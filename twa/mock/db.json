@@ -1,0 +1,18 @@
+{
+  "carts": {
+    "123456": {
+      "items": [
+        {
+          "id": "p1",
+          "name": "Cool T-Shirt",
+          "price": 1200,
+          "quantity": 1
+        }
+      ]
+    },
+    "789012": {
+      "items": []
+    }
+  },
+  "users": []
+}
