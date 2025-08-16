@@ -1,0 +1,18 @@
+.imageContainer {
+  position: relative;
+  min-height: 180px;
+  background-color: gray;
+}
+
+.addButtonContainer {
+  display: inline;
+  right: 0;
+  position: absolute;
+  bottom: 0;
+  margin: 16px;
+}
+
+.addButtonContainer button {
+  width: 32px;
+  height: 32px;
+}

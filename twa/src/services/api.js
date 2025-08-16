@@ -11,19 +11,15 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' }
 });
 
-// === Cart Endpoints ===
+const dataExtractor = (p) => p.then(res => res.data);
 
-// GET /cart
 export const getCart = async (userId) => {
-  try {
-    const res = await api.get('/cart');
-    return res.data;
-  } catch (err) {
-    return { items: [] };
-  }
+    return dataExtractor(api.get(`/carts/${userId}`));
+};
+export const getProducts = async () => {
+    return dataExtractor(api.get('/products'));
 };
 
-// POST /cart/add
 export const addToCart = async (userId, item) => {
   const cart = await getCart(userId);
   const items = [...(cart.items || [])];

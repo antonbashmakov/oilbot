@@ -21,3 +21,11 @@ body {
   background: white;
   position: relative;
 }
+.button {
+  width: 100%;
+  background-color: rgb(0, 121, 227);
+  color: white;
+  border: 0;
+  padding: 16px;
+  border-radius: 12px;
+}

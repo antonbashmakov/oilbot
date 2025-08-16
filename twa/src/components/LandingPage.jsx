@@ -4,26 +4,6 @@ import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
 import { getCart, addToCart } from '../services/api';
 
-const mockProducts = [
-  {
-    id: 'p1',
-    name: 'Cool T-Shirt',
-    price: 1200,
-    image: 'https://via.placeholder.com/300x200?text=T-Shirt'
-  },
-  {
-    id: 'p2',
-    name: 'Stylish Hat',
-    price: 800,
-    image: 'https://via.placeholder.com/300x200?text=Hat'
-  },
-  {
-    id: 'p3',
-    name: 'Leather Bag',
-    price: 2500,
-    image: 'https://via.placeholder.com/300x200?text=Bag'
-  }
-];
 
 export default function LandingPage() {
   const navigate = useNavigate();
