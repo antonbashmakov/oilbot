@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
+
 import ProductCard from '../components/ProductCard';
 import ButtonContainer from '../components/ButtonContainer';
-import { getCart, addToCart, getProducts } from '../services/api';
+import { addToCart, getProducts } from '../services/api';
 
 
 
@@ -20,12 +20,9 @@ export default function LandingPage() {
       return;
     }
     setUserId(user.id);
-    loadCart(user.id);
   }, []);
   
   useEffect( () => {getProducts().then(data => setProducts(data))}, []);
-
-  const loadCart = async (id) => getCart(id).then(items => setCartItems(items));
 
   const handleAddToCart = async (product) => {
     const item = { ...product, quantity: 1 };
@@ -45,7 +42,7 @@ export default function LandingPage() {
 
   return (
     <ButtonContainer text="Buy">
-      <Header cartItemCount={itemCount} />
+      
       <main style={{ padding: '16px', overflowY: 'auto', flex: 1 }}>
         {products.map(product => (
           <ProductCard
@@ -57,4 +54,4 @@ export default function LandingPage() {
       </main>
     </ButtonContainer>
   );
-}
+};

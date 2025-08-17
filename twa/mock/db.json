@@ -14,7 +14,17 @@
       "items": []
     }
   },
-  "users": [],
+  "users": [
+    {
+      "id": "mocked-id",
+      "firstName": "John",
+      "lastName": "Doe",
+      "username": "johndoe",
+      "languageCode": "en",
+      "isMember": true,
+      "email": "john@example.com"
+    }
+  ],
   "products": [
     {
       "id": "p1",

@@ -19,28 +19,19 @@ export const getCart = async (userId) => {
 export const getProducts = async () => {
     return dataExtractor(api.get('/products'));
 };
+export const getUser = async (userId) => {
+    return dataExtractor(api.get(`/users/${userId}`));
+};
 
-export const addToCart = async (userId, item) => {
-  const cart = await getCart(userId);
-  const items = [...(cart.items || [])];
-  const existing = items.find(i => i.id === item.id);
-
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    items.push({ ...item, quantity: 1 });
-  }
-
-  await api.patch('/cart', { items });
-  return { items };
+export const addToCart = async (userId, items) => {
+  await api.patch(`/carts/${userId}`, { items });
 };
 
 // POST /cart/remove
-export const removeFromCart = async (userId, itemId) => {
-  const cart = await getCart(userId);
-  const items = (cart.items || []).filter(i => i.id !== itemId);
-  await api.patch('/cart', { items });
-  return { items };
+export const removeFromCart = async (userId, itemIds) => {
+  const current = await getCart(userId);
+  const filtered = current.items.filter(i => !itemIds.includes(i.id));
+  await api.patch(`/carts/${userId}`, { items: filtered });
 };
 
 // POST /start-checkout

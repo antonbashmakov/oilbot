@@ -5,7 +5,7 @@ import VariationOverlay from './VariationOverlay';
 
 import './ProductCard.css'
 
-export default function ProductCard({ product, onAddToCart }) {
+export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const deliveryDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString();
 

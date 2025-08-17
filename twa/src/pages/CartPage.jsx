@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
 import CartItem from '../components/CartItem';
 import { removeFromCart, checkout } from '../services/api';
+import ButtonContainer from '../components/ButtonContainer';
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -60,8 +60,8 @@ export default function CartPage() {
   };
 
   return (
-    <div className="container">
-      <Header cartItemCount={cartItems.length} />
+
+    <ButtonContainer text="Buy">
       <main style={{ padding: '16px', flex: 1, overflowY: 'auto' }}>
         <h3>Your Cart</h3>
         {cartItems.length === 0 ? (
@@ -85,28 +85,7 @@ export default function CartPage() {
           Total: {total} ₽
         </div>
       </main>
-      <footer style={{
-        padding: '16px',
-        borderTop: '1px solid #eee',
-        background: 'white'
-      }}>
-        <button
-          onClick={handleCheckout}
-          style={{
-            width: '100%',
-            padding: '14px',
-            backgroundColor: '#30D158',
-            color: 'white',
-            border: 'none',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}
-        >
-          Buy ({total} ₽)
-        </button>
-      </footer>
-    </div>
+    </ButtonContainer>
+
   );
 }

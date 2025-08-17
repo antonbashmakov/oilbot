@@ -3,7 +3,10 @@ import LandingPage from './pages/LandingPage';
 import CartPage from './pages/CartPage';
 import ThankYouPage from './pages/ThankYouPage';
 
-export default function App() {
+import { UserProvider } from './context/UserContext';
+
+
+const AppContent = () => {
   return (
     <BrowserRouter>
       <Routes>
@@ -12,5 +15,13 @@ export default function App() {
         <Route path="/thank-you" element={<ThankYouPage />} />
       </Routes>
     </BrowserRouter>
+  );
+}
+
+export default function App() {
+  return (
+    <UserProvider>
+      <AppContent />
+    </UserProvider>
   );
 }
