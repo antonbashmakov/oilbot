@@ -11,16 +11,6 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [products, setProducts] = useState([]);
-  const [userId, setUserId] = useState(null);
-
-  useEffect(() => {
-    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    if (!user) {
-      console.warn("User not found");
-      return;
-    }
-    setUserId(user.id);
-  }, []);
   
   useEffect( () => {getProducts().then(data => setProducts(data))}, []);
 

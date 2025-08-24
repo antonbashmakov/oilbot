@@ -13,7 +13,7 @@ const mockVariations = [
 const VariationOverlayContent = ({ product, onClose }) => {
 
   const navigate = useNavigate();
-  const { addItem } = useCart();
+  const { addItems } = useCart();
 
   const [quantities, setQuantities] = useState(() => {
     const state = {};
@@ -47,8 +47,8 @@ const VariationOverlayContent = ({ product, onClose }) => {
       });
 
     if (itemsToAdd.length > 0) {
-      // Call parent handler (will sync with server)
-      addItem(itemsToAdd);
+      // Call parent handler (will sync with server)      
+      addItems(itemsToAdd);
     }
 
     // Close overlay
@@ -196,8 +196,6 @@ const VariationOverlayContent = ({ product, onClose }) => {
 
 export default function VariationOverlay({ product, onClose }) {
   return (
-    <CartProvider >
       <VariationOverlayContent product={product} onClose={onClose}  />
-    </CartProvider>
   );
 };

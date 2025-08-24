@@ -6,6 +6,7 @@ import { getUser } from '../services/api'
 const UserContext = createContext();
 
 const userReducer = (state, action) => {
+
   switch (action.type) {
     case 'SET_USER':
       return { ...state, ...action.payload };

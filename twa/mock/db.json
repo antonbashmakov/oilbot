@@ -30,25 +30,25 @@
       "id": "p1",
       "name": "Cool T-Shirt",
       "price": 1200,
-      "image": "https://via.placeholder.com/300x200?text=T-Shirt"
+      "image": "https://demowebshop.tricentis.com/content/images/thumbs/0000224_141-inch-laptop_300.png"
     },
     {
       "id": "p2",
       "name": "Stylish Hat",
       "price": 800,
-      "image": "https://via.placeholder.com/300x200?text=Hat"
+      "image": "https://demowebshop.tricentis.com/content/images/thumbs/0000224_141-inch-laptop_300.png"
     },
     {
       "id": "p3",
       "name": "Leather Bag",
       "price": 2500,
-      "image": "https://via.placeholder.com/300x200?text=Bag"
+      "image": "https://demowebshop.tricentis.com/content/images/thumbs/0000224_141-inch-laptop_300.png"
     },
     {
       "id": "p4",
       "name": "Leather Bag",
       "price": 2500,
-      "image": "https://via.placeholder.com/300x200?text=Bag"
+      "image": "https://demowebshop.tricentis.com/content/images/thumbs/0000224_141-inch-laptop_300.png"
     }
   ]
 }

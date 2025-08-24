@@ -66,8 +66,9 @@ export function CartProvider({ children, userId }) {
 
   // Save to server and localStorage
   const addItems = async (items) => {
-    if (!userId || !items.length) return;
+    console.log('addItems:', userId, items)
 
+    if (!userId || !items.length) return;
     // Optimistic update (UI first)
     dispatch({ type: 'ADD_ITEMS', payload: items });
 
@@ -117,7 +118,7 @@ export function CartProvider({ children, userId }) {
   return (
     <CartContext.Provider value={{
       cart: state.items,
-      addItem: addItems,
+      addItems: addItems,
       removeItem: (id) => removeItems([id]),
       removeItems,
       clearCart,

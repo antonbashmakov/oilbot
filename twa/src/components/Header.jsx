@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { CartProvider, useCart } from '../context/CartContext';
+import { CartIcon } from './CartIcon';
 
 const HeaderContent = () => {
 
@@ -25,13 +26,7 @@ const HeaderContent = () => {
   }}>
     <h2>🛍️ My Shop</h2>
     <div style={{ position: 'relative' }}>
-      <img
-        src="/cart-icon.png"
-        alt="Cart"
-        width="28"
-        onClick={() => window.location.hash = '/cart'}
-        style={{ cursor: 'pointer' }}
-      />
+      <CartIcon />
       {count > 0 && (
         <div style={{
           position: 'absolute',
@@ -56,8 +51,6 @@ const HeaderContent = () => {
 
 export default function Header() {
   return (
-    <CartProvider >
-      <HeaderContent />
-    </CartProvider>
+    <HeaderContent />
   );
 };
