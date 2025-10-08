@@ -9,18 +9,21 @@ import { useCart } from '../context/CartContext';
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState([]);
+
 
   const { user } = useUser();
-  const { cart } = useCart();
+  const { cart, setItems } = useCart();
 
+  const [cartItems, setCartItems] = useState(cart);
 
+  useEffect(() => setCartItems(cart), [cart]);
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleRemove = async (itemId) => {
-    await removeFromCart(user.id, itemId);
-    setCartItems(prev => prev.filter(i => i.id !== itemId));
+    const res = await removeFromCart(user.id, itemId);
+
+    setItems(res);
   };
 
   const handleCheckout = async () => {
@@ -46,9 +49,9 @@ export default function CartPage() {
     <ButtonContainer text="Buy">
       <main style={{ padding: '16px', flex: 1, overflowY: 'auto' }}>
         <h3>Your Cart</h3>
-        {cart.length === 0 && <p>Your cart is empty</p> }
+        {cartItems.length === 0 && <p>Your cart is empty</p> }
         {
-          cart.map(item => (
+          cartItems.map(item => (
             <CartItem
               key={item.id}
               item={item}

@@ -31,7 +31,7 @@ export const addToCart = async (userId, items) => {
 export const removeFromCart = async (userId, itemIds) => {
   const current = await getCart(userId);
   const filtered = current.items.filter(i => !itemIds.includes(i.id));
-  await api.patch(`/carts/${userId}`, { items: filtered });
+  return dataExtractor(api.patch(`/carts/${userId}`, { items: filtered })).then( data => data.items);
 };
 
 // POST /start-checkout

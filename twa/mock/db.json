@@ -1,22 +1,30 @@
 {
-  "carts": {
-    "123456": {
+  "carts": [
+    {
+      "id": "123456",
       "items": [
         {
-          "id": "p1",
-          "name": "Cool T-Shirt",
+          "id": "p3-v2",
+          "productId": "p3",
+          "variationId": "v2",
+          "name": "Leather Bag (Medium)",
           "price": 1200,
+          "quantity": 1
+        },
+        {
+          "id": "p3-v4",
+          "productId": "p3",
+          "variationId": "v4",
+          "name": "Leather Bag (X-Large)",
+          "price": 1600,
           "quantity": 1
         }
       ]
-    },
-    "789012": {
-      "items": []
     }
-  },
+  ],
   "users": [
     {
-      "id": "mocked-id",
+      "id": "123456",
       "firstName": "John",
       "lastName": "Doe",
       "username": "johndoe",

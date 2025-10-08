@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
 import { CartProvider, useCart } from '../context/CartContext';
 import { CartIcon } from './CartIcon';
 
 const HeaderContent = () => {
 
+  const navigate = useNavigate();
   const [count, setCount] = useState(0);
 
-  const { getTotalCount } = useCart();
+  const { getTotalCount, cart } = useCart();
 
   useEffect(() => {
     setCount(getTotalCount());
-  }, []);
+  }, [cart]);
 
   return <header style={{
     display: 'flex',
@@ -24,9 +26,9 @@ const HeaderContent = () => {
     background: 'white',
     zIndex: 10
   }}>
-    <h2>🛍️ My Shop</h2>
+    <h2 onClick={() => navigate('/')}>🛍️ My Shop</h2>
     <div style={{ position: 'relative' }}>
-      <CartIcon />
+      <div onClick={() => navigate('/cart')}><CartIcon /></div>
       {count > 0 && (
         <div style={{
           position: 'absolute',

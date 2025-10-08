@@ -12,7 +12,9 @@ export default function LandingPage() {
   const [cartItems, setCartItems] = useState([]);
   const [products, setProducts] = useState([]);
   
-  useEffect( () => {getProducts().then(data => setProducts(data))}, []);
+  useEffect( () => {
+    getProducts().then(data => setProducts(data))
+  }, []);
 
   const handleAddToCart = async (product) => {
     const item = { ...product, quantity: 1 };
@@ -32,7 +34,6 @@ export default function LandingPage() {
 
   return (
     <ButtonContainer text="Buy">
-      
       <main style={{ padding: '16px', overflowY: 'auto', flex: 1 }}>
         {products.map(product => (
           <ProductCard

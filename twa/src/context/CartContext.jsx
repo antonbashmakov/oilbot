@@ -34,7 +34,6 @@ const cartReducer = (state, action) => {
 
 export function CartProvider({ children, userId }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [] });
-
   // Load cart on mount
   useEffect(() => {
     if (!userId) return;
@@ -51,7 +50,7 @@ export function CartProvider({ children, userId }) {
         // 2. Sync with server
         const serverCart = await apiGetCart(userId);
         const items = serverCart.items || [];
-
+        console.log('saving to storage ', items)
         // 3. Save to localStorage and update state
         localStorage.setItem(`cart_${userId}`, JSON.stringify(items));
         dispatch({ type: 'SET_CART', payload: items });
@@ -66,7 +65,6 @@ export function CartProvider({ children, userId }) {
 
   // Save to server and localStorage
   const addItems = async (items) => {
-    console.log('addItems:', userId, items)
 
     if (!userId || !items.length) return;
     // Optimistic update (UI first)
@@ -74,7 +72,7 @@ export function CartProvider({ children, userId }) {
 
     try {
       // Sync with server
-      await apiAddToCart(userId, items);
+      
       // Update localStorage
       const updated = [...state.items];
       items.forEach(item => {
@@ -85,6 +83,7 @@ export function CartProvider({ children, userId }) {
           updated.push(item);
         }
       });
+      await apiAddToCart(userId, updated);
       localStorage.setItem(`cart_${userId}`, JSON.stringify(updated));
     } catch (err) {
       console.error('Sync cart failed:', err);
@@ -108,6 +107,10 @@ export function CartProvider({ children, userId }) {
     }
   };
 
+  const setItems = (items) => {
+    dispatch({ type: 'SET_CART', payload: items });
+  };
+
   const clearCart = () => {
     if (!userId) return;
     dispatch({ type: 'CLEAR_CART' });
@@ -119,10 +122,13 @@ export function CartProvider({ children, userId }) {
     <CartContext.Provider value={{
       cart: state.items,
       addItems: addItems,
+      setItems: setItems,
       removeItem: (id) => removeItems([id]),
       removeItems,
       clearCart,
-      getTotalCount: () => state.items.reduce((sum, i) => sum + i.quantity, 0),
+      getTotalCount: () => {
+        return state.items.reduce((sum, i) => sum + i.quantity, 0)
+      },
       getTotalPrice: () => state.items.reduce((sum, i) => sum + i.price * i.quantity, 0)
     }}>
       {children}

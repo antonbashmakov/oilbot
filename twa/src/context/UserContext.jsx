@@ -55,7 +55,7 @@ export function UserProvider({ children }) {
       if (!telegramUser) {
         console.warn('No Telegram user found. Use mocked user');
         telegramUser = {
-          id: 'mocked-id',
+          id: '123456',
           firstName: 'Mock',
           lastName: 'Mocksson',
           username: 'mock',

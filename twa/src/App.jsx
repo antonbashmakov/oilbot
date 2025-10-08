@@ -23,11 +23,10 @@ const AppContent = () => {
 };
 
 export default function App() {
+
   return (
     <UserProvider>
-      <CartProvider>
         <AppContent />
-      </CartProvider>
     </UserProvider>
   );
 };
