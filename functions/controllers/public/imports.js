@@ -4,6 +4,7 @@ import admin from 'firebase-admin';
 import cors from 'cors';
 
 import UserService from '../../services/UserService.js';
+import ProductService from '../../services/ProductService.js';
 
 import { api, authorize }  from '../../services/utils.js';
 
@@ -14,6 +15,7 @@ export {
   admin,
   cors,
   UserService,
+  ProductService,
   api,
   authorize,
 };

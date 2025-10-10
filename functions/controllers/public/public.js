@@ -4,6 +4,7 @@ import {
   admin,
   cors,
   UserService,
+  ProductService,
   api,
   authorize,
 } from './imports.js';
@@ -19,7 +20,12 @@ publicApi.use(cors(
 ));
 
 publicApi.get('/products', async (req, res) => {
-  api.send(res, []);
+
+  const productService = new ProductService(admin);
+
+  const products = await productService.findAll();
+  
+  api.send(res, products);
 });
 
 

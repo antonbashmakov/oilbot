@@ -2,22 +2,25 @@ import axios from 'axios';
 
 // Use different base in dev vs prod
 const isDev = import.meta.env.MODE === 'development';
-const API_BASE = isDev
-  ? 'http://localhost:4000'
+const API_BASE_PUBLIC = isDev
+  ? 'http://localhost:5001/posebestoimosti/us-central1/public'
   : 'https://europe-west1-your-project.cloudfunctions.net/api';
 
-const api = axios.create({
-  baseURL: API_BASE,
+const publicApi = axios.create({
+  baseURL: API_BASE_PUBLIC,
   headers: { 'Content-Type': 'application/json' }
 });
 
-const dataExtractor = (p) => p.then(res => res.data);
+const dataExtractor = (p) => p.then(res => {
+  return res.data.data
+
+});
 
 export const getCart = async (userId) => {
     return dataExtractor(api.get(`/carts/${userId}`));
 };
 export const getProducts = async () => {
-    return dataExtractor(api.get('/products'));
+    return dataExtractor(publicApi.get('/products'));
 };
 export const getUser = async (userId) => {
     return dataExtractor(api.get(`/users/${userId}`));
