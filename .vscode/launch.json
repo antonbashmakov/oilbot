@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "Python: Debug Cloud Function",
+          "type": "debugpy",
+          "request": "launch",
+          "module": "functions_framework",
+          "args": [
+              "--target=generate_report",  // Replace with your function name
+              "--debug"
+          ],
+          "env": {
+              "PYTHONPATH": "${workspaceFolder}"
+          },
+          "console": "integratedTerminal"
+      }
+  ]
+}

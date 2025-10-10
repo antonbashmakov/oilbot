@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"vite\" \"yarn:api\"",
+    "dev": "concurrently \"vite\"",
     "build": "vite build",
     "preview": "vite preview",
     "api": "json-server --watch mock/db.json --port 4000"

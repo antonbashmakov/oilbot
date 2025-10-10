@@ -50,7 +50,6 @@ export function CartProvider({ children, userId }) {
         // 2. Sync with server
         const serverCart = await apiGetCart(userId);
         const items = serverCart.items || [];
-        console.log('saving to storage ', items)
         // 3. Save to localStorage and update state
         localStorage.setItem(`cart_${userId}`, JSON.stringify(items));
         dispatch({ type: 'SET_CART', payload: items });

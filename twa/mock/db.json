@@ -4,19 +4,35 @@
       "id": "123456",
       "items": [
         {
-          "id": "p3-v2",
-          "productId": "p3",
-          "variationId": "v2",
-          "name": "Leather Bag (Medium)",
-          "price": 1200,
+          "id": "p1-v4",
+          "productId": "p1",
+          "variationId": "v4",
+          "name": "Cool T-Shirt (X-Large)",
+          "price": 1600,
           "quantity": 1
         },
         {
-          "id": "p3-v4",
-          "productId": "p3",
+          "id": "p2-v3",
+          "productId": "p2",
+          "variationId": "v3",
+          "name": "Stylish Hat (Large)",
+          "price": 1400,
+          "quantity": 1
+        },
+        {
+          "id": "p2-v4",
+          "productId": "p2",
           "variationId": "v4",
-          "name": "Leather Bag (X-Large)",
+          "name": "Stylish Hat (X-Large)",
           "price": 1600,
+          "quantity": 1
+        },
+        {
+          "id": "p4-v1",
+          "productId": "p4",
+          "variationId": "v1",
+          "name": "Leather Bag (Small)",
+          "price": 900,
           "quantity": 1
         }
       ]
