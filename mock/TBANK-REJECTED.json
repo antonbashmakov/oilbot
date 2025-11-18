@@ -1,0 +1,43 @@
+[
+  {
+    "headers": {
+      "host": "antonlavia.app.n8n.cloud",
+      "user-agent": "HTTP Client",
+      "content-length": "298",
+      "accept": "text/plain, application/json, application/yaml, application/*+json, */*",
+      "accept-encoding": "gzip, br",
+      "cdn-loop": "cloudflare; loops=1; subreqs=1",
+      "cf-connecting-ip": "212.49.24.206",
+      "cf-ew-via": "15",
+      "cf-ipcountry": "NL",
+      "cf-ray": "99dcad9c416e5438-TLL",
+      "cf-visitor": "{\"scheme\":\"https\"}",
+      "cf-worker": "n8n.cloud",
+      "content-type": "application/json;charset=UTF-8",
+      "x-forwarded-for": "212.49.24.206, 172.69.136.189",
+      "x-forwarded-host": "antonlavia.app.n8n.cloud",
+      "x-forwarded-port": "443",
+      "x-forwarded-proto": "https",
+      "x-forwarded-server": "traefik-prod-users-gwc-44-68df68bcf-nbsj5",
+      "x-is-trusted": "yes",
+      "x-real-ip": "212.49.24.206"
+    },
+    "params": {},
+    "query": {},
+    "body": {
+      "TerminalKey": "1754681033595DEMO",
+      "OrderId": "ZzgAyitzPOacxIt0zshV",
+      "Success": false,
+      "Status": "REJECTED",
+      "PaymentId": 7369696307,
+      "ErrorCode": "1051",
+      "Amount": 143900,
+      "CardId": 621282974,
+      "Pan": "500000******0009",
+      "ExpDate": "1230",
+      "Token": "d778af12ea519b1d834a163b6f64566b44cb7d27b9fc9b0f50877727d85a2eac"
+    },
+    "webhookUrl": "https://antonlavia.app.n8n.cloud/webhook/ddfef7e0-4053-486e-a505-3f65ef6ceea0",
+    "executionMode": "production"
+  }
+]

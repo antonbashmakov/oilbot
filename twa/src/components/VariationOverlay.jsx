@@ -1,14 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CartProvider, useCart } from '../context/CartContext';
-
-// Mock variations
-const mockVariations = [
-  { id: 'v1', name: 'Small', price: 900 },
-  { id: 'v2', name: 'Medium', price: 1200 },
-  { id: 'v3', name: 'Large', price: 1400 },
-  { id: 'v4', name: 'X-Large', price: 1600 }
-];
+import { useCart } from '../context/CartContext';
 
 const VariationOverlayContent = ({ product, onClose }) => {
 
@@ -17,7 +9,7 @@ const VariationOverlayContent = ({ product, onClose }) => {
 
   const [quantities, setQuantities] = useState(() => {
     const state = {};
-    mockVariations.forEach(v => state[v.id] = 0);
+    product.variations.forEach(v => state[v.id] = 0);
     return state;
   });
 
@@ -27,7 +19,7 @@ const VariationOverlayContent = ({ product, onClose }) => {
   }, 0);
 
   const totalPrice = Object.entries(quantities).reduce((sum, [id, qty]) => {
-    const variation = mockVariations.find(v => v.id === id);
+    const variation = product.variations.find(v => v.id === id);
     return sum + (variation ? variation.price * qty : 0);
   }, 0);
 
@@ -35,7 +27,7 @@ const VariationOverlayContent = ({ product, onClose }) => {
     const itemsToAdd = Object.entries(quantities)
       .filter(([id, qty]) => qty > 0)
       .map(([id, qty]) => {
-        const variation = mockVariations.find(v => v.id === id);
+        const variation = product.variations.find(v => v.id === id);
         return {
           id: `${product.id}-${id}`, // unique key
           productId: product.id,
@@ -101,7 +93,7 @@ const VariationOverlayContent = ({ product, onClose }) => {
 
       {/* Variations List */}
       <div>
-        {mockVariations.map(variation => (
+        {product.variations.map(variation => (
           <div key={variation.id} style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -194,8 +186,8 @@ const VariationOverlayContent = ({ product, onClose }) => {
   );
 };
 
-export default function VariationOverlay({ product, onClose }) {
+export default function VariationOverlay({ product, onClose, variations }) {
   return (
-      <VariationOverlayContent product={product} onClose={onClose}  />
+      <VariationOverlayContent product={product} onClose={onClose} variations={variations}  />
   );
 };

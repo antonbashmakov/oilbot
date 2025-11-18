@@ -1,6 +1,7 @@
 export const COLLECTIONS = {
     USERS: 'users',
     PRODUCTS: 'products',
+    CARTS: 'carts',
 };
 
 

@@ -6,13 +6,21 @@ const API_BASE_PUBLIC = isDev
   ? 'http://localhost:5001/posebestoimosti/us-central1/public'
   : 'https://europe-west1-your-project.cloudfunctions.net/api';
 
+const API_BASE_PRIVATE = isDev
+  ? 'http://localhost:5001/posebestoimosti/us-central1/private'
+  : 'https://europe-west1-your-project.cloudfunctions.net/api';
+
 const publicApi = axios.create({
+  baseURL: API_BASE_PUBLIC,
+  headers: { 'Content-Type': 'application/json' }
+});
+const privateApi = axios.create({
   baseURL: API_BASE_PUBLIC,
   headers: { 'Content-Type': 'application/json' }
 });
 
 const dataExtractor = (p) => p.then(res => {
-  return res.data.data
+  return res.data.data;
 
 });
 
@@ -27,7 +35,7 @@ export const getUser = async (userId) => {
 };
 
 export const addToCart = async (userId, items) => {
-  await api.patch(`/carts/${userId}`, { items });
+  await privateApi.patch(`/carts/${userId}`, { items });
 };
 
 // POST /cart/remove
