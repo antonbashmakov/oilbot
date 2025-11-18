@@ -1,46 +1,59 @@
 import { createSystem, defaultConfig } from "@chakra-ui/react";
 
-// Color palette constants based on the specified dark theme
+// Color palette constants based on the specified Tailwind config
 export const colors = {
-  // Primary Backgrounds: Deep, desaturated grays
+  // Primary Colors
+  primary: {
+    blue: "#4A90E2",      // Corporate Blue
+    blueDark: "#58A6FF",  // Primary Dark
+  },
+  
+  // Status Colors
+  status: {
+    success: "#28A745",   // Success Green
+    successDark: "#34D399",
+    warning: "#FFC107",   // Warning Yellow
+    warningDark: "#FBBF24",
+  },
+  
+  // Background Colors
   background: {
-    primary: "#121212",
-    secondary: "#1E1E1E",
+    light: "#f6f6f8",
+    dark: "#101622",      // Background Dark
+    tertiary: "#141927",
   },
   
-  // Surface/Container Elements: Slightly lighter shades of dark gray
+  // Surface Colors
   surface: {
-    container: "#2C2C2C",
-    elevated: "#333333",
+    dark: "#1A2233",      // Surface Dark
+    elevated: "#2A3344",
   },
   
-  // Text Color: Light, muted colors
+  // Text Colors
   text: {
     primary: "#E0E0E0",
     secondary: "#CCCCCC",
     hint: "#999999",
   },
   
-  // Accent Colors: Complementary, vibrant colors for interactive elements
-  accent: {
-    blue: "#4A90E2",      // Muted blue
-    green: "#4CAF50",     // Muted green
-    purple: "#9C27B0",    // Muted purple
-    orange: "#FF9800",    // Muted orange
+  // Neutral Colors
+  neutral: {
+    default: "#6c757d",
+    dark: "#8B949E",
   },
   
-  // Status Colors for delivery statuses
-  status: {
-    pending: "#FF9800",   // Orange for PENDING
-    inTransit: "#4A90E2", // Blue for IN_TRANSIT
+  // Status Colors for delivery statuses (mapped to new palette)
+  deliveryStatus: {
+    pending: "#FFC107",   // Warning Yellow for PENDING
+    inTransit: "#4A90E2", // Corporate Blue for IN_TRANSIT
     inTransitBack: "#9C27B0", // Purple for IN_TRANSIT_BACK
-    fulfilled: "#4CAF50", // Green for FULLFILLED
+    fulfilled: "#28A745", // Success Green for FULLFILLED
   },
   
-  // Borders/Dividers: Very subtle, darker gray lines
+  // Borders/Dividers
   border: {
-    subtle: "#444444",
-    medium: "#555555",
+    subtle: "#2D3748",
+    medium: "#4A5568",
   },
 };
 
@@ -50,11 +63,12 @@ export const theme = createSystem(defaultConfig, {
     tokens: {
       colors: {
         // Background colors
-        "bg.primary": { value: colors.background.primary },
-        "bg.secondary": { value: colors.background.secondary },
+        "bg.primary": { value: colors.background.dark },
+        "bg.secondary": { value: colors.background.tertiary },
+        "bg.tertiary": { value: colors.background.tertiary },
         
         // Surface colors
-        "surface.container": { value: colors.surface.container },
+        "surface.container": { value: colors.surface.dark },
         "surface.elevated": { value: colors.surface.elevated },
         
         // Text colors
@@ -62,21 +76,38 @@ export const theme = createSystem(defaultConfig, {
         "text.secondary": { value: colors.text.secondary },
         "text.hint": { value: colors.text.hint },
         
-        // Accent colors
-        "accent.blue": { value: colors.accent.blue },
-        "accent.green": { value: colors.accent.green },
-        "accent.purple": { value: colors.accent.purple },
-        "accent.orange": { value: colors.accent.orange },
+        // Primary colors
+        "primary.blue": { value: colors.primary.blue },
+        "primary.blueDark": { value: colors.primary.blueDark },
         
         // Status colors
-        "status.pending": { value: colors.status.pending },
-        "status.inTransit": { value: colors.status.inTransit },
-        "status.inTransitBack": { value: colors.status.inTransitBack },
-        "status.fulfilled": { value: colors.status.fulfilled },
+        "status.success": { value: colors.status.success },
+        "status.successDark": { value: colors.status.successDark },
+        "status.warning": { value: colors.status.warning },
+        "status.warningDark": { value: colors.status.warningDark },
+        
+        // Delivery status colors
+        "status.pending": { value: colors.deliveryStatus.pending },
+        "status.inTransit": { value: colors.deliveryStatus.inTransit },
+        "status.inTransitBack": { value: colors.deliveryStatus.inTransitBack },
+        "status.fulfilled": { value: colors.deliveryStatus.fulfilled },
+        
+        // Neutral colors
+        "neutral.default": { value: colors.neutral.default },
+        "neutral.dark": { value: colors.neutral.dark },
         
         // Border colors
         "border.subtle": { value: colors.border.subtle },
         "border.medium": { value: colors.border.medium },
+      },
+      fonts: {
+        "display": { value: "Inter, sans-serif" },
+      },
+      radii: {
+        "DEFAULT": { value: "0.25rem" },
+        "lg": { value: "0.5rem" },
+        "xl": { value: "0.75rem" },
+        "full": { value: "9999px" },
       },
     },
   },

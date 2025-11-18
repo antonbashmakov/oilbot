@@ -6,7 +6,6 @@ import {
   Container,
   Heading,
   Text,
-  Table,
   Card,
   SimpleGrid,
   Badge,
@@ -14,6 +13,7 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { KPICard } from "@/components/ui/KPICard";
+import { DataTable, Column } from "@/components/DataTable";
 
 // Mock data for deliveries
 const mockDeliveries = [
@@ -85,7 +85,7 @@ const mockOrphanOrders = [
 ];
 
 // Status badge component
-function StatusBadge({ status }: { status: string }) {
+const  StatusBadge = ({ status }: { status: string }) => {
   const statusColors = {
     PENDING: "status.pending",
     IN_TRANSIT: "status.inTransit",
@@ -130,40 +130,58 @@ export default function Dashboard() {
             <Heading size="lg" color="text.primary">Upcoming Deliveries</Heading>
           </Card.Header>
           <Card.Body>
-            <Box overflowX="auto">
-              <Table.Root variant="outline" size="sm">
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader color="text.secondary">ID</Table.ColumnHeader>
-                    <Table.ColumnHeader color="text.secondary">Name</Table.ColumnHeader>
-                    <Table.ColumnHeader color="text.secondary">Description</Table.ColumnHeader>
-                    <Table.ColumnHeader color="text.secondary" textAlign="end">Orders</Table.ColumnHeader>
-                    <Table.ColumnHeader color="text.secondary">Delivery Start</Table.ColumnHeader>
-                    <Table.ColumnHeader color="text.secondary">Delivery End</Table.ColumnHeader>
-                    <Table.ColumnHeader color="text.secondary">Status</Table.ColumnHeader>
-                    <Table.ColumnHeader color="text.secondary">Group</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {deliveries.map((delivery) => (
-                    <Table.Row key={delivery.id} _hover={{ bg: "surface.elevated" }}>
-                      <Table.Cell fontWeight="medium" color="text.primary">{delivery.id}</Table.Cell>
-                      <Table.Cell color="text.primary">{delivery.name}</Table.Cell>
-                      <Table.Cell maxW="200px" title={delivery.description}>
-                        <Text truncate color="text.primary">{delivery.description}</Text>
-                      </Table.Cell>
-                      <Table.Cell textAlign="end" color="text.primary">{delivery.numberOfOrders}</Table.Cell>
-                      <Table.Cell color="text.primary">{delivery.deliveryStart}</Table.Cell>
-                      <Table.Cell color="text.primary">{delivery.deliveryEnd}</Table.Cell>
-                      <Table.Cell>
-                        <StatusBadge status={delivery.status} />
-                      </Table.Cell>
-                      <Table.Cell color="text.primary">{delivery.group}</Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table.Root>
-            </Box>
+            <DataTable
+              columns={[
+                {
+                  key: "id",
+                  header: "ID",
+                  accessor: (delivery) => (
+                    <Text fontWeight="medium">{delivery.id}</Text>
+                  ),
+                },
+                {
+                  key: "name",
+                  header: "Name",
+                  accessor: (delivery) => delivery.name,
+                },
+                {
+                  key: "description",
+                  header: "Description",
+                  accessor: (delivery) => (
+                    <Text maxW="200px" title={delivery.description} truncate>
+                      {delivery.description}
+                    </Text>
+                  ),
+                },
+                {
+                  key: "numberOfOrders",
+                  header: "Orders",
+                  accessor: (delivery) => delivery.numberOfOrders,
+                  align: "end",
+                },
+                {
+                  key: "deliveryStart",
+                  header: "Delivery Start",
+                  accessor: (delivery) => delivery.deliveryStart,
+                },
+                {
+                  key: "deliveryEnd",
+                  header: "Delivery End",
+                  accessor: (delivery) => delivery.deliveryEnd,
+                },
+                {
+                  key: "status",
+                  header: "Status",
+                  accessor: (delivery) => <StatusBadge status={delivery.status} />,
+                },
+                {
+                  key: "group",
+                  header: "Group",
+                  accessor: (delivery) => delivery.group,
+                },
+              ]}
+              data={deliveries}
+            />
           </Card.Body>
         </Card.Root>
 
