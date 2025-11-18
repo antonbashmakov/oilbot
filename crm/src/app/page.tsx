@@ -87,10 +87,10 @@ const mockOrphanOrders = [
 // Status badge component
 function StatusBadge({ status }: { status: string }) {
   const statusColors = {
-    PENDING: "yellow",
-    IN_TRANSIT: "blue",
-    IN_TRANSIT_BACK: "purple",
-    FULLFILLED: "green"
+    PENDING: "status.pending",
+    IN_TRANSIT: "status.inTransit",
+    IN_TRANSIT_BACK: "status.inTransitBack",
+    FULLFILLED: "status.fulfilled"
   };
 
   return (
@@ -112,53 +112,53 @@ export default function Dashboard() {
     : 0;
 
   return (
-    <Box bg="gray.900" minH="100vh" py="8">
+    <Box bg="bg.primary" minH="100vh" py="8">
       <Container maxW="7xl">
         {/* Header */}
         <Stack direction="column" gap="2" align="start" mb="8">
-          <Heading size="2xl" color="white">
+          <Heading size="2xl" color="text.primary">
             CRM Dashboard
           </Heading>
-          <Text color="gray.400" fontSize="lg">
+          <Text color="text.secondary" fontSize="lg">
             Overview of delivery and order information
           </Text>
         </Stack>
 
         {/* Deliveries Table */}
-        <Card.Root bg="gray.800" border="1px" borderColor="gray.700" mb="8">
+        <Card.Root bg="surface.container" border="1px" borderColor="border.subtle" mb="8">
           <Card.Header pb="0">
-            <Heading size="lg">Upcoming Deliveries</Heading>
+            <Heading size="lg" color="text.primary">Upcoming Deliveries</Heading>
           </Card.Header>
           <Card.Body>
             <Box overflowX="auto">
               <Table.Root variant="outline" size="sm">
                 <Table.Header>
                   <Table.Row>
-                    <Table.ColumnHeader color="gray.400">ID</Table.ColumnHeader>
-                    <Table.ColumnHeader color="gray.400">Name</Table.ColumnHeader>
-                    <Table.ColumnHeader color="gray.400">Description</Table.ColumnHeader>
-                    <Table.ColumnHeader color="gray.400" textAlign="end">Orders</Table.ColumnHeader>
-                    <Table.ColumnHeader color="gray.400">Delivery Start</Table.ColumnHeader>
-                    <Table.ColumnHeader color="gray.400">Delivery End</Table.ColumnHeader>
-                    <Table.ColumnHeader color="gray.400">Status</Table.ColumnHeader>
-                    <Table.ColumnHeader color="gray.400">Group</Table.ColumnHeader>
+                    <Table.ColumnHeader color="text.secondary">ID</Table.ColumnHeader>
+                    <Table.ColumnHeader color="text.secondary">Name</Table.ColumnHeader>
+                    <Table.ColumnHeader color="text.secondary">Description</Table.ColumnHeader>
+                    <Table.ColumnHeader color="text.secondary" textAlign="end">Orders</Table.ColumnHeader>
+                    <Table.ColumnHeader color="text.secondary">Delivery Start</Table.ColumnHeader>
+                    <Table.ColumnHeader color="text.secondary">Delivery End</Table.ColumnHeader>
+                    <Table.ColumnHeader color="text.secondary">Status</Table.ColumnHeader>
+                    <Table.ColumnHeader color="text.secondary">Group</Table.ColumnHeader>
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
                   {deliveries.map((delivery) => (
-                    <Table.Row key={delivery.id} _hover={{ bg: "gray.700" }}>
-                      <Table.Cell fontWeight="medium">{delivery.id}</Table.Cell>
-                      <Table.Cell>{delivery.name}</Table.Cell>
+                    <Table.Row key={delivery.id} _hover={{ bg: "surface.elevated" }}>
+                      <Table.Cell fontWeight="medium" color="text.primary">{delivery.id}</Table.Cell>
+                      <Table.Cell color="text.primary">{delivery.name}</Table.Cell>
                       <Table.Cell maxW="200px" title={delivery.description}>
-                        <Text truncate>{delivery.description}</Text>
+                        <Text truncate color="text.primary">{delivery.description}</Text>
                       </Table.Cell>
-                      <Table.Cell textAlign="end">{delivery.numberOfOrders}</Table.Cell>
-                      <Table.Cell>{delivery.deliveryStart}</Table.Cell>
-                      <Table.Cell>{delivery.deliveryEnd}</Table.Cell>
+                      <Table.Cell textAlign="end" color="text.primary">{delivery.numberOfOrders}</Table.Cell>
+                      <Table.Cell color="text.primary">{delivery.deliveryStart}</Table.Cell>
+                      <Table.Cell color="text.primary">{delivery.deliveryEnd}</Table.Cell>
                       <Table.Cell>
                         <StatusBadge status={delivery.status} />
                       </Table.Cell>
-                      <Table.Cell>{delivery.group}</Table.Cell>
+                      <Table.Cell color="text.primary">{delivery.group}</Table.Cell>
                     </Table.Row>
                   ))}
                 </Table.Body>
@@ -187,34 +187,34 @@ export default function Dashboard() {
         </SimpleGrid>
 
         {/* Orphan Orders List */}
-        <Card.Root bg="gray.800" border="1px" borderColor="gray.700">
+        <Card.Root bg="surface.container" border="1px" borderColor="border.subtle">
           <Card.Header>
-            <Heading size="lg">Orders Without Deliveries</Heading>
+            <Heading size="lg" color="text.primary">Orders Without Deliveries</Heading>
           </Card.Header>
           <Card.Body>
             <Stack direction="column" gap="4">
               {orphanOrders.map((order) => (
-                <Card.Root key={order.id} bg="gray.750" border="1px" borderColor="gray.600">
+                <Card.Root key={order.id} bg="surface.elevated" border="1px" borderColor="border.medium">
                   <Card.Body>
                     <Flex justify="space-between" align="center">
                       <Stack direction="column" gap="1" align="start">
-                        <Text fontWeight="bold" color="white">
+                        <Text fontWeight="bold" color="text.primary">
                           {order.id} - {order.customer}
                         </Text>
-                        <Text color="gray.400" fontSize="sm">
+                        <Text color="text.secondary" fontSize="sm">
                           Created: {order.createdAt}
                         </Text>
                       </Stack>
                       <Flex gap="4" align="center">
                         <Stack direction="column" gap="1" align="end">
-                          <Text color="white" fontWeight="medium">
+                          <Text color="text.primary" fontWeight="medium">
                             ${order.value}
                           </Text>
-                          <Text color="gray.400" fontSize="sm">
+                          <Text color="text.secondary" fontSize="sm">
                             {order.items} items
                           </Text>
                         </Stack>
-                        <Badge colorPalette="orange" variant="subtle">
+                        <Badge colorPalette="accent.orange" variant="subtle">
                           Needs Delivery
                         </Badge>
                       </Flex>

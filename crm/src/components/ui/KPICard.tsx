@@ -8,16 +8,16 @@ interface KPICardProps {
 
 export function KPICard({ name, value, description }: KPICardProps) {
   return (
-    <Card.Root bg="gray.800" border="1px" borderColor="gray.700">
+    <Card.Root bg="surface.container" border="1px" borderColor="border.subtle">
       <Card.Body>
         <Flex direction="column" gap="2">
-          <Text color="gray.400" fontSize="sm" fontWeight="medium">
+          <Text color="text.secondary" fontSize="sm" fontWeight="medium">
             {name}
           </Text>
-          <Text color="white" fontSize="3xl" fontWeight="bold">
+          <Text color="text.primary" fontSize="3xl" fontWeight="bold">
             {value}
           </Text>
-          <Text color="gray.400" fontSize="sm">
+          <Text color="text.secondary" fontSize="sm">
             {description}
           </Text>
         </Flex>
