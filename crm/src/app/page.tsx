@@ -13,6 +13,7 @@ import {
   Flex,
   Stack,
 } from "@chakra-ui/react";
+import { KPICard } from "@/components/ui/KPICard";
 
 // Mock data for deliveries
 const mockDeliveries = [
@@ -168,53 +169,21 @@ export default function Dashboard() {
 
         {/* KPI Cards */}
         <SimpleGrid columns={{ base: 1, md: 3 }} gap="6" mb="8">
-          <Card.Root bg="gray.800" border="1px" borderColor="gray.700">
-            <Card.Body>
-              <Flex direction="column" gap="2">
-                <Text color="gray.400" fontSize="sm" fontWeight="medium">
-                  Total Pending Deliveries
-                </Text>
-                <Text color="white" fontSize="3xl" fontWeight="bold">
-                  {totalPendingDeliveries}
-                </Text>
-                <Text color="gray.400" fontSize="sm">
-                  Deliveries awaiting processing
-                </Text>
-              </Flex>
-            </Card.Body>
-          </Card.Root>
-
-          <Card.Root bg="gray.800" border="1px" borderColor="gray.700">
-            <Card.Body>
-              <Flex direction="column" gap="2">
-                <Text color="gray.400" fontSize="sm" fontWeight="medium">
-                  Orphans Orders
-                </Text>
-                <Text color="white" fontSize="3xl" fontWeight="bold">
-                  {orphansOrders}
-                </Text>
-                <Text color="gray.400" fontSize="sm">
-                  Orders without deliveries
-                </Text>
-              </Flex>
-            </Card.Body>
-          </Card.Root>
-
-          <Card.Root bg="gray.800" border="1px" borderColor="gray.700">
-            <Card.Body>
-              <Flex direction="column" gap="2">
-                <Text color="gray.400" fontSize="sm" fontWeight="medium">
-                  Average Order Value
-                </Text>
-                <Text color="white" fontSize="3xl" fontWeight="bold">
-                  ${averageOrderValue}
-                </Text>
-                <Text color="gray.400" fontSize="sm">
-                  Average value per order
-                </Text>
-              </Flex>
-            </Card.Body>
-          </Card.Root>
+          <KPICard
+            name="Total Pending Deliveries"
+            value={totalPendingDeliveries}
+            description="Deliveries awaiting processing"
+          />
+          <KPICard
+            name="Orphans Orders"
+            value={orphansOrders}
+            description="Orders without deliveries"
+          />
+          <KPICard
+            name="Average Order Value"
+            value={`$${averageOrderValue}`}
+            description="Average value per order"
+          />
         </SimpleGrid>
 
         {/* Orphan Orders List */}
