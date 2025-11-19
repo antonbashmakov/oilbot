@@ -85,3 +85,5 @@ abstract class AbstractService {
   abstract getCollectionName(): string;
   getExcludedFields(): string[] { return []; }
 }
+
+export { AbstractService };

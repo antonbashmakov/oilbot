@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { Request, Response, NextFunction } from 'express';
 
 import {
   functions,
@@ -21,7 +22,7 @@ adminApi.use(cors(
   { origin: true } // allows all cross origin xhr requests
 ));
 
-adminApi.use(async (req, res, next) => {
+adminApi.use(async (req: Request, res: Response, next: NextFunction) => {
   const userService = new UserService(admin);
   try {
     return await authorize(req, res, next, userService, admin);
@@ -29,8 +30,6 @@ adminApi.use(async (req, res, next) => {
     logger.error(err);
     return api.error(res);
   }
-
 });
-
 
 export default adminApi;

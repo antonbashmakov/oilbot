@@ -52,4 +52,5 @@ class AbstractService {
     }
     getExcludedFields() { return []; }
 }
+export { AbstractService };
 //# sourceMappingURL=AbstractService.js.map
