@@ -41,28 +41,4 @@ privateApi.get('/users/me', async (req, res) => {
   api.send(res, user);
 });
 
-privateApi.patch('/carts/:cartId', async (req, res) => {
-
-  const cart = req.body;
-  const cartId = req.params.cartId;
-
-  try {
-
-    const cartService = new CartService(admin);
-
-    logger.debug(cart)
-
-    const c = await cartService.set({id: cartId, ...cart})
-
-    api.send(res, { c });
-
-  } catch (err) {
-    logger.error(err);
-    return api.error(res);
-  }
-});
-
-
-
-
 export default privateApi;

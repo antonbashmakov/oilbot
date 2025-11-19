@@ -6,5 +6,5 @@ class User {
         this.createdAt = createdAt;
     }
 }
-
 export default User;
+//# sourceMappingURL=User.js.map
