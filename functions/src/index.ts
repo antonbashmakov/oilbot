@@ -1,12 +1,19 @@
-import * as functions from 'firebase-functions';
-import { Request, Response } from 'express';
+/**
+ * Import function triggers from their respective submodules:
+ *
+ * import {onCall} from "firebase-functions/v2/https";
+ * import {onDocumentWritten} from "firebase-functions/v2/firestore";
+ *
+ * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ */
 
-// Export API function
-export const api = functions.region('europe-west1').https.onRequest((req: Request, res: Response) => {
-  res.status(200).send('API endpoint');
-});
+import {onRequest} from "firebase-functions/v2/https";
+import * as logger from "firebase-functions/logger";
 
-// Optional: Telegram webhook (if you want bot messages)
-export const telegramWebhook = functions.https.onRequest((req: Request, res: Response) => {
-  res.status(200).send('OK');
-});
+// Start writing functions
+// https://firebase.google.com/docs/functions/typescript
+
+ export const helloWorld = onRequest((request, response) => {
+   logger.info("Hello logs!", {structuredData: true});
+   response.send("Hello from Firebase!");
+ });
