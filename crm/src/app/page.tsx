@@ -205,7 +205,7 @@ export default function Dashboard() {
         </SimpleGrid>
 
         {/* Orphan Orders List */}
-        <Card.Root bg="surface.container" border="1px" borderColor="border.subtle">
+        <Card.Root border="1px" borderColor="border.subtle">
           <Card.Header>
             <Heading size="lg" color="text.primary">Orders Without Deliveries</Heading>
           </Card.Header>

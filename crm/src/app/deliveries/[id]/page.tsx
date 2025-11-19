@@ -8,20 +8,24 @@ import {
   Text,
   Button,
   Flex,
-  Badge,
   Card,
+  Badge,
+  Stack,
+  Separator,
 } from "@chakra-ui/react";
 import { DataTable } from "@/components/DataTable";
+import { DeliveryInformationCard, Delivery } from "../DeliveryInformationCard";
 
 // Mock data for a specific delivery
-const mockDelivery = {
-  id: "DLV-001",
-  name: "Moscow Morning Delivery",
-  description: "Morning delivery to Moscow region",
+const mockDelivery: Delivery = {
+  id: "764a2736-d1e0-4586-9a9f-088f252b41b9",
+  number: 9,
+  description: "This shipment includes: caviar, salmon, trout, salmon (again), steaks, cheeses, and ham.",
   status: "PENDING" as const,
+  order_deadline: "7-11-2025",
+  delivery_start: "9-11-2025",
+  delivery_end: "13-11-2025",
   group: "MOSCOW",
-  deliveryStart: "2025-11-19 08:00",
-  deliveryEnd: "2025-11-19 12:00",
   orders: [
     {
       id: "ORD-101",
@@ -61,9 +65,9 @@ const mockDelivery = {
 // Order status badge component
 function OrderStatusBadge({ status }: { status: string }) {
   const statusColors = {
-    PENDING: "status.warning",
-    PAID: "status.success",
-    CONSOLIDATED: "primary.blue",
+    PENDING: "yellow",
+    PAID: "green",
+    CONSOLIDATED: "green",
   };
 
   const statusLabels = {
@@ -103,10 +107,10 @@ export default function DeliveryDetailPage() {
         <Flex justify="space-between" align="center" mb="8">
           <Box>
             <Heading size="2xl" color="text.primary">
-              Delivery {delivery.id}
+              Delivery #{delivery.number}
             </Heading>
             <Text color="text.secondary" fontSize="lg" mt="2">
-              {delivery.name}
+              {delivery.description}
             </Text>
           </Box>
           <Flex gap="4">
@@ -120,53 +124,16 @@ export default function DeliveryDetailPage() {
         </Flex>
 
         {/* Delivery Information Card */}
-        <Card.Root bg="surface.container" border="1px" borderColor="border.subtle" mb="8">
-          <Card.Body>
-            <Flex gap="8" wrap="wrap">
-              <Box>
-                <Text color="text.secondary" fontSize="sm" fontWeight="medium">
-                  Description
-                </Text>
-                <Text color="text.primary">{delivery.description}</Text>
-              </Box>
-              <Box>
-                <Text color="text.secondary" fontSize="sm" fontWeight="medium">
-                  Status
-                </Text>
-                <Badge colorPalette="status.pending" mt="1">
-                  {delivery.status.replace(/_/g, " ")}
-                </Badge>
-              </Box>
-              <Box>
-                <Text color="text.secondary" fontSize="sm" fontWeight="medium">
-                  Group
-                </Text>
-                <Text color="text.primary">{delivery.group}</Text>
-              </Box>
-              <Box>
-                <Text color="text.secondary" fontSize="sm" fontWeight="medium">
-                  Delivery Start
-                </Text>
-                <Text color="text.primary">{delivery.deliveryStart}</Text>
-              </Box>
-              <Box>
-                <Text color="text.secondary" fontSize="sm" fontWeight="medium">
-                  Delivery End
-                </Text>
-                <Text color="text.primary">{delivery.deliveryEnd}</Text>
-              </Box>
-            </Flex>
-          </Card.Body>
-        </Card.Root>
-
+          <DeliveryInformationCard delivery={delivery} />
+        <Container mb="8" />
         {/* Orders Table */}
-        <Card.Root bg="surface.container" border="1px" borderColor="border.subtle">
+        <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
           <Card.Header>
-            <Heading size="lg" color="text.primary">
+            <Heading p={0} size="lg" color="text.primary">
               Orders in Delivery
             </Heading>
           </Card.Header>
-          <Card.Body>
+          <Card.Body p={0}>
             <DataTable
               columns={[
                 {

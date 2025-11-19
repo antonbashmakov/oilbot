@@ -31,7 +31,7 @@ export const colors = {
   
   // Text Colors
   text: {
-    primary: "#E0E0E0",
+    primary: "white",
     secondary: "#CCCCCC",
     hint: "#999999",
   },
