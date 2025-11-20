@@ -1,0 +1,91 @@
+import { jsonify } from './utils';
+
+// Interface for entities that have an ID
+interface Entity {
+  id: string;
+  createdAt?: Date;
+  owner?: { id: string };
+}
+
+// Simplified Firebase Admin SDK interface
+interface FirebaseAdmin {
+  firestore(): any;
+}
+
+abstract class AbstractService<T extends Entity> {
+  protected firebase: FirebaseAdmin;
+
+  constructor(firebase: FirebaseAdmin) {
+    this.firebase = firebase;
+  }
+
+  find(id: string): Promise<T | undefined> {
+    return this.getCollection().doc(id).get().then((doc: any) => doc.data() as T);
+  }
+
+  update(entity: T, object: Partial<T>): Promise<any> {
+    return this.getCollection().doc(entity.id).update(object);
+  }
+
+  findAll(): Promise<T[]> {
+    return this.getCollection().get().then((result: any) => result.docs.map((doc: any) => doc.data() as T));
+  }
+
+  addAll(objects: T[]): void {
+    objects.forEach(object => this.add(object));
+  }
+
+  setAll(objects: T[]): void {
+    objects.forEach(object => this.set(object));
+  }
+
+  addForOwner(user: { id: string }, object: Omit<T, 'owner'>): Promise<T> {
+    const objectWithOwner = { ...object, owner: { id: user.id } } as T;
+    return this.add(objectWithOwner);
+  }
+
+  fetchForOwner(owner: { id: string }): Promise<T[]> {
+    return this.getCollection().where('owner.id', '==', owner.id)
+      .get().then((result: any) => result.docs.map((doc: any) => doc.data() as T));
+  }
+
+  add(object: T): Promise<T> {
+    object.createdAt = new Date();
+
+    const fields = this.getExcludedFields();
+
+    const fieldsToSave: Record<string, any> = {};
+
+    fields.forEach(field => fieldsToSave[field] = object[field as keyof T]);
+
+    const objectToSave = Object.assign(jsonify(object), fieldsToSave);
+
+    const ref = this.getCollection().doc();
+    objectToSave.id = ref.id;
+
+    return ref.set(objectToSave).then(() => objectToSave as T);
+  }
+
+  set(object: T): Promise<any> {
+    const objectToSet = JSON.parse(JSON.stringify(object));
+    objectToSet.createdAt = new Date();
+    return this.getCollection().doc(objectToSet.id).set(objectToSet);
+  }
+
+  delete(object: T): Promise<any> {
+    return this.firebase.firestore().collection(this.getCollectionName()).doc(object.id).delete();    
+  }
+
+  getCollection() {
+    return this.firebase.firestore().collection(this.getCollectionName());
+  }
+
+  getCollectionByName(collection: string) {
+    return this.firebase.firestore().collection(collection);
+  }
+
+  abstract getCollectionName(): string;
+  abstract getExcludedFields(): string[];
+}
+
+export default AbstractService;
