@@ -79,41 +79,6 @@ export const parseToken = (bearer: string | undefined): string | null => {
   return null;
 }
 
-export const authorize = async (
-  req: ExpressRequest, 
-  res: ExpressResponse, 
-  next: (() => void) | null, 
-  userService: UserService, 
-  admin: FirebaseAdmin
-): Promise<void | ExpressResponse> => {
-  if (!req.headers.authorization) {
-    if (!next) {
-      return Promise.reject(new Error('MISSING_AUTH_HEADER'));
-    }
-    return api.forbidden(res);
-  }
-
-  const jwt = parseToken(req.headers.authorization.trim());
-
-  logger.info(`jwt found : ${(jwt ? 'yes' : 'no')}`);
-  try {
-    const claims = await admin.auth().verifyIdToken(jwt!);
-    let user = await userService.find(claims.uid);
-
-    if (!user) {
-      logger.log(`User with id ${claims.uid} logged in but the object is not in the DB. Creating the necessary objects.`)
-      user = createUserObject(claims, userService);
-    }
-
-    req.user = user;
-  } catch (err: any) {
-    if (err.code === 'auth/argument-error') return api.unauthorized(res, 'Token has expired');
-    throw new Error(err.message)
-  }
-
-  if (next) return next();
-}
-
 export const createUserObject = (user: any, userService: UserService): User => {
   const userObject = new User(user.uid, user.email);
   logger.info('creating user : ', userObject);
