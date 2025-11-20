@@ -1,0 +1,13 @@
+export const COLLECTIONS = {
+    CUSTOMERS: 'CUSTOMERS',
+    DELIVERIES: 'DELIVERIES',
+
+};
+
+
+
+
+export const HTTP_ERRORS = {
+    UNAUTHORIZED : 'UNAUTHORIZED',
+    NOT_FOUND : 'NOT_FOUND',
+};
