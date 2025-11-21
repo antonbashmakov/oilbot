@@ -6,11 +6,11 @@ import {
   admin,
   express,
   DeliveryService,
-  AbstractService,
+  //AbstractService,
   api,
 } from './imports';
 
-const logger = functions.logger;
+//const logger = functions.logger;
 
 admin.initializeApp(functions.config().firebase, 'admin');
 dotenv.config();
@@ -47,6 +47,10 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
     
     return api.send(res, delivery);
   } catch (err: any) {
+
+    if(err.code && err.code === 5) {
+      return api.notFound(res, 'Delivery not found');
+    }
     functions.logger.error(err);
     return api.error(res, err.message || 'Internal server error');
   }

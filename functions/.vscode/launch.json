@@ -1,0 +1,100 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Firebase Functions",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "serve"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "FIREBASE_DEBUG_MODE": "true"
+      },
+      "restart": true,
+      "protocol": "inspector",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/lib/**/*.js"
+      ]
+    },
+    {
+      "name": "Attach to Firebase Emulator",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "restart": true,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "${workspaceFolder}",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/lib/**/*.js"
+      ]
+    },
+    {
+      "name": "Debug TypeScript Functions",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/firebase",
+      "args": [
+        "emulators:start",
+        "--only",
+        "functions",
+        "--inspect-functions"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "FIREBASE_DEBUG_MODE": "true"
+      },
+      "restart": true,
+      "protocol": "inspector",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/lib/**/*.js"
+      ]
+    },
+    {
+      "name": "Run Firebase Functions Shell",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "shell"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "FIREBASE_DEBUG_MODE": "true"
+      },
+      "restart": true,
+      "protocol": "inspector",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/lib/**/*.js"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Functions with Emulators",
+      "configurations": [
+        "Debug Firebase Functions"
+      ]
+    }
+  ]
+}

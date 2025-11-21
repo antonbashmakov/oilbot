@@ -4,7 +4,10 @@ import * as admin from 'firebase-admin';
 admin.initializeApp();
 
 import publicApi from './controllers/public/public';
-const pub = functions.https.onRequest(publicApi);
+import adminApi from './controllers/admin';
 
-export { pub as public };
+const pub = functions.https.onRequest(publicApi);
+const adm = functions.https.onRequest(adminApi);
+
+export { pub as public, adm as admin };
 

@@ -14,7 +14,7 @@ servers:
     description: Development server
 
 paths:
-  /deliveries:
+  /admin/deliveries:
     get:
       summary: Get all deliveries
       description: Retrieve a list of all deliveries
@@ -42,7 +42,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /deliveries/{id}:
+  /admin/deliveries/{id}:
     get:
       summary: Get delivery by ID
       description: Retrieve a specific delivery by its ID
