@@ -16,6 +16,8 @@ interface ExpressResponse {
 }
 
 // Interface for Express request object
+
+/*
 interface ExpressRequest {
   headers: {
     authorization?: string;
@@ -30,6 +32,7 @@ interface FirebaseAdmin {
   };
 }
 
+*/
 // Interface for User Service
 interface UserService {
   find(id: string): Promise<User | undefined>;

@@ -1,2 +1,3 @@
-import publicApi from './public';
+export { default as publicApi } from './public';
+
 
