@@ -3,10 +3,45 @@
 import { ChakraProvider } from "@chakra-ui/react";
 import { theme } from "@/theme";
 
-export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <ChakraProvider value={theme}>
-      {children}
+import { ApiConfigProvider } from '@/api/apiConfigContext';
+// import { UserProvider } from '@/api/user/provider';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { ReactQueryDevtools } from 'react-query/devtools'
+
+const queryClient = new QueryClient();
+
+
+export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
+    let baseUrl = 'http://localhost:5001/posebestoimosti-473916/us-central1';
+    if (typeof window !== 'undefined') {
+
+        const host = window.location.host;
+        // Temporary solution before API gateway etc
+        if (host.endsWith('.run.app')) {
+            baseUrl = `https://${host.replace('boui', 'crm')}/api/crm`
+
+        }
+        if (window.location.hostname !== 'localhost') {
+            baseUrl = `https://${host}:5001/posebestoimosti-473916/us-central1/`
+        }
+
+    }
+    return <ChakraProvider value={theme}><QueryClientProvider client={queryClient}>
+        <ApiConfigProvider value={{
+            baseUrl,
+            siteUrl: process.env.NEXT_PUBLIC_SITE_URL as string
+        }}>
+            <DndProvider backend={HTML5Backend}>
+                {/*<UserProvider>*/}
+                    {children}
+                {/*</UserProvider>*/} 
+            </DndProvider>
+        </ApiConfigProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider >
     </ChakraProvider>
-  );
-}
+};
+
+

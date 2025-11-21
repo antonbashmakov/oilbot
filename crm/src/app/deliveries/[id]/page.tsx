@@ -10,57 +10,12 @@ import {
   Flex,
   Card,
   Badge,
-  Stack,
-  Separator,
 } from "@chakra-ui/react";
 import { DataTable } from "@/components/DataTable";
 import { DeliveryInformationCard, Delivery } from "../DeliveryInformationCard";
+import { useAdminDeliveryQuery } from "@/api";
 
-// Mock data for a specific delivery
-const mockDelivery: Delivery = {
-  id: "764a2736-d1e0-4586-9a9f-088f252b41b9",
-  number: 9,
-  description: "This shipment includes: caviar, salmon, trout, salmon (again), steaks, cheeses, and ham.",
-  status: "PENDING" as const,
-  order_deadline: "7-11-2025",
-  delivery_start: "9-11-2025",
-  delivery_end: "13-11-2025",
-  group: "MOSCOW",
-  orders: [
-    {
-      id: "ORD-101",
-      customerName: "Ivan Petrov",
-      orderDate: "2025-11-18 14:30",
-      status: "PAID" as const,
-      numberOfItems: 3,
-      totalValue: 2500,
-    },
-    {
-      id: "ORD-102",
-      customerName: "Maria Ivanova",
-      orderDate: "2025-11-18 16:45",
-      status: "PENDING" as const,
-      numberOfItems: 2,
-      totalValue: 1800,
-    },
-    {
-      id: "ORD-103",
-      customerName: "Alexey Smirnov",
-      orderDate: "2025-11-19 09:15",
-      status: "CONSOLIDATED" as const,
-      numberOfItems: 4,
-      totalValue: 3200,
-    },
-    {
-      id: "ORD-104",
-      customerName: "Elena Volkova",
-      orderDate: "2025-11-19 10:30",
-      status: "PAID" as const,
-      numberOfItems: 1,
-      totalValue: 1500,
-    },
-  ],
-};
+
 
 // Order status badge component
 function OrderStatusBadge({ status }: { status: string }) {
@@ -87,8 +42,7 @@ export default function DeliveryDetailPage() {
   const params = useParams();
   const deliveryId = params.id as string;
 
-  // In a real app, we would fetch the delivery data based on the ID
-  const delivery = mockDelivery;
+  const {data: delivery} = useAdminDeliveryQuery(deliveryId);
 
   const handleEdit = () => {
     console.log("Edit delivery:", deliveryId);
@@ -102,7 +56,7 @@ export default function DeliveryDetailPage() {
 
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
-      <Container maxW="7xl">
+{   delivery &&  <Container maxW="7xl">
         {/* Header with title and buttons */}
         <Flex justify="space-between" align="center" mb="8">
           <Box>
@@ -176,6 +130,7 @@ export default function DeliveryDetailPage() {
           </Card.Body>
         </Card.Root>
       </Container>
+}
     </Box>
   );
 }

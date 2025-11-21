@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "openapi": "openapi-typescript openapi/api.yml -o src/api/openapi/crm.d.ts"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
@@ -18,9 +19,13 @@
     "framer-motion": "^12.23.24",
     "next": "16.0.3",
     "next-themes": "^0.4.6",
+    "openapi-fetch": "^0.9.7",
     "react": "19.2.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "19.2.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "react-query": "^3.39.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -29,6 +34,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
+    "openapi-typescript": "^6.7.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
