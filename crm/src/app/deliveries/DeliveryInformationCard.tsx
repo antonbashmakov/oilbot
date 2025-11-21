@@ -1,4 +1,5 @@
 import { Card, Box, Text, Badge, Flex } from "@chakra-ui/react";
+import { format } from "date-fns";
 
 export interface Delivery {
   id: string;
@@ -96,19 +97,19 @@ export function DeliveryInformationCard({ delivery }: DeliveryInformationCardPro
               <Text color="text.secondary" fontSize="sm" fontWeight="medium" mb="1">
                 Order Deadline
               </Text>
-              <Text color="text.primary">{delivery.order_deadline}</Text>
+              <Text color="text.primary">{delivery.order_deadline ? format(delivery.order_deadline, "ddMMyyyy") : ''}</Text>
             </Box>
             <Box>
               <Text color="text.secondary" fontSize="sm" fontWeight="medium" mb="1">
                 Delivery Start
               </Text>
-              <Text color="text.primary">{delivery.delivery_start}</Text>
+              <Text color="text.primary">{format(delivery.delivery_start, "dd-MM-yyyy")}</Text>
             </Box>
             <Box>
               <Text color="text.secondary" fontSize="sm" fontWeight="medium" mb="1">
                 Delivery End
               </Text>
-              <Text color="text.primary">{delivery.delivery_end}</Text>
+              <Text color="text.primary">{format(delivery.delivery_end, "dd-MM-yyyy")}</Text>
             </Box>
           </Flex>
         </Flex>

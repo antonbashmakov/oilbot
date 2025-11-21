@@ -44,6 +44,10 @@ export default function DeliveryDetailPage() {
 
   const {data: delivery} = useAdminDeliveryQuery(deliveryId);
 
+
+  console.log("Delivery data:", delivery);
+  
+
   const handleEdit = () => {
     console.log("Edit delivery:", deliveryId);
     // Implement edit functionality
@@ -81,7 +85,7 @@ export default function DeliveryDetailPage() {
           <DeliveryInformationCard delivery={delivery} />
         <Container mb="8" />
         {/* Orders Table */}
-        <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
+        { delivery.orders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
           <Card.Header>
             <Heading p={0} size="lg" color="text.primary">
               Orders in Delivery
@@ -128,7 +132,7 @@ export default function DeliveryDetailPage() {
               data={delivery.orders}
             />
           </Card.Body>
-        </Card.Root>
+        </Card.Root>}
       </Container>
 }
     </Box>
