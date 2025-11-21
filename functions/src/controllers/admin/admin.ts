@@ -5,7 +5,7 @@ import {
   cors,
   admin,
   express,
-  // UserService,
+  DeliveryService,
   AbstractService,
   api,
 } from './imports';
@@ -35,30 +35,21 @@ adminApi.use(async (req: express.Request, res: express.Response, next: express.N
 
 */
 
-interface CreateDocumentRequest {
-  collection: string;
-  object: any;
-}
-
-adminApi.post('/create/document', async (req: express.Request, res: express.Response) => {
-  const { collection, object } = req.body as CreateDocumentRequest;
-
-  // Create a concrete implementation of AbstractService
-  class ConcreteService extends AbstractService<any> {
-    getCollectionName(): string { return collection; }
-    getExcludedFields(): string[] { return []; }
-  }
-
-  const service = new ConcreteService(admin);
-
+adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Response) => {
   try {
-    const ret = await service.add(object);
-    api.send(res, ret);
+    const { id } = req.params;
+    const deliveryService = new DeliveryService(admin);
+    const delivery = await deliveryService.find(id);
+    
+    if (!delivery) {
+      return api.notFound(res, 'Delivery not found');
+    }
+    
+    return api.send(res, delivery);
   } catch (err: any) {
-    logger.error(err);
-    api.error(res, err.message);
+    functions.logger.error(err);
+    return api.error(res, err.message || 'Internal server error');
   }
-
 });
 
 export default adminApi;

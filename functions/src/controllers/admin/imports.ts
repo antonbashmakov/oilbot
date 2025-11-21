@@ -5,6 +5,8 @@ import * as cors from 'cors';
 
 import UserService from '../../services/UserService';
 import AbstractService from '../../services/AbstractService';
+import DeliveryService from '../../services/DeliveryService';
+
 import { api } from '../../services/utils';
 import * as CONSTANTS from '../../constants';
 
@@ -16,6 +18,7 @@ export {
   CONSTANTS,
   UserService,
   AbstractService,
+  DeliveryService,
   api,
 };
 

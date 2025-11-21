@@ -1,0 +1,258 @@
+openapi: 3.0.0
+info:
+  title: Posebestoimosti API
+  description: API for managing deliveries and users
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@posebestoimosti.com
+
+servers:
+  - url: https://your-domain.com
+    description: Production server
+  - url: http://localhost:5001
+    description: Development server
+
+paths:
+  /deliveries:
+    get:
+      summary: Get all deliveries
+      description: Retrieve a list of all deliveries
+      tags:
+        - Deliveries
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Delivery'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /deliveries/{id}:
+    get:
+      summary: Get delivery by ID
+      description: Retrieve a specific delivery by its ID
+      tags:
+        - Deliveries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Delivery ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Delivery'
+        '404':
+          description: Delivery not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Delivery:
+      type: object
+      required:
+        - id
+        - number
+        - description
+        - status
+        - order_deadline
+        - delivery_start
+        - delivery_end
+        - group
+        - orders
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the delivery
+          example: "delivery-123"
+        number:
+          type: integer
+          description: Delivery number
+          example: 1001
+        description:
+          type: string
+          description: Description of the delivery
+          example: "Weekly grocery delivery"
+        status:
+          type: string
+          enum:
+            - PENDING
+            - IN_TRANSIT
+            - IN_TRANSIT_BACK
+            - FULFILLED
+          description: Current status of the delivery
+          example: "PENDING"
+        order_deadline:
+          type: string
+          format: date-time
+          description: Deadline for placing orders
+          example: "2025-01-15T23:59:59Z"
+        delivery_start:
+          type: string
+          format: date-time
+          description: Start date and time of delivery
+          example: "2025-01-16T08:00:00Z"
+        delivery_end:
+          type: string
+          format: date-time
+          description: End date and time of delivery
+          example: "2025-01-16T18:00:00Z"
+        group:
+          type: string
+          description: Delivery group identifier
+          example: "group-a"
+        orders:
+          type: array
+          description: List of orders in this delivery
+          items:
+            $ref: '#/components/schemas/Order'
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2025-01-01T00:00:00Z"
+        owner:
+          type: object
+          description: Owner information
+          properties:
+            id:
+              type: string
+              description: Owner ID
+              example: "user-123"
+
+    Order:
+      type: object
+      required:
+        - id
+        - customerName
+        - orderDate
+        - status
+        - numberOfItems
+        - totalValue
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the order
+          example: "order-456"
+        customerName:
+          type: string
+          description: Name of the customer
+          example: "John Doe"
+        orderDate:
+          type: string
+          format: date-time
+          description: Date when the order was placed
+          example: "2025-01-10T14:30:00Z"
+        status:
+          type: string
+          enum:
+            - PENDING
+            - PAID
+            - CONSOLIDATED
+          description: Current status of the order
+          example: "PAID"
+        numberOfItems:
+          type: integer
+          description: Number of items in the order
+          example: 5
+        totalValue:
+          type: number
+          format: float
+          description: Total value of the order
+          example: 150.75
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - roles
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the user
+          example: "user-123"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "user@example.com"
+        roles:
+          type: array
+          description: User roles
+          items:
+            type: string
+          example: ["admin", "user"]
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2025-01-01T00:00:00Z"
+        label:
+          type: object
+          description: User label information
+          properties:
+            expiration:
+              type: integer
+              description: Label expiration timestamp
+              example: 1735689600
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code
+              example: "NOT_FOUND"
+            message:
+              type: string
+              description: Error message
+              example: "Delivery not found"
+
+tags:
+  - name: Deliveries
+    description: Operations related to deliveries
+  - name: Users
