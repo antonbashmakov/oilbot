@@ -83,7 +83,7 @@ paths:
 
 components:
   schemas:
-    Delivery:
+    DeliveryOverview:
       type: object
       required:
         - id

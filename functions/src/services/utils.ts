@@ -54,7 +54,7 @@ export const api = {
   
   send: (response: ExpressResponse, data: any = {}): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(200).send({ code: 'OK', data }),
+    .status(200).send(data),
   
   redirect: (response: ExpressResponse, data: any = {}): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)

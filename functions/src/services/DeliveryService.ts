@@ -2,7 +2,7 @@ import AbstractService from './AbstractService';
 import { COLLECTIONS } from '../constants';
 
 // Interface for Delivery entity based on the example provided
-interface Delivery {
+export interface Delivery {
   id: string;
   number: number;
   description: string;
@@ -11,16 +11,6 @@ interface Delivery {
   delivery_start: string;
   delivery_end: string;
   group: string;
-  orders: Array<{
-    id: string;
-    customerName: string;
-    orderDate: string;
-    status: "PENDING" | "PAID" | "CONSOLIDATED";
-    numberOfItems: number;
-    totalValue: number;
-  }>;
-  createdAt?: Date;
-  owner?: { id: string };
 }
 
 class DeliveryService extends AbstractService<Delivery> {
@@ -32,6 +22,10 @@ class DeliveryService extends AbstractService<Delivery> {
     findDeliveriesByStatus(status: Delivery['status']): Promise<Delivery[]> {
         return this.getCollection().where('status', '==', status).orderBy('delivery_start', 'desc')
         .get().then((result : any) => result.docs.map((doc: any) => doc.data() as Delivery));  
+    }
+
+    toPOJO(o: any): Delivery {
+        return {...o, delivery_end: o.delivery_end.toDate(), delivery_start: o.delivery_start.toDate(), order_deadline: o.order_deadline?.toDate()};
     }
 
     getCollectionName(): string { return COLLECTIONS.DELIVERIES; }
