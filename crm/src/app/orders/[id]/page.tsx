@@ -17,6 +17,7 @@ import {
   Stack,
   Text,
   VStack,
+  Container
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column } from "@/components/DataTable";
@@ -90,7 +91,8 @@ export default function OrderPage() {
   ];
 
   return (
-    <Box p={8}>
+    <Box bg="bg.primary" minH="100vh" py="8">
+      <Container maxW="7xl">
       <VStack gap={6} align="stretch">
         {/* Breadcrumbs */}
         <Breadcrumb.Root>
@@ -106,7 +108,7 @@ export default function OrderPage() {
         </Breadcrumb.Root>
         <Flex justify="space-between" align="center">
           <Flex align="center" gap={4}>
-            <Heading as="h1" size="lg">
+            <Heading size="2xl" color="text.primary">
               Order {orderId}
             </Heading>
             <Badge colorScheme="green">Paid</Badge>
@@ -118,11 +120,13 @@ export default function OrderPage() {
         <Grid templateColumns="repeat(3, 1fr)" gap={6}>
           {/* Left Column */}
           <GridItem colSpan={2}>
+            
             <DataTable
               columns={columns}
               data={orderItems}
               title="Order Items"
             />
+            
           </GridItem>
 
           {/* Right Column */}
@@ -170,6 +174,7 @@ export default function OrderPage() {
           </GridItem>
         </Grid>
       </VStack>
+      </Container>
     </Box>
   );
 }

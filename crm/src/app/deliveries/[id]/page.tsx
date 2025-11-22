@@ -82,7 +82,7 @@ export default function DeliveryDetailPage() {
         </Flex>
 
         {/* Delivery Information Card */}
-          <DeliveryInformationCard delivery={delivery} />
+        <DeliveryInformationCard delivery={delivery} />
         <Container mb="8" />
         {/* Orders Table */}
         { delivery.orders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
