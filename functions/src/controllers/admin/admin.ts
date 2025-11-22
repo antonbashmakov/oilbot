@@ -11,6 +11,7 @@ import {
   api,
 } from './imports';
 import { DeliveryOverview, Stats } from '../../models/models';
+import OrderPickingService from '../../services/OrderPickingService';
 
 admin.initializeApp({}, 'admin');
 admin.firestore().settings({
@@ -100,6 +101,28 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
     devileryOverview.stats = Object.keys(deliveryStats).map(key => deliveryStats[key]);
     
     return api.send(res, devileryOverview);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || 'Internal server error');
+  }
+});
+
+adminApi.get('/orders/:id', async (req: express.Request, res: express.Response) => {
+  try {
+    const { id } = req.params;
+    const orderService = new OrderService(admin);
+
+    const order = await orderService.find(id);
+
+    if (!order) {
+      return api.notFound(res, 'Delivery not found');
+    }
+
+    const pickingService = new OrderPickingService(admin);
+
+    const picking = await pickingService.find(id);
+    
+    return api.send(res, {...order, picking});
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || 'Internal server error');

@@ -83,6 +83,45 @@ paths:
 
 components:
   schemas:
+    OrderPicking:
+      type: object
+      required:
+        - delivery
+        - delivery_end
+        - delivery_start
+        - id
+        - items
+        - owner
+        - status
+        - total
+        - type
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the cart item
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"      
+        delivery:
+          $ref: '#/components/schemas/DeliveryRef'
+        items:
+          type: array
+          description: Items in this order picking
+          items:
+            $ref: '#/components/schemas/CartItem'
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+        status:
+          type: string
+          description: Order picking status
+          example: "PENDING"
+        total:
+          type: number
+          format: float
+          description: Total value
+          example: 0
+        type:
+          type: string
+          description: Order picking type
+          example: "ORIGINAL"
     CartItem:
       type: object
       required:
@@ -126,16 +165,37 @@ components:
             description: Quantity
             example: 1          
         owner:
-          type: object
-          description: Owner information
-          required:
-            - id
-          properties:
-            id:
-              type: integer
-              description: Owner ID
-              example: 491043753
+          $ref: '#/components/schemas/OwnerRef'
 
+    OwnerRef:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          description: Owner ID
+          example: 270053857
+    DeliveryRef:
+      required:
+        - delivery_end
+        - delivery_start
+        - id
+      properties:
+        delivery_end:
+          type: string
+          format: date-time
+          description: Delivery end date and time
+          example: "2025-11-23T00:00:00.000Z"
+        delivery_start:
+          type: string
+          format: date-time
+          description: Delivery start date and time
+          example: "2025-11-21T00:00:00.000Z"
+        id:
+          type: string
+          description: Unique identifier for the order picking
+          example: "ef4d5632-ba34-4488-97a5-b9b7af299535"      
     Item:
       type: object
       required:
@@ -237,13 +297,12 @@ components:
           description: Name of the stats item
           example: "Сёмга филе Филе на коже 1.8 Кг"
 
-    DeliveryOverview:
+    Delivery:
       type: object
       required:
         - id
         - number
         - description
-        - status
         - order_deadline
         - delivery_start
         - delivery_end
@@ -295,24 +354,23 @@ components:
           description: List of orders in this delivery
           items:
             $ref: '#/components/schemas/Order'
-        stats:
-          type: array
-          description: Statistics for the delivery
-          items:
-            $ref: '#/components/schemas/Stats'
         createdAt:
           type: string
           format: date-time
           description: Creation timestamp
           example: "2025-01-01T00:00:00Z"
         owner:
-          type: object
-          description: Owner information
-          properties:
-            id:
-              type: string
-              description: Owner ID
-              example: "user-123"
+          $ref: '#/components/schemas/OwnerRef'
+
+    DeliveryOverview:
+      allOf:
+        - $ref: '#/components/schemas/Delivery'
+      properties:
+        stats:
+          type: array
+          description: Statistics for the delivery
+          items:
+            $ref: '#/components/schemas/Stats'
 
     Order:
       type: object
@@ -353,15 +411,7 @@ components:
           description: Current status of the order
           example: "PAID"
         owner:
-          type: object
-          description: Owner information
-          required:
-            - id
-          properties:
-            id:
-              type: string
-              description: Owner ID
-              example: "user-123"
+          $ref: '#/components/schemas/OwnerRef'
         numberOfItems:
           type: integer
           description: Number of items in the order
@@ -371,6 +421,12 @@ components:
           format: float
           description: Total value of the order
           example: 150.75
+    OrderOverview:
+      allOf:
+        - $ref: '#/components/schemas/Order'
+      properties:
+        picking:
+          $ref: '#/components/schemas/OrderPicking'
 
     User:
       type: object

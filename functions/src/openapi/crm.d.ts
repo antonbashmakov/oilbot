@@ -75,6 +75,33 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    OrderPicking: {
+      /**
+       * @description Unique identifier for the cart item
+       * @example db13bdf1-cd12-4650-82be-f55af1e79bf7
+       */
+      id: string;
+      delivery: components["schemas"]["DeliveryRef"];
+      /** @description Items in this order picking */
+      items: components["schemas"]["CartItem"][];
+      owner: components["schemas"]["OwnerRef"];
+      /**
+       * @description Order picking status
+       * @example PENDING
+       */
+      status: string;
+      /**
+       * Format: float
+       * @description Total value
+       * @example 0
+       */
+      total: number;
+      /**
+       * @description Order picking type
+       * @example ORIGINAL
+       */
+      type: string;
+    };
     CartItem: {
       /**
        * Format: float
@@ -113,14 +140,33 @@ export interface components {
        * @example 1
        */
       quantity: number;
-      /** @description Owner information */
-      owner: {
-        /**
-         * @description Owner ID
-         * @example 491043753
-         */
-        id: number;
-      };
+      owner: components["schemas"]["OwnerRef"];
+    };
+    OwnerRef: {
+      /**
+       * @description Owner ID
+       * @example 270053857
+       */
+      id: number;
+    };
+    DeliveryRef: {
+      /**
+       * Format: date-time
+       * @description Delivery end date and time
+       * @example 2025-11-23T00:00:00.000Z
+       */
+      delivery_end: string;
+      /**
+       * Format: date-time
+       * @description Delivery start date and time
+       * @example 2025-11-21T00:00:00.000Z
+       */
+      delivery_start: string;
+      /**
+       * @description Unique identifier for the order picking
+       * @example ef4d5632-ba34-4488-97a5-b9b7af299535
+       */
+      id: string;
     };
     Item: {
       /**
@@ -217,7 +263,7 @@ export interface components {
        */
       name: string;
     };
-    DeliveryOverview: {
+    Delivery: {
       /**
        * @description Unique identifier for the delivery
        * @example delivery-123
@@ -238,7 +284,7 @@ export interface components {
        * @example PENDING
        * @enum {string}
        */
-      status: "PENDING" | "IN_TRANSIT" | "IN_TRANSIT_BACK" | "FULFILLED";
+      status?: "PENDING" | "IN_TRANSIT" | "IN_TRANSIT_BACK" | "FULFILLED";
       /**
        * Format: date-time
        * @description Deadline for placing orders
@@ -264,23 +310,18 @@ export interface components {
       group: string;
       /** @description List of orders in this delivery */
       orders: components["schemas"]["Order"][];
-      /** @description Statistics for the delivery */
-      stats?: components["schemas"]["Stats"][];
       /**
        * Format: date-time
        * @description Creation timestamp
        * @example 2025-01-01T00:00:00Z
        */
       createdAt?: string;
-      /** @description Owner information */
-      owner?: {
-        /**
-         * @description Owner ID
-         * @example user-123
-         */
-        id?: string;
-      };
+      owner?: components["schemas"]["OwnerRef"];
     };
+    DeliveryOverview: {
+      /** @description Statistics for the delivery */
+      stats?: components["schemas"]["Stats"][];
+    } & components["schemas"]["Delivery"];
     Order: {
       /**
        * @description Unique identifier for the order
@@ -306,14 +347,7 @@ export interface components {
        * @enum {string}
        */
       status: "PENDING" | "PAID" | "CONSOLIDATED";
-      /** @description Owner information */
-      owner: {
-        /**
-         * @description Owner ID
-         * @example user-123
-         */
-        id: string;
-      };
+      owner: components["schemas"]["OwnerRef"];
       /**
        * @description Number of items in the order
        * @example 5
@@ -326,6 +360,9 @@ export interface components {
        */
       total?: number;
     };
+    OrderOverview: {
+      picking?: components["schemas"]["OrderPicking"];
+    } & components["schemas"]["Order"];
     User: {
       /**
        * @description Unique identifier for the user

@@ -3,6 +3,7 @@ export const COLLECTIONS = {
     USERS: 'USERS',
     DELIVERIES: 'DELIVERIES',
     ORDERS: 'ORDERS',
+    PICKINGS: 'PICKINGS',
 };
 
 

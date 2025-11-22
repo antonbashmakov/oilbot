@@ -2,9 +2,9 @@ import { jsonify } from './utils';
 
 // Interface for entities that have an ID
 interface Entity {
-  id: string;
+  id: string | number;
   createdAt?: Date;
-  owner?: { id: string };
+  owner?: { id: string | number };
 }
 
 // Simplified Firebase Admin SDK interface
@@ -85,9 +85,8 @@ abstract class AbstractService<T extends Entity> {
     return this.firebase.firestore().collection(collection);
   }
 
-
-
-  toPOJO(id:any, o: any): T {
+  toPOJO(id:any, o: any): T | undefined {
+    if(!o) return;
     return { id, ...o } as T;
   }
   abstract getCollectionName(): string;
