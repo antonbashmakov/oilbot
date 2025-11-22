@@ -75,7 +75,26 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    Delivery: {
+    Stats: {
+      /**
+       * Format: float
+       * @description Total value
+       * @example 4498
+       */
+      total: number;
+      /**
+       * Format: float
+       * @description Fraction value
+       * @example 1.8
+       */
+      fraction: number;
+      /**
+       * @description Name of the stats item
+       * @example Сёмга филе Филе на коже 1.8 Кг
+       */
+      name: string;
+    };
+    DeliveryOverview: {
       /**
        * @description Unique identifier for the delivery
        * @example delivery-123
@@ -122,6 +141,8 @@ export interface components {
       group: string;
       /** @description List of orders in this delivery */
       orders: components["schemas"]["Order"][];
+      /** @description Statistics for the delivery */
+      stats?: components["schemas"]["Stats"][];
       /**
        * Format: date-time
        * @description Creation timestamp
@@ -160,6 +181,14 @@ export interface components {
        * @enum {string}
        */
       status: "PENDING" | "PAID" | "CONSOLIDATED";
+      /** @description Owner information */
+      owner: {
+        /**
+         * @description Owner ID
+         * @example user-123
+         */
+        id?: string;
+      };
       /**
        * @description Number of items in the order
        * @example 5
@@ -170,7 +199,7 @@ export interface components {
        * @description Total value of the order
        * @example 150.75
        */
-      totalValue: number;
+      total?: number;
     };
     User: {
       /**

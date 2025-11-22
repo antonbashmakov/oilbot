@@ -1,3 +1,3 @@
 import {components} from "@/api/openapi/crm";
 
-export type Delivery = components["schemas"]["Delivery"];
+export type DeliveryOverview = components["schemas"]["DeliveryOverview"];

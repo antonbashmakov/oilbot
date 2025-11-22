@@ -12,7 +12,7 @@ import {
   Badge,
 } from "@chakra-ui/react";
 import { DataTable } from "@/components/DataTable";
-import { DeliveryInformationCard, Delivery } from "../DeliveryInformationCard";
+import { DeliveryInformationCard } from "../DeliveryInformationCard";
 import { useAdminDeliveryQuery } from "@/api";
 
 
@@ -104,7 +104,7 @@ export default function DeliveryDetailPage() {
                 {
                   key: "customerName",
                   header: "Customer Name",
-                  accessor: (order) => order.customerName,
+                  accessor: (order) => order.owner.id,
                 },
                 {
                   key: "orderDate",
@@ -125,11 +125,42 @@ export default function DeliveryDetailPage() {
                 {
                   key: "totalValue",
                   header: "Total Value",
-                  accessor: (order) => `$${order.totalValue}`,
+                  accessor: (order) => order.total,
                   align: "end",
                 },
               ]}
               data={delivery.orders}
+            />
+          </Card.Body>
+        </Card.Root>}
+        { delivery.stats && delivery.stats.length > 0 && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
+          <Card.Header>
+            <Heading p={0} size="lg" color="text.primary">
+              Statistics
+            </Heading>
+          </Card.Header>
+          <Card.Body p={0}>
+            <DataTable
+              columns={[
+                {
+                  key: "itemName",
+                  header: "Item Name",
+                  accessor: (item) => (
+                    <Text fontWeight="medium">{item.name}</Text>
+                  ),
+                },
+                {
+                  key: "totalFraction",
+                  header: "Total Fraction",
+                  accessor: (item) => item.fraction,
+                },
+                {
+                  key: "totalCost",
+                  header: "Total Cost",
+                  accessor: (item) => item.total,
+                },
+              ]}
+              data={delivery.stats!}
             />
           </Card.Body>
         </Card.Root>}

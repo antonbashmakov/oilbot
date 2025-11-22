@@ -1,27 +1,11 @@
+import { DeliveryOverview } from "@/api/models";
 import { Card, Box, Text, Badge, Flex } from "@chakra-ui/react";
 import { format } from "date-fns";
 
-export interface Delivery {
-  id: string;
-  number: number;
-  description: string;
-  status: "PENDING" | "IN_TRANSIT" | "IN_TRANSIT_BACK" | "FULFILLED";
-  order_deadline: string;
-  delivery_start: string;
-  delivery_end: string;
-  group: string;
-  orders: Array<{
-    id: string;
-    customerName: string;
-    orderDate: string;
-    status: "PENDING" | "PAID" | "CONSOLIDATED";
-    numberOfItems: number;
-    totalValue: number;
-  }>;
-}
+
 
 interface DeliveryInformationCardProps {
-  delivery: Delivery;
+  delivery: DeliveryOverview;
 }
 
 export function DeliveryInformationCard({ delivery }: DeliveryInformationCardProps) {

@@ -83,7 +83,29 @@ paths:
 
 components:
   schemas:
-    Delivery:
+    Stats:
+      type: object
+      required:
+        - total
+        - fraction
+        - name
+      properties:
+        total:
+          type: number
+          format: float
+          description: Total value
+          example: 4498
+        fraction:
+          type: number
+          format: float
+          description: Fraction value
+          example: 1.8
+        name:
+          type: string
+          description: Name of the stats item
+          example: "Сёмга филе Филе на коже 1.8 Кг"
+
+    DeliveryOverview:
       type: object
       required:
         - id
@@ -141,6 +163,11 @@ components:
           description: List of orders in this delivery
           items:
             $ref: '#/components/schemas/Order'
+        stats:
+          type: array
+          description: Statistics for the delivery
+          items:
+            $ref: '#/components/schemas/Stats'
         createdAt:
           type: string
           format: date-time
@@ -164,6 +191,7 @@ components:
         - status
         - numberOfItems
         - totalValue
+        - owner
       properties:
         id:
           type: string
@@ -186,11 +214,19 @@ components:
             - CONSOLIDATED
           description: Current status of the order
           example: "PAID"
+        owner:
+          type: object
+          description: Owner information
+          properties:
+            id:
+              type: string
+              description: Owner ID
+              example: "user-123"
         numberOfItems:
           type: integer
           description: Number of items in the order
           example: 5
-        totalValue:
+        total:
           type: number
           format: float
           description: Total value of the order
