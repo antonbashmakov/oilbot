@@ -21,6 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column } from "@/components/DataTable";
+import DataTableExample from "@/components/DataTableExample";
 
 // Mock data for the order items
 const orderItems = [
@@ -58,14 +59,14 @@ const customer = {
 
 // Mock data for order history
 const orderHistory = [
-    { event: "Order Created", date: "2023-11-20 10:00" },
-    { event: "Payment Sent", date: "2023-11-20 10:05" },
-    { event: "Payment Made", date: "2023-11-20 10:10" },
-    { event: "Order Picked", date: "2023-11-21 09:00" },
-    { event: "Reconciliation Order created", date: "2023-11-21 09:30" },
-    { event: "Reconciliation Payment Sent", date: "2023-11-21 09:35" },
-    { event: "Reconciliation Payment Made", date: "2023-11-21 09:40" },
-    { event: "Order delivered", date: "2023-11-22 14:00" },
+  { event: "Order Created", date: "2023-11-20 10:00" },
+  { event: "Payment Sent", date: "2023-11-20 10:05" },
+  { event: "Payment Made", date: "2023-11-20 10:10" },
+  { event: "Order Picked", date: "2023-11-21 09:00" },
+  { event: "Reconciliation Order created", date: "2023-11-21 09:30" },
+  { event: "Reconciliation Payment Sent", date: "2023-11-21 09:35" },
+  { event: "Reconciliation Payment Made", date: "2023-11-21 09:40" },
+  { event: "Order delivered", date: "2023-11-22 14:00" },
 ];
 
 
@@ -93,87 +94,96 @@ export default function OrderPage() {
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
       <Container maxW="7xl">
-      <VStack gap={6} align="stretch">
-        {/* Breadcrumbs */}
-        <Breadcrumb.Root>
-          <Breadcrumb.Item>
-            <Breadcrumb.Link href="/dashboard">Dashboard</Breadcrumb.Link>
-          </Breadcrumb.Item>
-          <Breadcrumb.Item>
-            <Breadcrumb.Link href="/orders">Orders</Breadcrumb.Link>
-          </Breadcrumb.Item>
-          <Breadcrumb.Item>
-            <Text>{orderId}</Text>
-          </Breadcrumb.Item>
-        </Breadcrumb.Root>
-        <Flex justify="space-between" align="center">
-          <Flex align="center" gap={4}>
-            <Heading size="2xl" color="text.primary">
-              Order {orderId}
-            </Heading>
-            <Badge colorScheme="green">Paid</Badge>
+        <VStack gap={6} align="stretch">
+          {/* Breadcrumbs */}
+
+          <Breadcrumb.Root>
+            <Breadcrumb.List>
+              <Breadcrumb.Item>
+                <Breadcrumb.Link href="/dashboard">Dashboard</Breadcrumb.Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Separator />
+              <Breadcrumb.Item>
+                <Breadcrumb.Link href="/orders">Orders</Breadcrumb.Link>
+              </Breadcrumb.Item>
+              <Breadcrumb.Separator />
+              <Breadcrumb.Item>
+                <Text>{orderId}</Text>
+              </Breadcrumb.Item>
+            </Breadcrumb.List>
+          </Breadcrumb.Root>
+
+
+          <Flex justify="space-between" align="center">
+            <Flex align="center" gap={4}>
+              <Heading size="2xl" color="text.primary">
+                Order {orderId}
+              </Heading>
+              <Badge colorScheme="green">Paid</Badge>
+            </Flex>
+            <Button colorScheme="blue">Start Picking</Button>
           </Flex>
-          <Button colorScheme="blue">Start Picking</Button>
-        </Flex>
 
-        {/* Main Content */}
-        <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-          {/* Left Column */}
-          <GridItem colSpan={2}>
-            
-            <DataTable
-              columns={columns}
-              data={orderItems}
-              title="Order Items"
-            />
-            
-          </GridItem>
+          {/* Main Content */}
+          <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+            {/* Left Column */}
+            <GridItem colSpan={2}>
+              <VStack gap={6} align="stretch">
+                <DataTable
+                  columns={columns}
+                  data={orderItems}
+                  title="Order Items"
+                />
 
-          {/* Right Column */}
-          <GridItem colSpan={1}>
-            <VStack gap={6} align="stretch">
-              {/* Customer Card */}
-              <Card.Root>
-                <Card.Header>
-                  <Heading size="md">Customer</Heading>
-                </Card.Header>
-                <Card.Body>
-                  <Flex align="center" gap={4}>
-                    <Avatar.Root>
-                      <Avatar.Image src={customer.avatarUrl} />
-                    </Avatar.Root>
-                    <Box>
-                      <Text fontWeight="bold">{customer.name}</Text>
-                      <Link href={`/customers/${customer.id}`} color="blue.500">
-                        View Customer
-                      </Link>
-                    </Box>
-                  </Flex>
-                </Card.Body>
-              </Card.Root>
+                <DataTableExample />               
+              </VStack>
+            </GridItem>
 
-              {/* Order History Card */}
-              <Card.Root>
-                <Card.Header>
-                  <Heading size="md">Order History</Heading>
-                </Card.Header>
-                <Card.Body>
-                  <Stack gap={4}>
-                    {orderHistory.map((item, index) => (
-                      <Flex key={index} justify="space-between">
-                        <Text fontSize="sm">{item.event}</Text>
-                        <Text fontSize="sm" color="gray.500">
-                          {item.date}
-                        </Text>
-                      </Flex>
-                    ))}
-                  </Stack>
-                </Card.Body>
-              </Card.Root>
-            </VStack>
-          </GridItem>
-        </Grid>
-      </VStack>
+            {/* Right Column */}
+            <GridItem colSpan={1}>
+              <VStack gap={6} align="stretch">
+                {/* Customer Card */}
+                <Card.Root>
+                  <Card.Header>
+                    <Heading size="md">Customer</Heading>
+                  </Card.Header>
+                  <Card.Body>
+                    <Flex align="center" gap={4}>
+                      <Avatar.Root>
+                        <Avatar.Image src={customer.avatarUrl} />
+                      </Avatar.Root>
+                      <Box>
+                        <Text fontWeight="bold">{customer.name}</Text>
+                        <Link href={`/customers/${customer.id}`} color="blue.500">
+                          View Customer
+                        </Link>
+                      </Box>
+                    </Flex>
+                  </Card.Body>
+                </Card.Root>
+
+                {/* Order History Card */}
+                <Card.Root>
+                  <Card.Header>
+                    <Heading size="md">Order History</Heading>
+                  </Card.Header>
+                  <Card.Body>
+                    <Stack gap={4}>
+                      {orderHistory.map((item, index) => (
+                        <Flex key={index} justify="space-between">
+                          <Text fontSize="sm">{item.event}</Text>
+                          <Text fontSize="sm" color="gray.500">
+                            {item.date}
+                          </Text>
+                        </Flex>
+                      ))}
+                    </Stack>
+                  </Card.Body>
+                </Card.Root>
+              </VStack>
+            </GridItem>
+          </Grid>
+        </VStack>
       </Container>
     </Box>
   );

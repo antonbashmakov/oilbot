@@ -1,7 +1,6 @@
 import {useApiConfig} from "@/api/apiConfigContext";
 import createClient, {Middleware} from "openapi-fetch";
 import {paths} from "@/api/openapi/crm";
-import {enqueueSnackbar} from "notistack";
 
 const useClient = () => {
 

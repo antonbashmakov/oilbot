@@ -14,6 +14,7 @@ import {
 import { DataTable } from "@/components/DataTable";
 import { DeliveryInformationCard } from "../DeliveryInformationCard";
 import { useAdminDeliveryQuery } from "@/api";
+import DataTableExample from "@/components/DataTableExample";
 
 
 
@@ -42,11 +43,11 @@ export default function DeliveryDetailPage() {
   const params = useParams();
   const deliveryId = params.id as string;
 
-  const {data: delivery} = useAdminDeliveryQuery(deliveryId);
+  const { data: delivery } = useAdminDeliveryQuery(deliveryId);
 
 
   console.log("Delivery data:", delivery);
-  
+
 
   const handleEdit = () => {
     console.log("Edit delivery:", deliveryId);
@@ -60,7 +61,10 @@ export default function DeliveryDetailPage() {
 
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
-{   delivery &&  <Container maxW="7xl">
+
+      
+      
+      {delivery && <Container maxW="7xl">
         {/* Header with title and buttons */}
         <Flex justify="space-between" align="center" mb="8">
           <Box>
@@ -85,7 +89,7 @@ export default function DeliveryDetailPage() {
         <DeliveryInformationCard delivery={delivery} />
         <Container mb="8" />
         {/* Orders Table */}
-        { delivery.orders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
+        {delivery.orders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
           <Card.Header>
             <Heading p={0} size="lg" color="text.primary">
               Orders in Delivery
@@ -133,7 +137,7 @@ export default function DeliveryDetailPage() {
             />
           </Card.Body>
         </Card.Root>}
-        { delivery.stats && delivery.stats.length > 0 && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
+        {delivery.stats && delivery.stats.length > 0 && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
           <Card.Header>
             <Heading p={0} size="lg" color="text.primary">
               Statistics
@@ -165,7 +169,7 @@ export default function DeliveryDetailPage() {
           </Card.Body>
         </Card.Root>}
       </Container>
-}
+      }
     </Box>
   );
 }
