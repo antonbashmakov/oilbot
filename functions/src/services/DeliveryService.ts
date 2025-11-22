@@ -24,8 +24,8 @@ class DeliveryService extends AbstractService<Delivery> {
         .get().then((result : any) => result.docs.map((doc: any) => doc.data() as Delivery));  
     }
 
-    toPOJO(o: any): Delivery {
-        return {...o, delivery_end: o.delivery_end.toDate(), delivery_start: o.delivery_start.toDate(), order_deadline: o.order_deadline?.toDate()};
+    toPOJO(id: any, o: any): Delivery {
+        return {...o, id, delivery_end: o.delivery_end.toDate(), delivery_start: o.delivery_start.toDate(), order_deadline: o.order_deadline?.toDate()};
     }
 
     getCollectionName(): string { return COLLECTIONS.DELIVERIES; }

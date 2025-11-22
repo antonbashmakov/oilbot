@@ -20,7 +20,7 @@ abstract class AbstractService<T extends Entity> {
   }
 
   find(id: string): Promise<T | undefined> {
-    return this.getCollection().doc(id).get().then((doc: any) => this.toPOJO(doc.data()));
+    return this.getCollection().doc(id).get().then((doc: any) => this.toPOJO(doc.id, doc.data()));
   }
 
   update(entity: T, object: Partial<T>): Promise<any> {
@@ -28,7 +28,7 @@ abstract class AbstractService<T extends Entity> {
   }
 
   findAll(): Promise<T[]> {
-    return this.getCollection().get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.data())));
+    return this.getCollection().get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.id, doc.data())));
   }
 
   addAll(objects: T[]): void {
@@ -46,7 +46,7 @@ abstract class AbstractService<T extends Entity> {
 
   fetchForOwner(owner: { id: string }): Promise<T[]> {
     return this.getCollection().where('owner.id', '==', owner.id)
-      .get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.data())));
+      .get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.id, doc.data())));
   }
 
   add(object: T): Promise<T> {
@@ -87,8 +87,8 @@ abstract class AbstractService<T extends Entity> {
 
 
 
-  toPOJO(o: any): T {
-    return { ...o } as T;
+  toPOJO(id:any, o: any): T {
+    return { id, ...o } as T;
   }
   abstract getCollectionName(): string;
   abstract getExcludedFields(): string[];

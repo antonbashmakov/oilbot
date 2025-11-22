@@ -83,6 +83,155 @@ paths:
 
 components:
   schemas:
+    CartItem:
+      type: object
+      required:
+        - fraction
+        - group
+        - id
+        - name
+        - owner
+        - price
+        - quantity
+      properties:
+        fraction:
+          type: number
+          format: float
+          description: Fraction value
+          example: 0.42
+        group:
+          type: string
+          description: Item group
+          example: "MOSCOW"
+        id:
+          type: string
+          description: Unique identifier for the cart item
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"
+        name:
+          type: string
+          description: Item name
+          example: "Горгонзола (Бразилия) Кусок 0.42 Кг"
+        price:
+            type: number
+            format: float
+            description: Price
+            example: 609
+        quantity:
+            type: integer
+            description: Quantity
+            example: 1          
+        owner:
+          type: object
+          description: Owner information
+          required:
+            - id
+          properties:
+            id:
+              type: integer
+              description: Owner ID
+              example: 491043753
+
+    Item:
+      type: object
+      required:
+        - category
+        - description
+        - fraction
+        - fraction_price_out
+        - group
+        - id
+        - link
+        - name
+        - price_in
+        - price_out
+        - row_number
+        - status
+        - unit
+        - unti_description
+      properties:
+        category:
+          type: string
+          description: Item category
+          example: "MEAT"
+        description:
+          type: string
+          description: Item description
+          example: "мясо"
+        fraction:
+          type: number
+          format: float
+          description: Fraction value
+          example: 1.2
+        fraction_price_out:
+          type: number
+          format: float
+          description: Fraction price out
+          example: 1439
+        group:
+          type: string
+          description: Item group
+          example: "BALASHOV"
+        id:
+          type: string
+          description: Unique identifier for the item
+          example: "06088197-f7ef-4bf2-8b3f-2f4a05c6c104"
+        link:
+          type: string
+          description: Link to item details
+          example: "https://t.me/posebestoimosti_saratov/214"
+        name:
+          type: string
+          description: Item name
+          example: "Телятина Филе (Тендер Лоин)"
+        price_in:
+          type: number
+          format: float
+          description: Price in
+          example: 1000
+        price_out:
+          type: number
+          format: float
+          description: Price out
+          example: 1199
+        row_number:
+          type: integer
+          description: Row number
+          example: 11
+        status:
+          type: string
+          description: Item status
+          example: "ACTIVE"
+        unit:
+          type: string
+          description: Unit of measurement
+          example: "Кг"
+        unti_description:
+          type: string
+          description: Unit description
+          example: "Отруб"
+
+    Stats:
+      type: object
+      required:
+        - total
+        - fraction
+        - name
+      properties:
+        total:
+          type: number
+          format: float
+          description: Total value
+          example: 4498
+        fraction:
+          type: number
+          format: float
+          description: Fraction value
+          example: 1.8
+        name:
+          type: string
+          description: Name of the stats item
+          example: "Сёмга филе Филе на коже 1.8 Кг"
+
     DeliveryOverview:
       type: object
       required:
@@ -141,6 +290,11 @@ components:
           description: List of orders in this delivery
           items:
             $ref: '#/components/schemas/Order'
+        stats:
+          type: array
+          description: Statistics for the delivery
+          items:
+            $ref: '#/components/schemas/Stats'
         createdAt:
           type: string
           format: date-time
@@ -161,23 +315,30 @@ components:
         - id
         - customerName
         - orderDate
+        - items
         - status
         - numberOfItems
         - totalValue
+        - owner
       properties:
         id:
           type: string
           description: Unique identifier for the order
           example: "order-456"
-        customerName:
+        name:
           type: string
           description: Name of the customer
-          example: "John Doe"
+          example: "Order 1"
         orderDate:
           type: string
           format: date-time
           description: Date when the order was placed
           example: "2025-01-10T14:30:00Z"
+        items:
+          type: array
+          description: Items in this order
+          items:
+            $ref: '#/components/schemas/CartItem'
         status:
           type: string
           enum:
@@ -186,11 +347,21 @@ components:
             - CONSOLIDATED
           description: Current status of the order
           example: "PAID"
+        owner:
+          type: object
+          description: Owner information
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              description: Owner ID
+              example: "user-123"
         numberOfItems:
           type: integer
           description: Number of items in the order
           example: 5
-        totalValue:
+        total:
           type: number
           format: float
           description: Total value of the order

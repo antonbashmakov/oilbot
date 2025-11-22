@@ -8,6 +8,7 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
+    "openapi": "openapi-typescript resources/openapi/api.yml -o src/openapi/crm.d.ts",
     "logs": "firebase functions:log"
   },
   "engines": {
@@ -27,7 +28,8 @@
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
     "firebase-functions-test": "^3.1.0",
-    "typescript": "^4.9.0"
+    "typescript": "^4.9.0",
+    "openapi-typescript": "^6.7.0"
   },
   "private": true
 }

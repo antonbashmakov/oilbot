@@ -7,11 +7,10 @@ import {
   express,
   DeliveryService,
   OrderService,
-  Order,
   //AbstractService,
   api,
-  Delivery,
 } from './imports';
+import { DeliveryOverview, Stats } from '../../models/models';
 
 admin.initializeApp({}, 'admin');
 admin.firestore().settings({
@@ -20,10 +19,6 @@ admin.firestore().settings({
 dotenv.config();
 
 const adminApi = express();
-interface DeliveryOverview extends Delivery  {
-  orders: Array<Order> ;
-}
-
 
 
 adminApi.use(cors(
@@ -72,6 +67,37 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
 
     const orders = await orderService.findOrders(delivery);
     const devileryOverview = {...delivery, orders} as DeliveryOverview;
+
+    const deliveryStats = orders.reduce((ds, order) => {
+      
+      const orderStats = order.items.reduce((os, item) => {
+        if(os[item.id]) {
+          os[item.id] = { total: 0, fraction: 0 , name: item.name };
+        }
+        os[item.id].total += item.price * item.quantity;
+        os[item.id].fraction += item.fraction;
+
+        return os;
+      }, {} as { [key: string]: Stats });
+
+      Object.keys(orderStats).forEach(key => {
+        if(!ds[key]) {
+          ds[key] = { ...orderStats[key] };
+          return
+        }
+
+        ds[key].total += orderStats[key].total;
+        ds[key].fraction += orderStats[key].fraction;
+        ds[key].name = orderStats[key].name;
+      });
+
+      ;
+
+
+      return ds;
+    }, {} as { [key: string]: Stats });
+
+    devileryOverview.stats = Object.keys(deliveryStats).map(key => deliveryStats[key]);
     
     return api.send(res, devileryOverview);
   } catch (err: any) {
