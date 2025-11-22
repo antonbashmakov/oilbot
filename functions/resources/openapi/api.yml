@@ -89,6 +89,7 @@ components:
         - fraction
         - group
         - id
+        - item_id
         - name
         - owner
         - price
@@ -104,6 +105,10 @@ components:
           description: Item group
           example: "MOSCOW"
         id:
+          type: string
+          description: Unique identifier for the cart item
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"
+        item_id:
           type: string
           description: Unique identifier for the cart item
           example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"

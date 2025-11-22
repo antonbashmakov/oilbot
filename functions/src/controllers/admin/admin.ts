@@ -71,11 +71,11 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
     const deliveryStats = orders.reduce((ds, order) => {
       
       const orderStats = order.items.reduce((os, item) => {
-        if(os[item.id]) {
-          os[item.id] = { total: 0, fraction: 0 , name: item.name };
+        if(!os[item.item_id]) {
+          os[item.item_id] = { total: 0, fraction: 0 , name: item.name };
         }
-        os[item.id].total += item.price * item.quantity;
-        os[item.id].fraction += item.fraction;
+        os[item.item_id].total += item.price * item.quantity;
+        os[item.item_id].fraction += item.fraction;
 
         return os;
       }, {} as { [key: string]: Stats });

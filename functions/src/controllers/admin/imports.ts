@@ -6,7 +6,7 @@ import * as cors from 'cors';
 import UserService from '../../services/UserService';
 import AbstractService from '../../services/AbstractService';
 import DeliveryService, {Delivery} from '../../services/DeliveryService';
-import OrderService, {Order} from '../../services/OrderService';
+import OrderService from '../../services/OrderService';
 
 import { api } from '../../services/utils';
 import * as CONSTANTS from '../../constants';
@@ -22,7 +22,6 @@ export {
   DeliveryService,
   OrderService,
   Delivery,
-  Order,
   api,
 };
 

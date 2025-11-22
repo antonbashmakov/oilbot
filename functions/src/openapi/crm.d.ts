@@ -93,6 +93,11 @@ export interface components {
        */
       id: string;
       /**
+       * @description Unique identifier for the cart item
+       * @example db13bdf1-cd12-4650-82be-f55af1e79bf7
+       */
+      item_id: string;
+      /**
        * @description Item name
        * @example Горгонзола (Бразилия) Кусок 0.42 Кг
        */
