@@ -174,7 +174,7 @@ components:
           type: array
           description: Items in this order picking
           items:
-            $ref: '#/components/schemas/CartItem'
+            $ref: '#/components/schemas/PickingItem'
         owner:
           $ref: '#/components/schemas/OwnerRef'
         status:
@@ -234,7 +234,15 @@ components:
             example: 1          
         owner:
           $ref: '#/components/schemas/OwnerRef'
-
+    PickingItem:
+      allOf:
+        - $ref: '#/components/schemas/OrderItem'
+      properties:
+        status:
+          enum:
+            - PENDING
+            - COLLECTED
+            - CANCELLED
     OwnerRef:
       type: object
       required:

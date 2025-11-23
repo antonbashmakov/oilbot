@@ -1,5 +1,6 @@
-import { Table, Box, Text, Button, Stack, Input } from "@chakra-ui/react";
+import { Table, Box, Text, Button, Stack, Input, Editable, IconButton, Flex } from "@chakra-ui/react";
 import React, { useState, useCallback } from "react";
+import { AddIcon, MinusIcon } from "@chakra-ui/icons";
 
 export interface Column<T> {
   key: string;
@@ -20,6 +21,8 @@ interface DataTableProps<T> {
   loading?: boolean;
   onSave?: (changedData: T[]) => Promise<void>;
   isSaving?: boolean;
+  isRowDisabled?: (item: T) => boolean;
+  rowButtons?: (item: T) => React.ReactNode[];
 }
 
 export interface EditableCellProps {
@@ -38,6 +41,8 @@ export function DataTable<T>({
   loading = false,
   onSave,
   isSaving = false,
+  isRowDisabled,
+  rowButtons,
 }: DataTableProps<T>) {
   const [editedData, setEditedData] = useState<T[]>(data);
   const [originalData, setOriginalData] = useState<T[]>(data);
@@ -56,17 +61,17 @@ export function DataTable<T>({
     setEditedData(prev => {
       const newData = [...prev];
       const column = columns.find(col => col.key === columnKey);
-      
+
       if (column?.field) {
         newData[rowIndex] = {
           ...newData[rowIndex],
           [column.field]: value
         };
       }
-      
+
       return newData;
     });
-    
+
     setHasChanges(true);
   }, [columns]);
 
@@ -85,8 +90,9 @@ export function DataTable<T>({
   }, [originalData]);
 
   const handleSave = useCallback(async () => {
+    console.log("handleSave called", onSave, editedData);
     if (!onSave) return;
-    
+
     try {
       await onSave(editedData);
       setOriginalData(editedData);
@@ -126,11 +132,11 @@ export function DataTable<T>({
   }
 
   return (
-    <Box bg="surface.container" 
-    borderStyle="solid" 
-    border="1px" 
-    borderRadius="sm" 
-    borderColor="border.subtle">
+    <Box bg="surface.container"
+      borderStyle="solid"
+      border="1px"
+      borderRadius="sm"
+      borderColor="border.subtle">
       {title && (
         <Box p="4" borderBottom="1px" borderColor="border.subtle">
           <Text fontSize="lg" fontWeight="semibold" color="text.primary">
@@ -152,56 +158,99 @@ export function DataTable<T>({
                   {column.header}
                 </Table.ColumnHeader>
               ))}
+              {/* Actions column header */}
+              {(rowButtons && data.some(item => !isRowDisabled || !isRowDisabled(item))) && (
+                <Table.ColumnHeader
+                  width="80px"
+                  textAlign="center"
+                >
+                  Actions
+                </Table.ColumnHeader>
+              )}
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {editedData.map((item, rowIndex) => (
-              <Table.Row key={rowIndex} _hover={{ bg: "surface.elevated" }}>
-                {columns.map((column) => {
-                  const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
-                  const cellValue = getCellValue(item, column);
+            {editedData.map((item, rowIndex) => {
+              const isDisabled = isRowDisabled ? isRowDisabled(item) : false;
+              const buttons = rowButtons ? rowButtons(item) : [];
+              const showButtons = buttons.length > 0 && !isDisabled;
+
+              return (
+                <Table.Row 
+                  key={rowIndex} 
+                  _hover={{ bg: "surface.elevated" }}
+                  opacity={isDisabled ? 0.6 : 1}
+                >
+                  {columns.map((column) => {
+                    const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;
+                    const cellValue = getCellValue(item, column);
+
+                    return (
+                      <Table.Cell
+                        padding={5}
+                        key={column.key}
+                        color="text.primary"
+                        textAlign={column.align || "start"}
+                        _hover={column.editable ? { bg: "surface.highlight", cursor: "pointer" } : {}}
+                        onClick={() => column.editable && !isDisabled && handleStartEdit(rowIndex, column.key)}
+                      >
+                        {column.editable && column.renderer ? (
+                          <column.renderer
+                            value={cellValue}
+                            onChange={(value) => handleCellChange(rowIndex, column.key, value)}
+                            isEditing={isEditing}
+                            onStartEdit={() => !isDisabled && handleStartEdit(rowIndex, column.key)}
+                            onEndEdit={handleEndEdit}
+                          />
+                        ) : (
+                          column.accessor(item)
+                        )}
+                      </Table.Cell>
+                    );
+                  })}
                   
-                  return (
-                    <Table.Cell
-                      padding={5}
-                      key={column.key}
-                      color="text.primary"
-                      textAlign={column.align || "start"}
-                      _hover={column.editable ? { bg: "surface.highlight", cursor: "pointer" } : {}}
-                      onClick={() => column.editable && handleStartEdit(rowIndex, column.key)}
-                    >
-                      {column.editable && column.renderer ? (
-                        <column.renderer
-                          value={cellValue}
-                          onChange={(value) => handleCellChange(rowIndex, column.key, value)}
-                          isEditing={isEditing}
-                          onStartEdit={() => handleStartEdit(rowIndex, column.key)}
-                          onEndEdit={handleEndEdit}
-                        />
-                      ) : (
-                        column.accessor(item)
-                      )}
-                    </Table.Cell>
-                  );
-                })}
-              </Table.Row>
-            ))}
+                  {/* Actions column */}
+                  <Table.Cell
+                    padding={5}
+                    width="80px"
+                    textAlign="center"
+                  >
+                    {showButtons && (
+                      <Flex 
+                        gap="1" 
+                        justify="center"
+                        opacity={0}
+                        _hover={{ opacity: 1 }}
+                        transition="opacity 0.2s"
+                      >
+                        
+                        {buttons.map((button, index) => (
+                          <Box key={index}>
+                            {button}
+                          </Box>
+                        ))}
+                      </Flex>
+                    )}
+                  </Table.Cell>
+                </Table.Row>
+              );
+            })}
           </Table.Body>
         </Table.Root>
       </Box>
-      
+
       {hasChanges && (
         <Box p="4" borderTop="1px" borderColor="border.subtle">
           <Box display="flex" gap="3" justifyContent="flex-end">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleCancel}
               disabled={isSaving}
             >
               Cancel
             </Button>
-            <Button 
-              colorScheme="blue" 
+            <Button
+              colorScheme="blue"
               onClick={handleSave}
               loading={isSaving}
             >
@@ -217,8 +266,6 @@ export function DataTable<T>({
 export const DecimalDataField: React.FC<EditableCellProps> = ({
   value,
   onChange,
-  isEditing,
-  onStartEdit,
   onEndEdit,
 }) => {
   const [inputValue, setInputValue] = useState(value?.toString() || '');
@@ -231,9 +278,9 @@ export const DecimalDataField: React.FC<EditableCellProps> = ({
     // Validate decimal format
     const decimalRegex = /^-?\d*\.?\d*$/;
     const isValidDecimal = decimalRegex.test(newValue) || newValue === '';
-    
+
     setIsValid(isValidDecimal);
-    
+
     if (isValidDecimal && newValue !== '') {
       // Convert to number for the onChange callback
       const numericValue = parseFloat(newValue);
@@ -245,7 +292,7 @@ export const DecimalDataField: React.FC<EditableCellProps> = ({
 
   const handleBlur = () => {
     onEndEdit();
-    
+
     // If input is invalid, revert to original value
     if (!isValid) {
       setInputValue(value?.toString() || '');
@@ -263,28 +310,15 @@ export const DecimalDataField: React.FC<EditableCellProps> = ({
     }
   };
 
-  if (isEditing) {
-    return (
-      <Input
-        value={inputValue}
-        onChange={handleInputChange}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        autoFocus
-        size="sm"
-        _invalid={{ borderColor: "red.500" }}
-        placeholder="Enter decimal number"
-      />
-    );
-  }
+  return <Editable.Root
+    size="sm"
+    value={inputValue}
+    textAlign="start"
+    onBlur={handleBlur}
+    onChange={handleInputChange}
+    defaultValue="Click to edit">
+    <Editable.Preview />
+    <Editable.Input onKeyDown={handleKeyDown} />
+  </Editable.Root>
 
-  return (
-    <Box 
-      onClick={onStartEdit}
-      cursor="pointer"
-      _hover={{ textDecoration: "underline" }}
-    >
-      {value !== null && value !== undefined ? value.toString() : '-'}
-    </Box>
-  );
 };

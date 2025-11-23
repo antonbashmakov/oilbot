@@ -151,7 +151,7 @@ export interface components {
       id: string;
       delivery: components["schemas"]["DeliveryRef"];
       /** @description Items in this order picking */
-      items: components["schemas"]["CartItem"][];
+      items: components["schemas"]["PickingItem"][];
       owner: components["schemas"]["OwnerRef"];
       /**
        * @description Order picking status
@@ -210,6 +210,10 @@ export interface components {
       quantity: number;
       owner: components["schemas"]["OwnerRef"];
     };
+    PickingItem: ({
+      /** @enum {unknown} */
+      status?: "PENDING" | "COLLECTED" | "CANCELLED";
+    }) & components["schemas"]["OrderItem"];
     OwnerRef: {
       /**
        * @description Owner ID

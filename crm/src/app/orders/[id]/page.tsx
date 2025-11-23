@@ -5,7 +5,7 @@ import {
   Badge,
   Box,
   Breadcrumb,
-  BreadcrumbLink,
+  DataList,
   Button,
   Card,
   Flex,
@@ -16,14 +16,15 @@ import {
   Stack,
   Text,
   VStack,
-  Container
+  Container,
+  Separator
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
-import DataTableExample from "@/components/DataTableExample";
 import { CartItem } from "@/api/models";
 import { useAdminOrderOverviewQuery } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
+import DataTableWithButtonsExample from "@/components/DataTableWithButtonsExample";
 
 
 // Mock data for the customer
@@ -82,22 +83,31 @@ export default function OrderPage() {
       accessor: (item) => item.name,
     },
     {
-      key: 'price',
-      header: 'Price',
-      accessor: (item) => item.price.toFixed(2),
+      key: 'fraction',
+      header: 'Fraction',
+      accessor: (item) => item.price,
       editable: true,
       field: 'price',
       renderer: DecimalDataField,
     },
     {
+      key: 'price',
+      header: 'Price',
+      accessor: (item) => item.price.toFixed(2),
+      field: 'price',
+    },
+    {
       key: 'quantity',
       header: 'Quantity',
       accessor: (item) => item.quantity,
-      editable: true,
       field: 'quantity',
-      renderer: DecimalDataField,
     },
   ];
+
+  const onSave = async (data: CartItem[]) => {
+    console.log("Saving data:", data);
+    return Promise.resolve();
+  };
 
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
@@ -120,6 +130,8 @@ export default function OrderPage() {
               </Breadcrumb.Item>
             </Breadcrumb.List>
           </Breadcrumb.Root>
+
+          <DataTableWithButtonsExample />
           {order && <>
 
             <Flex justify="space-between" align="center">
@@ -140,7 +152,7 @@ export default function OrderPage() {
                   <DataTable
                     columns={columns}
                     data={order.items}
-                    title="Order Items"
+                    title="Order Items"                    
                   />
                   <InfoMessage
                     type="info"
@@ -154,6 +166,7 @@ export default function OrderPage() {
                       data={order.picking.items}
                       title="Products"
                       isSaving={false}
+                      onSave={onSave}
                     />
                   }
                 </VStack>
@@ -174,16 +187,40 @@ export default function OrderPage() {
                         </Avatar.Root>
                         <Box>
                           <Text fontWeight="bold">{customer.name}</Text>
-                          { order.customer.username && <Link href={`https://t.me/${order.customer.username}`} color="blue.500">
+                          {order.customer.username && <Link href={`https://t.me/${order.customer.username}`} color="blue.500">
                             @{order.customer.username}
                           </Link>}
-                          { !order.customer.username && <Text color="text.secondary">{order.customer.id}</Text>}
+                          {!order.customer.username && <Text color="text.secondary">{order.customer.id}</Text>}
                         </Box>
                       </Flex>
                     </Card.Body>
                   </Card.Root>
 
                   {/* Order History Card */}
+                  <Card.Root>
+                    <Card.Header>
+                      <Heading size="md">Order History</Heading>
+                    </Card.Header>
+                    <Card.Body>
+                      <DataList.Root orientation="horizontal" maxW="md">
+
+                          <DataList.Item key="calculation-original">
+                            <DataList.ItemLabel>Original</DataList.ItemLabel>
+                            <DataList.ItemValue>{order.total}</DataList.ItemValue>
+                          </DataList.Item>
+                          <DataList.Item key="calculation-picking">
+                            <DataList.ItemLabel>Picking</DataList.ItemLabel>
+                            <DataList.ItemValue>{order.picking?.total || 0}</DataList.ItemValue>
+                          </DataList.Item>
+                          <Separator />
+                          <DataList.Item key="calculation-final" fontWeight="bold">
+                            <DataList.ItemLabel>Final Total</DataList.ItemLabel>
+                            <DataList.ItemValue>{(order.picking?.total || 0) - (order.total || 0)}</DataList.ItemValue>
+                          </DataList.Item>
+                        
+                      </DataList.Root>
+                    </Card.Body>
+                  </Card.Root>
                   <Card.Root>
                     <Card.Header>
                       <Heading size="md">Order History</Heading>
