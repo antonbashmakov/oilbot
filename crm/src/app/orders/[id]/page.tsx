@@ -5,7 +5,6 @@ import {
   Badge,
   Box,
   Breadcrumb,
-  BreadcrumbItem,
   BreadcrumbLink,
   Button,
   Card,
@@ -20,35 +19,12 @@ import {
   Container
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
-import { DataTable, Column } from "@/components/DataTable";
+import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
 import DataTableExample from "@/components/DataTableExample";
+import { CartItem } from "@/api/models";
+import { useAdminOrderOverviewQuery } from "@/api";
+import { InfoMessage } from "@/components/ui/InfoMessage";
 
-// Mock data for the order items
-const orderItems = [
-  {
-    id: "PROD-001",
-    name: "Laptop Pro",
-    fraction: "unit",
-    quantity: 1,
-    price: 1200,
-  },
-  {
-    id: "PROD-002",
-    name: "Wireless Mouse",
-    fraction: "unit",
-    quantity: 1,
-    price: 50,
-  },
-  {
-    id: "PROD-003",
-    name: "USB-C Cable",
-    fraction: "unit",
-    quantity: 2,
-    price: 15,
-  },
-];
-
-type OrderItem = typeof orderItems[0];
 
 // Mock data for the customer
 const customer = {
@@ -73,7 +49,9 @@ const orderHistory = [
 export default function OrderPage() {
   const { id: orderId } = useParams();
 
-  const columns: Column<OrderItem>[] = [
+  const { data: order } = useAdminOrderOverviewQuery(orderId as string);
+
+  const columns: Column<CartItem>[] = [
     { key: "id", header: "ID", accessor: (item) => item.id },
     { key: "name", header: "Name", accessor: (item) => item.name },
     { key: "fraction", header: "Fraction", accessor: (item) => item.fraction },
@@ -86,8 +64,38 @@ export default function OrderPage() {
     {
       key: "price",
       header: "Price",
-      accessor: (item) => `$${item.price.toFixed(2)}`,
+      accessor: (item) => item.price.toFixed(2),
       align: "end",
+    },
+  ];
+
+  const pickingColumns: Column<CartItem>[] = [
+    {
+      key: 'id',
+      header: 'ID',
+      accessor: (item) => item.id,
+      width: '80px',
+    },
+    {
+      key: 'name',
+      header: 'Name',
+      accessor: (item) => item.name,
+    },
+    {
+      key: 'price',
+      header: 'Price',
+      accessor: (item) => item.price.toFixed(2),
+      editable: true,
+      field: 'price',
+      renderer: DecimalDataField,
+    },
+    {
+      key: 'quantity',
+      header: 'Quantity',
+      accessor: (item) => item.quantity,
+      editable: true,
+      field: 'quantity',
+      renderer: DecimalDataField,
     },
   ];
 
@@ -112,77 +120,93 @@ export default function OrderPage() {
               </Breadcrumb.Item>
             </Breadcrumb.List>
           </Breadcrumb.Root>
+          {order && <>
 
-
-          <Flex justify="space-between" align="center">
-            <Flex align="center" gap={4}>
-              <Heading size="2xl" color="text.primary">
-                Order {orderId}
-              </Heading>
-              <Badge colorScheme="green">Paid</Badge>
+            <Flex justify="space-between" align="center">
+              <Flex align="center" gap={4}>
+                <Heading size="2xl" color="text.primary">
+                  Order {orderId}
+                </Heading>
+                <Badge colorScheme="green">Paid</Badge>
+              </Flex>
+              <Button colorScheme="blue">Start Picking</Button>
             </Flex>
-            <Button colorScheme="blue">Start Picking</Button>
-          </Flex>
 
-          {/* Main Content */}
-          <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-            {/* Left Column */}
-            <GridItem colSpan={2}>
-              <VStack gap={6} align="stretch">
-                <DataTable
-                  columns={columns}
-                  data={orderItems}
-                  title="Order Items"
-                />
+            {/* Main Content */}
+            <Grid templateColumns="repeat(3, 1fr)" gap={6}>
+              {/* Left Column */}
+              <GridItem colSpan={2}>
+                <VStack gap={6} align="stretch" >
+                  <DataTable
+                    columns={columns}
+                    data={order.items}
+                    title="Order Items"
+                  />
+                  <InfoMessage
+                    type="info"
+                    badgeText="Note"
+                    message={order.picking ? "Change the fraction column to reflect the picked items." : "Click 'Start Picking' to begin the order picking process."}
+                  />
 
-                <DataTableExample />               
-              </VStack>
-            </GridItem>
+                  {
+                    order.picking && <DataTable
+                      columns={pickingColumns}
+                      data={order.picking.items}
+                      title="Products"
+                      isSaving={false}
+                    />
+                  }
+                </VStack>
+              </GridItem>
 
-            {/* Right Column */}
-            <GridItem colSpan={1}>
-              <VStack gap={6} align="stretch">
-                {/* Customer Card */}
-                <Card.Root>
-                  <Card.Header>
-                    <Heading size="md">Customer</Heading>
-                  </Card.Header>
-                  <Card.Body>
-                    <Flex align="center" gap={4}>
-                      <Avatar.Root>
-                        <Avatar.Image src={customer.avatarUrl} />
-                      </Avatar.Root>
-                      <Box>
-                        <Text fontWeight="bold">{customer.name}</Text>
-                        <Link href={`/customers/${customer.id}`} color="blue.500">
-                          View Customer
-                        </Link>
-                      </Box>
-                    </Flex>
-                  </Card.Body>
-                </Card.Root>
+              {/* Right Column */}
+              <GridItem colSpan={1}>
+                <VStack gap={6} align="stretch" >
+                  {/* Customer Card */}
+                  <Card.Root>
+                    <Card.Header>
+                      <Heading size="md">Customer</Heading>
+                    </Card.Header>
+                    <Card.Body>
+                      <Flex align="center" gap={4}>
+                        <Avatar.Root>
+                          <Avatar.Image src={customer.avatarUrl} />
+                        </Avatar.Root>
+                        <Box>
+                          <Text fontWeight="bold">{customer.name}</Text>
+                          { order.customer.username && <Link href={`https://t.me/${order.customer.username}`} color="blue.500">
+                            @{order.customer.username}
+                          </Link>}
+                          { !order.customer.username && <Text color="text.secondary">{order.customer.id}</Text>}
+                        </Box>
+                      </Flex>
+                    </Card.Body>
+                  </Card.Root>
 
-                {/* Order History Card */}
-                <Card.Root>
-                  <Card.Header>
-                    <Heading size="md">Order History</Heading>
-                  </Card.Header>
-                  <Card.Body>
-                    <Stack gap={4}>
-                      {orderHistory.map((item, index) => (
-                        <Flex key={index} justify="space-between">
-                          <Text fontSize="sm">{item.event}</Text>
-                          <Text fontSize="sm" color="gray.500">
-                            {item.date}
-                          </Text>
-                        </Flex>
-                      ))}
-                    </Stack>
-                  </Card.Body>
-                </Card.Root>
-              </VStack>
-            </GridItem>
-          </Grid>
+                  {/* Order History Card */}
+                  <Card.Root>
+                    <Card.Header>
+                      <Heading size="md">Order History</Heading>
+                    </Card.Header>
+                    <Card.Body>
+                      <Stack gap={4}>
+                        {orderHistory.map((item, index) => (
+                          <Flex key={index} justify="space-between">
+                            <Text fontSize="sm">{item.event}</Text>
+                            <Text fontSize="sm" color="gray.500">
+                              {item.date}
+                            </Text>
+                          </Flex>
+                        ))}
+                      </Stack>
+                    </Card.Body>
+                  </Card.Root>
+                </VStack>
+              </GridItem>
+            </Grid>
+
+          </>
+          }
         </VStack>
       </Container>
     </Box>

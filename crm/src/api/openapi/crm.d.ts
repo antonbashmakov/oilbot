@@ -4,6 +4,9 @@
  */
 
 
+/** WithRequired type helpers */
+type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+
 export interface paths {
   "/admin/deliveries": {
     /**
@@ -50,7 +53,45 @@ export interface paths {
             "application/json": {
               /** @example OK */
               code?: string;
-              data?: components["schemas"]["Delivery"];
+              data?: components["schemas"]["DeliveryOverview"];
+            };
+          };
+        };
+        /** @description Delivery not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/admin/orders/{id}": {
+    /**
+     * Get order overview by ID
+     * @description Retrieve a specific delivery by its ID
+     */
+    get: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["OrderOverview"];
             };
           };
         };
@@ -75,6 +116,202 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    Customer: {
+      /**
+       * @description Customer's first name
+       * @example Антон
+       */
+      first_name: string;
+      /**
+       * @description Unique identifier for the customer
+       * @example 1019705782
+       */
+      id: number;
+      /**
+       * @description Whether the customer is a bot
+       * @example null
+       */
+      is_bot?: boolean | null;
+      /**
+       * @description Customer's language code
+       * @example ru
+       */
+      language_code: string;
+      /**
+       * @description Customer's username
+       * @example getting_drunk
+       */
+      username: string;
+    };
+    OrderPicking: {
+      /**
+       * @description Unique identifier for the cart item
+       * @example db13bdf1-cd12-4650-82be-f55af1e79bf7
+       */
+      id: string;
+      delivery: components["schemas"]["DeliveryRef"];
+      /** @description Items in this order picking */
+      items: components["schemas"]["CartItem"][];
+      owner: components["schemas"]["OwnerRef"];
+      /**
+       * @description Order picking status
+       * @example PENDING
+       */
+      status: string;
+      /**
+       * Format: float
+       * @description Total value
+       * @example 0
+       */
+      total: number;
+      /**
+       * @description Order picking type
+       * @example ORIGINAL
+       */
+      type: string;
+    };
+    CartItem: {
+      /**
+       * Format: float
+       * @description Fraction value
+       * @example 0.42
+       */
+      fraction: number;
+      /**
+       * @description Item group
+       * @example MOSCOW
+       */
+      group: string;
+      /**
+       * @description Unique identifier for the cart item
+       * @example db13bdf1-cd12-4650-82be-f55af1e79bf7
+       */
+      id: string;
+      /**
+       * @description Unique identifier for the cart item
+       * @example db13bdf1-cd12-4650-82be-f55af1e79bf7
+       */
+      item_id: string;
+      /**
+       * @description Item name
+       * @example Горгонзола (Бразилия) Кусок 0.42 Кг
+       */
+      name: string;
+      /**
+       * Format: float
+       * @description Price
+       * @example 609
+       */
+      price: number;
+      /**
+       * @description Quantity
+       * @example 1
+       */
+      quantity: number;
+      owner: components["schemas"]["OwnerRef"];
+    };
+    OwnerRef: {
+      /**
+       * @description Owner ID
+       * @example 270053857
+       */
+      id: number;
+    };
+    DeliveryRef: {
+      /**
+       * Format: date-time
+       * @description Delivery end date and time
+       * @example 2025-11-23T00:00:00.000Z
+       */
+      delivery_end: string;
+      /**
+       * Format: date-time
+       * @description Delivery start date and time
+       * @example 2025-11-21T00:00:00.000Z
+       */
+      delivery_start: string;
+      /**
+       * @description Unique identifier for the order picking
+       * @example ef4d5632-ba34-4488-97a5-b9b7af299535
+       */
+      id: string;
+    };
+    Item: {
+      /**
+       * @description Item category
+       * @example MEAT
+       */
+      category: string;
+      /**
+       * @description Item description
+       * @example мясо
+       */
+      description: string;
+      /**
+       * Format: float
+       * @description Fraction value
+       * @example 1.2
+       */
+      fraction: number;
+      /**
+       * Format: float
+       * @description Fraction price out
+       * @example 1439
+       */
+      fraction_price_out: number;
+      /**
+       * @description Item group
+       * @example BALASHOV
+       */
+      group: string;
+      /**
+       * @description Unique identifier for the item
+       * @example 06088197-f7ef-4bf2-8b3f-2f4a05c6c104
+       */
+      id: string;
+      /**
+       * @description Link to item details
+       * @example https://t.me/posebestoimosti_saratov/214
+       */
+      link: string;
+      /**
+       * @description Item name
+       * @example Телятина Филе (Тендер Лоин)
+       */
+      name: string;
+      /**
+       * Format: float
+       * @description Price in
+       * @example 1000
+       */
+      price_in: number;
+      /**
+       * Format: float
+       * @description Price out
+       * @example 1199
+       */
+      price_out: number;
+      /**
+       * @description Row number
+       * @example 11
+       */
+      row_number: number;
+      /**
+       * @description Item status
+       * @example ACTIVE
+       */
+      status: string;
+      /**
+       * @description Unit of measurement
+       * @example Кг
+       */
+      unit: string;
+      /**
+       * @description Unit description
+       * @example Отруб
+       */
+      unti_description: string;
+    };
     Stats: {
       /**
        * Format: float
@@ -94,7 +331,7 @@ export interface components {
        */
       name: string;
     };
-    DeliveryOverview: {
+    Delivery: {
       /**
        * @description Unique identifier for the delivery
        * @example delivery-123
@@ -115,7 +352,7 @@ export interface components {
        * @example PENDING
        * @enum {string}
        */
-      status: "PENDING" | "IN_TRANSIT" | "IN_TRANSIT_BACK" | "FULFILLED";
+      status?: "PENDING" | "IN_TRANSIT" | "IN_TRANSIT_BACK" | "FULFILLED";
       /**
        * Format: date-time
        * @description Deadline for placing orders
@@ -141,23 +378,18 @@ export interface components {
       group: string;
       /** @description List of orders in this delivery */
       orders: components["schemas"]["Order"][];
-      /** @description Statistics for the delivery */
-      stats?: components["schemas"]["Stats"][];
       /**
        * Format: date-time
        * @description Creation timestamp
        * @example 2025-01-01T00:00:00Z
        */
       createdAt?: string;
-      /** @description Owner information */
-      owner?: {
-        /**
-         * @description Owner ID
-         * @example user-123
-         */
-        id?: string;
-      };
+      owner?: components["schemas"]["OwnerRef"];
     };
+    DeliveryOverview: {
+      /** @description Statistics for the delivery */
+      stats?: components["schemas"]["Stats"][];
+    } & components["schemas"]["Delivery"];
     Order: {
       /**
        * @description Unique identifier for the order
@@ -166,29 +398,24 @@ export interface components {
       id: string;
       /**
        * @description Name of the customer
-       * @example John Doe
+       * @example Order 1
        */
-      customerName: string;
+      name?: string;
       /**
        * Format: date-time
        * @description Date when the order was placed
        * @example 2025-01-10T14:30:00Z
        */
       orderDate: string;
+      /** @description Items in this order */
+      items: components["schemas"]["CartItem"][];
       /**
        * @description Current status of the order
        * @example PAID
        * @enum {string}
        */
       status: "PENDING" | "PAID" | "CONSOLIDATED";
-      /** @description Owner information */
-      owner: {
-        /**
-         * @description Owner ID
-         * @example user-123
-         */
-        id?: string;
-      };
+      owner: components["schemas"]["OwnerRef"];
       /**
        * @description Number of items in the order
        * @example 5
@@ -201,6 +428,10 @@ export interface components {
        */
       total?: number;
     };
+    OrderOverview: WithRequired<{
+      picking?: components["schemas"]["OrderPicking"];
+      customer: components["schemas"]["Customer"];
+    } & components["schemas"]["Order"], "customer">;
     User: {
       /**
        * @description Unique identifier for the user

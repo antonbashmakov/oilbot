@@ -126,7 +126,11 @@ export function DataTable<T>({
   }
 
   return (
-    <Box bg="surface.container" border="1px" borderColor="border.subtle">
+    <Box bg="surface.container" 
+    borderStyle="solid" 
+    border="1px" 
+    borderRadius="sm" 
+    borderColor="border.subtle">
       {title && (
         <Box p="4" borderBottom="1px" borderColor="border.subtle">
           <Text fontSize="lg" fontWeight="semibold" color="text.primary">
@@ -134,7 +138,7 @@ export function DataTable<T>({
           </Text>
         </Box>
       )}
-      <Box overflowX="auto">
+      <Box overflowX="auto" bg="surface.container">
         <Table.Root variant="outline" size="sm">
           <Table.Header>
             <Table.Row>

@@ -14,9 +14,6 @@ import {
 import { DataTable } from "@/components/DataTable";
 import { DeliveryInformationCard } from "../DeliveryInformationCard";
 import { useAdminDeliveryQuery } from "@/api";
-import DataTableExample from "@/components/DataTableExample";
-
-
 
 // Order status badge component
 function OrderStatusBadge({ status }: { status: string }) {

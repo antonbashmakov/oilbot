@@ -67,7 +67,45 @@ paths:
                     type: string
                     example: "OK"
                   data:
-                    $ref: '#/components/schemas/Delivery'
+                    $ref: '#/components/schemas/DeliveryOverview'
+        '404':
+          description: Delivery not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /admin/orders/{id}:
+    get:
+      summary: Get order overview by ID
+      description: Retrieve a specific delivery by its ID
+      tags:
+        - Deliveries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/OrderOverview'
         '404':
           description: Delivery not found
           content:
@@ -83,6 +121,228 @@ paths:
 
 components:
   schemas:
+    Customer:
+      type: object
+      required:
+        - first_name
+        - id
+        - language_code
+        - username
+      properties:
+        first_name:
+          type: string
+          description: Customer's first name
+          example: "Антон"
+        id:
+          type: integer
+          description: Unique identifier for the customer
+          example: 1019705782
+        is_bot:
+          type: boolean
+          nullable: true
+          description: Whether the customer is a bot
+          example: null
+        language_code:
+          type: string
+          description: Customer's language code
+          example: "ru"
+        username:
+          type: string
+          description: Customer's username
+          example: "getting_drunk"
+
+    OrderPicking:
+      type: object
+      required:
+        - delivery
+        - delivery_end
+        - delivery_start
+        - id
+        - items
+        - owner
+        - status
+        - total
+        - type
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the cart item
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"      
+        delivery:
+          $ref: '#/components/schemas/DeliveryRef'
+        items:
+          type: array
+          description: Items in this order picking
+          items:
+            $ref: '#/components/schemas/CartItem'
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+        status:
+          type: string
+          description: Order picking status
+          example: "PENDING"
+        total:
+          type: number
+          format: float
+          description: Total value
+          example: 0
+        type:
+          type: string
+          description: Order picking type
+          example: "ORIGINAL"
+    CartItem:
+      type: object
+      required:
+        - fraction
+        - group
+        - id
+        - item_id
+        - name
+        - owner
+        - price
+        - quantity
+      properties:
+        fraction:
+          type: number
+          format: float
+          description: Fraction value
+          example: 0.42
+        group:
+          type: string
+          description: Item group
+          example: "MOSCOW"
+        id:
+          type: string
+          description: Unique identifier for the cart item
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"
+        item_id:
+          type: string
+          description: Unique identifier for the cart item
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"
+        name:
+          type: string
+          description: Item name
+          example: "Горгонзола (Бразилия) Кусок 0.42 Кг"
+        price:
+            type: number
+            format: float
+            description: Price
+            example: 609
+        quantity:
+            type: integer
+            description: Quantity
+            example: 1          
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+
+    OwnerRef:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          description: Owner ID
+          example: 270053857
+    DeliveryRef:
+      required:
+        - delivery_end
+        - delivery_start
+        - id
+      properties:
+        delivery_end:
+          type: string
+          format: date-time
+          description: Delivery end date and time
+          example: "2025-11-23T00:00:00.000Z"
+        delivery_start:
+          type: string
+          format: date-time
+          description: Delivery start date and time
+          example: "2025-11-21T00:00:00.000Z"
+        id:
+          type: string
+          description: Unique identifier for the order picking
+          example: "ef4d5632-ba34-4488-97a5-b9b7af299535"      
+    Item:
+      type: object
+      required:
+        - category
+        - description
+        - fraction
+        - fraction_price_out
+        - group
+        - id
+        - link
+        - name
+        - price_in
+        - price_out
+        - row_number
+        - status
+        - unit
+        - unti_description
+      properties:
+        category:
+          type: string
+          description: Item category
+          example: "MEAT"
+        description:
+          type: string
+          description: Item description
+          example: "мясо"
+        fraction:
+          type: number
+          format: float
+          description: Fraction value
+          example: 1.2
+        fraction_price_out:
+          type: number
+          format: float
+          description: Fraction price out
+          example: 1439
+        group:
+          type: string
+          description: Item group
+          example: "BALASHOV"
+        id:
+          type: string
+          description: Unique identifier for the item
+          example: "06088197-f7ef-4bf2-8b3f-2f4a05c6c104"
+        link:
+          type: string
+          description: Link to item details
+          example: "https://t.me/posebestoimosti_saratov/214"
+        name:
+          type: string
+          description: Item name
+          example: "Телятина Филе (Тендер Лоин)"
+        price_in:
+          type: number
+          format: float
+          description: Price in
+          example: 1000
+        price_out:
+          type: number
+          format: float
+          description: Price out
+          example: 1199
+        row_number:
+          type: integer
+          description: Row number
+          example: 11
+        status:
+          type: string
+          description: Item status
+          example: "ACTIVE"
+        unit:
+          type: string
+          description: Unit of measurement
+          example: "Кг"
+        unti_description:
+          type: string
+          description: Unit description
+          example: "Отруб"
+
     Stats:
       type: object
       required:
@@ -105,13 +365,12 @@ components:
           description: Name of the stats item
           example: "Сёмга филе Филе на коже 1.8 Кг"
 
-    DeliveryOverview:
+    Delivery:
       type: object
       required:
         - id
         - number
         - description
-        - status
         - order_deadline
         - delivery_start
         - delivery_end
@@ -163,24 +422,23 @@ components:
           description: List of orders in this delivery
           items:
             $ref: '#/components/schemas/Order'
-        stats:
-          type: array
-          description: Statistics for the delivery
-          items:
-            $ref: '#/components/schemas/Stats'
         createdAt:
           type: string
           format: date-time
           description: Creation timestamp
           example: "2025-01-01T00:00:00Z"
         owner:
-          type: object
-          description: Owner information
-          properties:
-            id:
-              type: string
-              description: Owner ID
-              example: "user-123"
+          $ref: '#/components/schemas/OwnerRef'
+
+    DeliveryOverview:
+      allOf:
+        - $ref: '#/components/schemas/Delivery'
+      properties:
+        stats:
+          type: array
+          description: Statistics for the delivery
+          items:
+            $ref: '#/components/schemas/Stats'
 
     Order:
       type: object
@@ -188,6 +446,7 @@ components:
         - id
         - customerName
         - orderDate
+        - items
         - status
         - numberOfItems
         - totalValue
@@ -197,15 +456,20 @@ components:
           type: string
           description: Unique identifier for the order
           example: "order-456"
-        customerName:
+        name:
           type: string
           description: Name of the customer
-          example: "John Doe"
+          example: "Order 1"
         orderDate:
           type: string
           format: date-time
           description: Date when the order was placed
           example: "2025-01-10T14:30:00Z"
+        items:
+          type: array
+          description: Items in this order
+          items:
+            $ref: '#/components/schemas/CartItem'
         status:
           type: string
           enum:
@@ -215,13 +479,7 @@ components:
           description: Current status of the order
           example: "PAID"
         owner:
-          type: object
-          description: Owner information
-          properties:
-            id:
-              type: string
-              description: Owner ID
-              example: "user-123"
+          $ref: '#/components/schemas/OwnerRef'
         numberOfItems:
           type: integer
           description: Number of items in the order
@@ -231,6 +489,16 @@ components:
           format: float
           description: Total value of the order
           example: 150.75
+    OrderOverview:
+      required:
+        - customer
+      allOf:
+        - $ref: '#/components/schemas/Order'
+      properties:
+        picking:
+          $ref: '#/components/schemas/OrderPicking'
+        customer:
+          $ref: '#/components/schemas/Customer'
 
     User:
       type: object
