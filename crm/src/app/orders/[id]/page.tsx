@@ -25,6 +25,7 @@ import { CartItem } from "@/api/models";
 import { useAdminOrderOverviewQuery } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
 import DataTableWithButtonsExample from "@/components/DataTableWithButtonsExample";
+import DataTableWithSummaryExample from "@/components/DataTableWithSummaryExample";
 
 
 // Mock data for the customer
@@ -55,7 +56,13 @@ export default function OrderPage() {
   const columns: Column<CartItem>[] = [
     { key: "id", header: "ID", accessor: (item) => item.id },
     { key: "name", header: "Name", accessor: (item) => item.name },
-    { key: "fraction", header: "Fraction", accessor: (item) => item.fraction },
+    { 
+      key: "fraction",  
+      field: "fraction",  
+      summarizable: true,
+      header: "Fraction", 
+      accessor: (item) => item.fraction 
+    },
     {
       key: "quantity",
       header: "Quantity",
@@ -64,6 +71,8 @@ export default function OrderPage() {
     },
     {
       key: "price",
+      field: "price",
+      summarizable: true,
       header: "Price",
       accessor: (item) => item.price.toFixed(2),
       align: "end",
@@ -85,7 +94,7 @@ export default function OrderPage() {
     {
       key: 'fraction',
       header: 'Fraction',
-      accessor: (item) => item.fraction + 'TEST',
+      accessor: (item) => item.fraction,
       editable: true,
       field: 'fraction',
       renderer: DecimalDataField,
@@ -131,7 +140,7 @@ export default function OrderPage() {
             </Breadcrumb.List>
           </Breadcrumb.Root>
 
-          {/*<DataTableWithButtonsExample /> */}
+          {/*< DataTableWithSummaryExample />*/}
           {order && <>
 
             <Flex justify="space-between" align="center">
@@ -144,9 +153,7 @@ export default function OrderPage() {
               <Button colorScheme="blue">Start Picking</Button>
             </Flex>
 
-            {/* Main Content */}
             <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-              {/* Left Column */}
               <GridItem colSpan={2}>
                 <VStack gap={6} align="stretch" >
                   <DataTable
@@ -173,10 +180,8 @@ export default function OrderPage() {
                 </VStack>
               </GridItem>
 
-              {/* Right Column */}
               <GridItem colSpan={1}>
                 <VStack gap={6} align="stretch" >
-                  {/* Customer Card */}
                   <Card.Root>
                     <Card.Header>
                       <Heading size="md">Customer</Heading>
@@ -197,7 +202,6 @@ export default function OrderPage() {
                     </Card.Body>
                   </Card.Root>
 
-                  {/* Order History Card */}
                   <Card.Root>
                     <Card.Header>
                       <Heading size="md">Order History</Heading>

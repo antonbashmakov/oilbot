@@ -11,6 +11,8 @@ export interface Column<T> {
   editable?: boolean;
   field?: string;
   renderer?: React.ComponentType<EditableCellProps>;
+  summarizable?: boolean;
+  summaryFormatter?: (sum: number) => React.ReactNode;
 }
 
 interface DataTableProps<T> {
@@ -48,6 +50,7 @@ export function DataTable<T>({
   const [originalData, setOriginalData] = useState<T[]>(data);
   const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+
 
   // Reset state when data changes
   React.useEffect(() => {
@@ -111,6 +114,31 @@ export function DataTable<T>({
     }
     return column.accessor(item);
   }, []);
+
+  // Calculate summary values for summarizable columns
+  const calculateSummary = useCallback(() => {
+    const summary: { [key: string]: number } = {};
+
+    columns.forEach(column => {
+      console.log("summary:", column.summarizable , column.field); 
+      if (column.summarizable && column.field) {
+        let sum = 0;
+        editedData.forEach(item => {
+          const value = (item as any)[column.field!];
+          if (typeof value === 'number') {
+            sum += value;
+          }
+        });
+        summary[column.key] = sum;
+      }
+    });
+  
+
+    return summary;
+  }, [columns, editedData]);
+
+  const summaryValues = calculateSummary();
+  const hasSummary = Object.keys(summaryValues).length > 0;
 
   if (loading) {
     return (
@@ -236,6 +264,47 @@ export function DataTable<T>({
                 </Table.Row>
               );
             })}
+            {/* Summary row */}
+            {hasSummary && (
+              <Table.Row bg="surface.highlight" fontWeight="semibold">
+                {columns.map((column) => {
+                  const summaryValue = summaryValues[column.key];
+                  const hasSummaryValue = summaryValue !== undefined;
+                  
+                  return (
+                    <Table.Cell
+                      padding={5}
+                      key={column.key}
+                      color="text.primary"
+                      textAlign={column.align || "start"}
+                      borderTop="2px"
+                      borderColor="border.subtle"
+                    >
+                      {hasSummaryValue ? (
+                        column.summaryFormatter ? (
+                          column.summaryFormatter(summaryValue)
+                        ) : (
+                          summaryValue
+                        )
+                      ) : (
+                        column.key === columns[0]?.key ? "Total" : ""
+                      )}
+                    </Table.Cell>
+                  );
+                })}
+                
+                {/* Empty cell for actions column in summary row */}
+                {rowButtons && (
+                  <Table.Cell
+                    padding={5}
+                    width="80px"
+                    textAlign="center"
+                    borderTop="2px"
+                    borderColor="border.subtle"
+                  />
+                )}
+              </Table.Row>
+            )}
           </Table.Body>
         </Table.Root>
       </Box>
