@@ -119,6 +119,51 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /admin/order-pickings/{id}:
+    patch:
+      summary: Update order picking items
+      description: Update the items in an order picking
+      tags:
+        - Order Pickings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order Picking ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderPickingPatch'
+      responses:
+        '200':
+          description: Order picking successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/OrderPicking'
+        '404':
+          description: Order picking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Customer:
@@ -150,6 +195,17 @@ components:
           type: string
           description: Customer's username
           example: "getting_drunk"
+
+    OrderPickingPatch:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Items to update in this order picking
+          items:
+            $ref: '#/components/schemas/PickingItem'
 
     OrderPicking:
       type: object

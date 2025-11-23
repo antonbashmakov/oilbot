@@ -22,7 +22,7 @@ import {
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
 import { CartItem } from "@/api/models";
-import { useAdminOrderOverviewQuery } from "@/api";
+import { useAdminOrderOverviewQuery, usePatchOrderPicking } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
 import DataTableWithButtonsExample from "@/components/DataTableWithButtonsExample";
 import DataTableWithSummaryExample from "@/components/DataTableWithSummaryExample";
@@ -52,16 +52,17 @@ export default function OrderPage() {
   const { id: orderId } = useParams();
 
   const { data: order } = useAdminOrderOverviewQuery(orderId as string);
+  const { data: picking, mutate: mutatePicking } = usePatchOrderPicking(orderId as string);
 
   const columns: Column<CartItem>[] = [
     { key: "id", header: "ID", accessor: (item) => item.id },
     { key: "name", header: "Name", accessor: (item) => item.name },
-    { 
-      key: "fraction",  
-      field: "fraction",  
+    {
+      key: "fraction",
+      field: "fraction",
       summarizable: true,
-      header: "Fraction", 
-      accessor: (item) => item.fraction 
+      header: "Fraction",
+      accessor: (item) => item.fraction
     },
     {
       key: "quantity",
@@ -114,8 +115,7 @@ export default function OrderPage() {
   ];
 
   const onSave = async (data: CartItem[]) => {
-    console.log("Saving data:", data);
-    return Promise.resolve();
+    return mutatePicking({ items: data });
   };
 
   return (
@@ -159,7 +159,7 @@ export default function OrderPage() {
                   <DataTable
                     columns={columns}
                     data={order.items}
-                    title="Order Items"                    
+                    title="Order Items"
                   />
                   <InfoMessage
                     type="info"
@@ -174,7 +174,7 @@ export default function OrderPage() {
                       title="Products"
                       isSaving={false}
                       onSave={onSave}
-                      rowButtons={() =>[]}
+                      rowButtons={() => []}
                     />
                   }
                 </VStack>
@@ -209,20 +209,20 @@ export default function OrderPage() {
                     <Card.Body>
                       <DataList.Root orientation="horizontal" maxW="md">
 
-                          <DataList.Item key="calculation-original">
-                            <DataList.ItemLabel>Original</DataList.ItemLabel>
-                            <DataList.ItemValue>{order.total}</DataList.ItemValue>
-                          </DataList.Item>
-                          <DataList.Item key="calculation-picking">
-                            <DataList.ItemLabel>Picking</DataList.ItemLabel>
-                            <DataList.ItemValue>{order.picking?.total || 0}</DataList.ItemValue>
-                          </DataList.Item>
-                          <Separator />
-                          <DataList.Item key="calculation-final" fontWeight="bold">
-                            <DataList.ItemLabel>Final Total</DataList.ItemLabel>
-                            <DataList.ItemValue>{(order.picking?.total || 0) - (order.total || 0)}</DataList.ItemValue>
-                          </DataList.Item>
-                        
+                        <DataList.Item key="calculation-original">
+                          <DataList.ItemLabel>Original</DataList.ItemLabel>
+                          <DataList.ItemValue>{order.total}</DataList.ItemValue>
+                        </DataList.Item>
+                        <DataList.Item key="calculation-picking">
+                          <DataList.ItemLabel>Picking</DataList.ItemLabel>
+                          <DataList.ItemValue>{order.picking?.total || 0}</DataList.ItemValue>
+                        </DataList.Item>
+                        <Separator />
+                        <DataList.Item key="calculation-final" fontWeight="bold">
+                          <DataList.ItemLabel>Final Total</DataList.ItemLabel>
+                          <DataList.ItemValue>{(order.picking?.total || 0) - (order.total || 0)}</DataList.ItemValue>
+                        </DataList.Item>
+
                       </DataList.Root>
                     </Card.Body>
                   </Card.Root>

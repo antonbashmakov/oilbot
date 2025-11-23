@@ -88,7 +88,6 @@ export function DataTable<T>({
 
   const handleCancel = useCallback(() => {
     setEditedData(originalData);
-    console.log("handleCancel called", originalData);
     setHasChanges(false);
     setEditingCell(null);
   }, [originalData]);
@@ -120,7 +119,6 @@ export function DataTable<T>({
     const summary: { [key: string]: number } = {};
 
     columns.forEach(column => {
-      console.log("summary:", column.summarizable , column.field); 
       if (column.summarizable && column.field) {
         let sum = 0;
         editedData.forEach(item => {

@@ -7,3 +7,4 @@ export type Order = components["schemas"]["Order"];
 export type OrderPicking = components["schemas"]["OrderPicking"];
 export type Delivery = components["schemas"]["Delivery"];
 export type CartItem = components["schemas"]["CartItem"];
+export type OrderPickingPatch = components["schemas"]["OrderPickingPatch"];
