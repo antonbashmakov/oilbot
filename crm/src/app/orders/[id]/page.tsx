@@ -85,9 +85,9 @@ export default function OrderPage() {
     {
       key: 'fraction',
       header: 'Fraction',
-      accessor: (item) => item.price,
+      accessor: (item) => item.fraction + 'TEST',
       editable: true,
-      field: 'price',
+      field: 'fraction',
       renderer: DecimalDataField,
     },
     {
@@ -131,7 +131,7 @@ export default function OrderPage() {
             </Breadcrumb.List>
           </Breadcrumb.Root>
 
-          <DataTableWithButtonsExample />
+          {/*<DataTableWithButtonsExample /> */}
           {order && <>
 
             <Flex justify="space-between" align="center">
@@ -167,6 +167,7 @@ export default function OrderPage() {
                       title="Products"
                       isSaving={false}
                       onSave={onSave}
+                      rowButtons={() =>[]}
                     />
                   }
                 </VStack>

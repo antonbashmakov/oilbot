@@ -1,5 +1,5 @@
 import { Table, Box, Text, Button, Stack, Input, Editable, IconButton, Flex } from "@chakra-ui/react";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
 
 export interface Column<T> {
@@ -85,6 +85,7 @@ export function DataTable<T>({
 
   const handleCancel = useCallback(() => {
     setEditedData(originalData);
+    console.log("handleCancel called", originalData);
     setHasChanges(false);
     setEditingCell(null);
   }, [originalData]);
@@ -176,8 +177,8 @@ export function DataTable<T>({
               const showButtons = buttons.length > 0 && !isDisabled;
 
               return (
-                <Table.Row 
-                  key={rowIndex} 
+                <Table.Row
+                  key={rowIndex}
                   _hover={{ bg: "surface.elevated" }}
                   opacity={isDisabled ? 0.6 : 1}
                 >
@@ -208,22 +209,22 @@ export function DataTable<T>({
                       </Table.Cell>
                     );
                   })}
-                  
+
                   {/* Actions column */}
-                  <Table.Cell
+                 { rowButtons &&  <Table.Cell
                     padding={5}
                     width="80px"
                     textAlign="center"
                   >
                     {showButtons && (
-                      <Flex 
-                        gap="1" 
+                      <Flex
+                        gap="1"
                         justify="center"
                         opacity={0}
                         _hover={{ opacity: 1 }}
                         transition="opacity 0.2s"
                       >
-                        
+
                         {buttons.map((button, index) => (
                           <Box key={index}>
                             {button}
@@ -231,7 +232,7 @@ export function DataTable<T>({
                         ))}
                       </Flex>
                     )}
-                  </Table.Cell>
+                  </Table.Cell>}
                 </Table.Row>
               );
             })}
@@ -270,6 +271,10 @@ export const DecimalDataField: React.FC<EditableCellProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState(value?.toString() || '');
   const [isValid, setIsValid] = useState(true);
+
+  useEffect(() => {
+    setInputValue(value?.toString() || '');
+  }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -310,7 +315,7 @@ export const DecimalDataField: React.FC<EditableCellProps> = ({
     }
   };
 
-  return <Editable.Root
+  return<Editable.Root
     size="sm"
     value={inputValue}
     textAlign="start"
@@ -320,5 +325,4 @@ export const DecimalDataField: React.FC<EditableCellProps> = ({
     <Editable.Preview />
     <Editable.Input onKeyDown={handleKeyDown} />
   </Editable.Root>
-
 };
