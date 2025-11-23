@@ -12,6 +12,7 @@ import {
 } from './imports';
 import { DeliveryOverview, Stats } from '../../models/models';
 import OrderPickingService from '../../services/OrderPickingService';
+import CustomerService from '../../services/CustomerService';
 
 admin.initializeApp({}, 'admin');
 admin.firestore().settings({
@@ -118,11 +119,13 @@ adminApi.get('/orders/:id', async (req: express.Request, res: express.Response) 
       return api.notFound(res, 'Delivery not found');
     }
 
+    const customerService = new CustomerService(admin);
     const pickingService = new OrderPickingService(admin);
 
     const picking = await pickingService.find(id);
+    const customer = await customerService.find(order.owner!.id);
     
-    return api.send(res, {...order, picking});
+    return api.send(res, {...order, picking, customer});
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || 'Internal server error');

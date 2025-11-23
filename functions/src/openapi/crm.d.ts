@@ -4,6 +4,9 @@
  */
 
 
+/** WithRequired type helpers */
+type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+
 export interface paths {
   "/admin/deliveries": {
     /**
@@ -50,7 +53,45 @@ export interface paths {
             "application/json": {
               /** @example OK */
               code?: string;
-              data?: components["schemas"]["Delivery"];
+              data?: components["schemas"]["DeliveryOverview"];
+            };
+          };
+        };
+        /** @description Delivery not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/admin/orders/{id}": {
+    /**
+     * Get order overview by ID
+     * @description Retrieve a specific delivery by its ID
+     */
+    get: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["OrderOverview"];
             };
           };
         };
@@ -75,6 +116,33 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    Customer: {
+      /**
+       * @description Customer's first name
+       * @example Антон
+       */
+      first_name: string;
+      /**
+       * @description Unique identifier for the customer
+       * @example 1019705782
+       */
+      id: number;
+      /**
+       * @description Whether the customer is a bot
+       * @example null
+       */
+      is_bot?: boolean | null;
+      /**
+       * @description Customer's language code
+       * @example ru
+       */
+      language_code: string;
+      /**
+       * @description Customer's username
+       * @example getting_drunk
+       */
+      username: string;
+    };
     OrderPicking: {
       /**
        * @description Unique identifier for the cart item
@@ -83,7 +151,7 @@ export interface components {
       id: string;
       delivery: components["schemas"]["DeliveryRef"];
       /** @description Items in this order picking */
-      items: components["schemas"]["CartItem"][];
+      items: components["schemas"]["PickingItem"][];
       owner: components["schemas"]["OwnerRef"];
       /**
        * @description Order picking status
@@ -142,6 +210,10 @@ export interface components {
       quantity: number;
       owner: components["schemas"]["OwnerRef"];
     };
+    PickingItem: ({
+      /** @enum {unknown} */
+      status?: "PENDING" | "COLLECTED" | "CANCELLED";
+    }) & components["schemas"]["OrderItem"];
     OwnerRef: {
       /**
        * @description Owner ID
@@ -360,9 +432,10 @@ export interface components {
        */
       total?: number;
     };
-    OrderOverview: {
+    OrderOverview: WithRequired<{
       picking?: components["schemas"]["OrderPicking"];
-    } & components["schemas"]["Order"];
+      customer: components["schemas"]["Customer"];
+    } & components["schemas"]["Order"], "customer">;
     User: {
       /**
        * @description Unique identifier for the user

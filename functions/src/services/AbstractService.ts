@@ -7,6 +7,8 @@ interface Entity {
   owner?: { id: string | number };
 }
 
+type IdOf<T extends Entity> = T["id"];
+
 // Simplified Firebase Admin SDK interface
 interface FirebaseAdmin {
   firestore(): any;
@@ -19,8 +21,8 @@ abstract class AbstractService<T extends Entity> {
     this.firebase = firebase;
   }
 
-  find(id: string): Promise<T | undefined> {
-    return this.getCollection().doc(id).get().then((doc: any) => this.toPOJO(doc.id, doc.data()));
+  find(id: IdOf<T>): Promise<T | undefined> {
+    return this.getCollection().doc(`${id}`).get().then((doc: any) => this.toPOJO(doc.id as IdOf<T>, doc.data()));
   }
 
   update(entity: T, object: Partial<T>): Promise<any> {
@@ -28,7 +30,7 @@ abstract class AbstractService<T extends Entity> {
   }
 
   findAll(): Promise<T[]> {
-    return this.getCollection().get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.id, doc.data())));
+    return this.getCollection().get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.id as IdOf<T>, doc.data())));
   }
 
   addAll(objects: T[]): void {

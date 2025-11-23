@@ -5,3 +5,4 @@ export type Stats = components["schemas"]["Stats"];
 export type Order = components["schemas"]["Order"];
 export type OrderPicking = components["schemas"]["OrderPicking"];
 export type Delivery = components["schemas"]["Delivery"];
+export type Customer = components["schemas"]["Customer"];
