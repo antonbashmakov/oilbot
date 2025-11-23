@@ -110,6 +110,49 @@ export interface paths {
       };
     };
   };
+  "/admin/order-pickings/{id}": {
+    /**
+     * Update order picking items
+     * @description Update the items in an order picking
+     */
+    patch: {
+      parameters: {
+        path: {
+          /** @description Order Picking ID */
+          id: string;
+        };
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["OrderPickingPatch"];
+        };
+      };
+      responses: {
+        /** @description Order picking successfully updated */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["OrderPicking"];
+            };
+          };
+        };
+        /** @description Order picking not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -142,6 +185,10 @@ export interface components {
        * @example getting_drunk
        */
       username: string;
+    };
+    OrderPickingPatch: {
+      /** @description Items to update in this order picking */
+      items: components["schemas"]["PickingItem"][];
     };
     OrderPicking: {
       /**

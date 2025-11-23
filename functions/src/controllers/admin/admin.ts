@@ -132,4 +132,26 @@ adminApi.get('/orders/:id', async (req: express.Request, res: express.Response) 
   }
 });
 
+adminApi.patch('/order-pickings/:id', async (req: express.Request, res: express.Response) => {
+  try {
+    const { id } = req.params;
+    const { items } = req.body;
+
+    if (!items || !Array.isArray(items)) {
+      return api.error(res, 'Items array is required');
+    }
+
+    const pickingService = new OrderPickingService(admin);
+    const updatedPicking = await pickingService.updateItems(id, items);
+    
+    return api.send(res, updatedPicking);
+  } catch (err: any) {
+    functions.logger.error(err);
+    if (err.message.includes('not found')) {
+      return api.notFound(res, 'Order picking not found');
+    }
+    return api.error(res, err.message || 'Internal server error');
+  }
+});
+
 export default adminApi;
