@@ -7,17 +7,32 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "openapi": "openapi-typescript resources/openapi/api.yml -o src/openapi/crm.d.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0"
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.0.0",
+    "moment": "^2.30.1",
+    "momentjs": "^2.0.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "openapi-fetch": "^0.9.7"
   },
   "devDependencies": {
     "@types/express": "^5.0.5",
-    "@types/node": "^24.10.1",
+    "@types/node-telegram-bot-api": "^0.64.13",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "eslint": "^8.9.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-import": "^2.25.4",
+    "firebase-functions-test": "^3.1.0",
+    "openapi-typescript": "^6.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
