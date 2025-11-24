@@ -164,6 +164,154 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /admin/orders/{id}/order-picking:
+    post:
+      summary: Start order picking process
+      description: Check if order picking exists, return existing one or create new from order
+      tags:
+        - Order Pickings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order picking found or created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/OrderPicking'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/items/category/{category}:
+    get:
+      summary: Get items by category
+      description: Retrieve a list of items for a specific category
+      tags:
+        - Items
+      parameters:
+        - name: category
+          in: path
+          required: true
+          description: Category name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/customers/{customerId}/cart/items/{itemId}:
+    post:
+      summary: Add item to cart
+      description: Add an item to a customer's cart
+      tags:
+        - Cart
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: number
+        - name: itemId
+          in: path
+          required: true
+          description: Item ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/customers/{customerId}/orders:
+    post:
+      summary: Create order from cart
+      description: Create a new order from a customer's cart
+      tags:
+        - Orders
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Order'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Customer:
@@ -486,11 +634,6 @@ components:
           description: List of orders in this delivery
           items:
             $ref: '#/components/schemas/Order'
-        createdAt:
-          type: string
-          format: date-time
-          description: Creation timestamp
-          example: "2025-01-01T00:00:00Z"
         owner:
           $ref: '#/components/schemas/OwnerRef'
 
@@ -623,4 +766,11 @@ components:
 tags:
   - name: Deliveries
     description: Operations related to deliveries
+  - name: Order Pickings
+    description: Operations related to order pickings
   - name: Users
+  - name: Items
+  - name: Cart
+    description: Operations related to cart
+  - name: Orders
+    description: Operations related to orders
