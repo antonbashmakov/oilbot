@@ -6,6 +6,7 @@ import DeliveryService from '../../services/DeliveryService';
 import ItemService from '../../services/ItemService';
 import CustomerService from '../../services/CustomerService';
 import CartItemService from '../../services/CartItemService';
+import OrderService from '../../services/OrderService';
 
 import { api }  from '../../services/utils';
 
@@ -19,5 +20,6 @@ export {
   DeliveryService,
   ItemService,
   CustomerService,
-  CartItemService
+  CartItemService,
+  OrderService
 };

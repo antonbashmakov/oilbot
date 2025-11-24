@@ -8,6 +8,7 @@ import {
   ItemService,
   CustomerService,
   CartItemService,
+  OrderService,
 } from './imports';
 import * as dotenv from 'dotenv';
 
@@ -18,6 +19,7 @@ const deliveryService = new DeliveryService(admin);
 const itemService = new ItemService(admin);
 const customerService = new CustomerService(admin);
 const cartItemService = new CartItemService(admin);
+const orderService = new OrderService(admin);
 
 const publicApi = express();
 
@@ -78,6 +80,28 @@ publicApi.post('/customers/:customerId/cart/items/:itemId', async (req: express.
 
     const cartItem = await cartItemService.addToCart(item, customer);
     return api.send(res, cartItem);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || 'Internal server error');
+  }
+});
+
+publicApi.post('/customers/:customerId/orders', async (req: express.Request, res: express.Response) => {
+  try {
+    const { customerId } = req.params;
+
+    const customer = await customerService.find(Number(customerId));
+    if (!customer) {
+      return api.notFound(res, 'Customer not found');
+    }
+
+    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+    if (!cartItems || cartItems.length === 0) {
+      return api.send(res, {});
+    }
+
+    const order = await orderService.createOrderFromCart(customer, cartItems);
+    return api.send(res, order);
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || 'Internal server error');
