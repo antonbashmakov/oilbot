@@ -14,50 +14,8 @@ import {
 } from "@chakra-ui/react";
 import { KPICard } from "@/components/ui/KPICard";
 import { DataTable, Column } from "@/components/DataTable";
-
-// Mock data for deliveries
-const mockDeliveries = [
-  {
-    id: "DLV-001",
-    name: "Moscow Morning Delivery",
-    description: "Morning delivery to Moscow region",
-    numberOfOrders: 15,
-    deliveryStart: "2025-11-19 08:00",
-    deliveryEnd: "2025-11-19 12:00",
-    status: "PENDING" as const,
-    group: "MOSCOW"
-  },
-  {
-    id: "DLV-002",
-    name: "St. Petersburg Express",
-    description: "Express delivery to St. Petersburg",
-    numberOfOrders: 8,
-    deliveryStart: "2025-11-19 09:30",
-    deliveryEnd: "2025-11-19 14:00",
-    status: "IN_TRANSIT" as const,
-    group: "ST_PETERSBURG"
-  },
-  {
-    id: "DLV-003",
-    name: "Kazan Standard",
-    description: "Standard delivery to Kazan",
-    numberOfOrders: 12,
-    deliveryStart: "2025-11-19 10:00",
-    deliveryEnd: "2025-11-19 16:00",
-    status: "IN_TRANSIT_BACK" as const,
-    group: "KAZAN"
-  },
-  {
-    id: "DLV-004",
-    name: "Sochi Weekend",
-    description: "Weekend delivery to Sochi",
-    numberOfOrders: 6,
-    deliveryStart: "2025-11-20 07:00",
-    deliveryEnd: "2025-11-20 15:00",
-    status: "FULLFILLED" as const,
-    group: "SOCHI"
-  }
-];
+import { useAdminDeliveriesQuery } from "@/api";
+import Link from "next/link";
 
 // Mock data for orders without deliveries
 const mockOrphanOrders = [
@@ -101,11 +59,12 @@ const  StatusBadge = ({ status }: { status: string }) => {
 }
 
 export default function Dashboard() {
-  const [deliveries] = useState(mockDeliveries);
   const [orphanOrders] = useState(mockOrphanOrders);
 
+  const {data: deliveries} = useAdminDeliveriesQuery();
+
   // Calculate KPIs
-  const totalPendingDeliveries = deliveries.filter(d => d.status === "PENDING").length;
+  const totalPendingDeliveries =  10;//deliveries.filter(d => d.status === "PENDING").length;
   const orphansOrders = orphanOrders.length;
   const averageOrderValue = orphanOrders.length > 0 
     ? Math.round(orphanOrders.reduce((sum, order) => sum + order.value, 0) / orphanOrders.length)
@@ -125,24 +84,25 @@ export default function Dashboard() {
         </Stack>
 
         {/* Deliveries Table */}
-        <Card.Root bg="surface.container" border="1px" borderColor="border.subtle" mb="8">
+        { deliveries && deliveries.length > 0 && <Card.Root bg="surface.container" border="1px" borderColor="border.subtle" mb="8">
           <Card.Header pb="0">
             <Heading size="lg" color="text.primary">Upcoming Deliveries</Heading>
           </Card.Header>
           <Card.Body>
             <DataTable
+              title="Deliveries"
               columns={[
                 {
                   key: "id",
                   header: "ID",
                   accessor: (delivery) => (
-                    <Text fontWeight="medium">{delivery.id}</Text>
+                     <Link target="_blank" href={`/deliveries/${delivery.id}`}><Text fontWeight="medium">{delivery.id}</Text></Link>
                   ),
                 },
                 {
                   key: "name",
                   header: "Name",
-                  accessor: (delivery) => delivery.name,
+                  accessor: (delivery) => delivery.number,
                 },
                 {
                   key: "description",
@@ -156,18 +116,18 @@ export default function Dashboard() {
                 {
                   key: "numberOfOrders",
                   header: "Orders",
-                  accessor: (delivery) => delivery.numberOfOrders,
+                  accessor: (delivery) => 'N/A',
                   align: "end",
                 },
                 {
                   key: "deliveryStart",
                   header: "Delivery Start",
-                  accessor: (delivery) => delivery.deliveryStart,
+                  accessor: (delivery) => delivery.delivery_start,
                 },
                 {
                   key: "deliveryEnd",
                   header: "Delivery End",
-                  accessor: (delivery) => delivery.deliveryEnd,
+                  accessor: (delivery) => delivery.delivery_end,
                 },
                 {
                   key: "status",
@@ -183,7 +143,7 @@ export default function Dashboard() {
               data={deliveries}
             />
           </Card.Body>
-        </Card.Root>
+        </Card.Root>}
 
         {/* KPI Cards */}
         <SimpleGrid columns={{ base: 1, md: 3 }} gap="6" mb="8">

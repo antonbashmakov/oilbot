@@ -539,7 +539,7 @@ export interface components {
        * @example PENDING
        * @enum {string}
        */
-      status?: "PENDING" | "IN_TRANSIT" | "IN_TRANSIT_BACK" | "FULFILLED";
+      status: "PENDING" | "IN_TRANSIT" | "IN_TRANSIT_BACK" | "FULFILLED";
       /**
        * Format: date-time
        * @description Deadline for placing orders

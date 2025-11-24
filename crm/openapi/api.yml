@@ -582,6 +582,7 @@ components:
       required:
         - id
         - number
+        - status
         - description
         - order_deadline
         - delivery_start

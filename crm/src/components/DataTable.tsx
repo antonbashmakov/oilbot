@@ -1,6 +1,7 @@
 import { Table, Box, Text, Button, Stack, Input, Editable, IconButton, Flex } from "@chakra-ui/react";
 import React, { useState, useCallback, useEffect } from "react";
 import { AddIcon, MinusIcon } from "@chakra-ui/icons";
+import { useRouter } from "next/navigation";
 
 export interface Column<T> {
   key: string;
@@ -25,6 +26,7 @@ interface DataTableProps<T> {
   isSaving?: boolean;
   isRowDisabled?: (item: T) => boolean;
   rowButtons?: (item: T) => React.ReactNode[];
+  onRowClick?: (item: T) => void;
 }
 
 export interface EditableCellProps {
@@ -45,7 +47,9 @@ export function DataTable<T>({
   isSaving = false,
   isRowDisabled,
   rowButtons,
+  onRowClick,
 }: DataTableProps<T>) {
+  const router = useRouter();
   const [editedData, setEditedData] = useState<T[]>(data);
   const [originalData, setOriginalData] = useState<T[]>(data);
   const [editingCell, setEditingCell] = useState<{ rowIndex: number; columnKey: string } | null>(null);
@@ -205,8 +209,9 @@ export function DataTable<T>({
               return (
                 <Table.Row
                   key={rowIndex}
-                  _hover={{ bg: "surface.elevated" }}
+                  _hover={{ bg: "surface.elevated", cursor: onRowClick ? "pointer" : "default" }}
                   opacity={isDisabled ? 0.6 : 1}
+                  onClick={() => onRowClick?.(item)}
                 >
                   {columns.map((column) => {
                     const isEditing = editingCell?.rowIndex === rowIndex && editingCell?.columnKey === column.key;

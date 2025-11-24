@@ -22,10 +22,11 @@ import {
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
 import { CartItem } from "@/api/models";
-import { useAdminOrderOverviewQuery, usePatchOrderPicking } from "@/api";
+import { useAdminOrderOverviewQuery, usePatchOrderPicking, useStartOrderPicking } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
 import DataTableWithButtonsExample from "@/components/DataTableWithButtonsExample";
 import DataTableWithSummaryExample from "@/components/DataTableWithSummaryExample";
+import { useCallback } from "react";
 
 
 // Mock data for the customer
@@ -52,7 +53,8 @@ export default function OrderPage() {
   const { id: orderId } = useParams();
 
   const { data: order } = useAdminOrderOverviewQuery(orderId as string);
-  const { data: picking, mutate: mutatePicking } = usePatchOrderPicking(orderId as string);
+  const { mutate: mutatePicking } = usePatchOrderPicking(orderId as string);
+  const { mutate: mutateStartPicking, isLoading: isStartPicking } = useStartOrderPicking(orderId as string);
 
   const columns: Column<CartItem>[] = [
     { key: "id", header: "ID", accessor: (item) => item.id },
@@ -118,6 +120,12 @@ export default function OrderPage() {
     return mutatePicking({ items: data });
   };
 
+const onStartPickingClick = useCallback(() => {
+    if (order && !order.picking) {
+      mutateStartPicking();
+    }
+  }, [order]);
+
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
       <Container maxW="7xl">
@@ -150,7 +158,7 @@ export default function OrderPage() {
                 </Heading>
                 <Badge colorScheme="green">Paid</Badge>
               </Flex>
-              <Button colorScheme="blue">Start Picking</Button>
+              { !order.picking && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Start Picking</Button>}
             </Flex>
 
             <Grid templateColumns="repeat(3, 1fr)" gap={6}>

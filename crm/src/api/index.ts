@@ -1,8 +1,9 @@
-import { useApiQuery, usePatchApi } from "@/api/rq";
+import { useApiQuery, usePatchApi, usePostApi } from "@/api/rq";
 import {
     DeliveryOverview,
     OrderOverview,
     OrderPickingPatch,
+    Delivery,
 } from "@/api/models";
 import { UseQueryResult } from "react-query";
 
@@ -10,12 +11,10 @@ export type QueryControlOptions = {
     enabled?: boolean
 }
 
-/*
 
-export const useAdminDeliveriesQuery = (): UseQueryResult<Delivery> => {
+export const useAdminDeliveriesQuery = (): UseQueryResult<Delivery[]> => {
     return useApiQuery("/admin/deliveries", {})
 };
-*/
 
 export function usePatchOrderPicking(id?: string) {
     return usePatchApi<
@@ -24,6 +23,19 @@ export function usePatchOrderPicking(id?: string) {
         OrderPickingPatch
     >(
         '/admin/order-pickings/{id}',
+        [
+            '/admin/orders/{id}'
+        ],
+        { id: id || ''}
+    );
+};
+export function useStartOrderPicking(id?: string) {
+    return usePostApi<
+        '/admin/orders/{id}/order-picking',
+        { id: string },
+        void
+    >(
+        '/admin/orders/{id}/order-picking',
         [
             '/admin/orders/{id}'
         ],
