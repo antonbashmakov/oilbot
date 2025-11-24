@@ -164,6 +164,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /admin/orders/{id}/order-picking:
+    post:
+      summary: Start order picking process
+      description: Check if order picking exists, return existing one or create new from order
+      tags:
+        - Order Pickings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order picking found or created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/OrderPicking'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Customer:

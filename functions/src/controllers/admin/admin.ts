@@ -154,4 +154,25 @@ adminApi.patch('/order-pickings/:id', async (req: express.Request, res: express.
   }
 });
 
+adminApi.post('/orders/:id/order-picking', async (req: express.Request, res: express.Response) => {
+  try {
+    const { id } = req.params;
+    
+    const orderService = new OrderService(admin);
+    const order = await orderService.find(id);
+
+    if (!order) {
+      return api.notFound(res, 'Order not found');
+    }
+
+    const pickingService = new OrderPickingService(admin);
+    const picking = await pickingService.findOrCreateFromOrder(id, order);
+    
+    return api.send(res, picking);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || 'Internal server error');
+  }
+});
+
 export default adminApi;

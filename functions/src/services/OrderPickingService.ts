@@ -34,6 +34,46 @@ class OrderPickingService extends AbstractService<OrderPicking> {
         return updatedPicking;
     }
 
+    async findOrCreateFromOrder(orderId: string, order: any): Promise<OrderPicking> {
+        // First check if picking already exists
+        const existingPicking = await this.find(orderId);
+        
+        if (existingPicking) {
+            return existingPicking;
+        }
+        
+        // Convert order items to picking items
+        const pickingItems = order.items.map((item: any) => ({
+            ...item,
+            status: 'PENDING' as const
+        }));
+        
+        // Calculate total
+        const total = order.items.reduce((sum: number, item: any) => {
+            return sum + (item.price * item.quantity);
+        }, 0);
+        
+        // Create new picking from order
+        const newPicking: OrderPicking = {
+            id: orderId,
+            delivery: {
+                id: order.delivery?.id || '',
+                delivery_start: order.delivery?.delivery_start || new Date().toISOString(),
+                delivery_end: order.delivery?.delivery_end || new Date().toISOString()
+            },
+            items: pickingItems,
+            owner: order.owner,
+            status: 'PENDING',
+            total,
+            type: 'ORIGINAL'
+        };
+        
+        // Save the new picking
+        await this.set(newPicking);
+        
+        return newPicking;
+    }
+
     getCollectionName(): string { return COLLECTIONS.PICKINGS; }
     getExcludedFields(): string[] { return ['createdAt']; }
 }
