@@ -1,17 +1,7 @@
 import AbstractService from './AbstractService';
 import { COLLECTIONS } from '../constants';
 
-// Interface for Delivery entity based on the example provided
-export interface Delivery {
-  id: string;
-  number: number;
-  description: string;
-  status: "PENDING" | "IN_TRANSIT" | "IN_TRANSIT_BACK" | "FULFILLED";
-  order_deadline: string;
-  delivery_start: string;
-  delivery_end: string;
-  group: string;
-}
+import { Delivery } from '../models/models';
 
 class DeliveryService extends AbstractService<Delivery> {
 

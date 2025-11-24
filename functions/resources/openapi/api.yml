@@ -634,11 +634,6 @@ components:
           description: List of orders in this delivery
           items:
             $ref: '#/components/schemas/Order'
-        createdAt:
-          type: string
-          format: date-time
-          description: Creation timestamp
-          example: "2025-01-01T00:00:00Z"
         owner:
           $ref: '#/components/schemas/OwnerRef'
 

@@ -153,6 +153,142 @@ export interface paths {
       };
     };
   };
+  "/admin/orders/{id}/order-picking": {
+    /**
+     * Start order picking process
+     * @description Check if order picking exists, return existing one or create new from order
+     */
+    post: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Order picking found or created successfully */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["OrderPicking"];
+            };
+          };
+        };
+        /** @description Order not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/private/items/category/{category}": {
+    /**
+     * Get items by category
+     * @description Retrieve a list of items for a specific category
+     */
+    get: {
+      parameters: {
+        path: {
+          /** @description Category name */
+          category: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["Item"][];
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/private/customers/{customerId}/cart/items/{itemId}": {
+    /**
+     * Add item to cart
+     * @description Add an item to a customer's cart
+     */
+    post: {
+      parameters: {
+        path: {
+          /** @description Customer ID */
+          customerId: number;
+          /** @description Item ID */
+          itemId: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["Item"][];
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/private/customers/{customerId}/orders": {
+    /**
+     * Create order from cart
+     * @description Create a new order from a customer's cart
+     */
+    post: {
+      parameters: {
+        path: {
+          /** @description Customer ID */
+          customerId: number;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["Order"];
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -429,12 +565,6 @@ export interface components {
       group: string;
       /** @description List of orders in this delivery */
       orders: components["schemas"]["Order"][];
-      /**
-       * Format: date-time
-       * @description Creation timestamp
-       * @example 2025-01-01T00:00:00Z
-       */
-      createdAt?: string;
       owner?: components["schemas"]["OwnerRef"];
     };
     DeliveryOverview: {
