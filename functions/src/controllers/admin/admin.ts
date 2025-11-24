@@ -93,9 +93,6 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
         ds[key].name = orderStats[key].name;
       });
 
-      ;
-
-
       return ds;
     }, {} as { [key: string]: Stats });
 

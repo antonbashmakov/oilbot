@@ -5,7 +5,7 @@ import * as cors from 'cors';
 
 import UserService from '../../services/UserService';
 import AbstractService from '../../services/AbstractService';
-import DeliveryService, {Delivery} from '../../services/DeliveryService';
+import DeliveryService from '../../services/DeliveryService';
 import OrderService from '../../services/OrderService';
 
 import { api } from '../../services/utils';
@@ -21,7 +21,6 @@ export {
   AbstractService,
   DeliveryService,
   OrderService,
-  Delivery,
   api,
 };
 
