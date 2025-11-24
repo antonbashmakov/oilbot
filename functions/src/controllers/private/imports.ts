@@ -3,6 +3,9 @@ import * as express from 'express';
 import * as admin from 'firebase-admin';
 import * as cors from 'cors';
 import DeliveryService from '../../services/DeliveryService';
+import ItemService from '../../services/ItemService';
+import CustomerService from '../../services/CustomerService';
+import CartItemService from '../../services/CartItemService';
 
 import { api }  from '../../services/utils';
 
@@ -13,5 +16,8 @@ export {
   admin,
   cors,
   api,
-  DeliveryService
+  DeliveryService,
+  ItemService,
+  CustomerService,
+  CartItemService
 };

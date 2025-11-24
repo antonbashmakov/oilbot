@@ -203,6 +203,82 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /private/items/category/{category}:
+    get:
+      summary: Get items by category
+      description: Retrieve a list of items for a specific category
+      tags:
+        - Items
+      parameters:
+        - name: category
+          in: path
+          required: true
+          description: Category name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/customers/{customerId}/cart/items/{itemId}:
+    post:
+      summary: Add item to cart
+      description: Add an item to a customer's cart
+      tags:
+        - Cart
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: number
+        - name: itemId
+          in: path
+          required: true
+          description: Item ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Customer:
@@ -662,4 +738,9 @@ components:
 tags:
   - name: Deliveries
     description: Operations related to deliveries
+  - name: Order Pickings
+    description: Operations related to order pickings
   - name: Users
+  - name: Items
+  - name: Cart
+    description: Operations related to cart

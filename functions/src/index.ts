@@ -3,11 +3,11 @@ import * as admin from 'firebase-admin';
 
 admin.initializeApp();
 
-import publicApi from './controllers/public/public';
+import publicApi from './controllers/private/private';
 import adminApi from './controllers/admin';
 
-const pub = functions.https.onRequest(publicApi);
+const priv = functions.https.onRequest(publicApi);
 const adm = functions.https.onRequest(adminApi);
 
-export { pub as public, adm as admin };
+export { priv as private, adm as admin };
 

@@ -4,6 +4,8 @@ export const COLLECTIONS = {
     DELIVERIES: 'DELIVERIES',
     ORDERS: 'ORDERS',
     PICKINGS: 'PICKINGS',
+    ITEMS: 'ITEMS',
+    CART_ITEMS: 'CART_ITEMS',
 };
 
 
