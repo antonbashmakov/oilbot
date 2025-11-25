@@ -164,6 +164,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /admin/order-pickings/{pickingId}/items/{itemId}/collect:
+    post:
+      summary: Collect an item in an order picking
+      description: Mark an item in an order picking as collected.
+      tags:
+        - Order Pickings
+      parameters:
+        - name: pickingId
+          in: path
+          required: true
+          description: Order Picking ID
+          schema:
+            type: string
+        - name: itemId
+          in: path
+          required: true
+          description: Item ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Item successfully collected
+        '404':
+          description: Order picking or item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /admin/orders/{id}/order-picking:
     post:
       summary: Start order picking process
@@ -359,8 +394,6 @@ components:
       type: object
       required:
         - delivery
-        - delivery_end
-        - delivery_start
         - id
         - items
         - owner
@@ -405,6 +438,7 @@ components:
         - owner
         - price
         - quantity
+        - price_for_unit
       properties:
         fraction:
           type: number
@@ -430,7 +464,12 @@ components:
         price:
             type: number
             format: float
-            description: Price
+            description: Price for the total quantity and fraction
+            example: 609
+        price_for_unit:
+            type: number
+            format: float
+            description: Price for one unit
             example: 609
         quantity:
             type: integer

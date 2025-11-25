@@ -105,7 +105,7 @@ export default function OrderPage() {
     {
       key: 'price',
       header: 'Price',
-      accessor: (item) => item.price.toFixed(2),
+      accessor: (item) => Math.floor(item.price_for_unit * item.fraction * item.quantity),
       field: 'price',
     },
     {
