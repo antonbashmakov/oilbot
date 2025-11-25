@@ -15,6 +15,7 @@ class CartItemService extends AbstractService<CartItem> {
             price: item.price_out,
             quantity: 1,
             fraction: item.fraction,
+            price_for_unit: item.price_out,
             group: item.group,
             owner: {
                 id: customer.id,

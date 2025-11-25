@@ -153,6 +153,40 @@ export interface paths {
       };
     };
   };
+  "/admin/order-pickings/{pickingId}/items/{itemId}/collect": {
+    /**
+     * Collect an item in an order picking
+     * @description Mark an item in an order picking as collected.
+     */
+    post: {
+      parameters: {
+        path: {
+          /** @description Order Picking ID */
+          pickingId: string;
+          /** @description Item ID */
+          itemId: string;
+        };
+      };
+      responses: {
+        /** @description Item successfully collected */
+        204: {
+          content: never;
+        };
+        /** @description Order picking or item not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/admin/orders/{id}/order-picking": {
     /**
      * Start order picking process
@@ -382,10 +416,16 @@ export interface components {
       name: string;
       /**
        * Format: float
-       * @description Price
+       * @description Price for the total quantity and fraction
        * @example 609
        */
       price: number;
+      /**
+       * Format: float
+       * @description Price for one unit
+       * @example 609
+       */
+      price_for_unit: number;
       /**
        * @description Quantity
        * @example 1
@@ -539,7 +579,7 @@ export interface components {
        * @example PENDING
        * @enum {string}
        */
-      status?: "PENDING" | "IN_TRANSIT" | "IN_TRANSIT_BACK" | "FULFILLED";
+      status: "PENDING" | "IN_TRANSIT" | "IN_TRANSIT_BACK" | "FULFILLED";
       /**
        * Format: date-time
        * @description Deadline for placing orders

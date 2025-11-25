@@ -172,4 +172,19 @@ adminApi.post('/orders/:id/order-picking', async (req: express.Request, res: exp
   }
 });
 
+adminApi.post('/order-pickings/:pickingid/items/:itemId/collect', async (req: express.Request, res: express.Response) => {
+  try {
+    const { pickingId, itemId } = req.params;
+    const pickingService = new OrderPickingService(admin);
+    await pickingService.toggleOrderItemCollection(pickingId, itemId);
+    return res.status(204).send();
+  } catch (err: any) {
+    functions.logger.error(err);
+    if (err.message.includes('not found')) {
+      return api.notFound(res, err.message);
+    }
+    return api.error(res, err.message || 'Internal server error');
+  }
+});
+
 export default adminApi;

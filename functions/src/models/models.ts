@@ -8,3 +8,4 @@ export type Delivery = components["schemas"]["Delivery"];
 export type Customer = components["schemas"]["Customer"];
 export type Item = components["schemas"]["Item"];
 export type CartItem = components["schemas"]["CartItem"];
+export type PickingItem = components["schemas"]["PickingItem"];
