@@ -68,7 +68,7 @@ class OrderPickingService extends AbstractService<OrderPicking> {
 
             const total = picking.items.filter(i => i.status === 'COLLECTED').reduce((a, b) => a + b.price, 0);
 
-            transaction.update(picking, { items: picking.items, total: total });
+            transaction.update(docRef, { items: picking.items, total: total });
 
         });
 

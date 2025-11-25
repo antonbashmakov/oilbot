@@ -172,7 +172,7 @@ adminApi.post('/orders/:id/order-picking', async (req: express.Request, res: exp
   }
 });
 
-adminApi.post('/order-pickings/:pickingid/items/:itemId/collect', async (req: express.Request, res: express.Response) => {
+adminApi.post('/order-pickings/:pickingId/items/:itemId/collect', async (req: express.Request, res: express.Response) => {
   try {
     const { pickingId, itemId } = req.params;
     const pickingService = new OrderPickingService(admin);
