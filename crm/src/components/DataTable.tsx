@@ -27,6 +27,7 @@ interface DataTableProps<T> {
   isRowDisabled?: (item: T) => boolean;
   rowButtons?: (item: T) => React.ReactNode[];
   onRowClick?: (item: T) => void;
+  getKey: (item: T) => string;
 }
 
 export interface EditableCellProps {
@@ -48,6 +49,7 @@ export function DataTable<T>({
   isRowDisabled,
   rowButtons,
   onRowClick,
+  getKey,
 }: DataTableProps<T>) {
   const router = useRouter();
   const [editedData, setEditedData] = useState<T[]>(data);
@@ -116,7 +118,7 @@ export function DataTable<T>({
       return (item as any)[column.field];
     }
     return column.accessor(item);
-  }, []);
+  }, [editedData]);
 
   // Calculate summary values for summarizable columns
   const calculateSummary = useCallback(() => {
@@ -190,7 +192,7 @@ export function DataTable<T>({
                 </Table.ColumnHeader>
               ))}
               {/* Actions column header */}
-              {(rowButtons && data.some(item => !isRowDisabled || !isRowDisabled(item))) && (
+              {(rowButtons) && (
                 <Table.ColumnHeader
                   width="80px"
                   textAlign="center"
@@ -204,11 +206,11 @@ export function DataTable<T>({
             {editedData.map((item, rowIndex) => {
               const isDisabled = isRowDisabled ? isRowDisabled(item) : false;
               const buttons = rowButtons ? rowButtons(item) : [];
-              const showButtons = buttons.length > 0 && !isDisabled;
+              const showButtons = !!buttons && !isDisabled;
 
               return (
                 <Table.Row
-                  key={rowIndex}
+                  key={getKey(item)}
                   _hover={{ bg: "surface.elevated", cursor: onRowClick ? "pointer" : "default" }}
                   opacity={isDisabled ? 0.6 : 1}
                   onClick={() => onRowClick?.(item)}

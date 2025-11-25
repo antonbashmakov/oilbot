@@ -17,16 +17,19 @@ import {
   Text,
   VStack,
   Container,
-  Separator
+  Separator,
+  IconButton,
+  Status
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
-import { CartItem } from "@/api/models";
-import { useAdminOrderOverviewQuery, usePatchOrderPicking, useStartOrderPicking } from "@/api";
+import { CartItem, PickingItem } from "@/api/models";
+import { useAdminOrderOverviewQuery, useCollectPickingItem, usePatchOrderPicking, useStartOrderPicking } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
 import DataTableWithButtonsExample from "@/components/DataTableWithButtonsExample";
 import DataTableWithSummaryExample from "@/components/DataTableWithSummaryExample";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { AddIcon, MinusIcon } from "@chakra-ui/icons";
 
 
 // Mock data for the customer
@@ -52,9 +55,12 @@ const orderHistory = [
 export default function OrderPage() {
   const { id: orderId } = useParams();
 
+  const [selectedItem, setSelectedItem] = useState<PickingItem>()
+
   const { data: order } = useAdminOrderOverviewQuery(orderId as string);
   const { mutate: mutatePicking } = usePatchOrderPicking(orderId as string);
   const { mutate: mutateStartPicking, isLoading: isStartPicking } = useStartOrderPicking(orderId as string);
+  const { mutate: collectPicking, isLoading: isCollecting } = useCollectPickingItem(orderId as string, selectedItem?.id);
 
   const columns: Column<CartItem>[] = [
     { key: "id", header: "ID", accessor: (item) => item.id },
@@ -82,7 +88,14 @@ export default function OrderPage() {
     },
   ];
 
-  const pickingColumns: Column<CartItem>[] = [
+  const pickingColumns: Column<PickingItem>[] = [
+    {
+      key: 'collected-status',
+      header: '',
+      accessor: (item) => <>{item.status === 'COLLECTED' && <Status.Root colorPalette="blue">
+        <Status.Indicator />
+      </Status.Root>}</>,
+    },
     {
       key: 'id',
       header: 'ID',
@@ -106,7 +119,14 @@ export default function OrderPage() {
       key: 'price',
       header: 'Price',
       accessor: (item) => Math.floor(item.price_for_unit * item.fraction * item.quantity),
-      field: 'price',
+    },
+    {
+      key: 'price_for_unit',
+      header: 'Price For Unit',
+      editable: true,
+      field: 'price_for_unit',
+      renderer: DecimalDataField,
+      accessor: (item) => item.price_for_unit,
     },
     {
       key: 'quantity',
@@ -116,15 +136,64 @@ export default function OrderPage() {
     },
   ];
 
+  const isRowDisabled = (item: PickingItem) => {
+    return item.status === 'CANCELLED' || isCollecting;
+  };
+
+  const rowButtons = (item: PickingItem) => {
+
+    if (item.status === 'PENDING') {
+      return [
+        <IconButton
+          key="add"
+          aria-label="Add quantity"
+          size="xs"
+          colorScheme="green"
+          onClick={() => onCollectClick(item)}
+        >
+          <AddIcon />
+        </IconButton>
+
+      ];
+    }
+    if (item.status === 'COLLECTED') {
+      return [
+        <IconButton
+          key="remove"
+          aria-label="Remove quantity"
+          size="xs"
+          colorScheme="red"
+          onClick={() => onCollectClick(item)}
+          disabled={item.quantity <= 0}
+        >
+          <MinusIcon />
+        </IconButton>
+      ];
+    }
+
+    return [];
+
+  };
+
   const onSave = async (data: CartItem[]) => {
     return mutatePicking({ items: data });
   };
 
-const onStartPickingClick = useCallback(() => {
+  const onStartPickingClick = useCallback(() => {
     if (order && !order.picking) {
       mutateStartPicking();
     }
   }, [order]);
+
+  const onCollectClick = useCallback((item: PickingItem) => {
+    setSelectedItem(item);
+  }, [selectedItem]);
+
+  useEffect(() => {
+    if (selectedItem?.id) {
+      collectPicking();
+    }
+  }, [selectedItem]);
 
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
@@ -158,7 +227,8 @@ const onStartPickingClick = useCallback(() => {
                 </Heading>
                 <Badge colorScheme="green">Paid</Badge>
               </Flex>
-              { !order.picking && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Start Picking</Button>}
+              {!order.picking && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Start Picking</Button>}
+              {order.status !== 'CONSOLIDATED' && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Consolidate</Button>}
             </Flex>
 
             <Grid templateColumns="repeat(3, 1fr)" gap={6}>
@@ -168,6 +238,7 @@ const onStartPickingClick = useCallback(() => {
                     columns={columns}
                     data={order.items}
                     title="Order Items"
+                    getKey={i => i.id}
                   />
                   <InfoMessage
                     type="info"
@@ -182,7 +253,9 @@ const onStartPickingClick = useCallback(() => {
                       title="Products"
                       isSaving={false}
                       onSave={onSave}
-                      rowButtons={() => []}
+                      isRowDisabled={isRowDisabled}
+                      rowButtons={rowButtons}
+                      getKey={i => i.id}
                     />
                   }
                 </VStack>
@@ -228,7 +301,7 @@ const onStartPickingClick = useCallback(() => {
                         <Separator />
                         <DataList.Item key="calculation-final" fontWeight="bold">
                           <DataList.ItemLabel>Final Total</DataList.ItemLabel>
-                          <DataList.ItemValue>{(order.picking?.total || 0) - (order.total || 0)}</DataList.ItemValue>
+                          <DataList.ItemValue>{(order.total || 0) - (order.picking?.total || 0)}</DataList.ItemValue>
                         </DataList.Item>
 
                       </DataList.Root>

@@ -29,6 +29,21 @@ export function usePatchOrderPicking(id?: string) {
         { id: id || ''}
     );
 };
+export function useCollectPickingItem(pickingId?: string, itemId?: string) {
+    return usePostApi<
+        '/admin/order-pickings/{pickingId}/items/{itemId}/collect',
+        { pickingId: string, itemId: string },
+        void
+    >(
+        '/admin/order-pickings/{pickingId}/items/{itemId}/collect',
+        [
+           '/admin/orders/{id}'
+        ],
+        { pickingId: pickingId || '',
+        itemId: itemId || ''
+        }
+    );
+};
 export function useStartOrderPicking(id?: string) {
     return usePostApi<
         '/admin/orders/{id}/order-picking',
