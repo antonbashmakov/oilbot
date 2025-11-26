@@ -26,7 +26,7 @@ export function usePatchOrderPicking(id?: string) {
         [
             '/admin/orders/{id}'
         ],
-        { id: id || ''}
+        { id: id || '' }
     );
 };
 export function useCollectPickingItem(pickingId?: string, itemId?: string) {
@@ -37,10 +37,26 @@ export function useCollectPickingItem(pickingId?: string, itemId?: string) {
     >(
         '/admin/order-pickings/{pickingId}/items/{itemId}/collect',
         [
-           '/admin/orders/{id}'
+            '/admin/orders/{id}'
         ],
-        { pickingId: pickingId || '',
-        itemId: itemId || ''
+        {
+            pickingId: pickingId || '',
+            itemId: itemId || ''
+        }
+    );
+};
+export function useConsolidateOrder(id?: string) {
+    return usePostApi<
+        '/admin/orders/{id}/consolidate',
+        { id: string },
+        void
+    >(
+        '/admin/orders/{id}/consolidate',
+        [
+            '/admin/orders/{id}'
+        ],
+        {
+            id: id || ''
         }
     );
 };
@@ -54,24 +70,26 @@ export function useStartOrderPicking(id?: string) {
         [
             '/admin/orders/{id}'
         ],
-        { id: id || ''}
+        { id: id || '' }
     );
 };
 
 export const useAdminDeliveryQuery = (id?: string): UseQueryResult<DeliveryOverview> => {
-    return useApiQuery("/admin/deliveries/{id}", {params: {
-        path: {
-            id: id || ""
+    return useApiQuery("/admin/deliveries/{id}", {
+        params: {
+            path: {
+                id: id || ""
+            }
         }
-    }
     }, { retry: 1, enabled: !!id })
 };
 export const useAdminOrderOverviewQuery = (id?: string): UseQueryResult<OrderOverview> => {
-    return useApiQuery("/admin/orders/{id}", {params: {
-        path: {
-            id: id || ""
+    return useApiQuery("/admin/orders/{id}", {
+        params: {
+            path: {
+                id: id || ""
+            }
         }
-    }
     }, { retry: 1, enabled: !!id })
 };
 
