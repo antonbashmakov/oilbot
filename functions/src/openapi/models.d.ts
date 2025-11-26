@@ -15,7 +15,7 @@ export interface components {
      * requiring asynchronous processing (e.g., ORDER_RESOLVED → trigger payment).
      * Written atomically with the domain write using the Outbox Pattern.
      */
-    OutboxEvent: {
+    BaseOutboxEvent: {
       /** @description Unique event identifier (UUID or Firestore doc ID). */
       id: string;
       /**
@@ -23,14 +23,6 @@ export interface components {
        * @example ORDER_RESOLVED
        */
       type: string;
-      /**
-       * @description Arbitrary event-specific data.
-       * @example {
-       *   "orderId": "abc123",
-       *   "amount": 4999
-       * }
-       */
-      payload: Record<string, never>;
       /**
        * Format: date-time
        * @description Timestamp when the event was written to Firestore.
@@ -53,6 +45,68 @@ export interface components {
       retries: number;
       /** @description Error message from the last failed processing attempt. */
       lastError?: string | null;
+    };
+    Payment: {
+      /**
+       * @description Total payment amount
+       * @example 1668
+       */
+      total?: string;
+      /**
+       * @description Current payment status
+       * @example PENDING
+       */
+      status?: string;
+      /**
+       * @description Identifier of the payer
+       * @example 270053857
+       */
+      payer_id?: string;
+      /**
+       * @description Identifier of the associated order
+       * @example FZcMTsLGnRHo87gZRS66
+       */
+      order_id?: string;
+      required?: [total, status, payer_id, order_id];
+    };
+    TinkoffPaymentItem: {
+      Name: string;
+      Price: number;
+      Quantity: number;
+      Amount: number;
+      /** @enum {string} */
+      Tax: "none" | "vat0" | "vat10" | "vat20" | "vat110" | "vat120";
+    };
+    TinkoffReceipt: {
+      /** Format: email */
+      Email: string;
+      /** @description Телефон покупателя */
+      Phone?: string;
+      /** @enum {string} */
+      Taxation: "osn" | "usn_income" | "usn_income_outcome" | "envd" | "esn" | "patent";
+      Items: components["schemas"]["TinkoffPaymentItem"][];
+    };
+    TinkoffPaymentData: {
+      /** @description Телефон покупателя */
+      Phone?: string;
+      /**
+       * Format: email
+       * @description Электронная почта покупателя
+       */
+      Email?: string;
+    };
+    TinkoffPaymentPayload: {
+      /** @description Ключ терминала */
+      TerminalKey: string;
+      Token?: string;
+      /** @description Сумма в копейках */
+      Amount: number;
+      /** @description Идентификатор заказа */
+      OrderId: string;
+      /** @description Описание заказа */
+      Description?: string;
+      DATA?: components["schemas"]["TinkoffPaymentData"];
+      Receipt: components["schemas"]["TinkoffReceipt"];
     };
   };
   responses: never;

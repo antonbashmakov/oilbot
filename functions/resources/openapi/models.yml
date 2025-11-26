@@ -8,7 +8,7 @@ info:
     email: support@posebestoimosti.com
 components:
   schemas:
-    OutboxEvent:
+    BaseOutboxEvent:
       type: object
       description: |
         An event stored in the Firestore outbox that represents a domain change
@@ -24,13 +24,6 @@ components:
           type: string
           description: Type of event that occurred.
           example: ORDER_RESOLVED
-
-        payload:
-          type: object
-          description: Arbitrary event-specific data.
-          example:
-            orderId: "abc123"
-            amount: 4999
 
         createdAt:
           type: string
@@ -66,3 +59,108 @@ components:
         - createdAt
         - processed
         - retries
+        
+    Payment:
+      type: object
+      properties:
+        total:
+          type: string
+          description: Total payment amount
+          example: "1668"
+        status:
+          type: string
+          description: Current payment status
+          example: "PENDING"
+        payer_id:
+          type: string
+          description: Identifier of the payer
+          example: "270053857"
+        order_id:
+          type: string
+          description: Identifier of the associated order
+          example: "FZcMTsLGnRHo87gZRS66"
+        required:
+          - total
+          - status
+          - payer_id
+          - order_id
+          
+    TinkoffPaymentItem:
+      type: object
+      properties:
+        Name:
+          type: string
+        Price:
+          type: integer
+        Quantity:
+          type: number
+        Amount:
+          type: integer
+        Tax:
+          type: string
+          enum: ["none", "vat0", "vat10", "vat20", "vat110", "vat120"]
+      required:
+        - Name
+        - Price
+        - Quantity
+        - Amount
+        - Tax
+
+    TinkoffReceipt:
+      type: object
+      properties:
+        Email:
+          type: string
+          format: email
+        Phone:
+          type: string
+          description: "Телефон покупателя"
+        Taxation:
+          type: string
+          enum: ["osn", "usn_income", "usn_income_outcome", "envd", "esn", "patent"]
+        Items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TinkoffPaymentItem'
+      required:
+        - Email
+        - Taxation
+        - Items
+
+    TinkoffPaymentData:
+        type: object
+        properties:
+          Phone:
+            type: string
+            description: "Телефон покупателя"
+          Email:
+            type: string
+            format: email
+            description: "Электронная почта покупателя"
+
+    TinkoffPaymentPayload:
+      type: object
+      properties:
+        TerminalKey:
+          type: string
+          description: "Ключ терминала"
+        Token:
+          type: string
+        Amount:
+          type: integer
+          description: "Сумма в копейках"
+        OrderId:
+          type: string
+          description: "Идентификатор заказа"
+        Description:
+          type: string
+          description: "Описание заказа"
+        DATA:
+          $ref: '#/components/schemas/TinkoffPaymentData'
+        Receipt:
+          $ref: '#/components/schemas/TinkoffReceipt'
+      required:
+        - TerminalKey
+        - Amount
+        - OrderId
+        - Receipt

@@ -667,7 +667,7 @@ export interface components {
        * @description Total value of the order
        * @example 150.75
        */
-      total?: number;
+      total: number;
     };
     OrderOverview: WithRequired<{
       picking?: components["schemas"]["OrderPicking"];

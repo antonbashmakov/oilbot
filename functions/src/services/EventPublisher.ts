@@ -4,14 +4,14 @@ import OutboxEventService from "./OutboxEventService";
 
 
 
-class EventPublisher {
+class EventPublisher<T extends OutboxEvent> {
 
   protected firebase: FirebaseAdmin;
 
   constructor(firebase: FirebaseAdmin) {
     this.firebase = firebase;
   }  
-  publish(event: OutboxEvent): Promise<OutboxEvent> {
+  publish(event: T): Promise<OutboxEvent> {
     const outboxEventService = new OutboxEventService(this.firebase);
     return outboxEventService.add(event);
   }

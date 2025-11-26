@@ -10,9 +10,10 @@ import {
   //AbstractService,
   api,
 } from './imports';
-import { DeliveryOverview, Stats } from '../../models';
+import { DeliveryOverview, OrderResolvedEvent, Stats } from '../../models';
 import OrderPickingService from '../../services/OrderPickingService';
 import CustomerService from '../../services/CustomerService';
+import EventPublisher from '../../services/EventPublisher';
 
 admin.initializeApp({}, 'admin');
 admin.firestore().settings({
@@ -207,6 +208,20 @@ adminApi.post('/orders/:id/consolidate', async (req: express.Request, res: expre
     }
 
     orderService.updateTransactionally(order, { status: 'RESOLVING' });
+
+    const eventPublisher = new EventPublisher<OrderResolvedEvent>(admin);
+
+    const event = { 
+      id: '', // will be set by OutboxEventService
+      createdAt: new Date(),
+      processed: false,
+      retries: 0,
+      type: 'ORDER_RESOLVE_REQUESTED' ,
+      payload: {orderId: order.id}
+
+    } ;
+
+    eventPublisher.publish(event);
 
     return api.send(res, {});
   } catch (err: any) {

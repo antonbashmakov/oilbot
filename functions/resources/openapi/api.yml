@@ -715,6 +715,7 @@ components:
         - numberOfItems
         - totalValue
         - owner
+        - total
       properties:
         id:
           type: string

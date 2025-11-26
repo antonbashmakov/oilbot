@@ -3,7 +3,7 @@ import { COLLECTIONS } from '../constants';
 
 import { OutboxEvent } from '../models';
 
-class OutboxEventService extends AbstractService<OutboxEvent> {
+class OutboxEventService<T extends OutboxEvent> extends AbstractService<T> {
   getCollectionName(): string {
     return COLLECTIONS.OUTBOX_EVENTS;
   }

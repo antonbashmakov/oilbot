@@ -1,0 +1,67 @@
+import axios from 'axios';
+import * as dotenv from 'dotenv';
+import * as functions from 'firebase-functions';
+
+import { Order, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt } from '../../models';
+dotenv.config();
+
+const terminal = process.env.TINKOFF_TERMINAL_ID || functions.config().tinkoff.TINKOFF_TERMINAL_ID;
+const password = process.env.TINKOFF_TERMINAL_PASSWORD || functions.config().tinkoff.TINKOFF_TERMINAL_PASSWORD;
+
+class TBankService {
+
+  orderToPaymentRequest(order: Order): TinkoffPaymentPayload {
+
+    const Items: TinkoffPaymentItem[] = order.items.map(i => ({
+      Name: i.name,
+      Price: i.price * 100,
+      Quantity: 1,
+      Amount: i.price * 100,
+      Tax: "vat0",
+    }));
+
+    const Receipt: TinkoffReceipt = {
+      Email: "info@posebestoimosti.ru",
+      Phone: "+79022394130",
+      Taxation: "osn",
+      Items,
+    };
+
+    const body = {
+      Token: '',
+      TerminalKey: terminal,
+      Amount: order.total * 100,
+      OrderId: order.id,
+      Description: "Оплата заказа в магазине По Себестоимости",
+      DATA: {
+        Phone: "+79022394130",
+        Email: "info@posebestoimosti.ru"
+      },
+      Receipt,
+    };
+
+    const rootFields = { ...body, Password: password } as any;
+
+    delete rootFields.DATA;
+    delete rootFields.Receipt;
+
+    const sortedValues = Object.keys(rootFields).sort().map(k => rootFields[k]).join('');
+
+    const crypto = require('crypto');
+    const hash = crypto.createHash('sha256').update(sortedValues).digest('hex');
+    body.Token = hash;
+
+    return body;
+  }
+
+  async initPayment(paymentRequest: TinkoffPaymentPayload) {
+    const response = await axios.post("https://securepay.tinkoff.ru/v2/Init", paymentRequest, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.data;
+  }
+}
+
+export default TBankService;
