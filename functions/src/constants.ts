@@ -6,6 +6,7 @@ export const COLLECTIONS = {
     PICKINGS: 'PICKINGS',
     ITEMS: 'ITEMS',
     CART_ITEMS: 'CART_ITEMS',
+    OUTBOX_EVENTS: 'OUTBOX_EVENTS',
 };
 
 

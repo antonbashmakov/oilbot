@@ -1,6 +1,6 @@
 import AbstractService from './AbstractService';
 import { COLLECTIONS } from '../constants';
-import { Order, Customer, CartItem, Delivery } from '../models/models';
+import { Order, Customer, CartItem, Delivery } from '../models';
 
 class OrderService extends AbstractService<Order> {
     constructor(firebase: any) {

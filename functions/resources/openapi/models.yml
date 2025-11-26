@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+  title: Posebestoimosti API
+  description: API for managing deliveries and users
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@posebestoimosti.com
+components:
+  schemas:
+    OutboxEvent:
+      type: object
+      description: |
+        An event stored in the Firestore outbox that represents a domain change
+        requiring asynchronous processing (e.g., ORDER_RESOLVED → trigger payment).
+        Written atomically with the domain write using the Outbox Pattern.
+      properties:
+        id:
+          type: string
+          description: Unique event identifier (UUID or Firestore doc ID).
+          readOnly: true
+
+        type:
+          type: string
+          description: Type of event that occurred.
+          example: ORDER_RESOLVED
+
+        payload:
+          type: object
+          description: Arbitrary event-specific data.
+          example:
+            orderId: "abc123"
+            amount: 4999
+
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the event was written to Firestore.
+
+        processed:
+          type: boolean
+          description: Indicates whether the event has been successfully processed.
+          default: false
+
+        processedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when processing completed successfully.
+
+        retries:
+          type: integer
+          description: How many times the event has failed processing.
+          minimum: 0
+          default: 0
+
+        lastError:
+          type: string
+          nullable: true
+          description: Error message from the last failed processing attempt.
+
+      required:
+        - id
+        - type
+        - payload
+        - createdAt
+        - processed
+        - retries

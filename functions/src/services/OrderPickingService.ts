@@ -1,6 +1,6 @@
 import AbstractService from './AbstractService';
 import { COLLECTIONS } from '../constants';
-import { OrderPicking } from '../models/models';
+import { OrderPicking } from '../models';
 
 
 class OrderPickingService extends AbstractService<OrderPicking> {

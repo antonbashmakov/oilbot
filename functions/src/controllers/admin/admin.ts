@@ -10,7 +10,7 @@ import {
   //AbstractService,
   api,
 } from './imports';
-import { DeliveryOverview, Stats } from '../../models/models';
+import { DeliveryOverview, Stats } from '../../models';
 import OrderPickingService from '../../services/OrderPickingService';
 import CustomerService from '../../services/CustomerService';
 

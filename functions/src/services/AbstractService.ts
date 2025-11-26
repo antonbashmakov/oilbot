@@ -3,14 +3,14 @@ import { jsonify } from './utils';
 // Interface for entities that have an ID
 interface Entity {
   id: string | number;
-  createdAt?: Date;
+  createdAt?: Date | string;
   owner?: { id: string | number };
 }
 
 type IdOf<T extends Entity> = T["id"];
 
 // Simplified Firebase Admin SDK interface
-interface FirebaseAdmin {
+export interface FirebaseAdmin {
   firestore(): any;
 }
 
