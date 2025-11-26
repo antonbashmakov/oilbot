@@ -225,6 +225,26 @@ export interface paths {
       };
     };
   };
+  "/admin/orders/{id}/consolidate": {
+    /**
+     * Resolve an order
+     * @description Marks an order as resolved.
+     */
+    post: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Order successfully resolved */
+        204: {
+          content: never;
+        };
+      };
+    };
+  };
   "/private/items/category/{category}": {
     /**
      * Get items by category
@@ -635,7 +655,7 @@ export interface components {
        * @example PAID
        * @enum {string}
        */
-      status: "PENDING" | "PAID" | "CONSOLIDATED";
+      status: "PENDING" | "PAID" | "RESOLVING" | "CONSOLIDATED";
       owner: components["schemas"]["OwnerRef"];
       /**
        * @description Number of items in the order

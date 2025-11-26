@@ -16,7 +16,7 @@ import CustomerService from '../../services/CustomerService';
 
 admin.initializeApp({}, 'admin');
 admin.firestore().settings({
-  databaseId: process.env.DATABASE_ID, 
+  databaseId: process.env.DATABASE_ID,
 });
 dotenv.config();
 
@@ -45,9 +45,9 @@ adminApi.get('/deliveries', async (req: express.Request, res: express.Response) 
   try {
 
     const deliveryService = new DeliveryService(admin);
-    
+
     const deliveries = await deliveryService.findAll();
-    
+
     return api.send(res, deliveries);
   } catch (err: any) {
 
@@ -68,13 +68,13 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
     }
 
     const orders = await orderService.findOrders(delivery);
-    const devileryOverview = {...delivery, orders} as DeliveryOverview;
+    const devileryOverview = { ...delivery, orders } as DeliveryOverview;
 
     const deliveryStats = orders.reduce((ds, order) => {
-      
+
       const orderStats = order.items.reduce((os, item) => {
-        if(!os[item.item_id]) {
-          os[item.item_id] = { total: 0, fraction: 0 , name: item.name };
+        if (!os[item.item_id]) {
+          os[item.item_id] = { total: 0, fraction: 0, name: item.name };
         }
         os[item.item_id].total += item.price * item.quantity;
         os[item.item_id].fraction += item.fraction;
@@ -83,7 +83,7 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
       }, {} as { [key: string]: Stats });
 
       Object.keys(orderStats).forEach(key => {
-        if(!ds[key]) {
+        if (!ds[key]) {
           ds[key] = { ...orderStats[key] };
           return
         }
@@ -97,7 +97,7 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
     }, {} as { [key: string]: Stats });
 
     devileryOverview.stats = Object.keys(deliveryStats).map(key => deliveryStats[key]);
-    
+
     return api.send(res, devileryOverview);
   } catch (err: any) {
     functions.logger.error(err);
@@ -121,8 +121,8 @@ adminApi.get('/orders/:id', async (req: express.Request, res: express.Response) 
 
     const picking = await pickingService.find(id);
     const customer = await customerService.find(order.owner!.id);
-    
-    return api.send(res, {...order, picking, customer});
+
+    return api.send(res, { ...order, picking, customer });
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || 'Internal server error');
@@ -140,7 +140,7 @@ adminApi.patch('/order-pickings/:id', async (req: express.Request, res: express.
 
     const pickingService = new OrderPickingService(admin);
     const updatedPicking = await pickingService.updateItems(id, items);
-    
+
     return api.send(res, updatedPicking);
   } catch (err: any) {
     functions.logger.error(err);
@@ -154,7 +154,7 @@ adminApi.patch('/order-pickings/:id', async (req: express.Request, res: express.
 adminApi.post('/orders/:id/order-picking', async (req: express.Request, res: express.Response) => {
   try {
     const { id } = req.params;
-    
+
     const orderService = new OrderService(admin);
     const order = await orderService.find(id);
 
@@ -164,7 +164,7 @@ adminApi.post('/orders/:id/order-picking', async (req: express.Request, res: exp
 
     const pickingService = new OrderPickingService(admin);
     const picking = await pickingService.findOrCreateFromOrder(id, order);
-    
+
     return api.send(res, picking);
   } catch (err: any) {
     functions.logger.error(err);
@@ -183,6 +183,34 @@ adminApi.post('/order-pickings/:pickingId/items/:itemId/collect', async (req: ex
     if (err.message.includes('not found')) {
       return api.notFound(res, err.message);
     }
+    return api.error(res, err.message || 'Internal server error');
+  }
+});
+
+adminApi.post('/orders/:id/consolidate', async (req: express.Request, res: express.Response) => {
+  try {
+    const { id } = req.params;
+
+    const orderService = new OrderService(admin);
+    const order = await orderService.find(id);
+
+    if (!order) {
+      return api.notFound(res, 'Order not found');
+    }
+
+    const pickingService = new OrderPickingService(admin);
+
+    const picking = await pickingService.find(id);
+
+    if (!picking || !picking.items.every(i => i.status === 'COLLECTED')) {
+      return api.badRequest(res, 'Order is not compiled');
+    }
+
+    orderService.updateTransactionally(order, { status: 'RESOLVING' });
+
+    return api.send(res, {});
+  } catch (err: any) {
+    functions.logger.error(err);
     return api.error(res, err.message || 'Internal server error');
   }
 });

@@ -78,7 +78,16 @@ abstract class AbstractService<T extends Entity> {
     return this.firebase.firestore().collection(this.getCollectionName()).doc(object.id).delete();    
   }
 
+  updateTransactionally(entity: T, object: Partial<T>): Promise<any> {
+    return this.runTransactionally(async (transaction: any) => {
+      const docRef = this.getCollection().doc(`${entity.id}`);
+      transaction.update(docRef, object);
+    });
+  };
 
+  runTransactionally(method: (transaction: any) => Promise<any>) {
+    return this.firebase.firestore().runTransaction(method);
+  }
   getCollection() {
     return this.firebase.firestore().collection(this.getCollectionName());
   }

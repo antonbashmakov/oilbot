@@ -739,6 +739,7 @@ components:
           enum:
             - PENDING
             - PAID
+            - RESOLVING
             - CONSOLIDATED
           description: Current status of the order
           example: "PAID"
