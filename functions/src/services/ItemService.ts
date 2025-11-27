@@ -4,9 +4,6 @@ import { Item } from '../models';
 
 
 class ItemService extends AbstractService<Item> {
-    constructor(firebase: any) {
-        super(firebase);
-    }
 
     findByCategory(category: string): Promise<Item[]> {
         return this.getCollection().where('category', '==', category)

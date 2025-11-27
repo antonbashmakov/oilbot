@@ -68,15 +68,20 @@ abstract class AbstractService<T extends Entity> {
     const ref = this.getCollection().doc();
     objectToSave.id = ref.id;
 
-    console.log(objectToSave)
-
     return ref.set(objectToSave).then(() => objectToSave as T);
   }
 
   set(object: T): Promise<any> {
-    const objectToSet = JSON.parse(JSON.stringify(object));
-    objectToSet.createdAt = new Date();
+    const fields = this.getExcludedFields();
+
+    const fieldsToSave: Record<string, any> = {};
+
+    fields.forEach(field => fieldsToSave[field] = object[field as keyof T]);
+
+    const objectToSet = Object.assign(jsonify(object), fieldsToSave);
+
     return this.getCollection().doc(objectToSet.id).set(objectToSet);
+    
   }
 
   delete(object: T): Promise<any> {

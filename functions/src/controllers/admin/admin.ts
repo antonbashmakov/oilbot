@@ -14,13 +14,18 @@ import { DeliveryOverview, OrderResolvedEvent, Stats } from '../../models';
 import OrderPickingService from '../../services/OrderPickingService';
 import CustomerService from '../../services/CustomerService';
 import EventPublisher from '../../services/EventPublisher';
-import { debug } from 'firebase-functions/logger';
+// import { debug } from 'firebase-functions/logger';
+dotenv.config();
 
 admin.initializeApp({}, 'admin');
-admin.firestore().settings({
-  databaseId: process.env.DATABASE_ID,
-});
-dotenv.config();
+
+
+if (process.env.GCLOUD_PROJECT !== 'test-project') {
+  admin.firestore().settings({
+    databaseId: process.env.DATABASE_ID,
+  });
+
+}
 
 const db = admin.firestore();
 
@@ -48,7 +53,7 @@ adminApi.use(async (req: express.Request, res: express.Response, next: express.N
 adminApi.get('/deliveries', async (req: express.Request, res: express.Response) => {
   try {
 
-    const deliveryService = new DeliveryService(admin);
+    const deliveryService = new DeliveryService(db);
 
     const deliveries = await deliveryService.findAll();
 
@@ -117,7 +122,7 @@ adminApi.get('/orders/:id', async (req: express.Request, res: express.Response) 
     const order = await orderService.find(id);
 
     if (!order) {
-      return api.notFound(res, 'Delivery not found');
+      return api.notFound(res, 'Order not found');
     }
 
     const customerService = new CustomerService(db);
@@ -214,16 +219,16 @@ adminApi.post('/orders/:id/consolidate', async (req: express.Request, res: expre
 
     const eventPublisher = new EventPublisher<OrderResolvedEvent>(db);
 
-    const event = { 
+    const event = {
       id: '', // will be set by OutboxEventService
       createdAt: new Date(),
       processedAt: new Date(),
       processed: false,
       retries: 0,
-      type: 'ORDER_RESOLVE_REQUESTED' ,
-      payload: {orderId: order.id}
+      type: 'ORDER_RESOLVE_REQUESTED',
+      payload: { orderId: order.id }
 
-    } ;
+    };
 
     eventPublisher.publish(event);
 

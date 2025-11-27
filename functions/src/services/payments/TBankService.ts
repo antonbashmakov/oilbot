@@ -44,13 +44,23 @@ class TBankService {
 
     delete rootFields.DATA;
     delete rootFields.Receipt;
-    
+
     body.Token = this.generateToken(rootFields);
 
     return body;
   }
 
   async initPayment(paymentRequest: TinkoffPaymentPayload) {
+
+    if (process.env.GCLOUD_PROJECT === 'test-project') {
+      return {
+        Success: true,
+        Status: 'NEW',
+        PaymentId: paymentRequest.OrderId,
+        PaymentURL: `https://securepay.tinkoff.ru/${paymentRequest.OrderId}`
+      }
+    }
+
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Init", paymentRequest, {
       headers: {
         'Content-Type': 'application/json'

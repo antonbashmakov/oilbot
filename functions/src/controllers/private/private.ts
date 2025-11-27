@@ -15,11 +15,13 @@ import * as dotenv from 'dotenv';
 admin.initializeApp(functions.config().firebase, 'public');
 dotenv.config();
 
-const deliveryService = new DeliveryService(admin);
-const itemService = new ItemService(admin);
-const customerService = new CustomerService(admin);
-const cartItemService = new CartItemService(admin);
-const orderService = new OrderService(admin);
+const db = admin.firestore();
+
+const deliveryService = new DeliveryService(db);
+const itemService = new ItemService(db);
+const customerService = new CustomerService(db);
+const cartItemService = new CartItemService(db);
+const orderService = new OrderService(db);
 
 const publicApi = express();
 
@@ -68,7 +70,7 @@ publicApi.post('/customers/:customerId/cart/items/:itemId', async (req: express.
   try {
     const { customerId, itemId } = req.params;
 
-    const customer = await customerService.find(Number(customerId));
+    const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, 'Customer not found');
     }
@@ -90,7 +92,7 @@ publicApi.post('/customers/:customerId/orders', async (req: express.Request, res
   try {
     const { customerId } = req.params;
 
-    const customer = await customerService.find(Number(customerId));
+    const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, 'Customer not found');
     }

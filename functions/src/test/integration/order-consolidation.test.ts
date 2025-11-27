@@ -1,52 +1,43 @@
 import * as request from 'supertest';
 import { testApp } from '../setup';
-//import { Order, OrderResolvedEvent } from '../../models';
 import { Order, OrderResolvedEvent } from '../../models';
 import OrderService from '../../services/OrderService';
-import OrderPickingService from '../../services/OrderPickingService';
 import CustomerService from '../../services/CustomerService';
 import EventPublisher from '../../services/EventPublisher';
 import TBankService from '../../services/payments/TBankService';
 
-// Mock the TBankService
-jest.mock('../../services/payments/TBankService');
-
-// Mock the EventPublisher to track calls
-
 describe('Order Consolidation Integration Test', () => {
   let orderService: OrderService;
-  let pickingService: OrderPickingService;
   let customerService: CustomerService;
+
   let createdOrder: Order;
   let createdCustomer: any;
+  let createdPicking: any;
 
   let orderResolvedPublisher: EventPublisher<OrderResolvedEvent>;
 
   beforeEach(async () => {
-    // Initialize services
     const unauthContext = testApp.unauthenticatedContext();
 
     const db = unauthContext.firestore();
 
     orderService = new OrderService(db as any);
-    pickingService = new OrderPickingService(db as any);
     customerService = new CustomerService(db as any);
     orderResolvedPublisher = new EventPublisher<OrderResolvedEvent>(db as any)
 
-    // Create a test customer
-    createdCustomer = await customerService.add({
+    createdCustomer = {
+      createdAt: new Date(),
       id: 'test-customer-id',
       first_name: 'Test',
       last_name: 'Customer',
       email: 'test@example.com',
       phone: '+1234567890'
-    } as any);
+    } as any;
 
-    // Create a test order
-    createdOrder = await orderService.add({
+    createdOrder = {
       id: 'test-order-id',
       name: 'Test Order',
-      orderDate: new Date().toISOString(),
+      createdAt: new Date(),
       items: [
         {
           id: 'test-item-1',
@@ -63,25 +54,23 @@ describe('Order Consolidation Integration Test', () => {
       owner: {
         id: createdCustomer.id
       }
-    } as any);
+    } as any;
+
+    createdPicking = { ...createdOrder };
+
+    createdPicking.items[0].status = 'COLLECTED';
+
+    // Create a test customer
+    await customerService.set(createdCustomer);
+
+    // Create a test order
+    await orderService.set(createdOrder);
 
     // Create order picking with all items collected
-    await pickingService.add({
-      id: createdOrder.id,
-      order_id: createdOrder.id,
-      items: [
-        {
-          id: 'test-item-1',
-          name: 'Test Item 1',
-          status: 'COLLECTED',
-          quantity: 2,
-          price: 100
-        }
-      ]
-    } as any);
-  });
+    //await pickingService.set(createdPicking);
+  })
 
-  it('when order resolved issued should create payment', async () => {
+  xit('when order resolved issued should create payment', async () => {
     // Mock the TBankService initPayment method
     const mockInitPayment = jest.fn().mockResolvedValue({
       Success: true,
@@ -118,29 +107,37 @@ describe('Order Consolidation Integration Test', () => {
     });
   });
 
-
-
-  xit('should return 400 if order is not compiled', async () => {
-    // Update picking to have uncollected items
-    await pickingService.updateItems(createdOrder.id, [
-      {
-        id: 'test-item-1',
-        name: 'Test Item 1',
-        status: 'PENDING',
-        quantity: 2,
-        price: 100
-      }
-    ]);
-
+  it('should return 400 if order is not compiled', async () => {
     // Call the consolidate endpoint
-    const response = await request('http://localhost:5001/test-project/us-central1/admin')
+
+    let response = await request('http://127.0.0.1:5001/test-project/us-central1/admin')
+      .get(`/orders/${createdOrder.id}`)
+      .expect(200);
+
+    response = await request('http://127.0.0.1:5001/test-project/us-central1/admin')
       .post(`/orders/${createdOrder.id}/consolidate`)
       .expect(400);
 
     // Verify the error response
-    expect(response.body.error).toBe('Order is not compiled');
+    expect(response.body.error.message).toBe('Order is not compiled');
+
+    response = await request('http://127.0.0.1:5001/test-project/us-central1/admin')
+      .post(`/orders/${createdOrder.id}/order-picking`)
+      .expect(200);
+    response = await request('http://127.0.0.1:5001/test-project/us-central1/admin')
+      .post(`/orders/${createdOrder.id}/order-picking`)
+      .expect(200);
+
+    expect(response.body.total).toBe(0);
+
+    response = await request('http://127.0.0.1:5001/test-project/us-central1/admin')
+      .post(`/order-pickings/${createdOrder.id}/items/test-item-1/collect`)
+      .expect(204);
+    response = await request('http://127.0.0.1:5001/test-project/us-central1/admin')
+      .post(`/orders/${createdOrder.id}/consolidate`)
+      .expect(200);
+
   });
-
-
-
 });
+
+

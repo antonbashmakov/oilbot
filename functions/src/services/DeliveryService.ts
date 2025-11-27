@@ -5,10 +5,6 @@ import { Delivery } from '../models';
 
 class DeliveryService extends AbstractService<Delivery> {
 
-    constructor(firebase: any) {
-        super(firebase);
-    }
-
     findDeliveriesByStatus(status: Delivery['status']): Promise<Delivery[]> {
         return this.getCollection().where('status', '==', status).orderBy('delivery_start', 'desc')
         .get().then((result : any) => result.docs.map((doc: any) => doc.data() as Delivery));  

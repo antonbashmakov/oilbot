@@ -13,7 +13,6 @@ class EventPublisher<T extends OutboxEvent> {
     this.firestore = firebase;
   }  
   publish(event: T): Promise<OutboxEvent> {
-    console.log('>>>>>>>>', event)
     const outboxEventService = new OutboxEventService(this.firestore);
     return outboxEventService.add(event);
   }

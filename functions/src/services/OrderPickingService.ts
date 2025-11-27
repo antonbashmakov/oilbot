@@ -7,6 +7,7 @@ class OrderPickingService extends AbstractService<OrderPicking> {
 
     async updateItems(id: string, items: OrderPicking['items']): Promise<OrderPicking> {
         const collection = this.getCollection();
+
         const docRef = collection.doc(id);
 
         // Use transaction for atomic update
@@ -90,6 +91,7 @@ class OrderPickingService extends AbstractService<OrderPicking> {
         // Create new picking from order
         const newPicking: OrderPicking = {
             id: orderId,
+            createdAt: new Date,
             delivery: { ...order.delivery },
             items: pickingItems,
             owner: order.owner,

@@ -16,7 +16,11 @@ class OrderResolveProcessor extends AbstractProcessor {
     }
 
     const paymentRequest = tbankService.orderToPaymentRequest(order);
+
+
+
     const paymentResponse = await tbankService.initPayment(paymentRequest);
+
 
     const paymentData = {
       payment_url: paymentResponse.PaymentURL,

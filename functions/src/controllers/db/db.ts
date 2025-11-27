@@ -1,16 +1,18 @@
 
-import * as admin from "firebase-admin";
-import * as functions from "firebase-functions";
+import {
+  functions,
+  admin,
+} from './imports';
 import { toProcessor } from "../../services/events/factory";
 import { OutboxEvent } from "../../models";
 
-admin.initializeApp(functions.config().firebase, "db");
+admin.initializeApp({}, "db");
 
 const db = admin.firestore();
 
 
 const processOutboxEvent = functions.firestore
-  .document("outboxEvents/{eventId}")
+  .document("OUTBOX_EVENTS/{eventId}")
   .onCreate(async (snap, context) => {
     const data = snap.data() as OutboxEvent;
 

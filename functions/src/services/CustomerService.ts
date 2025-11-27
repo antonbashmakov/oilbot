@@ -5,9 +5,6 @@ import { Customer } from '../models';
 
 class CustomerService extends AbstractService<Customer> {
 
-    constructor(firebase: any) {
-        super(firebase);
-    }
     getCollectionName(): string { return COLLECTIONS.CUSTOMERS; }
     getExcludedFields(): string[] { return ['createdAt']; }
 }
