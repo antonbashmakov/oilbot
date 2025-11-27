@@ -34,8 +34,8 @@ class TBankService {
       OrderId: order.id,
       Description: "Оплата заказа в магазине По Себестоимости",
       DATA: {
-        Phone: "+79022394130",
-        Email: "info@posebestoimosti.ru"
+        Phone: process.env.SUPPORT_PHONE,
+        Email: process.env.SUPPORT_EMAIL,
       },
       Receipt,
     };
@@ -44,12 +44,8 @@ class TBankService {
 
     delete rootFields.DATA;
     delete rootFields.Receipt;
-
-    const sortedValues = Object.keys(rootFields).sort().map(k => rootFields[k]).join('');
-
-    const crypto = require('crypto');
-    const hash = crypto.createHash('sha256').update(sortedValues).digest('hex');
-    body.Token = hash;
+    
+    body.Token = this.generateToken(rootFields);
 
     return body;
   }
@@ -61,6 +57,14 @@ class TBankService {
       }
     });
     return response.data;
+  }
+
+  generateToken(object: any): string {
+    const sortedValues = Object.keys(object).sort().map(k => object[k]).join('');
+
+    const crypto = require('crypto');
+    return crypto.createHash('sha256').update(sortedValues).digest('hex');
+
   }
 }
 

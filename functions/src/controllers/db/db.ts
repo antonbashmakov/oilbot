@@ -15,9 +15,7 @@ const processOutboxEvent = functions.firestore
     try {
 
       const ProcessorConstructor = toProcessor(data.type);
-
       const processor = new ProcessorConstructor(admin);
-
       processor.process(data);
 
       // mark success
