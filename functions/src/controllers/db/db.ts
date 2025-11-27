@@ -6,6 +6,8 @@ import { OutboxEvent } from "../../models";
 
 admin.initializeApp(functions.config().firebase, "db");
 
+const db = admin.firestore();
+
 
 const processOutboxEvent = functions.firestore
   .document("outboxEvents/{eventId}")
@@ -15,7 +17,7 @@ const processOutboxEvent = functions.firestore
     try {
 
       const ProcessorConstructor = toProcessor(data.type);
-      const processor = new ProcessorConstructor(admin);
+      const processor = new ProcessorConstructor(db);
       processor.process(data);
 
       // mark success
@@ -23,12 +25,14 @@ const processOutboxEvent = functions.firestore
         processed: true,
         processedAt: Date.now(),
       });
+
     } catch (error ) {
       console.error("Failed to process event:", error);
 
       // increment retry counter — DO NOT mark as processed
       await snap.ref.update({
         retries: data.retries + 1,
+        processedAt: Date.now(),
         lastError: (error as any).message,
       });
 

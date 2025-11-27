@@ -68,6 +68,8 @@ abstract class AbstractService<T extends Entity> {
     const ref = this.getCollection().doc();
     objectToSave.id = ref.id;
 
+    console.log(objectToSave)
+
     return ref.set(objectToSave).then(() => objectToSave as T);
   }
 
