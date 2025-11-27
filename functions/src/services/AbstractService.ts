@@ -1,8 +1,9 @@
+import { Firestore } from 'firebase-admin/firestore';
 import { jsonify } from './utils';
 
 // Interface for entities that have an ID
 interface Entity {
-  id: string | number;
+  id: string;
   createdAt?: Date | string;
   owner?: { id: string | number };
 }
@@ -10,15 +11,17 @@ interface Entity {
 type IdOf<T extends Entity> = T["id"];
 
 // Simplified Firebase Admin SDK interface
-export interface FirebaseAdmin {
+/*
+export interface Firestore {
   firestore(): any;
 }
+*/
 
 abstract class AbstractService<T extends Entity> {
-  protected firebase: FirebaseAdmin;
+  protected db: Firestore;
 
-  constructor(firebase: FirebaseAdmin) {
-    this.firebase = firebase;
+  constructor(firebase: Firestore) {
+    this.db = firebase;
   }
 
   find(id: IdOf<T>): Promise<T | undefined> {
@@ -75,7 +78,7 @@ abstract class AbstractService<T extends Entity> {
   }
 
   delete(object: T): Promise<any> {
-    return this.firebase.firestore().collection(this.getCollectionName()).doc(object.id).delete();    
+    return this.db.collection(this.getCollectionName()).doc(object.id).delete();    
   }
 
   updateTransactionally(entity: T, object: Partial<T>): Promise<any> {
@@ -86,14 +89,14 @@ abstract class AbstractService<T extends Entity> {
   };
 
   runTransactionally(method: (transaction: any) => Promise<any>) {
-    return this.firebase.firestore().runTransaction(method);
+    return this.db.runTransaction(method);
   }
   getCollection() {
-    return this.firebase.firestore().collection(this.getCollectionName());
+    return this.db.collection(this.getCollectionName());
   }
 
   getCollectionByName(collection: string) {
-    return this.firebase.firestore().collection(collection);
+    return this.db.collection(collection);
   }
 
   toPOJO(id:any, o: any): T | undefined {

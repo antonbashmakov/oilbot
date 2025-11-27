@@ -5,16 +5,12 @@ import { OrderPicking } from '../models';
 
 class OrderPickingService extends AbstractService<OrderPicking> {
 
-    constructor(firebase: any) {
-        super(firebase);
-    }
-
     async updateItems(id: string, items: OrderPicking['items']): Promise<OrderPicking> {
         const collection = this.getCollection();
         const docRef = collection.doc(id);
 
         // Use transaction for atomic update
-        const updatedPicking = await this.firebase.firestore().runTransaction(async (transaction: any) => {
+        const updatedPicking = await this.db.runTransaction(async (transaction: any) => {
             // Get the current document
             const docSnapshot = await transaction.get(docRef);
 
@@ -49,7 +45,7 @@ class OrderPickingService extends AbstractService<OrderPicking> {
 
 
         // Use transaction for atomic update
-        await this.firebase.firestore().runTransaction(async (transaction: any) => {
+        await this.db.runTransaction(async (transaction: any) => {
             // Get the current document
             const docSnapshot = await transaction.get(docRef);
 

@@ -1,12 +1,12 @@
+import { Firestore } from "firebase-admin/firestore";
 import { OutboxEvent } from "../../models";
-import { FirebaseAdmin } from "../AbstractService";
 
 abstract class AbstractProcessor {
 
-    protected firebase: FirebaseAdmin;
+    protected db: Firestore;
   
-    constructor(firebase: FirebaseAdmin) {
-      this.firebase = firebase;
+    constructor(db: Firestore) {
+      this.db = db;
     }
 
   abstract process(event:  OutboxEvent): void;

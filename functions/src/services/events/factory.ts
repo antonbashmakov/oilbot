@@ -1,8 +1,9 @@
 import OrderResolveProcessor from "./OrderResolveProcessor";
 import AbstractProcessor from "./AbstractProcessor";
-import { FirebaseAdmin } from "../AbstractService";
+import { Firestore } from "firebase-admin/firestore";
 
-type ProcessorConstructor = new (firebase: FirebaseAdmin) => AbstractProcessor;
+
+type ProcessorConstructor = new (firebase: Firestore) => AbstractProcessor;
 
 const EVENT_PROCESSORS: { [key: string]: ProcessorConstructor } = {
   'ORDER_RESOLVE_REQUESTED': OrderResolveProcessor,

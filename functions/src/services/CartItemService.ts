@@ -3,9 +3,6 @@ import { COLLECTIONS } from '../constants';
 import { CartItem, Item, Customer } from '../models';
 
 class CartItemService extends AbstractService<CartItem> {
-    constructor(firebase: any) {
-        super(firebase);
-    }
 
     async addToCart(item: Item, customer: Customer): Promise<CartItem> {
         const cartItem: CartItem = {

@@ -379,9 +379,9 @@ components:
           description: Customer's first name
           example: "Антон"
         id:
-          type: integer
+          type: string
           description: Unique identifier for the customer
-          example: 1019705782
+          example: "1019705782"
         is_bot:
           type: boolean
           nullable: true
@@ -509,9 +509,9 @@ components:
         - id
       properties:
         id:
-          type: integer
+          type: string
           description: Owner ID
-          example: 270053857
+          example: "270053857"
     DeliveryRef:
       required:
         - delivery_end

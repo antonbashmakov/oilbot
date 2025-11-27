@@ -359,7 +359,7 @@ export interface components {
        * @description Unique identifier for the customer
        * @example 1019705782
        */
-      id: number;
+      id: string;
       /**
        * @description Whether the customer is a bot
        * @example null
@@ -462,7 +462,7 @@ export interface components {
        * @description Owner ID
        * @example 270053857
        */
-      id: number;
+      id: string;
     };
     DeliveryRef: {
       /**

@@ -9,7 +9,10 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "openapi": "openapi-typescript resources/openapi/api.yml -o src/openapi/api.d.ts && openapi-typescript resources/openapi/models.yml -o src/openapi/models.d.ts",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "engines": {
     "node": "20"
@@ -23,14 +26,22 @@
     "momentjs": "^2.0.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.0",
+    "@firebase/testing": "^0.20.11",
     "@types/axios": "^0.14.4",
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
     "eslint": "^8.9.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
+    "firebase": "^9",
     "firebase-functions-test": "^3.1.0",
+    "jest": "^30.2.0",
     "openapi-typescript": "^6.7.0",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.5",
     "typescript": "^4.9.0"
   },
   "private": true

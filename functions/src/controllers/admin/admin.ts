@@ -14,12 +14,15 @@ import { DeliveryOverview, OrderResolvedEvent, Stats } from '../../models';
 import OrderPickingService from '../../services/OrderPickingService';
 import CustomerService from '../../services/CustomerService';
 import EventPublisher from '../../services/EventPublisher';
+import { debug } from 'firebase-functions/logger';
 
 admin.initializeApp({}, 'admin');
 admin.firestore().settings({
   databaseId: process.env.DATABASE_ID,
 });
 dotenv.config();
+
+const db = admin.firestore();
 
 const adminApi = express();
 
@@ -60,8 +63,8 @@ adminApi.get('/deliveries', async (req: express.Request, res: express.Response) 
 adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Response) => {
   try {
     const { id } = req.params;
-    const deliveryService = new DeliveryService(admin);
-    const orderService = new OrderService(admin);
+    const deliveryService = new DeliveryService(db);
+    const orderService = new OrderService(db);
     const delivery = await deliveryService.find(id);
 
     if (!delivery) {
@@ -109,7 +112,7 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
 adminApi.get('/orders/:id', async (req: express.Request, res: express.Response) => {
   try {
     const { id } = req.params;
-    const orderService = new OrderService(admin);
+    const orderService = new OrderService(db);
 
     const order = await orderService.find(id);
 
@@ -117,8 +120,8 @@ adminApi.get('/orders/:id', async (req: express.Request, res: express.Response) 
       return api.notFound(res, 'Delivery not found');
     }
 
-    const customerService = new CustomerService(admin);
-    const pickingService = new OrderPickingService(admin);
+    const customerService = new CustomerService(db);
+    const pickingService = new OrderPickingService(db);
 
     const picking = await pickingService.find(id);
     const customer = await customerService.find(order.owner!.id);
@@ -139,7 +142,7 @@ adminApi.patch('/order-pickings/:id', async (req: express.Request, res: express.
       return api.error(res, 'Items array is required');
     }
 
-    const pickingService = new OrderPickingService(admin);
+    const pickingService = new OrderPickingService(db);
     const updatedPicking = await pickingService.updateItems(id, items);
 
     return api.send(res, updatedPicking);
@@ -156,14 +159,14 @@ adminApi.post('/orders/:id/order-picking', async (req: express.Request, res: exp
   try {
     const { id } = req.params;
 
-    const orderService = new OrderService(admin);
+    const orderService = new OrderService(db);
     const order = await orderService.find(id);
 
     if (!order) {
       return api.notFound(res, 'Order not found');
     }
 
-    const pickingService = new OrderPickingService(admin);
+    const pickingService = new OrderPickingService(db);
     const picking = await pickingService.findOrCreateFromOrder(id, order);
 
     return api.send(res, picking);
@@ -176,7 +179,7 @@ adminApi.post('/orders/:id/order-picking', async (req: express.Request, res: exp
 adminApi.post('/order-pickings/:pickingId/items/:itemId/collect', async (req: express.Request, res: express.Response) => {
   try {
     const { pickingId, itemId } = req.params;
-    const pickingService = new OrderPickingService(admin);
+    const pickingService = new OrderPickingService(db);
     await pickingService.toggleOrderItemCollection(pickingId, itemId);
     return res.status(204).send();
   } catch (err: any) {
@@ -192,14 +195,14 @@ adminApi.post('/orders/:id/consolidate', async (req: express.Request, res: expre
   try {
     const { id } = req.params;
 
-    const orderService = new OrderService(admin);
+    const orderService = new OrderService(db);
     const order = await orderService.find(id);
 
     if (!order) {
       return api.notFound(res, 'Order not found');
     }
 
-    const pickingService = new OrderPickingService(admin);
+    const pickingService = new OrderPickingService(db);
 
     const picking = await pickingService.find(id);
 
@@ -209,7 +212,7 @@ adminApi.post('/orders/:id/consolidate', async (req: express.Request, res: expre
 
     orderService.updateTransactionally(order, { status: 'RESOLVING' });
 
-    const eventPublisher = new EventPublisher<OrderResolvedEvent>(admin);
+    const eventPublisher = new EventPublisher<OrderResolvedEvent>(db);
 
     const event = { 
       id: '', // will be set by OutboxEventService

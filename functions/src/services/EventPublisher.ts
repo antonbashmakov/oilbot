@@ -1,18 +1,19 @@
+import { Firestore } from "firebase-admin/firestore";
 import { OutboxEvent } from "../models";
-import { FirebaseAdmin } from "./AbstractService";
+
 import OutboxEventService from "./OutboxEventService";
 
 
 
 class EventPublisher<T extends OutboxEvent> {
 
-  protected firebase: FirebaseAdmin;
+  protected firestore: Firestore;
 
-  constructor(firebase: FirebaseAdmin) {
-    this.firebase = firebase;
+  constructor(firebase: Firestore) {
+    this.firestore = firebase;
   }  
   publish(event: T): Promise<OutboxEvent> {
-    const outboxEventService = new OutboxEventService(this.firebase);
+    const outboxEventService = new OutboxEventService(this.firestore);
     return outboxEventService.add(event);
   }
 

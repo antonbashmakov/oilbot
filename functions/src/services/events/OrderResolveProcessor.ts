@@ -6,7 +6,7 @@ import AbstractProcessor from "./AbstractProcessor";
 class OrderResolveProcessor extends AbstractProcessor {
 
   async process(event: OrderResolvedEvent): Promise<void> {
-    const orderService = new OrderService(this.firebase);
+    const orderService = new OrderService(this.db);
     const tbankService = new TBankService();
 
     const order = await orderService.find(event.payload.orderId);
@@ -21,7 +21,7 @@ class OrderResolveProcessor extends AbstractProcessor {
     const paymentData = {
       payment_url: paymentResponse.PaymentURL,
       error_code: paymentResponse.ErrorCode,
-      payment_id: this.firebase.firestore().collection('PAYMENTS').doc().id,
+      payment_id: this.db.collection('PAYMENTS').doc().id,
       external_payment_id: paymentResponse.PaymentId,
       terminal_key: paymentResponse.TerminalKey,
       order_id: paymentResponse.OrderId,
@@ -31,7 +31,7 @@ class OrderResolveProcessor extends AbstractProcessor {
       created_at: new Date().toISOString()
     };
 
-    await this.firebase.firestore().collection('PAYMENTS').doc(paymentData.payment_id).set(paymentData);
+    await this.db.collection('PAYMENTS').doc(paymentData.payment_id).set(paymentData);
   }
 }
 

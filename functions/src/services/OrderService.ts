@@ -3,9 +3,7 @@ import { COLLECTIONS } from '../constants';
 import { Order, Customer, CartItem, Delivery } from '../models';
 
 class OrderService extends AbstractService<Order> {
-    constructor(firebase: any) {
-        super(firebase);
-    }
+
 
     findOrders(delivery: Delivery): Promise<Order[]> {
         return this.getCollection().where('delivery.id', '==', delivery.id)
@@ -29,7 +27,7 @@ class OrderService extends AbstractService<Order> {
             }
         };
 
-        const batch = this.firebase.firestore().batch();
+        const batch = this.db.batch();
         batch.set(orderRef, order);
 
         cartItems.forEach(item => {
