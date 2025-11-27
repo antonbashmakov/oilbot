@@ -17,7 +17,7 @@ class IdempotencyGuardService extends AbstractService<IdempotentObject> {
       
       const idempotentRequestResult: IdempotentObject<T> = {
         id: key,
-        createdAt: new Date(),
+        created_at: new Date(),
         data
       }
 
@@ -27,7 +27,7 @@ class IdempotencyGuardService extends AbstractService<IdempotentObject> {
   }
 
   getExcludedFields(): string[] {
-    return ["createdAt", "processedAt"];
+    return ["created_at", "processed_at"];
   }
 }
 

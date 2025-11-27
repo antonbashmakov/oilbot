@@ -725,11 +725,6 @@ components:
           type: string
           description: Name of the customer
           example: "Order 1"
-        orderDate:
-          type: string
-          format: date-time
-          description: Date when the order was placed
-          example: "2025-01-10T14:30:00Z"
         items:
           type: array
           description: Items in this order
@@ -746,7 +741,7 @@ components:
           example: "PAID"
         owner:
           $ref: '#/components/schemas/OwnerRef'
-        numberOfItems:
+        number_of_Items:
           type: integer
           description: Number of items in the order
           example: 5
@@ -788,7 +783,7 @@ components:
           items:
             type: string
           example: ["admin", "user"]
-        createdAt:
+        created_at:
           type: string
           format: date-time
           description: Creation timestamp
@@ -821,6 +816,56 @@ components:
               type: string
               description: Error message
               example: "Delivery not found"
+
+    Payment:
+      type: object
+      required:
+        - id
+        - external_payment_id
+        - terminal_key
+        - order_id
+        - amount
+        - success
+        - created_at
+      properties:
+        payment_url:
+          type: string
+          description: URL for payment processing
+          example: "https://securepay.tinkoff.ru/payment/init"
+        error_code:
+          type: string
+          nullable: true
+          description: Error code from payment provider
+          example: "0"
+        id:
+          type: string
+          description: Internal payment ID
+          example: "payment-123456"
+        external_payment_id:
+          type: string
+          description: Payment ID from external payment provider
+          example: "123456789"
+        terminal_key:
+          type: string
+          description: Terminal key from payment provider
+          example: "TinkoffBankTest"
+        order_id:
+          type: string
+          description: Order ID associated with the payment
+          example: "order-456"
+        amount:
+          type: integer
+          description: Payment amount in minor units (kopecks)
+          example: 15000
+        success:
+          type: boolean
+          description: Whether the payment was successful
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: Payment creation timestamp
+          example: "2025-01-10T14:30:00Z"
 
 tags:
   - name: Deliveries

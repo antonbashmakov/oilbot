@@ -4,7 +4,7 @@ import { jsonify } from './utils';
 // Interface for entities that have an ID
 interface Entity {
   id: string;
-  createdAt?: Date | string;
+  created_at?: Date | string;
   owner?: { id: string | number };
 }
 
@@ -55,7 +55,7 @@ abstract class AbstractService<T extends Entity> {
   }
 
   add(object: T): Promise<T> {
-    object.createdAt = new Date();
+    object.created_at = new Date();
 
     const fields = this.getExcludedFields();
 

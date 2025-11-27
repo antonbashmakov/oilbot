@@ -54,9 +54,14 @@ class TBankService {
 
     if (process.env.GCLOUD_PROJECT === 'test-project') {
       return {
+        TerminalKey: "MOCK_TERMINAL",
         Success: true,
         Status: 'NEW',
-        PaymentId: paymentRequest.OrderId,
+        ErrorCode: 0,
+        PaymentId: "external-mock-id",
+        OrderId: paymentRequest.OrderId,
+        Amount: paymentRequest.Amount,
+        Token: "mock-token",
         PaymentURL: `https://securepay.tinkoff.ru/${paymentRequest.OrderId}`
       }
     }

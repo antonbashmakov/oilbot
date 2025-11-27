@@ -1,6 +1,7 @@
-import { OrderResolvedEvent } from "../../models";
+import { OrderResolvedEvent, Payment } from "../../models";
 import OrderService from "../OrderService";
 import TBankService from "../payments/TBankService";
+import PaymentService from "../PaymentService";
 import AbstractProcessor from "./AbstractProcessor";
 
 class OrderResolveProcessor extends AbstractProcessor {
@@ -9,7 +10,7 @@ class OrderResolveProcessor extends AbstractProcessor {
     const orderService = new OrderService(this.db);
     const tbankService = new TBankService();
 
-    const order = await orderService.find(event.payload.orderId);
+    const order = await orderService.find(event.payload.order_id);
 
     if (!order) {
       throw new Error(`Order with id ${event.payload.orderId} not found`);
@@ -17,25 +18,26 @@ class OrderResolveProcessor extends AbstractProcessor {
 
     const paymentRequest = tbankService.orderToPaymentRequest(order);
 
-
-
+    
     const paymentResponse = await tbankService.initPayment(paymentRequest);
-
-
-    const paymentData = {
+    
+    const paymentData: Payment = {
       payment_url: paymentResponse.PaymentURL,
       error_code: paymentResponse.ErrorCode,
-      payment_id: this.db.collection('PAYMENTS').doc().id,
+      id: '',
       external_payment_id: paymentResponse.PaymentId,
       terminal_key: paymentResponse.TerminalKey,
       order_id: paymentResponse.OrderId,
       amount: paymentResponse.Amount,
       success: paymentResponse.Success,
-      token: paymentRequest.Token,
-      created_at: new Date().toISOString()
+      created_at: new Date()
     };
 
-    await this.db.collection('PAYMENTS').doc(paymentData.payment_id).set(paymentData);
+    const paymentService = new PaymentService(this.db);
+
+
+    console.log('ADDIng ===========', paymentData)
+    await paymentService.add(paymentData);
   }
 }
 

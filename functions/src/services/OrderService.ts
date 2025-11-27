@@ -17,10 +17,9 @@ class OrderService extends AbstractService<Order> {
         const order: Order = {
             id: orderRef.id,
             name: customer.first_name,
-            orderDate: new Date().toISOString(),
             items: cartItems,
             status: 'PENDING',
-            numberOfItems: cartItems.length,
+            number_of_Items: cartItems.length,
             total: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
             owner: {
                 id: customer.id,
@@ -40,7 +39,7 @@ class OrderService extends AbstractService<Order> {
     }
 
     getCollectionName(): string { return COLLECTIONS.ORDERS; }
-    getExcludedFields(): string[] { return ['createdAt']; }
+    getExcludedFields(): string[] { return ['created_at']; }
 }
 
 export default OrderService;

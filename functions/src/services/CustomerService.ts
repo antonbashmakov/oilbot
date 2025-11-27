@@ -6,7 +6,7 @@ import { Customer } from '../models';
 class CustomerService extends AbstractService<Customer> {
 
     getCollectionName(): string { return COLLECTIONS.CUSTOMERS; }
-    getExcludedFields(): string[] { return ['createdAt']; }
+    getExcludedFields(): string[] { return ['created_at']; }
 }
 
 export default CustomerService;

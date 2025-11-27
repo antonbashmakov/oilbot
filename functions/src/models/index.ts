@@ -11,6 +11,7 @@ export type Customer = components["schemas"]["Customer"];
 export type Item = components["schemas"]["Item"];
 export type CartItem = components["schemas"]["CartItem"];
 export type PickingItem = components["schemas"]["PickingItem"];
+export type BasePayment = components["schemas"]["Payment"];
 
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
@@ -18,24 +19,27 @@ export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 
-export type OrderPicking = Omit<BaseOrderPicking, "createdAt" > &  {
-  createdAt: Date;
+export type Payment = Omit<BasePayment, "created_at" > &  {
+  created_at: Date;
 };
-export type OutboxEvent = Omit<BaseOutboxEvent, "createdAt" | "processedAt"> &  {
-  createdAt: Date;
-  processedAt?: Date;
+export type OrderPicking = Omit<BaseOrderPicking, "created_at" > &  {
+  created_at: Date;
+};
+export type OutboxEvent = Omit<BaseOutboxEvent, "created_at" | "processedAt"> &  {
+  created_at: Date;
+  processed_at?: Date;
   payload?: { [key: string]: any };
 };
 
 export type OrderResolvedEvent = OutboxEvent & {
   payload: {
-    orderId: string;
+    order_id: string;
   }
 };
 
 export interface IdempotentObject<T = any> {
   id: string;
-  createdAt: Date;
+  created_at: Date;
   data: T;
 }
 

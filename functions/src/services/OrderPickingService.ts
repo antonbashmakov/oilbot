@@ -91,7 +91,7 @@ class OrderPickingService extends AbstractService<OrderPicking> {
         // Create new picking from order
         const newPicking: OrderPicking = {
             id: orderId,
-            createdAt: new Date,
+            created_at: new Date,
             delivery: { ...order.delivery },
             items: pickingItems,
             owner: order.owner,
@@ -107,7 +107,7 @@ class OrderPickingService extends AbstractService<OrderPicking> {
     }
 
     getCollectionName(): string { return COLLECTIONS.PICKINGS; }
-    getExcludedFields(): string[] { return ['createdAt']; }
+    getExcludedFields(): string[] { return ['created_at']; }
 }
 
 export default OrderPickingService;

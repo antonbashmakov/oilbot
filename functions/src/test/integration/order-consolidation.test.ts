@@ -5,10 +5,14 @@ import OrderService from '../../services/OrderService';
 import CustomerService from '../../services/CustomerService';
 import EventPublisher from '../../services/EventPublisher';
 import TBankService from '../../services/payments/TBankService';
+import PaymentService from '../../services/PaymentService';
+import OutboxEventService from '../../services/OutboxEventService';
 
 describe('Order Consolidation Integration Test', () => {
   let orderService: OrderService;
   let customerService: CustomerService;
+  let paymentService: PaymentService;
+  let outboxEventService: OutboxEventService<OrderResolvedEvent>;
 
   let createdOrder: Order;
   let createdCustomer: any;
@@ -23,10 +27,12 @@ describe('Order Consolidation Integration Test', () => {
 
     orderService = new OrderService(db as any);
     customerService = new CustomerService(db as any);
-    orderResolvedPublisher = new EventPublisher<OrderResolvedEvent>(db as any)
+    paymentService = new PaymentService(db as any);
+    orderResolvedPublisher = new EventPublisher<OrderResolvedEvent>(db as any);
+    outboxEventService = new OutboxEventService(db as any);
 
     createdCustomer = {
-      createdAt: new Date(),
+      created_at: new Date(),
       id: 'test-customer-id',
       first_name: 'Test',
       last_name: 'Customer',
@@ -37,7 +43,7 @@ describe('Order Consolidation Integration Test', () => {
     createdOrder = {
       id: 'test-order-id',
       name: 'Test Order',
-      createdAt: new Date(),
+      created_at: new Date(),
       items: [
         {
           id: 'test-item-1',
@@ -87,10 +93,10 @@ describe('Order Consolidation Integration Test', () => {
       type: 'ORDER_RESOLVE_REQUESTED',
       processed: false,
       retries: 0,
-      createdAt: new Date,
-      processedAt: new Date,
+      created_at: new Date,
+      processed_at: new Date,
       payload: {
-        orderId: 'some-order'
+        order_id: 'some-order'
       }
     })
 
@@ -107,8 +113,15 @@ describe('Order Consolidation Integration Test', () => {
     });
   });
 
-  it('should return 400 if order is not compiled', async () => {
+  it('order flow', async () => {
     // Call the consolidate endpoint
+
+    let payments = await paymentService.findAll();
+    expect(payments.length).toBe(0);
+
+    let events = await outboxEventService.findAll();
+    expect(events.length).toBe(0);
+
 
     let response = await request('http://127.0.0.1:5001/test-project/us-central1/admin')
       .get(`/orders/${createdOrder.id}`)
@@ -136,6 +149,13 @@ describe('Order Consolidation Integration Test', () => {
     response = await request('http://127.0.0.1:5001/test-project/us-central1/admin')
       .post(`/orders/${createdOrder.id}/consolidate`)
       .expect(200);
+
+    const order = await orderService.find(createdOrder.id);
+
+    expect(order?.status).toBe('RESOLVING');
+
+    events = await outboxEventService.findAll();
+    expect(events.length).toBe(1);
 
   });
 });

@@ -9,7 +9,7 @@ class OutboxEventService<T extends OutboxEvent> extends AbstractService<T> {
   }
 
   getExcludedFields(): string[] {
-    return ["createdAt", "processedAt"];
+    return ["created_at", "processed_at"];
   }
 }
 

@@ -22,7 +22,7 @@ class CartItemService extends AbstractService<CartItem> {
     }
 
     getCollectionName(): string { return COLLECTIONS.CART_ITEMS; }
-    getExcludedFields(): string[] { return ['createdAt']; }
+    getExcludedFields(): string[] { return ['created_at']; }
 }
 
 export default CartItemService;

@@ -19,7 +19,6 @@ dotenv.config();
 
 admin.initializeApp({}, 'admin');
 
-
 if (process.env.GCLOUD_PROJECT !== 'test-project') {
   admin.firestore().settings({
     databaseId: process.env.DATABASE_ID,
@@ -215,22 +214,22 @@ adminApi.post('/orders/:id/consolidate', async (req: express.Request, res: expre
       return api.badRequest(res, 'Order is not compiled');
     }
 
-    orderService.updateTransactionally(order, { status: 'RESOLVING' });
+    await orderService.updateTransactionally(order, { status: 'RESOLVING' });
 
     const eventPublisher = new EventPublisher<OrderResolvedEvent>(db);
 
     const event = {
       id: '', // will be set by OutboxEventService
-      createdAt: new Date(),
-      processedAt: new Date(),
+      created_at: new Date(),
+      processed_at: new Date(),
       processed: false,
       retries: 0,
       type: 'ORDER_RESOLVE_REQUESTED',
-      payload: { orderId: order.id }
+      payload: { order_id: order.id }
 
     };
 
-    eventPublisher.publish(event);
+    await eventPublisher.publish(event);
 
     return api.send(res, {});
   } catch (err: any) {

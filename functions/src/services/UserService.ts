@@ -9,7 +9,7 @@ interface UserEntity {
   id: string;
   email: string;
   roles: string[];
-  createdAt?: Date;
+  created_at?: Date;
   label?: {
     expiration: number;
   };
@@ -22,20 +22,20 @@ class UserService extends AbstractService<UserEntity> {
     }
 
     createUser(user: UserEntity): Promise<any> {
-        const createdAt = user.createdAt;
+        const created_at = user.created_at;
 
         const userToSave = jsonify(user);
 
-        userToSave.createdAt = createdAt;
+        userToSave.created_at = created_at;
         const ref = this.getCollection().doc(userToSave.id);
         return ref.set(userToSave);
     }
 
     getCollectionName(): string { return COLLECTIONS.USERS; }
-    getExcludedFields(): string[] { return ['createdAt']; }
+    getExcludedFields(): string[] { return ['created_at']; }
 
     clearUser(user: UserEntity): void {
-        delete (user as any).createdAt;
+        delete (user as any).created_at;
         delete (user as any).roles;
         delete (user as any).email;
     }

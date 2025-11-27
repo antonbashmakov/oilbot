@@ -15,7 +15,7 @@ class DeliveryService extends AbstractService<Delivery> {
     }
 
     getCollectionName(): string { return COLLECTIONS.DELIVERIES; }
-    getExcludedFields(): string[] { return ['createdAt']; }
+    getExcludedFields(): string[] { return ['created_at']; }
 }
 
 export default DeliveryService;

@@ -11,7 +11,7 @@ class ItemService extends AbstractService<Item> {
     }
 
     getCollectionName(): string { return COLLECTIONS.ITEMS; }
-    getExcludedFields(): string[] { return ['createdAt']; }
+    getExcludedFields(): string[] { return ['created_at']; }
 }
 
 export default ItemService;

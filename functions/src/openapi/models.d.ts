@@ -27,7 +27,7 @@ export interface components {
        * Format: date-time
        * @description Timestamp when the event was written to Firestore.
        */
-      createdAt: string;
+      created_at: string;
       /**
        * @description Indicates whether the event has been successfully processed.
        * @default false

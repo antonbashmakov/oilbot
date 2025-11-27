@@ -2,13 +2,13 @@ class User {
     id: string;
     email: string;
     roles: string[];
-    createdAt: Date;
+    created_at: Date;
 
-    constructor(uid: string, email: string, createdAt: Date = new Date()) {
+    constructor(uid: string, email: string, created_at: Date = new Date()) {
         this.id = uid;
         this.email = email;
         this.roles = ['customer'];
-        this.createdAt = createdAt;
+        this.created_at = created_at;
     }
 }
 
