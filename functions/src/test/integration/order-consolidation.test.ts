@@ -3,8 +3,6 @@ import { testApp } from '../setup';
 import { Order, OrderResolvedEvent } from '../../models';
 import OrderService from '../../services/OrderService';
 import CustomerService from '../../services/CustomerService';
-import EventPublisher from '../../services/EventPublisher';
-import TBankService from '../../services/payments/TBankService';
 import PaymentService from '../../services/PaymentService';
 import OutboxEventService from '../../services/OutboxEventService';
 
@@ -18,8 +16,6 @@ describe('Order Consolidation Integration Test', () => {
   let createdCustomer: any;
   let createdPicking: any;
 
-  let orderResolvedPublisher: EventPublisher<OrderResolvedEvent>;
-
   beforeEach(async () => {
     const unauthContext = testApp.unauthenticatedContext();
 
@@ -28,7 +24,6 @@ describe('Order Consolidation Integration Test', () => {
     orderService = new OrderService(db as any);
     customerService = new CustomerService(db as any);
     paymentService = new PaymentService(db as any);
-    orderResolvedPublisher = new EventPublisher<OrderResolvedEvent>(db as any);
     outboxEventService = new OutboxEventService(db as any);
 
     createdCustomer = {
@@ -75,43 +70,6 @@ describe('Order Consolidation Integration Test', () => {
     // Create order picking with all items collected
     //await pickingService.set(createdPicking);
   })
-
-  xit('when order resolved issued should create payment', async () => {
-    // Mock the TBankService initPayment method
-    const mockInitPayment = jest.fn().mockResolvedValue({
-      Success: true,
-      Status: 'NEW',
-      PaymentId: 'mock-payment-id',
-      PaymentURL: 'https://securepay.tinkoff.ru/mock-payment-url'
-    });
-
-    (TBankService as jest.MockedClass<typeof TBankService>).prototype.initPayment = mockInitPayment;
-
-
-    orderResolvedPublisher.publish({
-      id: 'test-order-id',
-      type: 'ORDER_RESOLVE_REQUESTED',
-      processed: false,
-      retries: 0,
-      created_at: new Date,
-      processed_at: new Date,
-      payload: {
-        order_id: 'some-order'
-      }
-    })
-
-    // Verify that initPayment was called
-    expect(mockInitPayment).toHaveBeenCalledTimes(1);
-
-    // Verify the payment request structure
-    const paymentRequest = mockInitPayment.mock.calls[0][0];
-    expect(paymentRequest).toMatchObject({
-      TerminalKey: expect.any(String),
-      Amount: 20000, // 200 * 100 (in kopecks)
-      OrderId: 'test-order-id',
-      Description: 'Оплата заказа в магазине По Себестоимости'
-    });
-  });
 
   it('order flow', async () => {
     // Call the consolidate endpoint

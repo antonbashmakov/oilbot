@@ -726,7 +726,7 @@ export interface components {
        * @description Error code from payment provider
        * @example 0
        */
-      error_code?: string | null;
+      error_code?: number | null;
       /**
        * @description Internal payment ID
        * @example payment-123456

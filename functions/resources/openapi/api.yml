@@ -833,10 +833,10 @@ components:
           description: URL for payment processing
           example: "https://securepay.tinkoff.ru/payment/init"
         error_code:
-          type: string
+          type: number
           nullable: true
           description: Error code from payment provider
-          example: "0"
+          example: 0
         id:
           type: string
           description: Internal payment ID

@@ -52,7 +52,8 @@ class TBankService {
 
   async initPayment(paymentRequest: TinkoffPaymentPayload) {
 
-    if (process.env.GCLOUD_PROJECT === 'test-project') {
+
+    if (process.env.IS_TEST) {
       return {
         TerminalKey: "MOCK_TERMINAL",
         Success: true,
