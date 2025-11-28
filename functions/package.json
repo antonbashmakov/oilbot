@@ -11,7 +11,7 @@
     "deploy": "firebase deploy --only functions",
     "openapi": "openapi-typescript resources/openapi/api.yml -o src/openapi/api.d.ts && openapi-typescript resources/openapi/models.yml -o src/openapi/models.d.ts",
     "logs": "firebase functions:log",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },

@@ -106,7 +106,7 @@ describe('OrderResolveProcessor Integration Test', () => {
     expect(createdPayment.created_at).toBeInstanceOf(Date);
   });
 
-  xit('should throw error when order is not found', async () => {
+  it('should throw error when order is not found', async () => {
     // Create test event with non-existent order ID
     const testEvent: OrderResolvedEvent = {
       id: 'test-event-id',

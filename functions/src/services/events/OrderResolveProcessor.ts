@@ -13,7 +13,7 @@ class OrderResolveProcessor extends AbstractProcessor {
     const order = await orderService.find(event.payload.order_id);
 
     if (!order) {
-      throw new Error(`Order with id ${event.payload.orderId} not found`);
+      throw new Error(`Order with id ${event.payload.order_id} not found`);
     }
 
     const paymentRequest = tbankService.orderToPaymentRequest(order);
