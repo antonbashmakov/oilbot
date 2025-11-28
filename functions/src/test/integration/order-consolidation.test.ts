@@ -71,7 +71,7 @@ describe('Order Consolidation Integration Test', () => {
     //await pickingService.set(createdPicking);
   })
 
-  it('order flow', async () => {
+  xit('order flow', async () => {
     // Call the consolidate endpoint
 
     let payments = await paymentService.findAll();

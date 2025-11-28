@@ -108,6 +108,7 @@ abstract class AbstractService<T extends Entity> {
 
   toPOJO(id:any, o: any): T | undefined {
     if(!o) return;
+
     return { id, ...o } as T;
   }
   abstract getCollectionName(): string;
