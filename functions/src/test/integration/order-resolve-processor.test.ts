@@ -5,6 +5,53 @@ import OrderService from '../../services/OrderService';
 import PaymentService from '../../services/PaymentService';
 import CustomerService from '../../services/CustomerService';
 import OrderPickingService from '../../services/OrderPickingService';
+import TBankService from '../../services/payments/TBankService';
+
+// Mock TBankService
+jest.mock('../../services/payments/TBankService');
+
+const mockTBankService = {
+  initPayment: jest.fn().mockImplementation((paymentRequest) => {
+    return {
+      TerminalKey: "MOCK_TERMINAL",
+      Success: true,
+      Status: 'NEW',
+      ErrorCode: 0,
+      PaymentId: "external-mock-id",
+      OrderId: paymentRequest.OrderId,
+      Amount: paymentRequest.Amount,
+      Token: "mock-token",
+      PaymentURL: `https://securepay.tinkoff.ru/${paymentRequest.OrderId}`
+    };
+  }),
+  orderToPaymentRequest: jest.fn().mockImplementation((order) => {
+    return {
+      TerminalKey: "MOCK_TERMINAL",
+      Amount: order.total * 100,
+      OrderId: order.id,
+      Description: "Оплата заказа в магазине По Себестоимости",
+      DATA: {
+        Phone: process.env.SUPPORT_PHONE,
+        Email: process.env.SUPPORT_EMAIL,
+      },
+      Receipt: {
+        Email: "info@posebestoimosti.ru",
+        Phone: "+79022394130",
+        Taxation: "osn",
+        Items: order.items.map((i: any) => ({
+          Name: i.name,
+          Price: i.price * 100,
+          Quantity: 1,
+          Amount: i.price * 100,
+          Tax: "vat0",
+        }))
+      },
+      Token: "mock-token"
+    };
+  })
+};
+
+(TBankService as jest.MockedClass<typeof TBankService>).mockImplementation(() => mockTBankService as any);
 
 describe('OrderResolveProcessor Integration Test', () => {
   let orderResolveProcessor: OrderResolveProcessor;
@@ -75,7 +122,7 @@ describe('OrderResolveProcessor Integration Test', () => {
 
 
 
-  it('should create a Payment object after successful processing', async () => {
+  it('should create a Payment object after successful processing when picking total is greater than order total', async () => {
     // Create test event
     const testEvent: OrderResolvedEvent = {
       id: 'test-event-id',
@@ -91,17 +138,20 @@ describe('OrderResolveProcessor Integration Test', () => {
 
     // Verify no payments exist initially
     let payments = await paymentService.findAll();
-
     expect(payments.length).toBe(0);
 
-    // Process the event, emulate multiple calls
+    // Verify original order status is PENDING
+    const originalOrder = await orderService.find(createdOrder.id);
+    expect(originalOrder?.status).toBe('PENDING');
+
+    // Process the event, emulate multiple calls (idempotency test)
     await orderResolveProcessor.process(testEvent);
     await orderResolveProcessor.process(testEvent);
     await orderResolveProcessor.process(testEvent);
     await orderResolveProcessor.process(testEvent);
     await orderResolveProcessor.process(testEvent);
 
-    // Verify that only one payment object was created
+    // Verify that only one payment object was created (idempotency)
     payments = await paymentService.findAll();
     expect(payments.length).toBe(1);
 
@@ -112,11 +162,79 @@ describe('OrderResolveProcessor Integration Test', () => {
     expect(createdPayment.external_payment_id).toBe('external-mock-id');
     expect(createdPayment.order_id).toBeTruthy();
     expect(createdPayment.terminal_key).toBe('MOCK_TERMINAL');
-    expect(createdPayment.amount).toBe(5000);
+    expect(createdPayment.amount).toBe(5000); // 50 * 100 (diff in kopecks)
     expect(createdPayment.success).toBe(true);
     expect(createdPayment.payment_url).toBeTruthy();
     expect(createdPayment.error_code).toBe(0);
     expect(createdPayment.created_at).toBeInstanceOf(Date);
+
+    // Verify original order status was updated
+    const updatedOrder = await orderService.find(createdOrder.id);
+    expect(updatedOrder?.status).toBe('CONCILIATION_PAYMENT_IN_PROGRESS');
+  });
+
+  it('should publish ORDER_CONCILIATED event when picking total equals order total', async () => {
+    // Update picking total to match order total
+    createdPicking.total = 150;
+    await pickingService.set(createdPicking);
+
+    // Create test event
+    const testEvent: OrderResolvedEvent = {
+      id: 'test-event-id',
+      idempotent_key: 'idempotent-key-equal',
+      type: 'ORDER_RESOLVED',
+      created_at: new Date(),
+      processed: false,
+      retries: 0,
+      payload: {
+        order_id: createdOrder.id
+      }
+    };
+
+    // Verify original order status is PENDING
+    const originalOrder = await orderService.find(createdOrder.id);
+    expect(originalOrder?.status).toBe('PENDING');
+
+    // Process the event
+    await orderResolveProcessor.process(testEvent);
+
+    // Verify no payment was created
+    const payments = await paymentService.findAll();
+    expect(payments.length).toBe(0);
+
+    // Verify original order status was updated to CONCILIATED
+    const updatedOrder = await orderService.find(createdOrder.id);
+    expect(updatedOrder?.status).toBe('CONCILIATED');
+  });
+
+  it('should publish BALANCE_CHANGE event when picking total is less than order total', async () => {
+    // Update picking total to be less than order total
+    createdPicking.total = 100;
+    await pickingService.set(createdPicking);
+
+    // Create test event
+    const testEvent: OrderResolvedEvent = {
+      id: 'test-event-id',
+      idempotent_key: 'idempotent-key-negative',
+      type: 'ORDER_RESOLVED',
+      created_at: new Date(),
+      processed: false,
+      retries: 0,
+      payload: {
+        order_id: createdOrder.id
+      }
+    };
+
+    // Process the event
+    await orderResolveProcessor.process(testEvent);
+
+    // Verify no payment was created
+    const payments = await paymentService.findAll();
+    expect(payments.length).toBe(0);
+
+    // Verify original order status remains unchanged (no status update for negative diff)
+    const updatedOrder = await orderService.find(createdOrder.id);
+    expect(updatedOrder?.status).toBe('PENDING');
   });
 
   it('should throw error when order is not found', async () => {

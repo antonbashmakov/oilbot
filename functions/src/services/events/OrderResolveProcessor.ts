@@ -55,6 +55,7 @@ class OrderResolveProcessor extends AbstractProcessor {
           retries: 0,
           type: CONSTANTS.EVENTS.BALANCE_CHANGE,
           created_at: new Date(),
+          processed_at: new Date(),
           payload: {
             customer_id: order.id,
             change: diff,

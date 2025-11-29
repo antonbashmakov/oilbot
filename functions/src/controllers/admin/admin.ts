@@ -9,6 +9,7 @@ import {
   OrderService,
   //AbstractService,
   api,
+  CONSTANTS,
 } from './imports';
 import { DeliveryOverview, OrderResolvedEvent, Stats } from '../../models';
 import OrderPickingService from '../../services/OrderPickingService';
@@ -218,13 +219,13 @@ adminApi.post('/orders/:id/consolidate', async (req: express.Request, res: expre
 
     const eventPublisher = new EventPublisher<OrderResolvedEvent>(db);
 
-    const event = {
+    const event: OrderResolvedEvent = {
       id: '', // will be set by OutboxEventService
       created_at: new Date(),
       processed_at: new Date(),
       processed: false,
       retries: 0,
-      type: 'ORDER_RESOLVE_REQUESTED',
+      type: CONSTANTS.EVENTS.ORDER_RESOLVED,
       payload: { order_id: order.id }
 
     };

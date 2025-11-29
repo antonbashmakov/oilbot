@@ -5,6 +5,53 @@ import OrderService from '../../services/OrderService';
 import CustomerService from '../../services/CustomerService';
 import PaymentService from '../../services/PaymentService';
 import OutboxEventService from '../../services/OutboxEventService';
+import TBankService from '../../services/payments/TBankService';
+
+// Mock TBankService
+jest.mock('../../services/payments/TBankService');
+
+const mockTBankService = {
+  initPayment: jest.fn().mockImplementation((paymentRequest) => {
+    return {
+      TerminalKey: "MOCK_TERMINAL",
+      Success: true,
+      Status: 'NEW',
+      ErrorCode: 0,
+      PaymentId: "external-mock-id",
+      OrderId: paymentRequest.OrderId,
+      Amount: paymentRequest.Amount,
+      Token: "mock-token",
+      PaymentURL: `https://securepay.tinkoff.ru/${paymentRequest.OrderId}`
+    };
+  }),
+  orderToPaymentRequest: jest.fn().mockImplementation((order) => {
+    return {
+      TerminalKey: "MOCK_TERMINAL",
+      Amount: order.total * 100,
+      OrderId: order.id,
+      Description: "Оплата заказа в магазине По Себестоимости",
+      DATA: {
+        Phone: process.env.SUPPORT_PHONE,
+        Email: process.env.SUPPORT_EMAIL,
+      },
+      Receipt: {
+        Email: "info@posebestoimosti.ru",
+        Phone: "+79022394130",
+        Taxation: "osn",
+        Items: order.items.map((i: any) => ({
+          Name: i.name,
+          Price: i.price * 100,
+          Quantity: 1,
+          Amount: i.price * 100,
+          Tax: "vat0",
+        }))
+      },
+      Token: "mock-token"
+    };
+  })
+};
+
+(TBankService as jest.MockedClass<typeof TBankService>).mockImplementation(() => mockTBankService as any);
 
 describe('Order Consolidation Integration Test', () => {
   let orderService: OrderService;
@@ -117,5 +164,3 @@ describe('Order Consolidation Integration Test', () => {
 
   });
 });
-
-
