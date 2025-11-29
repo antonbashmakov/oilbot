@@ -176,6 +176,9 @@ components:
           type: string
           description: Unique identifier for the message
           readOnly: true
+        thread_id:
+          type: string
+          description: Unique identifier a thread those messages belongs to
         provider:
           type: string
           enum: [TELEGRAM, OTHER]

@@ -41,6 +41,8 @@ class OrderPaymentCreatedProcessor extends AbstractProcessor {
 
     if (ret) {
 
+      ret.thread_id = order.id;
+
       const conversationMessageService = new ConversationMessageService(this.db);
       await conversationMessageService.add(ret);
     }

@@ -9,7 +9,7 @@ import ConversationMessageService from '../../services/ConversationMessageServic
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-xdescribe('OrderPaymentCreatedProcessor Integration Test (Real Telegram)', () => {
+describe('OrderPaymentCreatedProcessor Integration Test (Real Telegram)', () => {
   let processor: OrderPaymentCreatedProcessor;
   let orderService: OrderService;
   let paymentService: PaymentService;
@@ -56,11 +56,22 @@ xdescribe('OrderPaymentCreatedProcessor Integration Test (Real Telegram)', () =>
           price_for_unit: 150,
           group: 'TEST_GROUP',
           owner: { id: '270053857' }
-        }
+        },
+        {
+          id: 'test-item-2',
+          name: 'Test Item 2',
+          price: 250,
+          quantity: 1,
+          item_id: 'item-2',
+          fraction: 1,
+          price_for_unit: 150,
+          group: 'TEST_GROUP',
+          owner: { id: '270053857' }
+        },
       ],
       status: 'PENDING',
       numberOfItems: 1,
-      total: 150,
+      total: 350,
       owner: {
         id: '270053857' // This will be used as Telegram chat ID
       }
@@ -113,6 +124,7 @@ xdescribe('OrderPaymentCreatedProcessor Integration Test (Real Telegram)', () =>
     expect(messages).toHaveLength(1);
     expect(messages[0].provider).toBe('TELEGRAM');
     expect(messages[0].recipient_id).toBe('270053857');
+    expect(messages[0].thread_id).toBe(createdPayment.order_id);
     expect(messages[0].text).toContain('Ваш заказ');
     expect(messages[0].text).toContain(createdPayment.payment_url);
   });

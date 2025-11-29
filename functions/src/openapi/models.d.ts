@@ -114,6 +114,8 @@ export interface components {
     ConversationMessage: {
       /** @description Unique identifier for the message */
       id: string;
+      /** @description Unique identifier a thread those messages belongs to */
+      thread_id?: string;
       /**
        * @description The provider used to send the message
        * @enum {string}
