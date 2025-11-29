@@ -721,7 +721,7 @@ export interface components {
        * @description URL for payment processing
        * @example https://securepay.tinkoff.ru/payment/init
        */
-      payment_url?: string;
+      payment_url: string;
       /**
        * @description Error code from payment provider
        * @example 0

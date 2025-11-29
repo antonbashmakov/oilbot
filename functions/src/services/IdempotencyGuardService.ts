@@ -9,25 +9,33 @@ class IdempotencyGuardService extends AbstractService<IdempotentObject> {
   }
 
   async runIdempotentRequest<T>(key: string, method: () => Promise<T>) {
-      let result = this.find(key);
 
-      if(result) return result;
+    return this.runTransactionally(async (t) => {
 
-      const data = await method();  
-      
+      const docRef = this.getCollection().doc(key);
+
+      const snapshot = await docRef.get();
+
+      if (snapshot.exists) return (snapshot.data() as IdempotentObject).data;
+
+      const data = await method();
+
       const idempotentRequestResult: IdempotentObject<T> = {
         id: key,
         created_at: new Date(),
         data
       }
 
-      this.set(idempotentRequestResult);
+      t.set(docRef, idempotentRequestResult);
 
       return data;
+    })
+
+
   }
 
   getExcludedFields(): string[] {
-    return ["created_at", "processed_at"];
+    return ["created_at"];
   }
 }
 

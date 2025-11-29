@@ -70,6 +70,7 @@ describe('OrderResolveProcessor Integration Test', () => {
     // Create test event
     const testEvent: OrderResolvedEvent = {
       id: 'test-event-id',
+      idempotent_key: 'idempotent-key-test',
       type: 'ORDER_RESOLVED',
       created_at: new Date(),
       processed: false,
@@ -82,13 +83,16 @@ describe('OrderResolveProcessor Integration Test', () => {
     // Verify no payments exist initially
     let payments = await paymentService.findAll();
 
-    console.log(payments)
     expect(payments.length).toBe(0);
 
-    // Process the event
+    // Process the event, emulate multiple calls
+    await orderResolveProcessor.process(testEvent);
+    await orderResolveProcessor.process(testEvent);
+    await orderResolveProcessor.process(testEvent);
+    await orderResolveProcessor.process(testEvent);
     await orderResolveProcessor.process(testEvent);
 
-    // Verify that a payment was created
+    // Verify that only one payment object was created
     payments = await paymentService.findAll();
     expect(payments.length).toBe(1);
 
@@ -110,6 +114,7 @@ describe('OrderResolveProcessor Integration Test', () => {
     // Create test event with non-existent order ID
     const testEvent: OrderResolvedEvent = {
       id: 'test-event-id',
+      idempotent_key: 'idempotent-key',
       type: 'ORDER_RESOLVED',
       created_at: new Date(),
       processed: false,

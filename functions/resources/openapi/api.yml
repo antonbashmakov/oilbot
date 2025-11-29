@@ -823,6 +823,7 @@ components:
         - id
         - external_payment_id
         - terminal_key
+        - payment_url
         - order_id
         - amount
         - success

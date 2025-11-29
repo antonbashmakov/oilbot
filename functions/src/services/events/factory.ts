@@ -1,4 +1,5 @@
 import OrderResolveProcessor from "./OrderResolveProcessor";
+import OrderPaymentCreatedProcessor from "./OrderPaymentCreatedProcessor";
 import AbstractProcessor from "./AbstractProcessor";
 import { Firestore } from "firebase-admin/firestore";
 
@@ -7,6 +8,7 @@ type ProcessorConstructor = new (firebase: Firestore) => AbstractProcessor;
 
 const EVENT_PROCESSORS: { [key: string]: ProcessorConstructor } = {
   'ORDER_RESOLVE_REQUESTED': OrderResolveProcessor,
+  'ORDER_PAYMENT_CREATED': OrderPaymentCreatedProcessor,
 };
 
 export const toProcessor: (event: string) => ProcessorConstructor = (event: string) => {

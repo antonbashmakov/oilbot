@@ -18,6 +18,8 @@ export interface components {
     BaseOutboxEvent: {
       /** @description Unique event identifier (UUID or Firestore doc ID). */
       id: string;
+      /** @description Idempotency key, used if sibling events are idempotent */
+      idempotent_key?: string;
       /**
        * @description Type of event that occurred.
        * @example ORDER_RESOLVED

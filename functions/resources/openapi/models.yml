@@ -19,7 +19,10 @@ components:
           type: string
           description: Unique event identifier (UUID or Firestore doc ID).
           readOnly: true
-
+        idempotent_key:
+          type: string
+          description: Idempotency key, used if sibling events are idempotent
+          readOnly: true
         type:
           type: string
           description: Type of event that occurred.

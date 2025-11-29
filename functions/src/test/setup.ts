@@ -17,7 +17,7 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  await testApp.clearFirestore();
+   await testApp.clearFirestore();
 });
 
 // Global test teardown
