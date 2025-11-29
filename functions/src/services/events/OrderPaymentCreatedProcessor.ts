@@ -1,35 +1,12 @@
-import { Order, PaymentCreatedEvent } from "../../models";
+import { PaymentCreatedEvent } from "../../models";
 import OrderService from "../OrderService";
 import PaymentService from "../PaymentService";
 import TelegramService from "../TelegramService";
 import AbstractProcessor from "./AbstractProcessor";
+import { toMessage, formatDate } from "../../messaging/util";
+import ConversationMessageService from "../ConversationMessageService";
 
 class OrderPaymentCreatedProcessor extends AbstractProcessor {
-
-  private formatDate(input: Date | string): string {
-    const date = input instanceof Date ? input : new Date(input);
-    const dd = String(date.getUTCDate()).padStart(2, "0");
-    const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
-    const yyyy = date.getUTCFullYear();
-    return `${dd}.${mm}.${yyyy}`;
-  }
-
-  private formatOrderMessage(order: Order, paymentUrl: string): string {
-    let message = "*🛒 Ваш заказ*\n\n*Товары:*\n";
-
-    order.items.forEach((item: any) => {
-      message += `- *${item.name} *: *${item.price} ₽*\n\n`;
-    });
-
-    const delivery = order.delivery 
-      ? `*🚚 Доставка:*\nc *${this.formatDate(order.delivery.delivery_start)}* по *${this.formatDate(order.delivery.delivery_end)}*\n`
-      : `❓ Доставка еще не определена\n`;
-
-    message += `*💰 Общая сумма:* *${order.total} ₽*\n${delivery}*ID заказа:* \`${order.id}\`\n\n`;
-    message += `🔗 Ссылка на оплату: ${paymentUrl}`;
-
-    return message;
-  }
 
   async process(event: PaymentCreatedEvent): Promise<void> {
     const orderService = new OrderService(this.db);
@@ -39,24 +16,33 @@ class OrderPaymentCreatedProcessor extends AbstractProcessor {
 
 
     // Find existing payment for this order
-    const payment = await paymentService.find(event.payload.payment_id);
-    if (!payment) {
-      throw new Error(`No payment found for  ${event.payload.payment_id}`);
-    };
-
-    const order = await orderService.find(payment.order_id);
-
-    if (!order) {
-      throw new Error(`Order with id ${event.payload.order_id} not found`);
-    };  
+    const payment = await paymentService.require(event.payload.payment_id);
+    const order = await orderService.require(payment.order_id);
 
     // Send Telegram message
-    const chatId = order.owner?.id; // Using owner.id as chat ID
-    if (chatId) {
-      const message = this.formatOrderMessage(order, payment.payment_url);
-      await telegramService.sendMessage(chatId, message);
-    } else {
-      console.warn(`No chat ID found for order ${order.id}, skipping Telegram message`);
+    const chatId = order.owner.id; // Using owner.id as chat ID
+    // Prepare template values
+    const templateValues = {
+      items: order.items.map(item => ({
+        name: item.name,
+        price: item.price
+      })),
+      delivery: order.delivery ? {
+        deliveryStart: formatDate(order.delivery.delivery_start),
+        deliveryEnd: formatDate(order.delivery.delivery_end)
+      } : null,
+      total: order.total,
+      orderId: order.id,
+      paymentUrl: payment.payment_url
+    };
+
+    const message = toMessage('ORDER_PAYMENT_CREATED', templateValues);
+    const ret = await telegramService.sendMessage(chatId, message);
+
+    if (ret) {
+
+      const conversationMessageService = new ConversationMessageService(this.db);
+      await conversationMessageService.add(ret);
     }
   }
 }

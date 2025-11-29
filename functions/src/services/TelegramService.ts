@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ConversationMessage } from '../models';
 
 class TelegramService {
   private botToken: string;
@@ -9,8 +10,7 @@ class TelegramService {
     this.baseUrl = `https://api.telegram.org/bot${this.botToken}`;
   }
 
-  async sendMessage(chatId: string, text: string): Promise<void> {
-    console.log('??????????????BOT TOKEN ',process.env)
+  async sendMessage(chatId: string, text: string): Promise<ConversationMessage | undefined> {
     if (!this.botToken) {
       console.warn('TELEGRAM_BOT_TOKEN not configured, skipping Telegram message');
       return;
@@ -23,7 +23,14 @@ class TelegramService {
         parse_mode: 'Markdown'
       });
 
-      return ret.data;
+      return {
+        id: ret.data.result.id,
+        provider: 'TELEGRAM',
+        recipient_id: chatId,
+        text: ret.data.result.text,
+        created_at: new Date()
+      }
+
     } catch (error) {
       console.error('Failed to send Telegram message:', error);
       throw new Error(`Failed to send Telegram message: ${error}`);

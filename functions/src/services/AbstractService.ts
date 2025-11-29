@@ -28,6 +28,13 @@ abstract class AbstractService<T extends Entity> {
     return this.getCollection().doc(`${id}`).get().then((doc: any) => this.toPOJO(doc.id as IdOf<T>, doc.data()));
   }
 
+  require(id: IdOf<T>): Promise<T> {
+    return this.getCollection().doc(`${id}`).get().then( doc => {
+      if(!doc.exists) throw new Error(`Object ${this.getCollectionName()}/${id} is not found`);
+      return doc;
+    }).then((doc: any) => this.toPOJO(doc.id as IdOf<T>, doc.data() ) as T);
+  }
+
   update(entity: T, object: Partial<T>): Promise<any> {
     return this.getCollection().doc(entity.id).update(object);
   }

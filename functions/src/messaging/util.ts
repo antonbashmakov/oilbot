@@ -1,0 +1,51 @@
+import * as mustache from 'mustache';
+
+// Define message templates
+const TEMPLATES = {
+  ORDER_PAYMENT_CREATED: `*🛒 Ваш заказ*
+
+*Товары:*
+{{#items}}
+- *{{name}} *: *{{price}} ₽*
+
+{{/items}}
+{{#delivery}}
+*🚚 Доставка:*
+c *{{deliveryStart}}* по *{{deliveryEnd}}*
+{{/delivery}}
+{{^delivery}}
+❓ Доставка еще не определена
+{{/delivery}}
+*💰 Общая сумма:* *{{total}} ₽*
+*ID заказа:* \`{{orderId}}\`
+
+🔗 Ссылка на оплату: {{{paymentUrl}}}`
+};
+
+/**
+ * Process a template with given values using mustache.js
+ * @param templateName - Name of the template to use
+ * @param values - Object containing values to substitute in the template
+ * @returns Processed message string
+ */
+export function toMessage(templateName: keyof typeof TEMPLATES, values: Record<string, any>): string {
+  const template = TEMPLATES[templateName];
+  if (!template) {
+    throw new Error(`Template '${templateName}' not found`);
+  }
+  
+  return mustache.render(template, values);
+}
+
+/**
+ * Format date to dd.mm.yyyy format
+ * @param input - Date object or string
+ * @returns Formatted date string
+ */
+export function formatDate(input: Date | string): string {
+  const date = input instanceof Date ? input : new Date(input);
+  const dd = String(date.getUTCDate()).padStart(2, "0");
+  const mm = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const yyyy = date.getUTCFullYear();
+  return `${dd}.${mm}.${yyyy}`;
+}

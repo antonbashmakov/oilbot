@@ -180,7 +180,7 @@ components:
           type: string
           enum: [TELEGRAM, OTHER]
           description: The provider used to send the message
-        chat_id:
+        recipient_id:
           type: string
           description: The chat ID where the message was sent
         text:

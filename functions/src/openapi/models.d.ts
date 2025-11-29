@@ -120,7 +120,7 @@ export interface components {
        */
       provider: "TELEGRAM" | "OTHER";
       /** @description The chat ID where the message was sent */
-      chat_id: string;
+      recipient_id?: string;
       /** @description The content of the message */
       text: string;
       /**
