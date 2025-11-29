@@ -110,6 +110,25 @@ export interface components {
       DATA?: components["schemas"]["TinkoffPaymentData"];
       Receipt: components["schemas"]["TinkoffReceipt"];
     };
+    /** @description A message sent in a conversation */
+    ConversationMessage: {
+      /** @description Unique identifier for the message */
+      id: string;
+      /**
+       * @description The provider used to send the message
+       * @enum {string}
+       */
+      provider: "TELEGRAM" | "OTHER";
+      /** @description The chat ID where the message was sent */
+      chat_id: string;
+      /** @description The content of the message */
+      text: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the message was created
+       */
+      created_at: string;
+    };
   };
   responses: never;
   parameters: never;

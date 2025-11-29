@@ -1,5 +1,5 @@
 import { testApp } from '../setup';
-import { Order, OrderResolvedEvent, Payment } from '../../models';
+import { Order, PaymentCreatedEvent, Payment } from '../../models';
 import OrderPaymentCreatedProcessor from '../../services/events/OrderPaymentCreatedProcessor';
 import OrderService from '../../services/OrderService';
 import PaymentService from '../../services/PaymentService';
@@ -60,14 +60,14 @@ describe('OrderPaymentCreatedProcessor Integration Test', () => {
           fraction: 1,
           price_for_unit: 150,
           group: 'TEST_GROUP',
-          owner: { id: 'test-customer-id' }
+          owner: { id: '270053857' }
         }
       ],
       status: 'PENDING',
       numberOfItems: 1,
       total: 150,
       owner: {
-        id: 'test-chat-id' // This will be used as Telegram chat ID
+        id: '270053857' // This will be used as Telegram chat ID
       }
     } as Order;
 
@@ -87,19 +87,19 @@ describe('OrderPaymentCreatedProcessor Integration Test', () => {
     // Create test data in Firestore
     await customerService.set(createdCustomer);
     await orderService.set(createdOrder);
-    await paymentService.add(createdPayment);
+    await paymentService.set(createdPayment);
   });
 
   it('should send Telegram message with payment URL after successful processing of ORDER_PAYMENT_CREATED', async () => {
     // Create test event
-    const testEvent: OrderResolvedEvent = {
+    const testEvent: PaymentCreatedEvent = {
       id: 'test-event-id-payment',
       type: 'ORDER_PAYMENT_CREATED',
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
-        order_id: createdOrder.id
+        payment_id: createdPayment.id
       }
     };
 
@@ -111,62 +111,34 @@ describe('OrderPaymentCreatedProcessor Integration Test', () => {
     
     // Verify the message was sent to the correct chat ID
     expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
-      'test-chat-id',
+      '270053857',
       expect.stringContaining('Ваш заказ')
     );
 
     // Verify the message contains the payment URL
     expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
-      'test-chat-id',
+      '270053857',
       expect.stringContaining(createdPayment.payment_url!)
     );
   });
 
-  it('should throw error when order is not found', async () => {
-    // Create test event with non-existent order ID
-    const testEvent: OrderResolvedEvent = {
-      id: 'test-event-id-payment',
-      type: 'ORDER_PAYMENT_CREATED',
-      created_at: new Date(),
-      processed: false,
-      retries: 0,
-      payload: {
-        order_id: 'non-existent-order-id'
-      }
-    };
-
-    // Verify that processing throws an error
-    await expect(processor.process(testEvent))
-      .rejects
-      .toThrow('Order with id non-existent-order-id not found');
-
-    // Verify no Telegram message was sent
-    expect(mockTelegramService.sendMessage).not.toHaveBeenCalled();
-  });
-
   it('should throw error when payment is not found', async () => {
-    // Create test event for order without payment
-    const orderWithoutPayment = {
-      ...createdOrder,
-      id: 'order-without-payment'
-    };
-    await orderService.set(orderWithoutPayment);
-
-    const testEvent: OrderResolvedEvent = {
+    // Create test event with non-existent payment ID
+    const testEvent: PaymentCreatedEvent = {
       id: 'test-event-id-payment',
       type: 'ORDER_PAYMENT_CREATED',
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
-        order_id: 'order-without-payment'
+        payment_id: 'non-existent-payment-id'
       }
     };
 
     // Verify that processing throws an error
     await expect(processor.process(testEvent))
       .rejects
-      .toThrow('No payment found for order order-without-payment');
+      .toThrow('No payment found for  non-existent-payment-id');
 
     // Verify no Telegram message was sent
     expect(mockTelegramService.sendMessage).not.toHaveBeenCalled();

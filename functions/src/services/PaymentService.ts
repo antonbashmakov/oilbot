@@ -5,6 +5,7 @@ import { Payment } from '../models';
 
 class PaymentService extends AbstractService<Payment> {
 
+
     toPOJO(id:any, o: any): Payment | undefined {
     if(!o) return;
 

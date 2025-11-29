@@ -18,6 +18,7 @@ export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
 export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
+export type BaseConversationMessage = models["schemas"]["ConversationMessage"];
 
 export type Payment = Omit<BasePayment, "created_at" > &  {
   created_at: Date;
@@ -30,10 +31,18 @@ export type OutboxEvent = Omit<BaseOutboxEvent, "created_at" | "processedAt"> & 
   processed_at?: Date;
   payload?: { [key: string]: any };
 };
+export type ConversationMessage = Omit<BaseConversationMessage, "created_at"> & {
+  created_at: Date;
+};
 
 export type OrderResolvedEvent = OutboxEvent & {
   payload: {
     order_id: string;
+  }
+};
+export type PaymentCreatedEvent = OutboxEvent & {
+  payload: {
+    payment_id: string;
   }
 };
 
@@ -45,4 +54,3 @@ export interface IdempotentObject<T = any> {
 
 
 export { User };
-

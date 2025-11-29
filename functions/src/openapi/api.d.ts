@@ -642,6 +642,7 @@ export interface components {
        * @example Order 1
        */
       name?: string;
+      delivery?: components["schemas"]["DeliveryRef"];
       /** @description Items in this order */
       items: components["schemas"]["CartItem"][];
       /**

@@ -1,4 +1,4 @@
-import { OrderResolvedEvent } from "../../models";
+import { Order, PaymentCreatedEvent } from "../../models";
 import OrderService from "../OrderService";
 import PaymentService from "../PaymentService";
 import TelegramService from "../TelegramService";
@@ -14,7 +14,7 @@ class OrderPaymentCreatedProcessor extends AbstractProcessor {
     return `${dd}.${mm}.${yyyy}`;
   }
 
-  private formatOrderMessage(order: any, paymentUrl: string): string {
+  private formatOrderMessage(order: Order, paymentUrl: string): string {
     let message = "*🛒 Ваш заказ*\n\n*Товары:*\n";
 
     order.items.forEach((item: any) => {
@@ -31,24 +31,24 @@ class OrderPaymentCreatedProcessor extends AbstractProcessor {
     return message;
   }
 
-  async process(event: OrderResolvedEvent): Promise<void> {
+  async process(event: PaymentCreatedEvent): Promise<void> {
     const orderService = new OrderService(this.db);
     const paymentService = new PaymentService(this.db);
     const telegramService = new TelegramService();
 
-    const order = await orderService.find(event.payload.order_id);
+
+
+    // Find existing payment for this order
+    const payment = await paymentService.find(event.payload.payment_id);
+    if (!payment) {
+      throw new Error(`No payment found for  ${event.payload.payment_id}`);
+    };
+
+    const order = await orderService.find(payment.order_id);
 
     if (!order) {
       throw new Error(`Order with id ${event.payload.order_id} not found`);
-    }
-
-    // Find existing payment for this order
-    const payments = await paymentService.findAll();
-    const payment = payments.find(p => p.order_id === order.id);
-
-    if (!payment) {
-      throw new Error(`No payment found for order ${order.id}`);
-    }
+    };  
 
     // Send Telegram message
     const chatId = order.owner?.id; // Using owner.id as chat ID
