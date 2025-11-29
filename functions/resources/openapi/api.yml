@@ -736,9 +736,16 @@ components:
           type: string
           enum:
             - PENDING
+            - PAYMENT_IN_PROGRESS
             - PAID
             - RESOLVING
-            - CONSOLIDATED
+            - CONCILIATION_PAYMENT_IN_PROGRESS
+            - CONCILIATED
+        type:
+          type: string
+          enum:
+            - CONCILIATION
+            - ORIGINAL
           description: Current status of the order
           example: "PAID"
         owner:

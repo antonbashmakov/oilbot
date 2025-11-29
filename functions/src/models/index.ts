@@ -40,6 +40,17 @@ export type OrderResolvedEvent = OutboxEvent & {
     order_id: string;
   }
 };
+export type OrderConciliatedEvent = OutboxEvent & {
+  payload: {
+    order_id: string;
+  }
+};
+export type BalanceChangedEvent = OutboxEvent & {
+  payload: {
+    customer_id: string;
+    change: number;
+  }
+};
 export type PaymentCreatedEvent = OutboxEvent & {
   payload: {
     payment_id: string;

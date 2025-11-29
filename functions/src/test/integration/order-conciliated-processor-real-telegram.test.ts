@@ -1,39 +1,35 @@
 import { testApp } from '../setup';
-import { Order, PaymentCreatedEvent, Payment } from '../../models';
-import OrderPaymentCreatedProcessor from '../../services/events/OrderPaymentCreatedProcessor';
+import { Order, OrderConciliatedEvent } from '../../models';
+import OrderConciliatedProcessor from '../../services/events/OrderConciliatedProcessor';
 import OrderService from '../../services/OrderService';
-import PaymentService from '../../services/PaymentService';
 import CustomerService from '../../services/CustomerService';
 import ConversationMessageService from '../../services/ConversationMessageService';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-xdescribe('OrderPaymentCreatedProcessor Integration Test (Real Telegram)', () => {
-  let processor: OrderPaymentCreatedProcessor;
+xdescribe('OrderConciliatedProcessor Integration Test (Real Telegram)', () => {
+  let processor: OrderConciliatedProcessor;
   let orderService: OrderService;
-  let paymentService: PaymentService;
   let customerService: CustomerService;
   let conversationMessageService: ConversationMessageService;
 
   let createdOrder: Order;
   let createdCustomer: any;
-  let createdPayment: Payment;
 
   beforeEach(async () => {
     const unauthContext = testApp.unauthenticatedContext();
     const db = unauthContext.firestore();
 
-    processor = new OrderPaymentCreatedProcessor(db as any);
+    processor = new OrderConciliatedProcessor(db as any);
     orderService = new OrderService(db as any);
-    paymentService = new PaymentService(db as any);
     customerService = new CustomerService(db as any);
     conversationMessageService = new ConversationMessageService(db as any);
 
     // Create test customer
     createdCustomer = {
       created_at: new Date(),
-      id: 'test-customer-id',
+      id: 'test-customer-id-conciliated',
       first_name: 'Test',
       last_name: 'Customer',
       email: 'test@example.com',
@@ -42,8 +38,8 @@ xdescribe('OrderPaymentCreatedProcessor Integration Test (Real Telegram)', () =>
 
     // Create test order
     createdOrder = {
-      id: 'test-order-id-payment-real',
-      name: 'Test Order Payment Real',
+      id: 'test-order-id-conciliated-real',
+      name: 'Test Order Conciliated Real',
       created_at: new Date(),
       items: [
         {
@@ -56,47 +52,22 @@ xdescribe('OrderPaymentCreatedProcessor Integration Test (Real Telegram)', () =>
           price_for_unit: 150,
           group: 'TEST_GROUP',
           owner: { id: '270053857' }
-        },
-        {
-          id: 'test-item-2',
-          name: 'Test Item 2',
-          price: 250,
-          quantity: 1,
-          item_id: 'item-2',
-          fraction: 1,
-          price_for_unit: 150,
-          group: 'TEST_GROUP',
-          owner: { id: '270053857' }
-        },
+        }
       ],
-      status: 'PENDING',
+      status: 'CONCILIATED',
       numberOfItems: 1,
-      total: 350,
+      total: 150,
       owner: {
         id: '270053857' // This will be used as Telegram chat ID
       }
     } as Order;
 
-    // Create test payment
-    createdPayment = {
-      id: 'test-payment-id-real',
-      external_payment_id: 'external-mock-id-real',
-      terminal_key: 'MOCK_TERMINAL',
-      order_id: createdOrder.id,
-      amount: 15000,
-      success: true,
-      payment_url: `https://securepay.tinkoff.ru/${createdOrder.id}`,
-      error_code: 0,
-      created_at: new Date()
-    } as Payment;
-
     // Create test data in Firestore
     await customerService.set(createdCustomer);
     await orderService.set(createdOrder);
-    await paymentService.set(createdPayment);
   });
 
-  it('should process ORDER_PAYMENT_CREATED event with real Telegram service', async () => {
+  it('should process ORDER_CONCILIATED event with real Telegram service', async () => {
     // Skip test if Telegram bot token is not configured
     if (!process.env.TELEGRAM_BOT_TOKEN) {
       console.warn('TELEGRAM_BOT_TOKEN not configured, skipping real Telegram test');
@@ -104,14 +75,14 @@ xdescribe('OrderPaymentCreatedProcessor Integration Test (Real Telegram)', () =>
     }
 
     // Create test event
-    const testEvent: PaymentCreatedEvent = {
-      id: 'test-event-id-payment-real',
-      type: 'ORDER_PAYMENT_CREATED',
+    const testEvent: OrderConciliatedEvent = {
+      id: 'test-event-id-conciliated-real',
+      type: 'ORDER_CONCILIATED',
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
-        payment_id: createdPayment.id
+        order_id: createdOrder.id
       }
     };
 
@@ -124,28 +95,28 @@ xdescribe('OrderPaymentCreatedProcessor Integration Test (Real Telegram)', () =>
     expect(messages).toHaveLength(1);
     expect(messages[0].provider).toBe('TELEGRAM');
     expect(messages[0].recipient_id).toBe('270053857');
-    expect(messages[0].thread_id).toBe(createdPayment.order_id);
-    expect(messages[0].text).toContain('Ваш заказ');
-    expect(messages[0].text).toContain(createdPayment.payment_url);
+    expect(messages[0].thread_id).toBe(createdOrder.id);
+    expect(messages[0].text).toContain('✅ Ваш заказ собран');
+    expect(messages[0].text).toContain('Номер заказ test-order-id-conciliated-real');
   });
 
-  it('should throw error when payment is not found', async () => {
-    // Create test event with non-existent payment ID
-    const testEvent: PaymentCreatedEvent = {
-      id: 'test-event-id-payment-real',
-      type: 'ORDER_PAYMENT_CREATED',
+  it('should throw error when order is not found', async () => {
+    // Create test event with non-existent order ID
+    const testEvent: OrderConciliatedEvent = {
+      id: 'test-event-id-conciliated-real',
+      type: 'ORDER_CONCILIATED',
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
-        payment_id: 'non-existent-payment-id-real'
+        order_id: 'non-existent-order-id-real'
       }
     };
 
     // Verify that processing throws an error
     await expect(processor.process(testEvent))
       .rejects
-      .toThrow('Object PAYMENTS/non-existent-payment-id-real is not found');
+      .toThrow('Object ORDERS/non-existent-order-id-real is not found');
 
     // Verify no conversation message was created
     const messages = await conversationMessageService.findAll();

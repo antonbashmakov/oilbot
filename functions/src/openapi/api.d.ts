@@ -645,12 +645,14 @@ export interface components {
       delivery?: components["schemas"]["DeliveryRef"];
       /** @description Items in this order */
       items: components["schemas"]["CartItem"][];
+      /** @enum {string} */
+      status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED";
       /**
        * @description Current status of the order
        * @example PAID
        * @enum {string}
        */
-      status: "PENDING" | "PAID" | "RESOLVING" | "CONSOLIDATED";
+      type?: "CONCILIATION" | "ORIGINAL";
       owner: components["schemas"]["OwnerRef"];
       /**
        * @description Number of items in the order

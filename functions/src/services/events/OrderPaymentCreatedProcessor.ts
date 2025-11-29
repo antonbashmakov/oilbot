@@ -13,8 +13,6 @@ class OrderPaymentCreatedProcessor extends AbstractProcessor {
     const paymentService = new PaymentService(this.db);
     const telegramService = new TelegramService();
 
-
-
     // Find existing payment for this order
     const payment = await paymentService.require(event.payload.payment_id);
     const order = await orderService.require(payment.order_id);
