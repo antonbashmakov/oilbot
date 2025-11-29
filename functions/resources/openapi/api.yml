@@ -877,6 +877,35 @@ components:
           description: Payment creation timestamp
           example: "2025-01-10T14:30:00Z"
 
+    CustomerBalance:
+      type: object
+      required:
+        - id
+        - owner
+        - balance
+      properties:
+        id:
+          type: string
+          description: Internal payment ID
+          example: "payment-123456"      
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+        balance:
+          type: number
+          format: float
+          description: Customer balance amount
+          example: 150.75
+        created_at:
+          type: string
+          format: date-time
+          description: Balance creation timestamp
+          example: "2025-01-10T14:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Balance last update timestamp
+          example: "2025-01-10T14:30:00Z"
+
 tags:
   - name: Deliveries
     description: Operations related to deliveries

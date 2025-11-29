@@ -8,12 +8,19 @@ import { OutboxEvent } from "../../models";
 
 admin.initializeApp({}, "db");
 
-const db = admin.firestore();
 
+if (process.env.GCLOUD_PROJECT !== 'test-project') {
+  admin.firestore().settings({
+    databaseId: process.env.DATABASE_ID,
+  });
+}
+
+const db = admin.firestore();
 
 const processOutboxEvent = functions.firestore
   .document("OUTBOX_EVENTS/{eventId}")
   .onCreate(async (snap, context) => {
+
     const data = snap.data() as OutboxEvent;
 
     try {

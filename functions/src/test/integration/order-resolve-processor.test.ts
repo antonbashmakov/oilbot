@@ -1,4 +1,4 @@
-import { testApp } from '../setup';
+import db from '../setup';
 import { Order, OrderPicking, OrderResolvedEvent } from '../../models';
 import OrderResolveProcessor from '../../services/events/OrderResolveProcessor';
 import OrderService from '../../services/OrderService';
@@ -65,9 +65,6 @@ describe('OrderResolveProcessor Integration Test', () => {
   let createdCustomer: any;
 
   beforeEach(async () => {
-    const unauthContext = testApp.unauthenticatedContext();
-    const db = unauthContext.firestore();
-
     orderResolveProcessor = new OrderResolveProcessor(db as any);
     orderService = new OrderService(db as any);
     paymentService = new PaymentService(db as any);
@@ -207,7 +204,7 @@ describe('OrderResolveProcessor Integration Test', () => {
     expect(updatedOrder?.status).toBe('CONCILIATED');
   });
 
-  it('should publish BALANCE_CHANGE event when picking total is less than order total', async () => {
+  it('should publish BALANCE_CHANGED event when picking total is less than order total', async () => {
     // Update picking total to be less than order total
     createdPicking.total = 100;
     await pickingService.set(createdPicking);

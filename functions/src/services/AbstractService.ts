@@ -1,4 +1,4 @@
-import { Firestore } from 'firebase-admin/firestore';
+import {  FieldValue, Firestore } from 'firebase-admin/firestore';
 import { jsonify } from './utils';
 
 // Interface for entities that have an ID
@@ -29,10 +29,10 @@ abstract class AbstractService<T extends Entity> {
   }
 
   require(id: IdOf<T>): Promise<T> {
-    return this.getCollection().doc(`${id}`).get().then( doc => {
-      if(!doc.exists) throw new Error(`Object ${this.getCollectionName()}/${id} is not found`);
+    return this.getCollection().doc(`${id}`).get().then(doc => {
+      if (!doc.exists) throw new Error(`Object ${this.getCollectionName()}/${id} is not found`);
       return doc;
-    }).then((doc: any) => this.toPOJO(doc.id as IdOf<T>, doc.data() ) as T);
+    }).then((doc: any) => this.toPOJO(doc.id as IdOf<T>, doc.data()) as T);
   }
 
   update(entity: T, object: Partial<T>): Promise<any> {
@@ -45,6 +45,19 @@ abstract class AbstractService<T extends Entity> {
 
   addAll(objects: T[]): void {
     objects.forEach(object => this.add(object));
+  }
+
+  incrementField(object: T, field: string, value: number): Promise<FirebaseFirestore.WriteResult> {
+
+    const keys = Object.keys(object);
+
+    if (!keys.includes(field)) throw Error(`Field ${field} is not in object type. Known fields are : ${keys.join()}`);
+
+    const ref = this.getCollection().doc(object.id);
+
+    // Atomically increment the population of the city by 50.
+    return ref.update({[field]: FieldValue.increment(value)});
+
   }
 
   setAll(objects: T[]): void {
@@ -88,11 +101,11 @@ abstract class AbstractService<T extends Entity> {
     const objectToSet = Object.assign(jsonify(object), fieldsToSave);
 
     return this.getCollection().doc(objectToSet.id).set(objectToSet);
-    
+
   }
 
   delete(object: T): Promise<any> {
-    return this.db.collection(this.getCollectionName()).doc(object.id).delete();    
+    return this.db.collection(this.getCollectionName()).doc(object.id).delete();
   }
 
   updateTransactionally(entity: T, object: Partial<T>): Promise<any> {
@@ -113,8 +126,8 @@ abstract class AbstractService<T extends Entity> {
     return this.db.collection(collection);
   }
 
-  toPOJO(id:any, o: any): T | undefined {
-    if(!o) return;
+  toPOJO(id: any, o: any): T | undefined {
+    if (!o) return;
 
     return { id, ...o } as T;
   }

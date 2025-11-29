@@ -12,6 +12,7 @@ export type Item = components["schemas"]["Item"];
 export type CartItem = components["schemas"]["CartItem"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type BasePayment = components["schemas"]["Payment"];
+export type BaseCustomerBalance = components["schemas"]["CustomerBalance"];
 
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
@@ -22,6 +23,10 @@ export type BaseConversationMessage = models["schemas"]["ConversationMessage"];
 
 export type Payment = Omit<BasePayment, "created_at" > &  {
   created_at: Date;
+};
+export type CustomerBalance = Omit<BaseCustomerBalance, "created_at" | "updated_at" > & {
+  created_at: Date;
+  updated_at: Date;
 };
 export type OrderPicking = Omit<BaseOrderPicking, "created_at" > &  {
   created_at: Date;

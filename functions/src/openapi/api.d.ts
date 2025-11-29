@@ -767,6 +767,32 @@ export interface components {
        */
       created_at: string;
     };
+    CustomerBalance: {
+      /**
+       * @description Internal payment ID
+       * @example payment-123456
+       */
+      id: string;
+      owner: components["schemas"]["OwnerRef"];
+      /**
+       * Format: float
+       * @description Customer balance amount
+       * @example 150.75
+       */
+      balance: number;
+      /**
+       * Format: date-time
+       * @description Balance creation timestamp
+       * @example 2025-01-10T14:30:00Z
+       */
+      created_at?: string;
+      /**
+       * Format: date-time
+       * @description Balance last update timestamp
+       * @example 2025-01-10T14:30:00Z
+       */
+      updated_at?: string;
+    };
   };
   responses: never;
   parameters: never;

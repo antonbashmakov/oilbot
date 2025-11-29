@@ -1,5 +1,5 @@
 import * as request from 'supertest';
-import { testApp } from '../setup';
+import db from '../setup';
 import { Order, OrderResolvedEvent } from '../../models';
 import OrderService from '../../services/OrderService';
 import CustomerService from '../../services/CustomerService';
@@ -64,9 +64,6 @@ describe('Order Consolidation Integration Test', () => {
   let createdPicking: any;
 
   beforeEach(async () => {
-    const unauthContext = testApp.unauthenticatedContext();
-
-    const db = unauthContext.firestore();
 
     orderService = new OrderService(db as any);
     customerService = new CustomerService(db as any);

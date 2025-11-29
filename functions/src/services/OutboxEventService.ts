@@ -8,6 +8,10 @@ class OutboxEventService<T extends OutboxEvent> extends AbstractService<T> {
     return COLLECTIONS.OUTBOX_EVENTS;
   }
 
+  toPOJO(id: any, o: any): T {
+    return { ...o, id, processed_at: o.processed_at.toDate(), created_at: o.created_at.toDate()  };
+  }
+
   getExcludedFields(): string[] {
     return ["created_at", "processed_at"];
   }

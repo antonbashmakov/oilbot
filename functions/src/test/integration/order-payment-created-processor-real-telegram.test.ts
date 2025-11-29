@@ -1,4 +1,4 @@
-import { testApp } from '../setup';
+import db from '../setup';
 import { Order, PaymentCreatedEvent, Payment } from '../../models';
 import OrderPaymentCreatedProcessor from '../../services/events/OrderPaymentCreatedProcessor';
 import OrderService from '../../services/OrderService';
@@ -21,9 +21,6 @@ xdescribe('OrderPaymentCreatedProcessor Integration Test (Real Telegram)', () =>
   let createdPayment: Payment;
 
   beforeEach(async () => {
-    const unauthContext = testApp.unauthenticatedContext();
-    const db = unauthContext.firestore();
-
     processor = new OrderPaymentCreatedProcessor(db as any);
     orderService = new OrderService(db as any);
     paymentService = new PaymentService(db as any);

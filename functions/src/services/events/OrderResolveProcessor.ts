@@ -7,6 +7,7 @@ import OrderService from "../OrderService";
 import TBankService from "../payments/TBankService";
 import PaymentService from "../PaymentService";
 import AbstractProcessor from "./AbstractProcessor";
+import { v4 as uuidv4 } from 'uuid';
 
 class OrderResolveProcessor extends AbstractProcessor {
 
@@ -51,9 +52,10 @@ class OrderResolveProcessor extends AbstractProcessor {
         const publisher = new EventPublisher<BalanceChangedEvent>(this.db);
         const event: BalanceChangedEvent = {
           id: '',
+          idempotent_key: uuidv4(),
           processed: false,
           retries: 0,
-          type: CONSTANTS.EVENTS.BALANCE_CHANGE,
+          type: CONSTANTS.EVENTS.BALANCE_CHANGED,
           created_at: new Date(),
           processed_at: new Date(),
           payload: {
