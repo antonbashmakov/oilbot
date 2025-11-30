@@ -19,12 +19,13 @@ import {
   Container,
   Separator,
   IconButton,
-  Status
+  Status,
+  Tabs
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
 import { CartItem, PickingItem } from "@/api/models";
-import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking } from "@/api";
+import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking, useAdminOrderConciliationQuery } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
 import { useCallback, useEffect, useState } from "react";
 import { AddIcon, MinusIcon, LockIcon } from "@chakra-ui/icons";
@@ -56,12 +57,15 @@ export default function OrderPage() {
   const [selectedItem, setSelectedItem] = useState<PickingItem>()
   const [isReadyForConsolidation, setIsReadyForConsolidation] = useState<boolean>(false);
   const [isOrderEditable, setIsOrderEditable] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>("order-items");
 
   const { data: order } = useAdminOrderOverviewQuery(orderId as string);
+  const { data: conciliationOrder } = useAdminOrderConciliationQuery(orderId as string);
   const { mutate: mutatePicking } = usePatchOrderPicking(orderId as string);
   const { mutate: mutateStartPicking, isLoading: isStartPicking } = useStartOrderPicking(orderId as string);
   const { mutate: mutateConsolidate, isLoading: isConsolidating } = useConsolidateOrder(orderId as string);
   const { mutate: collectPicking, isLoading: isCollecting } = useCollectPickingItem(orderId as string, selectedItem?.id);
+
 
   const columns: Column<CartItem>[] = [
     { key: "id", header: "ID", accessor: (item) => item.id },
@@ -251,37 +255,90 @@ export default function OrderPage() {
 
             <Grid templateColumns="repeat(3, 1fr)" gap={6}>
               <GridItem colSpan={2}>
-                <VStack gap={6} align="stretch" >
-                  <DataTable
-                    columns={columns}
-                    data={order.items}
-                    title="Order Items"
-                    getKey={i => i.id}
-                  />
-                  <InfoMessage
-                    type="info"
-                    badgeText="Note"
-                    message={order.picking ? "Change the fraction column to reflect the picked items." : "Click 'Start Picking' to begin the order picking process."}
-                  />
+                <Tabs.Root bg="surface.container" value={activeTab} onValueChange={(e) => setActiveTab(e.value)}>
+                  <Tabs.List>
+                    <Tabs.Trigger value="order-items">Order Items</Tabs.Trigger>
+                    <Tabs.Trigger disabled={!conciliationOrder || !conciliationOrder.items} value="closing-order">Closing Order</Tabs.Trigger>
+                  </Tabs.List>
+                  <Tabs.Content value="order-items">
+                    <VStack gap={6} align="stretch" mt={4}>
+                      <DataTable
+                        columns={columns}
+                        data={order.items}
+                        getKey={i => i.id}
+                      />
+                      <InfoMessage
+                        type="info"
+                        badgeText="Note"
+                        message={order.picking ? "Change the fraction column to reflect the picked items." : "Click 'Start Picking' to begin the order picking process."}
+                      />
 
-                  {
-                    order.picking && <DataTable
-                      columns={pickingColumns}
-                      data={order.picking.items}
-                      title="Products"
-                      isSaving={false}
-                      onSave={onSave}
-                      isRowDisabled={isRowDisabled}
-                      rowButtons={rowButtons}
-                      getKey={i => i.id}
-                    />
-                  }
-                </VStack>
+                      {
+                        order.picking && <DataTable
+                          columns={pickingColumns}
+                          data={order.picking.items}
+                          title="Products"
+                          isSaving={false}
+                          onSave={onSave}
+                          isRowDisabled={isRowDisabled}
+                          rowButtons={rowButtons}
+                          getKey={i => i.id}
+                        />
+                      }
+                    </VStack>
+                  </Tabs.Content>
+                  <Tabs.Content value="closing-order">
+                    <VStack gap={6} align="stretch" mt={4}>
+                      {conciliationOrder && conciliationOrder.items ? (
+                        <>
+                          <Card.Root>
+                            <Card.Header>
+                              <Heading size="md">Closing Order Information</Heading>
+                            </Card.Header>
+                            <Card.Body>
+                              <DataList.Root orientation="horizontal" maxW="md">
+                                <DataList.Item key="conciliation-id">
+                                  <DataList.ItemLabel>Order ID</DataList.ItemLabel>
+                                  <DataList.ItemValue>{conciliationOrder.id}</DataList.ItemValue>
+                                </DataList.Item>
+                                <DataList.Item key="conciliation-status">
+                                  <DataList.ItemLabel>Status</DataList.ItemLabel>
+                                  <DataList.ItemValue>
+                                    <Badge colorScheme={
+                                      conciliationOrder.status === 'CONCILIATED' ? 'green' :
+                                      conciliationOrder.status === 'CONCILIATION_PAYMENT_IN_PROGRESS' ? 'orange' : 'gray'
+                                    }>
+                                      {conciliationOrder.status}
+                                    </Badge>
+                                  </DataList.ItemValue>
+                                </DataList.Item>
+                              </DataList.Root>
+                            </Card.Body>
+                          </Card.Root>
+                          
+                          <DataTable
+                            columns={columns}
+                            data={conciliationOrder.items}
+                            title="Closing Order Items"
+                            getKey={i => i.id}
+                            isRowDisabled={() => true}
+                          />
+                        </>
+                      ) : (
+                        <InfoMessage
+                          type="info"
+                          badgeText="Info"
+                          message="No closing order found for this order."
+                        />
+                      )}
+                    </VStack>
+                  </Tabs.Content>
+                </Tabs.Root>
               </GridItem>
 
               <GridItem colSpan={1}>
                 <VStack gap={6} align="stretch" >
-                  <Card.Root>
+                  <Card.Root bg="surface.container">
                     <Card.Header>
                       <Heading size="md">Customer</Heading>
                     </Card.Header>
@@ -301,7 +358,7 @@ export default function OrderPage() {
                     </Card.Body>
                   </Card.Root>
 
-                  <Card.Root>
+                  <Card.Root bg="surface.container">
                     <Card.Header>
                       <Heading size="md">Order History</Heading>
                     </Card.Header>
@@ -325,7 +382,7 @@ export default function OrderPage() {
                       </DataList.Root>
                     </Card.Body>
                   </Card.Root>
-                  <Card.Root>
+                  <Card.Root bg="surface.container">
                     <Card.Header>
                       <Heading size="md">Order History</Heading>
                     </Card.Header>

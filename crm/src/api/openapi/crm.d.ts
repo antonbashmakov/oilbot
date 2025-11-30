@@ -245,6 +245,38 @@ export interface paths {
       };
     };
   };
+  "/admin/orders/{id}/conciliation": {
+    /**
+     * Get conciliation order
+     * @description Retrieve the conciliation order for a given order ID
+     */
+    get: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["Order"];
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/private/items/category/{category}": {
     /**
      * Get items by category
@@ -637,6 +669,11 @@ export interface components {
        * @example order-456
        */
       id: string;
+      /**
+       * @description Original order this order is consolidated with
+       * @example order-45611
+       */
+      reconciliated_order_id?: string;
       /**
        * @description Name of the customer
        * @example Order 1

@@ -4,6 +4,7 @@ import {
     OrderOverview,
     OrderPickingPatch,
     Delivery,
+    Order,
 } from "@/api/models";
 import { UseQueryResult } from "react-query";
 
@@ -93,5 +94,12 @@ export const useAdminOrderOverviewQuery = (id?: string): UseQueryResult<OrderOve
     }, { retry: 1, enabled: !!id })
 };
 
-
-
+export const useAdminOrderConciliationQuery = (id?: string): UseQueryResult<Order> => {
+    return useApiQuery("/admin/orders/{id}/conciliation", {
+        params: {
+            path: {
+                id: id || ""
+            }
+        }
+    }, { retry: 1, enabled: !!id })
+};

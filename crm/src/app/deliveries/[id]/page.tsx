@@ -22,12 +22,14 @@ function OrderStatusBadge({ status }: { status: string }) {
     PENDING: "yellow",
     PAID: "green",
     RESOLVING: "yellow",
+    CONCILIATION_PAYMENT_IN_PROGRESS: "yellow",
   };
 
   const statusLabels = {
     PENDING: "Pending",
     PAID: "Paid",
     RESOLVING: "Resolving",
+    CONCILIATION_PAYMENT_IN_PROGRESS: "Payment in Progress",
   };
 
   return (
