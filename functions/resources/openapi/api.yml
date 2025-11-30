@@ -255,6 +255,39 @@ paths:
         '204':
           description: Order successfully resolved
 
+  /admin/orders/{id}/conciliation:
+    get:
+      summary: Get conciliation order
+      description: Retrieve the conciliation order for a given order ID
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Order'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /private/items/category/{category}:
     get:
       summary: Get items by category
@@ -721,6 +754,10 @@ components:
           type: string
           description: Unique identifier for the order
           example: "order-456"
+        reconciliated_order_id:
+          type: string
+          description: Original order this order is consolidated with
+          example: "order-45611"
         name:
           type: string
           description: Name of the customer

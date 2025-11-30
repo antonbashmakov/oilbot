@@ -638,6 +638,11 @@ export interface components {
        */
       id: string;
       /**
+       * @description Original order this order is consolidated with
+       * @example order-45611
+       */
+      reconciliated_order_id?: string;
+      /**
        * @description Name of the customer
        * @example Order 1
        */

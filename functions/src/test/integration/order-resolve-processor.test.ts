@@ -233,6 +233,45 @@ describe("OrderResolveProcessor Integration Test", () => {
     expect(updatedOrder?.status).toBe("PENDING");
   });
 
+  it("should create CONCILIATION order pointing to original order when picking total is greater than order total", async () => {
+    // Create test event
+    const testEvent: OrderResolvedEvent = {
+      id: "test-event-id",
+      idempotent_key: "idempotent-key-conciliation",
+      type: "ORDER_RESOLVED",
+      created_at: new Date(),
+      processed: false,
+      retries: 0,
+      payload: {
+        order_id: createdOrder.id,
+      },
+    };
+
+    // Verify no conciliation orders exist initially
+    const initialConciliationOrder = await orderService.findConciliationOrder(createdOrder.id);
+    expect(initialConciliationOrder).toBeNull();
+
+    // Process the event
+    await orderResolveProcessor.process(testEvent);
+
+    // Verify that a CONCILIATION order was created and points to the original order
+    const conciliationOrder = await orderService.findConciliationOrder(createdOrder.id);
+    expect(conciliationOrder).toBeDefined();
+    expect(conciliationOrder?.type).toBe("CONCILIATION");
+    expect(conciliationOrder?.reconciliated_order_id).toBe(createdOrder.id);
+    expect(conciliationOrder?.status).toBe("PAYMENT_IN_PROGRESS");
+    expect(conciliationOrder?.total).toBe(50); // 200 (picking) - 150 (order) = 50
+
+    // Verify the conciliation order has proper item structure
+    expect(conciliationOrder?.items).toHaveLength(1);
+    expect(conciliationOrder?.items[0].name).toBe("Финальный расчёт заказа");
+    expect(conciliationOrder?.items[0].price).toBe(50);
+
+    // Verify original order status was updated
+    const updatedOrder = await orderService.find(createdOrder.id);
+    expect(updatedOrder?.status).toBe("CONCILIATION_PAYMENT_IN_PROGRESS");
+  });
+
   it("should throw error when order is not found", async () => {
     // Create test event with non-existent order ID
     const testEvent: OrderResolvedEvent = {

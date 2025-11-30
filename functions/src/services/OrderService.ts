@@ -35,6 +35,20 @@ class OrderService extends AbstractService<Order> {
     return order;
   }
 
+  async findConciliationOrder(orderId: string): Promise<Order | null> {
+    const result = await this.getCollection()
+      .where("reconciliated_order_id", "==", orderId)
+      .limit(1)
+      .get();
+
+    if (result.empty) {
+      return null;
+    }
+
+    const doc = result.docs[0];
+    return this.toPOJO(doc.id, doc.data()) as Order;
+  }
+
   getCollectionName(): string {
     return COLLECTIONS.ORDERS;
   }

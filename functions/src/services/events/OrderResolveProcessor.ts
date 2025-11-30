@@ -72,6 +72,7 @@ class OrderResolveProcessor extends AbstractProcessor {
         owner: order.owner,
         status: "PAYMENT_IN_PROGRESS",
         total: diff,
+        reconciliated_order_id: order.id,
         name: `Order ${order.id} reconciliation`,
         items: [{
           fraction: 1,

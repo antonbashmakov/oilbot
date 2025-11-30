@@ -262,4 +262,18 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
   }
 });
 
+adminApi.get("/orders/:id/conciliation", async (req: express.Request, res: express.Response) => {
+  try {
+    const {id} = req.params;
+    const orderService = new OrderService(db);
+
+    const conciliationOrder = await orderService.findConciliationOrder(id);
+
+    return api.send(res, conciliationOrder);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
 export default adminApi;

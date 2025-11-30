@@ -15,10 +15,13 @@ dotenv.config();
 
 const databaseId = process.env.DATABASE_ID ?? "(default)";
 
-const db = new admin.firestore.Firestore({
-  projectId: process.env.GCLOUD_PROJECT,
-  databaseId,
-});
+const db = admin.firestore();
+
+if (process.env.GCLOUD_PROJECT !== "test-project" && db.databaseId !== process.env.DATABASE_ID) {
+  db.settings({
+    databaseId,
+  });
+}
 
 const processOutboxEvent = functions.firestore
   .database(databaseId)
