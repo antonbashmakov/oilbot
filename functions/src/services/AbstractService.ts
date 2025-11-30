@@ -1,5 +1,5 @@
-import {  FieldValue, Firestore } from 'firebase-admin/firestore';
-import { jsonify } from './utils';
+import {FieldValue, Firestore} from "firebase-admin/firestore";
+import {jsonify} from "./utils";
 
 // Interface for entities that have an ID
 interface Entity {
@@ -29,7 +29,7 @@ abstract class AbstractService<T extends Entity> {
   }
 
   require(id: IdOf<T>): Promise<T> {
-    return this.getCollection().doc(`${id}`).get().then(doc => {
+    return this.getCollection().doc(`${id}`).get().then((doc) => {
       if (!doc.exists) throw new Error(`Object ${this.getCollectionName()}/${id} is not found`);
       return doc;
     }).then((doc: any) => this.toPOJO(doc.id as IdOf<T>, doc.data()) as T);
@@ -44,11 +44,10 @@ abstract class AbstractService<T extends Entity> {
   }
 
   addAll(objects: T[]): void {
-    objects.forEach(object => this.add(object));
+    objects.forEach((object) => this.add(object));
   }
 
   incrementField(object: T, field: string, value: number): Promise<FirebaseFirestore.WriteResult> {
-
     const keys = Object.keys(object);
 
     if (!keys.includes(field)) throw Error(`Field ${field} is not in object type. Known fields are : ${keys.join()}`);
@@ -57,20 +56,19 @@ abstract class AbstractService<T extends Entity> {
 
     // Atomically increment the population of the city by 50.
     return ref.update({[field]: FieldValue.increment(value)});
-
   }
 
   setAll(objects: T[]): void {
-    objects.forEach(object => this.set(object));
+    objects.forEach((object) => this.set(object));
   }
 
-  addForOwner(user: { id: string }, object: Omit<T, 'owner'>): Promise<T> {
-    const objectWithOwner = { ...object, owner: { id: user.id } } as T;
+  addForOwner(user: { id: string }, object: Omit<T, "owner">): Promise<T> {
+    const objectWithOwner = {...object, owner: {id: user.id}} as T;
     return this.add(objectWithOwner);
   }
 
   fetchForOwner(owner: { id: string }): Promise<T[]> {
-    return this.getCollection().where('owner.id', '==', owner.id)
+    return this.getCollection().where("owner.id", "==", owner.id)
       .get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.id, doc.data())));
   }
 
@@ -81,7 +79,7 @@ abstract class AbstractService<T extends Entity> {
 
     const fieldsToSave: Record<string, any> = {};
 
-    fields.forEach(field => fieldsToSave[field] = object[field as keyof T]);
+    fields.forEach((field) => fieldsToSave[field] = object[field as keyof T]);
 
     const objectToSave = Object.assign(jsonify(object), fieldsToSave);
 
@@ -96,12 +94,11 @@ abstract class AbstractService<T extends Entity> {
 
     const fieldsToSave: Record<string, any> = {};
 
-    fields.forEach(field => fieldsToSave[field] = object[field as keyof T]);
+    fields.forEach((field) => fieldsToSave[field] = object[field as keyof T]);
 
     const objectToSet = Object.assign(jsonify(object), fieldsToSave);
 
     return this.getCollection().doc(objectToSet.id).set(objectToSet);
-
   }
 
   delete(object: T): Promise<any> {
@@ -113,7 +110,7 @@ abstract class AbstractService<T extends Entity> {
       const docRef = this.getCollection().doc(`${entity.id}`);
       transaction.update(docRef, object);
     });
-  };
+  }
 
   runTransactionally(method: (transaction: any) => Promise<any>) {
     return this.db.runTransaction(method);
@@ -129,7 +126,7 @@ abstract class AbstractService<T extends Entity> {
   toPOJO(id: any, o: any): T | undefined {
     if (!o) return;
 
-    return { id, ...o } as T;
+    return {id, ...o} as T;
   }
   abstract getCollectionName(): string;
   abstract getExcludedFields(): string[];

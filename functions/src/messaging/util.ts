@@ -1,4 +1,4 @@
-import * as mustache from 'mustache';
+import * as mustache from "mustache";
 
 // Define message templates
 const TEMPLATES = {
@@ -22,28 +22,28 @@ c *{{deliveryStart}}* по *{{deliveryEnd}}*
 🔗 Ссылка на оплату: {{{paymentUrl}}}`,
   ORDER_CONCILIATED: `✅ Ваш заказ собран. Мы оповестим вас когда и где его можно будет забрать.
 
-Номер заказ {{orderId}}`
+Номер заказ {{orderId}}`,
 };
 
 /**
  * Process a template with given values using mustache.js
  * @param templateName - Name of the template to use
  * @param values - Object containing values to substitute in the template
- * @returns Processed message string
+ * @return Processed message string
  */
 export function toMessage(templateName: keyof typeof TEMPLATES, values: Record<string, any>): string {
   const template = TEMPLATES[templateName];
   if (!template) {
     throw new Error(`Template '${templateName}' not found`);
   }
-  
+
   return mustache.render(template, values);
 }
 
 /**
  * Format date to dd.mm.yyyy format
  * @param input - Date object or string
- * @returns Formatted date string
+ * @return Formatted date string
  */
 export function formatDate(input: Date | string): string {
   const date = input instanceof Date ? input : new Date(input);

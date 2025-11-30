@@ -1,10 +1,10 @@
-import db from '../setup';
-import { BalanceChangedEvent } from '../../models';
-import BalanceChangedProcessor from '../../services/events/BalanceChangedProcessor';
-import CustomerBalanceService from '../../services/CustomerBalanceService';
-import CustomerService from '../../services/CustomerService';
+import db from "../setup";
+import {BalanceChangedEvent} from "../../models";
+import BalanceChangedProcessor from "../../services/events/BalanceChangedProcessor";
+import CustomerBalanceService from "../../services/CustomerBalanceService";
+import CustomerService from "../../services/CustomerService";
 
-describe('BalanceChangedProcessor Integration Test', () => {
+describe("BalanceChangedProcessor Integration Test", () => {
   let processor: BalanceChangedProcessor;
   let customerBalanceService: CustomerBalanceService;
   let customerService: CustomerService;
@@ -22,30 +22,30 @@ describe('BalanceChangedProcessor Integration Test', () => {
     // Create test customer
     createdCustomer = {
       created_at: new Date(),
-      id: 'test-customer-id-balance',
-      first_name: 'Test',
-      last_name: 'Customer',
-      email: 'test@example.com',
-      phone: '+1234567890'
+      id: "test-customer-id-balance",
+      first_name: "Test",
+      last_name: "Customer",
+      email: "test@example.com",
+      phone: "+1234567890",
     } as any;
 
     // Create test data in Firestore
     await customerService.set(createdCustomer);
   });
 
-  it('should update customer balance after successful processing', async () => {
+  it("should update customer balance after successful processing", async () => {
     // Create test event
     const testEvent: BalanceChangedEvent = {
-      id: 'test-event-id-balance',
-      idempotent_key: 'idempotent-key-balance-test',
-      type: 'BALANCE_CHANGED',
+      id: "test-event-id-balance",
+      idempotent_key: "idempotent-key-balance-test",
+      type: "BALANCE_CHANGED",
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
         customer_id: createdCustomer.id,
-        change: -50 // Negative change (refund)
-      }
+        change: -50, // Negative change (refund)
+      },
     };
 
     // Verify no balance exists initially
@@ -69,19 +69,19 @@ describe('BalanceChangedProcessor Integration Test', () => {
     expect(balance!.updated_at).toBeInstanceOf(Date);
   });
 
-  it('should handle positive balance changes', async () => {
+  it("should handle positive balance changes", async () => {
     // Create test event with positive change
     const testEvent: BalanceChangedEvent = {
-      id: 'test-event-id-balance-positive',
-      idempotent_key: 'idempotent-key-balance-positive',
-      type: 'BALANCE_CHANGED',
+      id: "test-event-id-balance-positive",
+      idempotent_key: "idempotent-key-balance-positive",
+      type: "BALANCE_CHANGED",
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
         customer_id: createdCustomer.id,
-        change: 100 // Positive change (credit)
-      }
+        change: 100, // Positive change (credit)
+      },
     };
 
     // Process the event
@@ -95,57 +95,57 @@ describe('BalanceChangedProcessor Integration Test', () => {
     expect(balance?.balance).toBe(100);
   });
 
-  it('should throw error when idempotent key is missing', async () => {
+  it("should throw error when idempotent key is missing", async () => {
     // Create test event without idempotent key
     const testEvent: BalanceChangedEvent = {
-      id: 'test-event-id-balance-no-key',
-      type: 'BALANCE_CHANGED',
+      id: "test-event-id-balance-no-key",
+      type: "BALANCE_CHANGED",
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
         customer_id: createdCustomer.id,
-        change: 50
-      }
+        change: 50,
+      },
     };
 
     // Verify that processing throws an error
     await expect(processor.process(testEvent))
       .rejects
-      .toThrow('Idempotent key is missing on BalanceChangedEvent');
+      .toThrow("Idempotent key is missing on BalanceChangedEvent");
 
     // Verify no balance was created
     const balance = await customerBalanceService.find(createdCustomer.id);
     expect(balance).toBeUndefined();
   });
 
-  it('should accumulate balance changes across different events', async () => {
+  it("should accumulate balance changes across different events", async () => {
     // Create first event
     const firstEvent: BalanceChangedEvent = {
-      id: 'test-event-id-balance-1',
-      idempotent_key: 'idempotent-key-balance-1',
-      type: 'BALANCE_CHANGED',
+      id: "test-event-id-balance-1",
+      idempotent_key: "idempotent-key-balance-1",
+      type: "BALANCE_CHANGED",
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
         customer_id: createdCustomer.id,
-        change: 100
-      }
+        change: 100,
+      },
     };
 
     // Create second event
     const secondEvent: BalanceChangedEvent = {
-      id: 'test-event-id-balance-2',
-      idempotent_key: 'idempotent-key-balance-2',
-      type: 'BALANCE_CHANGED',
+      id: "test-event-id-balance-2",
+      idempotent_key: "idempotent-key-balance-2",
+      type: "BALANCE_CHANGED",
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
         customer_id: createdCustomer.id,
-        change: -30
-      }
+        change: -30,
+      },
     };
 
     // Process both events
@@ -158,5 +158,4 @@ describe('BalanceChangedProcessor Integration Test', () => {
     expect(balance).toBeDefined();
     expect(balance?.balance).toBe(70); // 100 - 30 = 70
   });
-
 });

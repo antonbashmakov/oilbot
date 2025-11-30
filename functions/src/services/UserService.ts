@@ -1,8 +1,8 @@
-import { COLLECTIONS } from '../constants';
+import {COLLECTIONS} from "../constants";
 
-import AbstractService from './AbstractService';
+import AbstractService from "./AbstractService";
 
-import { jsonify } from './utils';
+import {jsonify} from "./utils";
 
 // Interface for User entity
 interface UserEntity {
@@ -16,30 +16,32 @@ interface UserEntity {
 }
 
 class UserService extends AbstractService<UserEntity> {
+  constructor(firebase: any) {
+    super(firebase);
+  }
 
-    constructor(firebase: any) {
-        super(firebase);
-    }
+  createUser(user: UserEntity): Promise<any> {
+    const created_at = user.created_at;
 
-    createUser(user: UserEntity): Promise<any> {
-        const created_at = user.created_at;
+    const userToSave = jsonify(user);
 
-        const userToSave = jsonify(user);
+    userToSave.created_at = created_at;
+    const ref = this.getCollection().doc(userToSave.id);
+    return ref.set(userToSave);
+  }
 
-        userToSave.created_at = created_at;
-        const ref = this.getCollection().doc(userToSave.id);
-        return ref.set(userToSave);
-    }
+  getCollectionName(): string {
+    return COLLECTIONS.USERS;
+  }
+  getExcludedFields(): string[] {
+    return ["created_at"];
+  }
 
-    getCollectionName(): string { return COLLECTIONS.USERS; }
-    getExcludedFields(): string[] { return ['created_at']; }
-
-    clearUser(user: UserEntity): void {
-        delete (user as any).created_at;
-        delete (user as any).roles;
-        delete (user as any).email;
-    }
-
+  clearUser(user: UserEntity): void {
+    delete (user as any).created_at;
+    delete (user as any).roles;
+    delete (user as any).email;
+  }
 }
 
 

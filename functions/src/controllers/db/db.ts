@@ -2,15 +2,15 @@
 import {
   functions,
   admin,
-} from './imports';
-import { toProcessor } from "../../services/events/factory";
-import { OutboxEvent } from "../../models";
+} from "./imports";
+import {toProcessor} from "../../services/events/factory";
+import {OutboxEvent} from "../../models";
 
 admin.initializeApp({}, "db");
 
 const db = admin.firestore();
 
-if ( process.env.GCLOUD_PROJECT !== 'test-project' && db.databaseId !== process.env.DATABASE_ID) {
+if ( process.env.GCLOUD_PROJECT !== "test-project" && db.databaseId !== process.env.DATABASE_ID) {
   db.settings({
     databaseId: process.env.DATABASE_ID,
   });
@@ -20,11 +20,9 @@ if ( process.env.GCLOUD_PROJECT !== 'test-project' && db.databaseId !== process.
 const processOutboxEvent = functions.firestore
   .document("OUTBOX_EVENTS/{eventId}")
   .onCreate(async (snap, context) => {
-
     const data = snap.data() as OutboxEvent;
 
     try {
-
       const ProcessorConstructor = toProcessor(data.type);
       const processor = new ProcessorConstructor(db);
       processor.process(data);
@@ -34,7 +32,6 @@ const processOutboxEvent = functions.firestore
         processed: true,
         processedAt: Date.now(),
       });
-
     } catch (error ) {
       console.error("Failed to process event:", error);
 

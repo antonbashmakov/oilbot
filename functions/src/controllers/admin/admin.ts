@@ -1,4 +1,4 @@
-import * as dotenv from 'dotenv';
+import * as dotenv from "dotenv";
 
 import {
   functions,
@@ -7,22 +7,22 @@ import {
   express,
   DeliveryService,
   OrderService,
-  //AbstractService,
+  // AbstractService,
   api,
   CONSTANTS,
-} from './imports';
-import { DeliveryOverview, OrderResolvedEvent, Stats } from '../../models';
-import OrderPickingService from '../../services/OrderPickingService';
-import CustomerService from '../../services/CustomerService';
-import EventPublisher from '../../services/EventPublisher';
+} from "./imports";
+import {DeliveryOverview, OrderResolvedEvent, Stats} from "../../models";
+import OrderPickingService from "../../services/OrderPickingService";
+import CustomerService from "../../services/CustomerService";
+import EventPublisher from "../../services/EventPublisher";
 // import { debug } from 'firebase-functions/logger';
 dotenv.config();
 
-admin.initializeApp({}, 'admin');
+admin.initializeApp({}, "admin");
 
 const db = admin.firestore();
 
-if (process.env.GCLOUD_PROJECT !== 'test-project' && db.databaseId !== process.env.DATABASE_ID) {
+if (process.env.GCLOUD_PROJECT !== "test-project" && db.databaseId !== process.env.DATABASE_ID) {
   db.settings({
     databaseId: process.env.DATABASE_ID,
   });
@@ -32,7 +32,7 @@ const adminApi = express();
 
 
 adminApi.use(cors(
-  { origin: true } // allows all cross origin xhr requests
+  {origin: true} // allows all cross origin xhr requests
 ));
 
 /*
@@ -49,40 +49,37 @@ adminApi.use(async (req: express.Request, res: express.Response, next: express.N
 
 */
 
-adminApi.get('/deliveries', async (req: express.Request, res: express.Response) => {
+adminApi.get("/deliveries", async (req: express.Request, res: express.Response) => {
   try {
-
     const deliveryService = new DeliveryService(db);
 
     const deliveries = await deliveryService.findAll();
 
     return api.send(res, deliveries);
   } catch (err: any) {
-
     functions.logger.error(err);
-    return api.error(res, err.message || 'Internal server error');
+    return api.error(res, err.message || "Internal server error");
   }
 });
 
-adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Response) => {
+adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const deliveryService = new DeliveryService(db);
     const orderService = new OrderService(db);
     const delivery = await deliveryService.find(id);
 
     if (!delivery) {
-      return api.notFound(res, 'Delivery not found');
+      return api.notFound(res, "Delivery not found");
     }
 
     const orders = await orderService.findOrders(delivery);
-    const devileryOverview = { ...delivery, orders } as DeliveryOverview;
+    const devileryOverview = {...delivery, orders} as DeliveryOverview;
 
     const deliveryStats = orders.reduce((ds, order) => {
-
       const orderStats = order.items.reduce((os, item) => {
         if (!os[item.item_id]) {
-          os[item.item_id] = { total: 0, fraction: 0, name: item.name };
+          os[item.item_id] = {total: 0, fraction: 0, name: item.name};
         }
         os[item.item_id].total += item.price * item.quantity;
         os[item.item_id].fraction += item.fraction;
@@ -90,10 +87,10 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
         return os;
       }, {} as { [key: string]: Stats });
 
-      Object.keys(orderStats).forEach(key => {
+      Object.keys(orderStats).forEach((key) => {
         if (!ds[key]) {
-          ds[key] = { ...orderStats[key] };
-          return
+          ds[key] = {...orderStats[key]};
+          return;
         }
 
         ds[key].total += orderStats[key].total;
@@ -104,24 +101,24 @@ adminApi.get('/deliveries/:id', async (req: express.Request, res: express.Respon
       return ds;
     }, {} as { [key: string]: Stats });
 
-    devileryOverview.stats = Object.keys(deliveryStats).map(key => deliveryStats[key]);
+    devileryOverview.stats = Object.keys(deliveryStats).map((key) => deliveryStats[key]);
 
     return api.send(res, devileryOverview);
   } catch (err: any) {
     functions.logger.error(err);
-    return api.error(res, err.message || 'Internal server error');
+    return api.error(res, err.message || "Internal server error");
   }
 });
 
-adminApi.get('/orders/:id', async (req: express.Request, res: express.Response) => {
+adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const orderService = new OrderService(db);
 
     const order = await orderService.find(id);
 
     if (!order) {
-      return api.notFound(res, 'Order not found');
+      return api.notFound(res, "Order not found");
     }
 
     const customerService = new CustomerService(db);
@@ -130,20 +127,20 @@ adminApi.get('/orders/:id', async (req: express.Request, res: express.Response) 
     const picking = await pickingService.find(id);
     const customer = await customerService.find(order.owner!.id);
 
-    return api.send(res, { ...order, picking, customer });
+    return api.send(res, {...order, picking, customer});
   } catch (err: any) {
     functions.logger.error(err);
-    return api.error(res, err.message || 'Internal server error');
+    return api.error(res, err.message || "Internal server error");
   }
 });
 
-adminApi.patch('/order-pickings/:id', async (req: express.Request, res: express.Response) => {
+adminApi.patch("/order-pickings/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
-    const { items } = req.body;
+    const {id} = req.params;
+    const {items} = req.body;
 
     if (!items || !Array.isArray(items)) {
-      return api.error(res, 'Items array is required');
+      return api.error(res, "Items array is required");
     }
 
     const orderService = new OrderService(db);
@@ -151,10 +148,10 @@ adminApi.patch('/order-pickings/:id', async (req: express.Request, res: express.
 
 
     if (!order) {
-      return api.notFound(res, 'Order not found');
+      return api.notFound(res, "Order not found");
     }
-    if (order.status !== 'PENDING' && order.status !== 'PAID') {
-      return api.badRequest(res, 'Order is not editable');
+    if (order.status !== "PENDING" && order.status !== "PAID") {
+      return api.badRequest(res, "Order is not editable");
     }
 
     const pickingService = new OrderPickingService(db);
@@ -163,22 +160,22 @@ adminApi.patch('/order-pickings/:id', async (req: express.Request, res: express.
     return api.send(res, updatedPicking);
   } catch (err: any) {
     functions.logger.error(err);
-    if (err.message.includes('not found')) {
-      return api.notFound(res, 'Order picking not found');
+    if (err.message.includes("not found")) {
+      return api.notFound(res, "Order picking not found");
     }
-    return api.error(res, err.message || 'Internal server error');
+    return api.error(res, err.message || "Internal server error");
   }
 });
 
-adminApi.post('/orders/:id/order-picking', async (req: express.Request, res: express.Response) => {
+adminApi.post("/orders/:id/order-picking", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
 
     if (!order) {
-      return api.notFound(res, 'Order not found');
+      return api.notFound(res, "Order not found");
     }
 
     const pickingService = new OrderPickingService(db);
@@ -187,22 +184,22 @@ adminApi.post('/orders/:id/order-picking', async (req: express.Request, res: exp
     return api.send(res, picking);
   } catch (err: any) {
     functions.logger.error(err);
-    return api.error(res, err.message || 'Internal server error');
+    return api.error(res, err.message || "Internal server error");
   }
 });
 
-adminApi.post('/order-pickings/:pickingId/items/:itemId/collect', async (req: express.Request, res: express.Response) => {
+adminApi.post("/order-pickings/:pickingId/items/:itemId/collect", async (req: express.Request, res: express.Response) => {
   try {
-    const { pickingId, itemId } = req.params;
+    const {pickingId, itemId} = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(pickingId);
 
     if (!order) {
-      return api.notFound(res, 'Order not found');
+      return api.notFound(res, "Order not found");
     }
-    if (order.status !== 'PENDING' && order.status !== 'PAID') {
-      return api.badRequest(res, 'Order is not editable');
+    if (order.status !== "PENDING" && order.status !== "PAID") {
+      return api.badRequest(res, "Order is not editable");
     }
 
 
@@ -211,47 +208,47 @@ adminApi.post('/order-pickings/:pickingId/items/:itemId/collect', async (req: ex
     return res.status(204).send();
   } catch (err: any) {
     functions.logger.error(err);
-    if (err.message.includes('not found')) {
+    if (err.message.includes("not found")) {
       return api.notFound(res, err.message);
     }
-    return api.error(res, err.message || 'Internal server error');
+    return api.error(res, err.message || "Internal server error");
   }
 });
 
-adminApi.post('/orders/:id/consolidate', async (req: express.Request, res: express.Response) => {
+adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
 
     if (!order) {
-      return api.notFound(res, 'Order not found');
+      return api.notFound(res, "Order not found");
     }
-    if (order.status !== 'PENDING' && order.status !== 'PAID') {
-      return api.badRequest(res, 'Order is not editable');
+    if (order.status !== "PENDING" && order.status !== "PAID") {
+      return api.badRequest(res, "Order is not editable");
     }
 
     const pickingService = new OrderPickingService(db);
 
     const picking = await pickingService.find(id);
 
-    if (!picking || !picking.items.every(i => i.status === 'COLLECTED')) {
-      return api.badRequest(res, 'Order is not compiled');
+    if (!picking || !picking.items.every((i) => i.status === "COLLECTED")) {
+      return api.badRequest(res, "Order is not compiled");
     }
 
-    await orderService.updateTransactionally(order, { status: 'RESOLVING' });
+    await orderService.updateTransactionally(order, {status: "RESOLVING"});
 
     const eventPublisher = new EventPublisher<OrderResolvedEvent>(db);
 
     const event: OrderResolvedEvent = {
-      id: '', // will be set by OutboxEventService
+      id: "", // will be set by OutboxEventService
       created_at: new Date(),
       processed_at: new Date(),
       processed: false,
       retries: 0,
       type: CONSTANTS.EVENTS.ORDER_RESOLVED,
-      payload: { order_id: order.id }
+      payload: {order_id: order.id},
 
     };
 
@@ -260,7 +257,7 @@ adminApi.post('/orders/:id/consolidate', async (req: express.Request, res: expre
     return api.send(res, {});
   } catch (err: any) {
     functions.logger.error(err);
-    return api.error(res, err.message || 'Internal server error');
+    return api.error(res, err.message || "Internal server error");
   }
 });
 

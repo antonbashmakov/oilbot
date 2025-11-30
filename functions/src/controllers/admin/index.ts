@@ -1,3 +1,3 @@
-import adminApi from './admin';
+import adminApi from "./admin";
 
 export default adminApi;

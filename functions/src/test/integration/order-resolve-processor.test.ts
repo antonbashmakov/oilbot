@@ -1,27 +1,27 @@
-import db from '../setup';
-import { Order, OrderPicking, OrderResolvedEvent } from '../../models';
-import OrderResolveProcessor from '../../services/events/OrderResolveProcessor';
-import OrderService from '../../services/OrderService';
-import PaymentService from '../../services/PaymentService';
-import CustomerService from '../../services/CustomerService';
-import OrderPickingService from '../../services/OrderPickingService';
-import TBankService from '../../services/payments/TBankService';
+import db from "../setup";
+import {Order, OrderPicking, OrderResolvedEvent} from "../../models";
+import OrderResolveProcessor from "../../services/events/OrderResolveProcessor";
+import OrderService from "../../services/OrderService";
+import PaymentService from "../../services/PaymentService";
+import CustomerService from "../../services/CustomerService";
+import OrderPickingService from "../../services/OrderPickingService";
+import TBankService from "../../services/payments/TBankService";
 
 // Mock TBankService
-jest.mock('../../services/payments/TBankService');
+jest.mock("../../services/payments/TBankService");
 
 const mockTBankService = {
   initPayment: jest.fn().mockImplementation((paymentRequest) => {
     return {
       TerminalKey: "MOCK_TERMINAL",
       Success: true,
-      Status: 'NEW',
+      Status: "NEW",
       ErrorCode: 0,
       PaymentId: "external-mock-id",
       OrderId: paymentRequest.OrderId,
       Amount: paymentRequest.Amount,
       Token: "mock-token",
-      PaymentURL: `https://securepay.tinkoff.ru/${paymentRequest.OrderId}`
+      PaymentURL: `https://securepay.tinkoff.ru/${paymentRequest.OrderId}`,
     };
   }),
   orderToPaymentRequest: jest.fn().mockImplementation((order) => {
@@ -44,16 +44,16 @@ const mockTBankService = {
           Quantity: 1,
           Amount: i.price * 100,
           Tax: "vat0",
-        }))
+        })),
       },
-      Token: "mock-token"
+      Token: "mock-token",
     };
-  })
+  }),
 };
 
 (TBankService as jest.MockedClass<typeof TBankService>).mockImplementation(() => mockTBankService as any);
 
-describe('OrderResolveProcessor Integration Test', () => {
+describe("OrderResolveProcessor Integration Test", () => {
   let orderResolveProcessor: OrderResolveProcessor;
   let orderService: OrderService;
   let pickingService: OrderPickingService;
@@ -74,37 +74,37 @@ describe('OrderResolveProcessor Integration Test', () => {
     // Create test customer
     createdCustomer = {
       created_at: new Date(),
-      id: 'test-customer-id',
-      first_name: 'Test',
-      last_name: 'Customer',
-      email: 'test@example.com',
-      phone: '+1234567890'
+      id: "test-customer-id",
+      first_name: "Test",
+      last_name: "Customer",
+      email: "test@example.com",
+      phone: "+1234567890",
     } as any;
 
     // Create test order
     createdOrder = {
-      id: 'test-order-id',
-      name: 'Test Order',
+      id: "test-order-id",
+      name: "Test Order",
       created_at: new Date(),
       items: [
         {
-          id: 'test-item-1',
-          name: 'Test Item 1',
+          id: "test-item-1",
+          name: "Test Item 1",
           price: 150,
           quantity: 1,
-          item_id: 'item-1',
+          item_id: "item-1",
           fraction: 1,
           price_for_unit: 150,
-          group: 'TEST_GROUP',
-          owner: { id: 'test-customer-id' }
-        }
+          group: "TEST_GROUP",
+          owner: {id: "test-customer-id"},
+        },
       ],
-      status: 'PENDING',
+      status: "PENDING",
       numberOfItems: 1,
       total: 150,
       owner: {
-        id: createdCustomer.id
-      }
+        id: createdCustomer.id,
+      },
     } as any;
 
     createdPicking = JSON.parse(JSON.stringify(createdOrder));
@@ -118,19 +118,18 @@ describe('OrderResolveProcessor Integration Test', () => {
   });
 
 
-
-  it('should create a Payment object after successful processing when picking total is greater than order total', async () => {
+  it("should create a Payment object after successful processing when picking total is greater than order total", async () => {
     // Create test event
     const testEvent: OrderResolvedEvent = {
-      id: 'test-event-id',
-      idempotent_key: 'idempotent-key-test',
-      type: 'ORDER_RESOLVED',
+      id: "test-event-id",
+      idempotent_key: "idempotent-key-test",
+      type: "ORDER_RESOLVED",
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
-        order_id: createdOrder.id
-      }
+        order_id: createdOrder.id,
+      },
     };
 
     // Verify no payments exist initially
@@ -139,7 +138,7 @@ describe('OrderResolveProcessor Integration Test', () => {
 
     // Verify original order status is PENDING
     const originalOrder = await orderService.find(createdOrder.id);
-    expect(originalOrder?.status).toBe('PENDING');
+    expect(originalOrder?.status).toBe("PENDING");
 
     // Process the event, emulate multiple calls (idempotency test)
     await orderResolveProcessor.process(testEvent);
@@ -153,12 +152,12 @@ describe('OrderResolveProcessor Integration Test', () => {
     expect(payments.length).toBe(1);
 
     const createdPayment = payments[0];
-    
+
     // Verify payment properties
     expect(createdPayment).toBeDefined();
-    expect(createdPayment.external_payment_id).toBe('external-mock-id');
+    expect(createdPayment.external_payment_id).toBe("external-mock-id");
     expect(createdPayment.order_id).toBeTruthy();
-    expect(createdPayment.terminal_key).toBe('MOCK_TERMINAL');
+    expect(createdPayment.terminal_key).toBe("MOCK_TERMINAL");
     expect(createdPayment.amount).toBe(5000); // 50 * 100 (diff in kopecks)
     expect(createdPayment.success).toBe(true);
     expect(createdPayment.payment_url).toBeTruthy();
@@ -167,30 +166,30 @@ describe('OrderResolveProcessor Integration Test', () => {
 
     // Verify original order status was updated
     const updatedOrder = await orderService.find(createdOrder.id);
-    expect(updatedOrder?.status).toBe('CONCILIATION_PAYMENT_IN_PROGRESS');
+    expect(updatedOrder?.status).toBe("CONCILIATION_PAYMENT_IN_PROGRESS");
   });
 
-  it('should publish ORDER_CONCILIATED event when picking total equals order total', async () => {
+  it("should publish ORDER_CONCILIATED event when picking total equals order total", async () => {
     // Update picking total to match order total
     createdPicking.total = 150;
     await pickingService.set(createdPicking);
 
     // Create test event
     const testEvent: OrderResolvedEvent = {
-      id: 'test-event-id',
-      idempotent_key: 'idempotent-key-equal',
-      type: 'ORDER_RESOLVED',
+      id: "test-event-id",
+      idempotent_key: "idempotent-key-equal",
+      type: "ORDER_RESOLVED",
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
-        order_id: createdOrder.id
-      }
+        order_id: createdOrder.id,
+      },
     };
 
     // Verify original order status is PENDING
     const originalOrder = await orderService.find(createdOrder.id);
-    expect(originalOrder?.status).toBe('PENDING');
+    expect(originalOrder?.status).toBe("PENDING");
 
     // Process the event
     await orderResolveProcessor.process(testEvent);
@@ -201,25 +200,25 @@ describe('OrderResolveProcessor Integration Test', () => {
 
     // Verify original order status was updated to CONCILIATED
     const updatedOrder = await orderService.find(createdOrder.id);
-    expect(updatedOrder?.status).toBe('CONCILIATED');
+    expect(updatedOrder?.status).toBe("CONCILIATED");
   });
 
-  it('should publish BALANCE_CHANGED event when picking total is less than order total', async () => {
+  it("should publish BALANCE_CHANGED event when picking total is less than order total", async () => {
     // Update picking total to be less than order total
     createdPicking.total = 100;
     await pickingService.set(createdPicking);
 
     // Create test event
     const testEvent: OrderResolvedEvent = {
-      id: 'test-event-id',
-      idempotent_key: 'idempotent-key-negative',
-      type: 'ORDER_RESOLVED',
+      id: "test-event-id",
+      idempotent_key: "idempotent-key-negative",
+      type: "ORDER_RESOLVED",
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
-        order_id: createdOrder.id
-      }
+        order_id: createdOrder.id,
+      },
     };
 
     // Process the event
@@ -231,27 +230,27 @@ describe('OrderResolveProcessor Integration Test', () => {
 
     // Verify original order status remains unchanged (no status update for negative diff)
     const updatedOrder = await orderService.find(createdOrder.id);
-    expect(updatedOrder?.status).toBe('PENDING');
+    expect(updatedOrder?.status).toBe("PENDING");
   });
 
-  it('should throw error when order is not found', async () => {
+  it("should throw error when order is not found", async () => {
     // Create test event with non-existent order ID
     const testEvent: OrderResolvedEvent = {
-      id: 'test-event-id',
-      idempotent_key: 'idempotent-key',
-      type: 'ORDER_RESOLVED',
+      id: "test-event-id",
+      idempotent_key: "idempotent-key",
+      type: "ORDER_RESOLVED",
       created_at: new Date(),
       processed: false,
       retries: 0,
       payload: {
-        order_id: 'non-existent-order-id'
-      }
+        order_id: "non-existent-order-id",
+      },
     };
 
     // Verify that processing throws an error
     await expect(orderResolveProcessor.process(testEvent))
       .rejects
-      .toThrow('Object ORDERS/non-existent-order-id is not found');
+      .toThrow("Object ORDERS/non-existent-order-id is not found");
 
     // Verify no payment was created
     const payments = await paymentService.findAll();

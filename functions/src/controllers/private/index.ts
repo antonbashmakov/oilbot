@@ -1,3 +1,3 @@
-export { default as publicApi } from './private';
+export {default as publicApi} from "./private";
 
 

@@ -1,14 +1,14 @@
-import * as functions from 'firebase-functions';
-import * as express from 'express';
-import * as admin from 'firebase-admin';
-import * as cors from 'cors';
-import DeliveryService from '../../services/DeliveryService';
-import ItemService from '../../services/ItemService';
-import CustomerService from '../../services/CustomerService';
-import CartItemService from '../../services/CartItemService';
-import OrderService from '../../services/OrderService';
+import * as functions from "firebase-functions";
+import * as express from "express";
+import * as admin from "firebase-admin";
+import * as cors from "cors";
+import DeliveryService from "../../services/DeliveryService";
+import ItemService from "../../services/ItemService";
+import CustomerService from "../../services/CustomerService";
+import CartItemService from "../../services/CartItemService";
+import OrderService from "../../services/OrderService";
 
-import { api }  from '../../services/utils';
+import {api} from "../../services/utils";
 
 
 export {
@@ -21,5 +21,5 @@ export {
   ItemService,
   CustomerService,
   CartItemService,
-  OrderService
+  OrderService,
 };

@@ -1,5 +1,5 @@
-import { components } from "../openapi/api";
-import { components as models } from "../openapi/models";
+import {components} from "../openapi/api";
+import {components as models} from "../openapi/models";
 import User from "./User";
 
 export type DeliveryOverview = components["schemas"]["DeliveryOverview"];
@@ -21,17 +21,17 @@ export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 export type BaseConversationMessage = models["schemas"]["ConversationMessage"];
 
-export type Payment = Omit<BasePayment, "created_at" > &  {
+export type Payment = Omit<BasePayment, "created_at" > & {
   created_at: Date;
 };
 export type CustomerBalance = Omit<BaseCustomerBalance, "created_at" | "updated_at" > & {
   created_at: Date;
   updated_at: Date;
 };
-export type OrderPicking = Omit<BaseOrderPicking, "created_at" > &  {
+export type OrderPicking = Omit<BaseOrderPicking, "created_at" > & {
   created_at: Date;
 };
-export type OutboxEvent = Omit<BaseOutboxEvent, "created_at" | "processedAt"> &  {
+export type OutboxEvent = Omit<BaseOutboxEvent, "created_at" | "processedAt"> & {
   created_at: Date;
   processed_at?: Date;
   payload?: { [key: string]: any };
@@ -69,4 +69,4 @@ export interface IdempotentObject<T = any> {
 }
 
 
-export { User };
+export {User};

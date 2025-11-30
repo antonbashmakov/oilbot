@@ -1,18 +1,16 @@
-import axios from 'axios';
-import * as dotenv from 'dotenv';
-import * as functions from 'firebase-functions';
+import axios from "axios";
+import * as dotenv from "dotenv";
+import * as functions from "firebase-functions";
 
-import { Order, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt } from '../../models';
+import {Order, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt} from "../../models";
 dotenv.config();
 
 const terminal = process.env.TINKOFF_TERMINAL_ID || functions.config().tinkoff.TINKOFF_TERMINAL_ID;
 const password = process.env.TINKOFF_TERMINAL_PASSWORD || functions.config().tinkoff.TINKOFF_TERMINAL_PASSWORD;
 
 class TBankService {
-
   orderToPaymentRequest(order: Order): TinkoffPaymentPayload {
-
-    const Items: TinkoffPaymentItem[] = order.items.map(i => ({
+    const Items: TinkoffPaymentItem[] = order.items.map((i) => ({
       Name: i.name,
       Price: i.price * 100,
       Quantity: 1,
@@ -28,7 +26,7 @@ class TBankService {
     };
 
     const body = {
-      Token: '',
+      Token: "",
       TerminalKey: terminal,
       Amount: order.total * 100,
       OrderId: order.id,
@@ -40,7 +38,7 @@ class TBankService {
       Receipt,
     };
 
-    const rootFields = { ...body, Password: password } as any;
+    const rootFields = {...body, Password: password} as any;
 
     delete rootFields.DATA;
     delete rootFields.Receipt;
@@ -51,36 +49,33 @@ class TBankService {
   }
 
   async initPayment(paymentRequest: TinkoffPaymentPayload) {
-
-
     if (process.env.IS_TEST) {
       return {
         TerminalKey: "MOCK_TERMINAL",
         Success: true,
-        Status: 'NEW',
+        Status: "NEW",
         ErrorCode: 0,
         PaymentId: "external-mock-id",
         OrderId: paymentRequest.OrderId,
         Amount: paymentRequest.Amount,
         Token: "mock-token",
-        PaymentURL: `https://securepay.tinkoff.ru/${paymentRequest.OrderId}`
-      }
+        PaymentURL: `https://securepay.tinkoff.ru/${paymentRequest.OrderId}`,
+      };
     }
 
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Init", paymentRequest, {
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     });
     return response.data;
   }
 
   generateToken(object: any): string {
-    const sortedValues = Object.keys(object).sort().map(k => object[k]).join('');
+    const sortedValues = Object.keys(object).sort().map((k) => object[k]).join("");
 
-    const crypto = require('crypto');
-    return crypto.createHash('sha256').update(sortedValues).digest('hex');
-
+    const crypto = require("crypto");
+    return crypto.createHash("sha256").update(sortedValues).digest("hex");
   }
 }
 
