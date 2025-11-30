@@ -24,7 +24,7 @@ import {
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
 import { CartItem, PickingItem } from "@/api/models";
-import { useAdminOrderOverviewQuery, useCollectPickingItem, usePatchOrderPicking, useStartOrderPicking } from "@/api";
+import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
 import DataTableWithButtonsExample from "@/components/DataTableWithButtonsExample";
 import DataTableWithSummaryExample from "@/components/DataTableWithSummaryExample";
@@ -56,10 +56,13 @@ export default function OrderPage() {
   const { id: orderId } = useParams();
 
   const [selectedItem, setSelectedItem] = useState<PickingItem>()
+  const [isReadyForConsolidation, setIsReadyForConsolidation] = useState<boolean>(false);
+  const [isOrderEditable, setIsOrderEditable] = useState<boolean>(false);
 
   const { data: order } = useAdminOrderOverviewQuery(orderId as string);
   const { mutate: mutatePicking } = usePatchOrderPicking(orderId as string);
   const { mutate: mutateStartPicking, isLoading: isStartPicking } = useStartOrderPicking(orderId as string);
+  const { mutate: mutateConsolidate, isLoading: isConsolidating } = useConsolidateOrder(orderId as string);
   const { mutate: collectPicking, isLoading: isCollecting } = useCollectPickingItem(orderId as string, selectedItem?.id);
 
   const columns: Column<CartItem>[] = [
@@ -137,7 +140,7 @@ export default function OrderPage() {
   ];
 
   const isRowDisabled = (item: PickingItem) => {
-    return item.status === 'CANCELLED' || isCollecting;
+    return  isCollecting || !isOrderEditable || (item.status === 'CANCELLED');
   };
 
   const rowButtons = (item: PickingItem) => {
@@ -184,6 +187,12 @@ export default function OrderPage() {
       mutateStartPicking();
     }
   }, [order]);
+  const onConsolidateClick = useCallback(() => {
+    if (isReadyForConsolidation) {
+      console.log('mutateConsolidate')
+      mutateConsolidate();
+    }
+  }, [order]);
 
   const onCollectClick = useCallback((item: PickingItem) => {
     setSelectedItem(item);
@@ -194,6 +203,11 @@ export default function OrderPage() {
       collectPicking();
     }
   }, [selectedItem]);
+  useEffect(() => {
+    setIsReadyForConsolidation(!!order && (order.status === 'PENDING' ||  order.status === 'PAID') && !!order.picking && order.picking.items.filter( i => i.status === 'COLLECTED').length === order.picking.items.length);
+    setIsOrderEditable((order?.status === 'PENDING' ||  order?.status === 'PAID') );
+  }, [order]);
+
 
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
@@ -228,7 +242,7 @@ export default function OrderPage() {
                 <Badge colorScheme="green">Paid</Badge>
               </Flex>
               {!order.picking && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Start Picking</Button>}
-              {order.status !== 'CONSOLIDATED' && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Consolidate</Button>}
+              <Button disabled={!isReadyForConsolidation} loading={isConsolidating} onClick={onConsolidateClick} colorScheme="blue">Consolidate</Button>
             </Flex>
 
             <Grid templateColumns="repeat(3, 1fr)" gap={6}>

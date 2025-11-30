@@ -90,6 +90,7 @@ export default function Dashboard() {
           </Card.Header>
           <Card.Body>
             <DataTable
+              getKey={i => i.id}
               title="Deliveries"
               columns={[
                 {

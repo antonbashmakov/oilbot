@@ -359,7 +359,7 @@ export interface components {
        * @description Unique identifier for the customer
        * @example 1019705782
        */
-      id: number;
+      id: string;
       /**
        * @description Whether the customer is a bot
        * @example null
@@ -462,7 +462,7 @@ export interface components {
        * @description Owner ID
        * @example 270053857
        */
-      id: number;
+      id: string;
     };
     DeliveryRef: {
       /**
@@ -642,32 +642,29 @@ export interface components {
        * @example Order 1
        */
       name?: string;
-      /**
-       * Format: date-time
-       * @description Date when the order was placed
-       * @example 2025-01-10T14:30:00Z
-       */
-      orderDate: string;
+      delivery?: components["schemas"]["DeliveryRef"];
       /** @description Items in this order */
       items: components["schemas"]["CartItem"][];
+      /** @enum {string} */
+      status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED";
       /**
        * @description Current status of the order
        * @example PAID
        * @enum {string}
        */
-      status: "PENDING" | "PAID" | "CONSOLIDATED";
+      type?: "CONCILIATION" | "ORIGINAL";
       owner: components["schemas"]["OwnerRef"];
       /**
        * @description Number of items in the order
        * @example 5
        */
-      numberOfItems: number;
+      number_of_Items?: number;
       /**
        * Format: float
        * @description Total value of the order
        * @example 150.75
        */
-      total?: number;
+      total: number;
     };
     OrderOverview: WithRequired<{
       picking?: components["schemas"]["OrderPicking"];
@@ -698,7 +695,7 @@ export interface components {
        * @description Creation timestamp
        * @example 2025-01-01T00:00:00Z
        */
-      createdAt?: string;
+      created_at?: string;
       /** @description User label information */
       label?: {
         /**
@@ -721,6 +718,80 @@ export interface components {
          */
         message: string;
       };
+    };
+    Payment: {
+      /**
+       * @description URL for payment processing
+       * @example https://securepay.tinkoff.ru/payment/init
+       */
+      payment_url: string;
+      /**
+       * @description Error code from payment provider
+       * @example 0
+       */
+      error_code?: number | null;
+      /**
+       * @description Internal payment ID
+       * @example payment-123456
+       */
+      id: string;
+      /**
+       * @description Payment ID from external payment provider
+       * @example 123456789
+       */
+      external_payment_id: string;
+      /**
+       * @description Terminal key from payment provider
+       * @example TinkoffBankTest
+       */
+      terminal_key: string;
+      /**
+       * @description Order ID associated with the payment
+       * @example order-456
+       */
+      order_id: string;
+      /**
+       * @description Payment amount in minor units (kopecks)
+       * @example 15000
+       */
+      amount: number;
+      /**
+       * @description Whether the payment was successful
+       * @example true
+       */
+      success: boolean;
+      /**
+       * Format: date-time
+       * @description Payment creation timestamp
+       * @example 2025-01-10T14:30:00Z
+       */
+      created_at: string;
+    };
+    CustomerBalance: {
+      /**
+       * @description Internal payment ID
+       * @example payment-123456
+       */
+      id: string;
+      owner: components["schemas"]["OwnerRef"];
+      /**
+       * Format: float
+       * @description Customer balance amount
+       * @example 150.75
+       */
+      balance: number;
+      /**
+       * Format: date-time
+       * @description Balance creation timestamp
+       * @example 2025-01-10T14:30:00Z
+       */
+      created_at?: string;
+      /**
+       * Format: date-time
+       * @description Balance last update timestamp
+       * @example 2025-01-10T14:30:00Z
+       */
+      updated_at?: string;
     };
   };
   responses: never;

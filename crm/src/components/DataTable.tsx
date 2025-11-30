@@ -228,7 +228,7 @@ export function DataTable<T>({
                         _hover={column.editable ? { bg: "surface.highlight", cursor: "pointer" } : {}}
                         onClick={() => column.editable && !isDisabled && handleStartEdit(rowIndex, column.key)}
                       >
-                        {column.editable && column.renderer ? (
+                        {column.editable && !isDisabled && column.renderer ? (
                           <column.renderer
                             value={cellValue}
                             onChange={(value) => handleCellChange(rowIndex, column.key, value)}

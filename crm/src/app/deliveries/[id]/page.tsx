@@ -14,6 +14,7 @@ import {
 import { DataTable } from "@/components/DataTable";
 import { DeliveryInformationCard } from "../DeliveryInformationCard";
 import { useAdminDeliveryQuery } from "@/api";
+import Link from "next/link";
 
 // Order status badge component
 function OrderStatusBadge({ status }: { status: string }) {
@@ -59,8 +60,8 @@ export default function DeliveryDetailPage() {
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
 
-      
-      
+
+
       {delivery && <Container maxW="7xl">
         {/* Header with title and buttons */}
         <Flex justify="space-between" align="center" mb="8">
@@ -94,23 +95,20 @@ export default function DeliveryDetailPage() {
           </Card.Header>
           <Card.Body p={0}>
             <DataTable
+              getKey={i => i.id}
               columns={[
                 {
                   key: "id",
                   header: "Order ID",
+
                   accessor: (order) => (
-                    <Text fontWeight="medium">{order.id}</Text>
+                    <Link target="_blank" href={`/orders/${order.id}`}><Text fontWeight="medium">{order.id}</Text></Link>
                   ),
                 },
                 {
                   key: "customerName",
                   header: "Customer Name",
                   accessor: (order) => order.owner.id,
-                },
-                {
-                  key: "orderDate",
-                  header: "Order Date",
-                  accessor: (order) => order.orderDate,
                 },
                 {
                   key: "status",
@@ -120,7 +118,7 @@ export default function DeliveryDetailPage() {
                 {
                   key: "numberOfItems",
                   header: "Items",
-                  accessor: (order) => order.numberOfItems,
+                  accessor: (order) => order.number_of_Items,
                   align: "end",
                 },
                 {
@@ -142,6 +140,7 @@ export default function DeliveryDetailPage() {
           </Card.Header>
           <Card.Body p={0}>
             <DataTable
+              getKey={i => i.name}
               columns={[
                 {
                   key: "itemName",
