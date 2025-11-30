@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as dotenv from "dotenv";
 import * as functions from "firebase-functions";
+import * as crypto from "crypto";
 
 import {Order, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt} from "../../models";
 dotenv.config();
@@ -73,8 +74,6 @@ class TBankService {
 
   generateToken(object: any): string {
     const sortedValues = Object.keys(object).sort().map((k) => object[k]).join("");
-
-    const crypto = require("crypto");
     return crypto.createHash("sha256").update(sortedValues).digest("hex");
   }
 }

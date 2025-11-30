@@ -7,11 +7,6 @@ admin.initializeApp({
   projectId: "test-project",
 });
 
-beforeAll(async () => {
-
-});
-
-
 // Export the Admin db for tests
 const db = admin.firestore();
 db.settings({
