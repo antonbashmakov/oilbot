@@ -243,6 +243,7 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
 
     const event: OrderResolvedEvent = {
       id: "", // will be set by OutboxEventService
+      idempotent_key: order.id,
       created_at: new Date(),
       processed_at: new Date(),
       processed: false,

@@ -1,23 +1,27 @@
 
+import * as dotenv from "dotenv";
+
 import {
   functions,
   admin,
 } from "./imports";
 import {toProcessor} from "../../services/events/factory";
 import {OutboxEvent} from "../../models";
+import {logger} from "../../services/logger";
 
 admin.initializeApp({}, "db");
 
-const db = admin.firestore();
+dotenv.config();
 
-if ( process.env.GCLOUD_PROJECT !== "test-project" && db.databaseId !== process.env.DATABASE_ID) {
-  db.settings({
-    databaseId: process.env.DATABASE_ID,
-  });
-}
+const databaseId = process.env.DATABASE_ID ?? "(default)";
 
+const db = new admin.firestore.Firestore({
+  projectId: process.env.GCLOUD_PROJECT,
+  databaseId,
+});
 
 const processOutboxEvent = functions.firestore
+  .database(databaseId)
   .document("OUTBOX_EVENTS/{eventId}")
   .onCreate(async (snap, context) => {
     const data = snap.data() as OutboxEvent;
@@ -32,17 +36,14 @@ const processOutboxEvent = functions.firestore
         processed: true,
         processedAt: Date.now(),
       });
-    } catch (error ) {
-      console.error("Failed to process event:", error);
-
+    } catch (error) {
+      logger.error("Failed to process event:", error);
       // increment retry counter — DO NOT mark as processed
       await snap.ref.update({
         retries: data.retries + 1,
         processedAt: Date.now(),
         lastError: (error as any).message,
       });
-
-      throw error; // allow built-in retry by Cloud Functions (if enabled)
     }
   });
 
