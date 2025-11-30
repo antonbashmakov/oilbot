@@ -20,14 +20,13 @@ dotenv.config();
 
 admin.initializeApp({}, 'admin');
 
-if (process.env.GCLOUD_PROJECT !== 'test-project') {
-  admin.firestore().settings({
+const db = admin.firestore();
+
+if (process.env.GCLOUD_PROJECT !== 'test-project' && db.databaseId !== process.env.DATABASE_ID) {
+  db.settings({
     databaseId: process.env.DATABASE_ID,
   });
-
 }
-
-const db = admin.firestore();
 
 const adminApi = express();
 
@@ -147,6 +146,17 @@ adminApi.patch('/order-pickings/:id', async (req: express.Request, res: express.
       return api.error(res, 'Items array is required');
     }
 
+    const orderService = new OrderService(db);
+    const order = await orderService.find(id);
+
+
+    if (!order) {
+      return api.notFound(res, 'Order not found');
+    }
+    if (order.status !== 'PENDING' && order.status !== 'PAID') {
+      return api.badRequest(res, 'Order is not editable');
+    }
+
     const pickingService = new OrderPickingService(db);
     const updatedPicking = await pickingService.updateItems(id, items);
 
@@ -184,6 +194,18 @@ adminApi.post('/orders/:id/order-picking', async (req: express.Request, res: exp
 adminApi.post('/order-pickings/:pickingId/items/:itemId/collect', async (req: express.Request, res: express.Response) => {
   try {
     const { pickingId, itemId } = req.params;
+
+    const orderService = new OrderService(db);
+    const order = await orderService.find(pickingId);
+
+    if (!order) {
+      return api.notFound(res, 'Order not found');
+    }
+    if (order.status !== 'PENDING' && order.status !== 'PAID') {
+      return api.badRequest(res, 'Order is not editable');
+    }
+
+
     const pickingService = new OrderPickingService(db);
     await pickingService.toggleOrderItemCollection(pickingId, itemId);
     return res.status(204).send();
@@ -205,6 +227,9 @@ adminApi.post('/orders/:id/consolidate', async (req: express.Request, res: expre
 
     if (!order) {
       return api.notFound(res, 'Order not found');
+    }
+    if (order.status !== 'PENDING' && order.status !== 'PAID') {
+      return api.badRequest(res, 'Order is not editable');
     }
 
     const pickingService = new OrderPickingService(db);

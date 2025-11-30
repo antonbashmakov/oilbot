@@ -30,11 +30,11 @@
     "uuid": "^8"
   },
   "devDependencies": {
-    "@firebase/rules-unit-testing": "^5.0.0",
     "@firebase/testing": "^0.20.11",
     "@types/axios": "^0.14.4",
     "@types/jest": "^30.0.0",
     "@types/supertest": "^6.0.3",
+    "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
     "eslint": "^8.9.0",

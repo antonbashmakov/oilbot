@@ -17,6 +17,12 @@ dotenv.config();
 
 const db = admin.firestore();
 
+if (process.env.GCLOUD_PROJECT !== 'test-project' && db.databaseId !== process.env.DATABASE_ID) {
+  db.settings({
+    databaseId: process.env.DATABASE_ID,
+  });
+}
+
 const deliveryService = new DeliveryService(db);
 const itemService = new ItemService(db);
 const customerService = new CustomerService(db);

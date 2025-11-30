@@ -8,14 +8,14 @@ import { OutboxEvent } from "../../models";
 
 admin.initializeApp({}, "db");
 
+const db = admin.firestore();
 
-if (process.env.GCLOUD_PROJECT !== 'test-project') {
-  admin.firestore().settings({
+if ( process.env.GCLOUD_PROJECT !== 'test-project' && db.databaseId !== process.env.DATABASE_ID) {
+  db.settings({
     databaseId: process.env.DATABASE_ID,
   });
 }
 
-const db = admin.firestore();
 
 const processOutboxEvent = functions.firestore
   .document("OUTBOX_EVENTS/{eventId}")
