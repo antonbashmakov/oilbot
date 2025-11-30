@@ -245,6 +245,38 @@ export interface paths {
       };
     };
   };
+  "/admin/orders/{id}/conciliation": {
+    /**
+     * Get conciliation order
+     * @description Retrieve the conciliation order for a given order ID
+     */
+    get: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["Order"];
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/private/items/category/{category}": {
     /**
      * Get items by category
@@ -657,13 +689,13 @@ export interface components {
        * @example PAID
        * @enum {string}
        */
-      type?: "CONCILIATION" | "ORIGINAL";
+      type: "CONCILIATION" | "ORIGINAL";
       owner: components["schemas"]["OwnerRef"];
       /**
        * @description Number of items in the order
        * @example 5
        */
-      number_of_Items?: number;
+      number_of_items?: number;
       /**
        * Format: float
        * @description Total value of the order
@@ -735,6 +767,8 @@ export interface components {
        * @example 0
        */
       error_code?: number | null;
+      /** @enum {string} */
+      status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT";
       /**
        * @description Internal payment ID
        * @example payment-123456
@@ -742,9 +776,9 @@ export interface components {
       id: string;
       /**
        * @description Payment ID from external payment provider
-       * @example 123456789
+       * @example 123456
        */
-      external_payment_id: string;
+      external_payment_id: number;
       /**
        * @description Terminal key from payment provider
        * @example TinkoffBankTest

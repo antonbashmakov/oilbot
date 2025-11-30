@@ -23,6 +23,19 @@ c *{{deliveryStart}}* по *{{deliveryEnd}}*
   ORDER_CONCILIATED: `✅ Ваш заказ собран. Мы оповестим вас когда и где его можно будет забрать.
 
 Номер заказ {{orderId}}`,
+  ORDER_PAYMENT_CONFIRMED_CONCILIATION: `✅ Разница по заказу успешно оплачена!
+Исходный заказ: *{{originalOrderId}}*`,
+  ORDER_PAYMENT_CONFIRMED_ORIGINAL: `✅ Мы приняли оплату за ваш заказ.
+Вы заказали:
+
+{{#items}}
+*{{name}}* : {{price}}₽
+{{/items}}
+
+Общая стоимость заказа: {{total}}₽
+
+Благодарим за покупку. При каждом важном изменении заказа, мы будем присылать обновление в чат. По всем вопросам просим писать @antonoldenberg`,
+  ORDER_PAYMENT_CONFIRMED_ADMIN: `✅ Ордер оплачен!: {{orderId}}`,
 };
 
 /**

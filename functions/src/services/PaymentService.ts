@@ -17,6 +17,20 @@ class PaymentService extends AbstractService<Payment> {
   getCollectionName(): string {
     return COLLECTIONS.PAYMENTS;
   }
+  async findByExternalId(id: number): Promise<Payment | undefined> {
+    const result = await this.getCollection()
+      .where("external_payment_id", "==", id)
+      .get();
+    
+    if (result.empty) {
+      return undefined;
+    }
+    
+    // Return the first payment found
+    const doc = result.docs[0];
+    return this.toPOJO(doc.id, doc.data()) as Payment;
+  }
+
   getExcludedFields(): string[] {
     return ["created_at"];
   }

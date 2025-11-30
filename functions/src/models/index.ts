@@ -62,6 +62,13 @@ export type PaymentCreatedEvent = OutboxEvent & {
   }
 };
 
+export type OrderPaymentConfirmedEvent = OutboxEvent & {
+  payload: {
+    order_id: string;
+    external_payment_id: number;
+  }
+};
+
 export interface IdempotentObject<T = any> {
   id: string;
   created_at: Date;

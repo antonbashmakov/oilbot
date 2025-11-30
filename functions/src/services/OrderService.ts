@@ -16,7 +16,8 @@ class OrderService extends AbstractService<Order> {
       name: customer.first_name,
       items: cartItems,
       status: "PENDING",
-      number_of_Items: cartItems.length,
+      type: "ORIGINAL",
+      number_of_items: cartItems.length,
       total: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
       owner: {
         id: customer.id,

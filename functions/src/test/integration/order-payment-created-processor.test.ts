@@ -61,6 +61,7 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
         },
       ],
       status: "PENDING",
+      type: "ORIGINAL",
       numberOfItems: 1,
       total: 150,
       owner: {
@@ -71,11 +72,12 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
     // Create test payment
     createdPayment = {
       id: "test-payment-id",
-      external_payment_id: "external-mock-id",
+      external_payment_id: 123456,
       terminal_key: "MOCK_TERMINAL",
       order_id: createdOrder.id,
       amount: 15000,
       success: true,
+      status: "SENT",
       payment_url: `https://securepay.tinkoff.ru/${createdOrder.id}`,
       error_code: 0,
       created_at: new Date(),

@@ -67,6 +67,7 @@ xdescribe("OrderPaymentCreatedProcessor Integration Test (Real Telegram)", () =>
         },
       ],
       status: "PENDING",
+      type: "ORIGINAL",
       numberOfItems: 1,
       total: 350,
       owner: {
@@ -77,11 +78,12 @@ xdescribe("OrderPaymentCreatedProcessor Integration Test (Real Telegram)", () =>
     // Create test payment
     createdPayment = {
       id: "test-payment-id-real",
-      external_payment_id: "external-mock-id-real",
+      external_payment_id: 123456,
       terminal_key: "MOCK_TERMINAL",
       order_id: createdOrder.id,
       amount: 15000,
       success: true,
+      status: "SENT",
       payment_url: `https://securepay.tinkoff.ru/${createdOrder.id}`,
       error_code: 0,
       created_at: new Date(),
