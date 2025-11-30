@@ -14,7 +14,8 @@ const queryClient = new QueryClient();
 
 
 export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
-    let baseUrl = 'http://localhost:5001/posebestoimosti-473916/us-central1';
+    //let baseUrl = 'http://localhost:5001/posebestoimosti-473916/us-central1';
+    let baseUrl = 'https://us-central1-posebestoimosti-473916.cloudfunctions.net/';
     if (typeof window !== 'undefined') {
 
         const host = window.location.host;
@@ -24,7 +25,8 @@ export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
 
         }
         if (window.location.hostname !== 'localhost') {
-            baseUrl = `https://${host}:5001/posebestoimosti-473916/us-central1/`
+            //baseUrl = `https://${host}:5001/posebestoimosti-473916/us-central1/`
+            baseUrl = `https://us-central1-posebestoimosti-473916.cloudfunctions.net/`
         }
 
     }

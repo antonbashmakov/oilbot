@@ -29,7 +29,6 @@ const DataTableWithSummaryExample: React.FC = () => {
     setProducts(changedData);
     setIsSaving(false);
     
-    console.log('Saved data:', changedData);
   };
 
   const columns: Column<Product>[] = [
@@ -71,6 +70,7 @@ const DataTableWithSummaryExample: React.FC = () => {
       <p>This table shows a summary row at the bottom with totals for price, quantity, and revenue columns.</p>
       
       <DataTable
+        getKey={p => `${p.id}`}
         columns={columns}
         data={products}
         title="Products with Summary"

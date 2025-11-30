@@ -257,7 +257,6 @@ export function DataTable<T>({
                         _hover={{ opacity: 1 }}
                         transition="opacity 0.2s"
                       >
-
                         {buttons.map((button, index) => (
                           <Box key={index}>
                             {button}

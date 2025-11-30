@@ -21,13 +21,13 @@ function OrderStatusBadge({ status }: { status: string }) {
   const statusColors = {
     PENDING: "yellow",
     PAID: "green",
-    CONSOLIDATED: "green",
+    RESOLVING: "yellow",
   };
 
   const statusLabels = {
     PENDING: "Pending",
     PAID: "Paid",
-    CONSOLIDATED: "Consolidated",
+    RESOLVING: "Resolving",
   };
 
   return (
@@ -42,10 +42,6 @@ export default function DeliveryDetailPage() {
   const deliveryId = params.id as string;
 
   const { data: delivery } = useAdminDeliveryQuery(deliveryId);
-
-
-  console.log("Delivery data:", delivery);
-
 
   const handleEdit = () => {
     console.log("Edit delivery:", deliveryId);

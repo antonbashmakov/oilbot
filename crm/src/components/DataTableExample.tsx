@@ -66,6 +66,7 @@ const DataTableExample: React.FC = () => {
       <p>Click on the Price or Quantity cells to edit them. Changes will be saved when you click "Save Changes".</p>
       
       <DataTable
+        getKey={p => `${p.id}`}
         columns={columns}
         data={products}
         title="Products"

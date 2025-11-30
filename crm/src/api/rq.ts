@@ -15,7 +15,7 @@ export async function handleResult<D, E, T extends { data?: D, error?: E }>(resu
     const { data, error } = await result;
 
 
-    console.log("API Result", { data, error });
+    // console.log("API Result", { data, error });
 
     if (error) {
         throw error;

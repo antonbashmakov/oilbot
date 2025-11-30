@@ -26,10 +26,8 @@ import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
 import { CartItem, PickingItem } from "@/api/models";
 import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
-import DataTableWithButtonsExample from "@/components/DataTableWithButtonsExample";
-import DataTableWithSummaryExample from "@/components/DataTableWithSummaryExample";
 import { useCallback, useEffect, useState } from "react";
-import { AddIcon, MinusIcon } from "@chakra-ui/icons";
+import { AddIcon, MinusIcon, LockIcon } from "@chakra-ui/icons";
 
 
 // Mock data for the customer
@@ -145,7 +143,7 @@ export default function OrderPage() {
 
   const rowButtons = (item: PickingItem) => {
 
-    if (item.status === 'PENDING') {
+    if (!item.status || item.status === 'PENDING') {
       return [
         <IconButton
           key="add"
@@ -188,11 +186,11 @@ export default function OrderPage() {
     }
   }, [order]);
   const onConsolidateClick = useCallback(() => {
+    console.log(isReadyForConsolidation)
     if (isReadyForConsolidation) {
-      console.log('mutateConsolidate')
       mutateConsolidate();
     }
-  }, [order]);
+  }, [isReadyForConsolidation]);
 
   const onCollectClick = useCallback((item: PickingItem) => {
     setSelectedItem(item);
@@ -240,6 +238,12 @@ export default function OrderPage() {
                   Order {orderId}
                 </Heading>
                 <Badge colorScheme="green">Paid</Badge>
+                {!isOrderEditable && (
+                  <Flex align="center" gap={1} color="gray.500">
+                    <LockIcon boxSize={4} />
+                    <Text fontSize="sm">The order is locked</Text>
+                  </Flex>
+                )}
               </Flex>
               {!order.picking && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Start Picking</Button>}
               <Button disabled={!isReadyForConsolidation} loading={isConsolidating} onClick={onConsolidateClick} colorScheme="blue">Consolidate</Button>
