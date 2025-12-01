@@ -277,6 +277,44 @@ export interface paths {
       };
     };
   };
+  "/admin/orders/{orderId}/payments": {
+    /**
+     * Get all payments for an order
+     * @description Retrieve all payments for an order, including payments from conciliation orders
+     */
+    get: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          orderId: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["Payment"][];
+            };
+          };
+        };
+        /** @description Order not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/private/items/category/{category}": {
     /**
      * Get items by category
@@ -689,13 +727,13 @@ export interface components {
        * @example PAID
        * @enum {string}
        */
-      type?: "CONCILIATION" | "ORIGINAL";
+      type: "CONCILIATION" | "ORIGINAL";
       owner: components["schemas"]["OwnerRef"];
       /**
        * @description Number of items in the order
        * @example 5
        */
-      number_of_Items?: number;
+      number_of_items?: number;
       /**
        * Format: float
        * @description Total value of the order
@@ -767,6 +805,8 @@ export interface components {
        * @example 0
        */
       error_code?: number | null;
+      /** @enum {string} */
+      status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT";
       /**
        * @description Internal payment ID
        * @example payment-123456
@@ -774,9 +814,9 @@ export interface components {
       id: string;
       /**
        * @description Payment ID from external payment provider
-       * @example 123456789
+       * @example 123456
        */
-      external_payment_id: string;
+      external_id: number;
       /**
        * @description Terminal key from payment provider
        * @example TinkoffBankTest
@@ -793,6 +833,11 @@ export interface components {
        */
       amount: number;
       /**
+       * @description Payment amount in minor units (kopecks)
+       * @example 15000
+       */
+      total: number;
+      /**
        * @description Whether the payment was successful
        * @example true
        */
@@ -803,6 +848,18 @@ export interface components {
        * @example 2025-01-10T14:30:00Z
        */
       created_at: string;
+      /**
+       * Format: date-time
+       * @description Payment creation timestamp
+       * @example 2025-01-10T14:30:00Z
+       */
+      updated_at: string;
+      /**
+       * Format: date-time
+       * @description Payment creation timestamp
+       * @example 2025-01-10T14:30:00Z
+       */
+      confirmed_at?: string;
     };
     CustomerBalance: {
       /**

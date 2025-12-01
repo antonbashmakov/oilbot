@@ -5,6 +5,7 @@ import {
     OrderPickingPatch,
     Delivery,
     Order,
+    Payment,
 } from "@/api/models";
 import { UseQueryResult } from "react-query";
 
@@ -102,4 +103,14 @@ export const useAdminOrderConciliationQuery = (id?: string): UseQueryResult<Orde
             }
         }
     }, { retry: 1, enabled: !!id })
+};
+
+export const useAdminOrderPaymentsQuery = (orderId?: string): UseQueryResult<Payment[]> => {
+    return useApiQuery("/admin/orders/{orderId}/payments", {
+        params: {
+            path: {
+                orderId: orderId || ""
+            }
+        }
+    }, { retry: 1, enabled: !!orderId })
 };

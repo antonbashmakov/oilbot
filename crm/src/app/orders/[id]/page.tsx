@@ -20,13 +20,15 @@ import {
   Separator,
   IconButton,
   Status,
-  Tabs
+  Tabs,
+  HStack
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
-import { CartItem, PickingItem } from "@/api/models";
-import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking, useAdminOrderConciliationQuery } from "@/api";
+import { CartItem, PickingItem, Payment } from "@/api/models";
+import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
+import { PaymentCard } from "@/components/ui/PaymentCard";
 import { useCallback, useEffect, useState } from "react";
 import { AddIcon, MinusIcon, LockIcon } from "@chakra-ui/icons";
 
@@ -50,7 +52,6 @@ const orderHistory = [
   { event: "Order delivered", date: "2023-11-22 14:00" },
 ];
 
-
 export default function OrderPage() {
   const { id: orderId } = useParams();
 
@@ -61,10 +62,19 @@ export default function OrderPage() {
 
   const { data: order } = useAdminOrderOverviewQuery(orderId as string);
   const { data: conciliationOrder } = useAdminOrderConciliationQuery(orderId as string);
+  const { data: payments = [] } = useAdminOrderPaymentsQuery(orderId as string);
   const { mutate: mutatePicking } = usePatchOrderPicking(orderId as string);
   const { mutate: mutateStartPicking, isLoading: isStartPicking } = useStartOrderPicking(orderId as string);
   const { mutate: mutateConsolidate, isLoading: isConsolidating } = useConsolidateOrder(orderId as string);
   const { mutate: collectPicking, isLoading: isCollecting } = useCollectPickingItem(orderId as string, selectedItem?.id);
+
+  // Sort payments into original and conciliation arrays
+  const originalPayments = payments.filter(payment =>
+    payment.order_id === orderId || !conciliationOrder || payment.order_id !== conciliationOrder.id
+  );
+  const conciliationPayments = payments.filter(payment =>
+    conciliationOrder && payment.order_id === conciliationOrder.id
+  );
 
 
   const columns: Column<CartItem>[] = [
@@ -142,7 +152,7 @@ export default function OrderPage() {
   ];
 
   const isRowDisabled = (item: PickingItem) => {
-    return  isCollecting || !isOrderEditable || (item.status === 'CANCELLED');
+    return isCollecting || !isOrderEditable || (item.status === 'CANCELLED');
   };
 
   const rowButtons = (item: PickingItem) => {
@@ -206,8 +216,8 @@ export default function OrderPage() {
     }
   }, [selectedItem]);
   useEffect(() => {
-    setIsReadyForConsolidation(!!order && (order.status === 'PENDING' ||  order.status === 'PAID') && !!order.picking && order.picking.items.filter( i => i.status === 'COLLECTED').length === order.picking.items.length);
-    setIsOrderEditable((order?.status === 'PENDING' ||  order?.status === 'PAID') );
+    setIsReadyForConsolidation(!!order && (order.status === 'PENDING' || order.status === 'PAID') && !!order.picking && order.picking.items.filter(i => i.status === 'COLLECTED').length === order.picking.items.length);
+    setIsOrderEditable((order?.status === 'PENDING' || order?.status === 'PAID'));
   }, [order]);
 
 
@@ -306,7 +316,7 @@ export default function OrderPage() {
                                   <DataList.ItemValue>
                                     <Badge colorScheme={
                                       conciliationOrder.status === 'CONCILIATED' ? 'green' :
-                                      conciliationOrder.status === 'CONCILIATION_PAYMENT_IN_PROGRESS' ? 'orange' : 'gray'
+                                        conciliationOrder.status === 'CONCILIATION_PAYMENT_IN_PROGRESS' ? 'orange' : 'gray'
                                     }>
                                       {conciliationOrder.status}
                                     </Badge>
@@ -315,7 +325,7 @@ export default function OrderPage() {
                               </DataList.Root>
                             </Card.Body>
                           </Card.Root>
-                          
+
                           <DataTable
                             columns={columns}
                             data={conciliationOrder.items}
@@ -360,7 +370,7 @@ export default function OrderPage() {
 
                   <Card.Root bg="surface.container">
                     <Card.Header>
-                      <Heading size="md">Order History</Heading>
+                      <Heading size="md">Order Calculation</Heading>
                     </Card.Header>
                     <Card.Body>
                       <DataList.Root orientation="horizontal" maxW="md">
@@ -380,6 +390,27 @@ export default function OrderPage() {
                         </DataList.Item>
 
                       </DataList.Root>
+                    </Card.Body>
+                  </Card.Root>
+                  <Card.Root bg="surface.container">
+                    <Card.Body>
+                      <HStack justifyContent={'space-between'}>
+                        <Heading size="md">Original</Heading>
+                        <Button size="2xs" colorScheme="dark" bg="blue.800" color="white">New payment</Button>
+                      </HStack>
+
+                      {originalPayments.map((payment) => (
+                        <PaymentCard key={payment.id} payment={payment} />
+                      ))}
+                      <Separator />
+                      <HStack mt={2} justifyContent={'space-between'}>
+                        <Heading size="md">Closing</Heading>
+                        <Button size="2xs" colorScheme="dark" bg="blue.800" color="white">New payment</Button>
+                      </HStack>
+                      {conciliationPayments.map((payment) => (
+                        <PaymentCard key={payment.id} payment={payment} />
+                      ))}
+
                     </Card.Body>
                   </Card.Root>
                   <Card.Root bg="surface.container">

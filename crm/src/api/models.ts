@@ -9,3 +9,4 @@ export type Delivery = components["schemas"]["Delivery"];
 export type CartItem = components["schemas"]["CartItem"];
 export type OrderPickingPatch = components["schemas"]["OrderPickingPatch"];
 export type PickingItem = components["schemas"]["PickingItem"];
+export type Payment = components["schemas"]["Payment"];
