@@ -7,6 +7,7 @@ import UserService from "../../services/UserService";
 import AbstractService from "../../services/AbstractService";
 import DeliveryService from "../../services/DeliveryService";
 import OrderService from "../../services/OrderService";
+import PaymentService from "../../services/PaymentService";
 
 import {api} from "../../services/utils";
 import * as CONSTANTS from "../../constants";
@@ -21,6 +22,7 @@ export {
   AbstractService,
   DeliveryService,
   OrderService,
+  PaymentService,
   api,
 };
 

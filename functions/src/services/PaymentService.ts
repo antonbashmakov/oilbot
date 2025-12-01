@@ -31,6 +31,18 @@ class PaymentService extends AbstractService<Payment> {
     return this.toPOJO(doc.id, doc.data()) as Payment;
   }
 
+  async findByOrderId(orderId: string): Promise<Payment[]> {
+    const result = await this.getCollection()
+      .where("order_id", "==", orderId)
+      .get();
+    
+    if (result.empty) {
+      return [];
+    }
+    
+    return result.docs.map(doc => this.toPOJO(doc.id, doc.data()) as Payment);
+  }
+
   getExcludedFields(): string[] {
     return ["created_at"];
   }

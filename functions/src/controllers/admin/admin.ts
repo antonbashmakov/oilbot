@@ -7,11 +7,12 @@ import {
   express,
   DeliveryService,
   OrderService,
+  PaymentService,
   // AbstractService,
   api,
   CONSTANTS,
 } from "./imports";
-import {DeliveryOverview, OrderResolvedEvent, Stats} from "../../models";
+import {DeliveryOverview, OrderResolvedEvent, Stats, Payment} from "../../models";
 import OrderPickingService from "../../services/OrderPickingService";
 import CustomerService from "../../services/CustomerService";
 import EventPublisher from "../../services/EventPublisher";
@@ -237,6 +238,7 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
       return api.badRequest(res, "Order is not compiled");
     }
 
+    
     await orderService.updateTransactionally(order, {status: "RESOLVING"});
 
     const eventPublisher = new EventPublisher<OrderResolvedEvent>(db);
@@ -270,6 +272,40 @@ adminApi.get("/orders/:id/conciliation", async (req: express.Request, res: expre
     const conciliationOrder = await orderService.findConciliationOrder(id);
 
     return api.send(res, conciliationOrder);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+adminApi.get("/orders/:orderId/payments", async (req: express.Request, res: express.Response) => {
+  try {
+    const {orderId} = req.params;
+    const orderService = new OrderService(db);
+    const paymentService = new PaymentService(db);
+
+    // First, get the main order to verify it exists
+    const order = await orderService.find(orderId);
+    if (!order) {
+      return api.notFound(res, "Order not found");
+    }
+
+    // Get payments for the main order
+    const mainOrderPayments = await paymentService.findByOrderId(orderId);
+
+    // Get conciliation order if it exists
+    const conciliationOrder = await orderService.findConciliationOrder(orderId);
+    let conciliationOrderPayments: Payment[] = [];
+    
+    if (conciliationOrder) {
+      // Get payments for the conciliation order
+      conciliationOrderPayments = await paymentService.findByOrderId(conciliationOrder.id);
+    }
+
+    // Combine all payments
+    const allPayments = [...mainOrderPayments, ...conciliationOrderPayments];
+
+    return api.send(res, allPayments);
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
