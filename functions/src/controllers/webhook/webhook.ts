@@ -9,7 +9,7 @@ import {
   api,
   CONSTANTS,
 } from "./imports";
-import {OrderPaymentConfirmedEvent} from "../../models";
+import {OrderPaymentConfirmedEvent, OrderPaymentFailedEvent} from "../../models";
 
 dotenv.config();
 
@@ -54,7 +54,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
       return api.badRequest(res, "Missing required fields: OrderId, Success, Status");
     }
 
-    // Only process successful confirmed payments
+    // Process successful confirmed payments
     if (body.Success && body.Status === "CONFIRMED") {
       const eventPublisher = new EventPublisher<OrderPaymentConfirmedEvent>(db);
 
@@ -68,6 +68,28 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
         payload: {
           order_id: body.OrderId,
           external_payment_id: body.PaymentId,
+        },
+      };
+
+      await eventPublisher.publish(event);
+    }
+
+    // Process failed payment statuses
+    const failedStatuses = ["REVERSED", "CANCELED", "REJECTED", "DEADLINE_EXPIRED"];
+    if (!body.Success || failedStatuses.includes(body.Status)) {
+      const eventPublisher = new EventPublisher<OrderPaymentFailedEvent>(db);
+
+      const event: OrderPaymentFailedEvent = {
+        id: "", // will be set by OutboxEventService
+        created_at: new Date(),
+        processed_at: new Date(),
+        processed: false,
+        retries: 0,
+        type: CONSTANTS.EVENTS.ORDER_PAYMENT_FAILED,
+        payload: {
+          order_id: body.OrderId,
+          external_payment_id: body.PaymentId,
+          status: body.Status,
         },
       };
 
