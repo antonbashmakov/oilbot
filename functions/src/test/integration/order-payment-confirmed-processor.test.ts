@@ -86,7 +86,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
     // Create test payment
     createdPayment = {
       id: "test-payment-id",
-      external_payment_id: 123456,
+      external_id: 123456,
       terminal_key: "TEST_TERMINAL",
       payment_url: "https://test-payment-url.com",
       order_id: "test-order-id",
@@ -115,7 +115,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
       retries: 0,
       payload: {
         order_id: createdOrder.id,
-        external_payment_id: 123456
+        external_id: 123456
       },
     };
 
@@ -157,7 +157,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
       retries: 0,
       payload: {
         order_id: createdConciliationOrder.id,
-        external_payment_id: 123456,
+        external_id: 123456,
       },
     };
 
@@ -227,7 +227,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
       retries: 0,
       payload: {
         order_id: testOrder.id,
-        external_payment_id: 999999, // Non-existent external payment ID
+        external_id: 999999, // Non-existent external payment ID
       },
     };
 
@@ -248,7 +248,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
       retries: 0,
       payload: {
         order_id: createdOrder.id,
-        external_payment_id: 123456,
+        external_id: 123456,
       },
     };
 
@@ -279,7 +279,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
       retries: 0,
       payload: {
         order_id: createdConciliationOrder.id,
-        external_payment_id: 123456,
+        external_id: 123456,
       },
     };
 

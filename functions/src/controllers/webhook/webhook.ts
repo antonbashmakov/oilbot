@@ -67,7 +67,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
         type: CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED,
         payload: {
           order_id: body.OrderId,
-          external_payment_id: body.PaymentId,
+          external_id: body.PaymentId,
         },
       };
 
@@ -88,7 +88,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
         type: CONSTANTS.EVENTS.ORDER_PAYMENT_FAILED,
         payload: {
           order_id: body.OrderId,
-          external_payment_id: body.PaymentId,
+          external_id: body.PaymentId,
           status: body.Status,
         },
       };

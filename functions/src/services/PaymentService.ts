@@ -9,7 +9,10 @@ class PaymentService extends AbstractService<Payment> {
 
     const p = {id, ...o} as Payment;
 
-    p.created_at = o.created_at.toDate();
+    p.amount = o.total; // duplicate for now, remove total later
+    p.updated_at = o.updated_at?.toDate();
+    p.updated_at = o.updated_at?.toDate();
+    p.confirmed_at = o.confirmed_at?.toDate();
 
     return p;
   }
@@ -19,7 +22,7 @@ class PaymentService extends AbstractService<Payment> {
   }
   async findByExternalId(id: number): Promise<Payment | undefined> {
     const result = await this.getCollection()
-      .where("external_payment_id", "==", id)
+      .where("external_id", "==", id)
       .get();
     
     if (result.empty) {

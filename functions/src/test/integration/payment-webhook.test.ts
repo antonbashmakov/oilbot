@@ -47,7 +47,7 @@ describe("Payment Webhook Logic Test", () => {
       type: CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED,
       payload: {
         order_id: paymentWebhookBody.OrderId,
-        external_payment_id: 123456
+        external_id: 123456
 
       },
     };
@@ -65,7 +65,7 @@ describe("Payment Webhook Logic Test", () => {
     const OrderPaymentConfirmedEvent = OrderPaymentConfirmedEvents[0];
     expect(OrderPaymentConfirmedEvent.payload).toEqual({
       order_id: "9a99gND6Q5LPS0WFTNIj",
-      external_payment_id: 123456,
+      external_id: 123456,
     });
     expect(OrderPaymentConfirmedEvent.idempotent_key).toBe("payment-confirmed-7465191924");
     expect(OrderPaymentConfirmedEvent.type).toBe("ORDER_PAYMENT_CONFIRMED");
@@ -100,7 +100,7 @@ describe("Payment Webhook Logic Test", () => {
         type: CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED,
         payload: {
           order_id: paymentWebhookBody.OrderId,
-          external_payment_id: 123456
+          external_id: 123456
 
         },
       };
@@ -144,7 +144,7 @@ describe("Payment Webhook Logic Test", () => {
         type: CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED,
         payload: {
           order_id: paymentWebhookBody.OrderId,
-          external_payment_id: 123456
+          external_id: 123456
 
         },
       };

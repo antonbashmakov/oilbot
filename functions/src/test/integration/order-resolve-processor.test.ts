@@ -155,7 +155,7 @@ describe("OrderResolveProcessor Integration Test", () => {
 
     // Verify payment properties
     expect(createdPayment).toBeDefined();
-    expect(createdPayment.external_payment_id).toBe("external-mock-id");
+    expect(createdPayment.external_id).toBe("external-mock-id");
     expect(createdPayment.order_id).toBeTruthy();
     expect(createdPayment.terminal_key).toBe("MOCK_TERMINAL");
     expect(createdPayment.amount).toBe(5000); // 50 * 100 (diff in kopecks)

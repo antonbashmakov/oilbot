@@ -98,12 +98,14 @@ class OrderResolveProcessor extends AbstractProcessor {
         error_code: paymentResponse.ErrorCode,
         id: "",
         status: 'SENT',
-        external_payment_id: paymentResponse.PaymentId,
+        external_id: paymentResponse.PaymentId,
         terminal_key: paymentResponse.TerminalKey,
         order_id: paymentResponse.OrderId,
         amount: paymentResponse.Amount,
+        total: paymentResponse.Amount,
         success: paymentResponse.Success,
         created_at: new Date(),
+        updated_at: new Date(),
       };
 
 

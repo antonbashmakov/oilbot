@@ -21,8 +21,10 @@ export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 export type BaseConversationMessage = models["schemas"]["ConversationMessage"];
 
-export type Payment = Omit<BasePayment, "created_at" > & {
+export type Payment = Omit<BasePayment, "created_at" | "updated_at" > & {
   created_at: Date;
+  updated_at: Date;
+  confirmed_at?: Date;
 };
 export type CustomerBalance = Omit<BaseCustomerBalance, "created_at" | "updated_at" > & {
   created_at: Date;
@@ -65,14 +67,14 @@ export type PaymentCreatedEvent = OutboxEvent & {
 export type OrderPaymentConfirmedEvent = OutboxEvent & {
   payload: {
     order_id: string;
-    external_payment_id: number;
+    external_id: number;
   }
 };
 
 export type OrderPaymentFailedEvent = OutboxEvent & {
   payload: {
     order_id: string;
-    external_payment_id: number;
+    external_id: number;
     status: string;
   }
 };

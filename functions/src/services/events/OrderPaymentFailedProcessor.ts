@@ -10,7 +10,7 @@ class OrderPaymentFailedProcessor extends AbstractProcessor {
     const paymentService = new PaymentService(this.db);
 
     const orderId = event.payload.order_id;
-    const externalPaymentId = event.payload.external_payment_id;
+    const externalPaymentId = event.payload.external_id;
     const paymentStatus = event.payload.status;
 
     const order = await orderService.require(orderId);

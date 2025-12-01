@@ -75,7 +75,7 @@ describe("Order Payments Endpoint Integration Test", () => {
     // Create payments for main order
     mainOrderPayment1 = {
       id: "test-payment-1",
-      external_payment_id: 111111,
+      external_id: 111111,
       terminal_key: "TEST_TERMINAL",
       payment_url: "https://test-payment-url.com/1",
       order_id: "test-main-order-id",
@@ -87,7 +87,7 @@ describe("Order Payments Endpoint Integration Test", () => {
 
     mainOrderPayment2 = {
       id: "test-payment-2",
-      external_payment_id: 222222,
+      external_id: 222222,
       terminal_key: "TEST_TERMINAL",
       payment_url: "https://test-payment-url.com/2",
       order_id: "test-main-order-id",
@@ -100,7 +100,7 @@ describe("Order Payments Endpoint Integration Test", () => {
     // Create payment for conciliation order
     conciliationOrderPayment = {
       id: "test-payment-3",
-      external_payment_id: 333333,
+      external_id: 333333,
       terminal_key: "TEST_TERMINAL",
       payment_url: "https://test-payment-url.com/3",
       order_id: "test-conciliation-order-id",
