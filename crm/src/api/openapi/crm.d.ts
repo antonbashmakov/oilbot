@@ -314,6 +314,59 @@ export interface paths {
         };
       };
     };
+    /**
+     * Create a new payment for an order
+     * @description Create a new payment for an order using idempotency key. Returns 400 if order already has a payment in status 'SENT' or 'CONFIRMED'
+     */
+    post: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          orderId: string;
+        };
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            /**
+             * @description Idempotency key to prevent duplicate payment creation
+             * @example unique-key-123
+             */
+            idempotency_key: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Payment created successfully */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["Payment"];
+            };
+          };
+        };
+        /** @description Order already has a payment in status 'SENT' or 'CONFIRMED' */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Order not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
   };
   "/private/items/category/{category}": {
     /**
@@ -424,7 +477,12 @@ export interface components {
        * @description Customer's first name
        * @example Антон
        */
-      first_name: string;
+      first_name?: string;
+      /**
+       * @description Customer's first name
+       * @example Антон
+       */
+      last_name?: string;
       /**
        * @description Unique identifier for the customer
        * @example 1019705782
@@ -444,7 +502,7 @@ export interface components {
        * @description Customer's username
        * @example getting_drunk
        */
-      username: string;
+      username?: string;
     };
     OrderPickingPatch: {
       /** @description Items to update in this order picking */
@@ -806,7 +864,7 @@ export interface components {
        */
       error_code?: number | null;
       /** @enum {string} */
-      status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT";
+      status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT" | "CANCELED" | "REJECTED";
       /**
        * @description Internal payment ID
        * @example payment-123456

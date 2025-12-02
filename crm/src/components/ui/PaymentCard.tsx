@@ -1,6 +1,7 @@
-import { Badge, Box, Flex, Text } from "@chakra-ui/react";
+import { Box, Flex, Text } from "@chakra-ui/react";
 import { CheckIcon, WarningIcon, CloseIcon, TimeIcon } from "@chakra-ui/icons";
 import { Payment } from "@/api/models";
+import { StatusBadge, StatusValue } from "./StatusBadge";
 import { format } from "date-fns";
 
 interface PaymentCardProps {
@@ -144,21 +145,7 @@ export const PaymentCard = ({ payment }: PaymentCardProps) => {
           <Text fontSize="xs" color="gray.500" _dark={{ color: "gray.400" }}>
             {formatDate(payment.updated_at)}
           </Text>
-          <Badge
-            px={2}
-            py={0.5}
-            borderRadius="md"
-            fontSize="xs"
-            fontWeight="medium"
-            bg={statusConfig.badgeBg}
-            color={statusConfig.badgeText}
-            _dark={{
-              bg: statusConfig.darkBadgeBg,
-              color: statusConfig.darkBadgeText,
-            }}
-          >
-            {statusConfig.label}
-          </Badge>
+          <StatusBadge status={payment.status as StatusValue} />
         </Flex>
 
       </Box>

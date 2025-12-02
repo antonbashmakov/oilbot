@@ -2,7 +2,6 @@
 
 import {
   Avatar,
-  Badge,
   Box,
   Breadcrumb,
   DataList,
@@ -13,7 +12,6 @@ import {
   GridItem,
   Heading,
   Link,
-  Stack,
   Text,
   VStack,
   Container,
@@ -25,57 +23,13 @@ import {
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
-import { CartItem, PickingItem, Payment } from "@/api/models";
-import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery } from "@/api";
+import { CartItem, PickingItem } from "@/api/models";
+import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery, useCreateOrderPayment } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
 import { PaymentCard } from "@/components/ui/PaymentCard";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useCallback, useEffect, useState } from "react";
 import { AddIcon, MinusIcon, LockIcon } from "@chakra-ui/icons";
-
-
-// Mock data for the customer
-const customer = {
-  id: "CUST-123",
-  name: "John Doe",
-  avatarUrl: "https://bit.ly/dan-abramov",
-};
-
-// Mock data for order history
-const orderHistory = [
-  { event: "Order Created", date: "2023-11-20 10:00" },
-  { event: "Payment Sent", date: "2023-11-20 10:05" },
-  { event: "Payment Made", date: "2023-11-20 10:10" },
-  { event: "Order Picked", date: "2023-11-21 09:00" },
-  { event: "Reconciliation Order created", date: "2023-11-21 09:30" },
-  { event: "Reconciliation Payment Sent", date: "2023-11-21 09:35" },
-  { event: "Reconciliation Payment Made", date: "2023-11-21 09:40" },
-  { event: "Order delivered", date: "2023-11-22 14:00" },
-];
-
-export default function OrderPage() {
-  const { id: orderId } = useParams();
-
-  const [selectedItem, setSelectedItem] = useState<PickingItem>()
-  const [isReadyForConsolidation, setIsReadyForConsolidation] = useState<boolean>(false);
-  const [isOrderEditable, setIsOrderEditable] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>("order-items");
-
-  const { data: order } = useAdminOrderOverviewQuery(orderId as string);
-  const { data: conciliationOrder } = useAdminOrderConciliationQuery(orderId as string);
-  const { data: payments = [] } = useAdminOrderPaymentsQuery(orderId as string);
-  const { mutate: mutatePicking } = usePatchOrderPicking(orderId as string);
-  const { mutate: mutateStartPicking, isLoading: isStartPicking } = useStartOrderPicking(orderId as string);
-  const { mutate: mutateConsolidate, isLoading: isConsolidating } = useConsolidateOrder(orderId as string);
-  const { mutate: collectPicking, isLoading: isCollecting } = useCollectPickingItem(orderId as string, selectedItem?.id);
-
-  // Sort payments into original and conciliation arrays
-  const originalPayments = payments.filter(payment =>
-    payment.order_id === orderId || !conciliationOrder || payment.order_id !== conciliationOrder.id
-  );
-  const conciliationPayments = payments.filter(payment =>
-    conciliationOrder && payment.order_id === conciliationOrder.id
-  );
-
 
   const columns: Column<CartItem>[] = [
     { key: "id", header: "ID", accessor: (item) => item.id },
@@ -151,6 +105,37 @@ export default function OrderPage() {
     },
   ];
 
+export default function OrderPage() {
+  const { id: orderId } = useParams();
+
+  const [selectedItem, setSelectedItem] = useState<PickingItem>()
+  const [isReadyForConsolidation, setIsReadyForConsolidation] = useState<boolean>(false);
+  const [isOrderEditable, setIsOrderEditable] = useState<boolean>(false);
+  const [isMissingOriginalPayment, setIsMissingOriginalPayment] = useState<boolean>(false);
+  const [isMissingConsolidationPayment, setIsMissingConsolidationPayment] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>("order-items");
+
+  const { data: order } = useAdminOrderOverviewQuery(orderId as string);
+  const { data: conciliationOrder } = useAdminOrderConciliationQuery(orderId as string);
+  const { data: payments = [] } = useAdminOrderPaymentsQuery(orderId as string);
+  const { mutate: mutatePicking } = usePatchOrderPicking(orderId as string);
+  const { mutate: mutateStartPicking, isLoading: isStartPicking } = useStartOrderPicking(orderId as string);
+  const { mutate: mutateConsolidate, isLoading: isConsolidating } = useConsolidateOrder(orderId as string);
+  const { mutate: collectPicking, isLoading: isCollecting } = useCollectPickingItem(orderId as string, selectedItem?.id);
+  const { mutate: createOriginalPayment, isLoading: isCreatingOriginalPayment } = useCreateOrderPayment(orderId as string);
+  const { mutate: createConciliationPayment, isLoading: isCreatingConciliationPayment } = useCreateOrderPayment(conciliationOrder?.id);
+
+  // Sort payments into original and conciliation arrays
+  const originalPayments = payments.filter(payment =>
+    payment.order_id === orderId || !conciliationOrder || payment.order_id !== conciliationOrder.id
+  );
+  const conciliationPayments = payments.filter(payment =>
+    conciliationOrder && payment.order_id === conciliationOrder.id
+  );
+
+  useEffect(() => setIsMissingOriginalPayment(!originalPayments?.filter(p => (p.status === 'SENT' || p.status === 'CONFIRMED')).length), [originalPayments]);
+  useEffect(() => setIsMissingConsolidationPayment( order?.status === 'RESOLVING' && !conciliationPayments?.filter(p => (p.status === 'SENT' || p.status === 'CONFIRMED')).length), [conciliationPayments]);
+
   const isRowDisabled = (item: PickingItem) => {
     return isCollecting || !isOrderEditable || (item.status === 'CANCELLED');
   };
@@ -210,11 +195,26 @@ export default function OrderPage() {
     setSelectedItem(item);
   }, [selectedItem]);
 
+  const onCreateOriginalPaymentClick = useCallback(() => {
+    if (orderId) {
+      const idempotencyKey = `original-${orderId}-${Date.now()}`;
+      createOriginalPayment({ idempotency_key: idempotencyKey });
+    }
+  }, [orderId, createOriginalPayment]);
+
+  const onCreateConciliationPaymentClick = useCallback(() => {
+    if (conciliationOrder?.id) {
+      const idempotencyKey = `conciliation-${conciliationOrder.id}-${Date.now()}`;
+      createConciliationPayment({ idempotency_key: idempotencyKey });
+    }
+  }, [conciliationOrder?.id, createConciliationPayment]);
+
   useEffect(() => {
     if (selectedItem?.id) {
       collectPicking();
     }
   }, [selectedItem]);
+
   useEffect(() => {
     setIsReadyForConsolidation(!!order && (order.status === 'PENDING' || order.status === 'PAID') && !!order.picking && order.picking.items.filter(i => i.status === 'COLLECTED').length === order.picking.items.length);
     setIsOrderEditable((order?.status === 'PENDING' || order?.status === 'PAID'));
@@ -251,7 +251,7 @@ export default function OrderPage() {
                 <Heading size="2xl" color="text.primary">
                   Order {orderId}
                 </Heading>
-                <Badge colorScheme="green">Paid</Badge>
+                <StatusBadge status={order.status} />
                 {!isOrderEditable && (
                   <Flex align="center" gap={1} color="gray.500">
                     <LockIcon boxSize={4} />
@@ -314,12 +314,7 @@ export default function OrderPage() {
                                 <DataList.Item key="conciliation-status">
                                   <DataList.ItemLabel>Status</DataList.ItemLabel>
                                   <DataList.ItemValue>
-                                    <Badge colorScheme={
-                                      conciliationOrder.status === 'CONCILIATED' ? 'green' :
-                                        conciliationOrder.status === 'CONCILIATION_PAYMENT_IN_PROGRESS' ? 'orange' : 'gray'
-                                    }>
-                                      {conciliationOrder.status}
-                                    </Badge>
+                                    <StatusBadge status={conciliationOrder.status} />
                                   </DataList.ItemValue>
                                 </DataList.Item>
                               </DataList.Root>
@@ -355,10 +350,11 @@ export default function OrderPage() {
                     <Card.Body>
                       <Flex align="center" gap={4}>
                         <Avatar.Root>
-                          <Avatar.Image src={customer.avatarUrl} />
+                          <Avatar.Image src="https://avatar.iran.liara.run/public/job/teacher/male" />
                         </Avatar.Root>
                         <Box>
-                          <Text fontWeight="bold">{customer.name}</Text>
+                          <Text fontWeight="bold">{order.customer?.first_name} {order.customer?.last_name}
+                          </Text>
                           {order.customer.username && <Link href={`https://t.me/${order.customer.username}`} color="blue.500">
                             @{order.customer.username}
                           </Link>}
@@ -396,7 +392,17 @@ export default function OrderPage() {
                     <Card.Body>
                       <HStack justifyContent={'space-between'}>
                         <Heading size="md">Original</Heading>
-                        <Button size="2xs" colorScheme="dark" bg="blue.800" color="white">New payment</Button>
+                        <Button 
+                          disabled={!isMissingOriginalPayment || isCreatingOriginalPayment}
+                          loading={isCreatingOriginalPayment}
+                          onClick={onCreateOriginalPaymentClick}
+                          size="2xs" 
+                          colorScheme="dark" 
+                          bg="blue.800" 
+                          color="white"
+                        >
+                          New payment
+                        </Button>
                       </HStack>
 
                       {originalPayments.map((payment) => (
@@ -405,29 +411,22 @@ export default function OrderPage() {
                       <Separator />
                       <HStack mt={2} justifyContent={'space-between'}>
                         <Heading size="md">Closing</Heading>
-                        <Button size="2xs" colorScheme="dark" bg="blue.800" color="white">New payment</Button>
+                        <Button 
+                          disabled={!isMissingConsolidationPayment || isCreatingConciliationPayment || !conciliationOrder?.id}
+                          loading={isCreatingConciliationPayment}
+                          onClick={onCreateConciliationPaymentClick}
+                          size="2xs" 
+                          colorScheme="dark" 
+                          bg="blue.800" 
+                          color="white"
+                        >
+                          New payment
+                        </Button>
                       </HStack>
                       {conciliationPayments.map((payment) => (
                         <PaymentCard key={payment.id} payment={payment} />
                       ))}
 
-                    </Card.Body>
-                  </Card.Root>
-                  <Card.Root bg="surface.container">
-                    <Card.Header>
-                      <Heading size="md">Order History</Heading>
-                    </Card.Header>
-                    <Card.Body>
-                      <Stack gap={4}>
-                        {orderHistory.map((item, index) => (
-                          <Flex key={index} justify="space-between">
-                            <Text fontSize="sm">{item.event}</Text>
-                            <Text fontSize="sm" color="gray.500">
-                              {item.date}
-                            </Text>
-                          </Flex>
-                        ))}
-                      </Stack>
                     </Card.Body>
                   </Card.Root>
                 </VStack>

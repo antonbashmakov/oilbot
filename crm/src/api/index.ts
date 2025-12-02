@@ -114,3 +114,20 @@ export const useAdminOrderPaymentsQuery = (orderId?: string): UseQueryResult<Pay
         }
     }, { retry: 1, enabled: !!orderId })
 };
+
+export function useCreateOrderPayment(orderId?: string) {
+    return usePostApi<
+        '/admin/orders/{orderId}/payments',
+        { orderId: string },
+        { idempotency_key: string }
+    >(
+        '/admin/orders/{orderId}/payments',
+        [
+            '/admin/orders/{orderId}/payments',
+            '/admin/orders/{id}'
+        ],
+        {
+            orderId: orderId || ''
+        }
+    );
+};
