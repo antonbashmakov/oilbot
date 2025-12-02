@@ -11,7 +11,7 @@ class PaymentService extends AbstractService<Payment> {
 
     p.amount = o.total; // duplicate for now, remove total later
     p.updated_at = o.updated_at?.toDate();
-    p.updated_at = o.updated_at?.toDate();
+    p.created_at = o.created_at?.toDate();
     p.confirmed_at = o.confirmed_at?.toDate();
 
     return p;
@@ -47,7 +47,7 @@ class PaymentService extends AbstractService<Payment> {
   }
 
   getExcludedFields(): string[] {
-    return ["created_at"];
+    return ["created_at", "updated_at", "confirmed_at"];
   }
 }
 

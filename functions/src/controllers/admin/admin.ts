@@ -8,14 +8,18 @@ import {
   DeliveryService,
   OrderService,
   PaymentService,
-  // AbstractService,
+  CustomerService,
+  TelegramService,
   api,
   CONSTANTS,
+  toMessage,
+  formatDate,
 } from "./imports";
-import {DeliveryOverview, OrderResolvedEvent, Stats, Payment} from "../../models";
+import { DeliveryOverview, OrderResolvedEvent, Stats, Payment } from "../../models";
 import OrderPickingService from "../../services/OrderPickingService";
-import CustomerService from "../../services/CustomerService";
 import EventPublisher from "../../services/EventPublisher";
+import IdempotencyGuardService from "../../services/IdempotencyGuardService";
+import TBankService from "../../services/payments/TBankService";
 // import { debug } from 'firebase-functions/logger';
 dotenv.config();
 
@@ -33,7 +37,7 @@ const adminApi = express();
 
 
 adminApi.use(cors(
-  {origin: true} // allows all cross origin xhr requests
+  { origin: true } // allows all cross origin xhr requests
 ));
 
 /*
@@ -65,7 +69,7 @@ adminApi.get("/deliveries", async (req: express.Request, res: express.Response) 
 
 adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const deliveryService = new DeliveryService(db);
     const orderService = new OrderService(db);
     const delivery = await deliveryService.find(id);
@@ -75,12 +79,12 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
     }
 
     const orders = await orderService.findOrders(delivery);
-    const devileryOverview = {...delivery, orders} as DeliveryOverview;
+    const devileryOverview = { ...delivery, orders } as DeliveryOverview;
 
     const deliveryStats = orders.reduce((ds, order) => {
       const orderStats = order.items.reduce((os, item) => {
         if (!os[item.item_id]) {
-          os[item.item_id] = {total: 0, fraction: 0, name: item.name};
+          os[item.item_id] = { total: 0, fraction: 0, name: item.name };
         }
         os[item.item_id].total += item.price * item.quantity;
         os[item.item_id].fraction += item.fraction;
@@ -90,7 +94,7 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
 
       Object.keys(orderStats).forEach((key) => {
         if (!ds[key]) {
-          ds[key] = {...orderStats[key]};
+          ds[key] = { ...orderStats[key] };
           return;
         }
 
@@ -113,7 +117,7 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
 
 adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const orderService = new OrderService(db);
 
     const order = await orderService.find(id);
@@ -128,7 +132,7 @@ adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) 
     const picking = await pickingService.find(id);
     const customer = await customerService.find(order.owner!.id);
 
-    return api.send(res, {...order, picking, customer});
+    return api.send(res, { ...order, picking, customer });
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
@@ -137,8 +141,8 @@ adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) 
 
 adminApi.patch("/order-pickings/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
-    const {items} = req.body;
+    const { id } = req.params;
+    const { items } = req.body;
 
     if (!items || !Array.isArray(items)) {
       return api.error(res, "Items array is required");
@@ -170,7 +174,7 @@ adminApi.patch("/order-pickings/:id", async (req: express.Request, res: express.
 
 adminApi.post("/orders/:id/order-picking", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
@@ -191,7 +195,7 @@ adminApi.post("/orders/:id/order-picking", async (req: express.Request, res: exp
 
 adminApi.post("/order-pickings/:pickingId/items/:itemId/collect", async (req: express.Request, res: express.Response) => {
   try {
-    const {pickingId, itemId} = req.params;
+    const { pickingId, itemId } = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(pickingId);
@@ -218,7 +222,7 @@ adminApi.post("/order-pickings/:pickingId/items/:itemId/collect", async (req: ex
 
 adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
@@ -238,8 +242,8 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
       return api.badRequest(res, "Order is not compiled");
     }
 
-    
-    await orderService.updateTransactionally(order, {status: "RESOLVING"});
+
+    await orderService.updateTransactionally(order, { status: "RESOLVING" });
 
     const eventPublisher = new EventPublisher<OrderResolvedEvent>(db);
 
@@ -251,7 +255,7 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
       processed: false,
       retries: 0,
       type: CONSTANTS.EVENTS.ORDER_RESOLVED,
-      payload: {order_id: order.id},
+      payload: { order_id: order.id },
 
     };
 
@@ -266,7 +270,7 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
 
 adminApi.get("/orders/:id/conciliation", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const orderService = new OrderService(db);
 
     const conciliationOrder = await orderService.findConciliationOrder(id);
@@ -280,7 +284,7 @@ adminApi.get("/orders/:id/conciliation", async (req: express.Request, res: expre
 
 adminApi.get("/orders/:orderId/payments", async (req: express.Request, res: express.Response) => {
   try {
-    const {orderId} = req.params;
+    const { orderId } = req.params;
     const orderService = new OrderService(db);
     const paymentService = new PaymentService(db);
 
@@ -296,7 +300,7 @@ adminApi.get("/orders/:orderId/payments", async (req: express.Request, res: expr
     // Get conciliation order if it exists
     const conciliationOrder = await orderService.findConciliationOrder(orderId);
     let conciliationOrderPayments: Payment[] = [];
-    
+
     if (conciliationOrder) {
       // Get payments for the conciliation order
       conciliationOrderPayments = await paymentService.findByOrderId(conciliationOrder.id);
@@ -308,6 +312,115 @@ adminApi.get("/orders/:orderId/payments", async (req: express.Request, res: expr
     return api.send(res, allPayments);
   } catch (err: any) {
     functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+adminApi.post("/orders/:orderId/payments", async (req: express.Request, res: express.Response) => {
+  try {
+    const { orderId } = req.params;
+    const { idempotency_key } = req.body;
+
+    if (!idempotency_key) {
+      return api.badRequest(res, "idempotency_key is required");
+    }
+
+    const orderService = new OrderService(db);
+    const paymentService = new PaymentService(db);
+    const customerService = new CustomerService(db);
+    const idempotencyGuardService = new IdempotencyGuardService(db);
+    const tbankService = new TBankService();
+    const telegramService = new TelegramService();
+
+    // First, get the main order to verify it exists
+    const order = await orderService.find(orderId);
+    if (!order) {
+      return api.notFound(res, "Order not found");
+    }
+
+    // Check if order already has a payment in status 'SENT' or 'CONFIRMED'
+    const existingPayments = await paymentService.findByOrderId(orderId);
+    const hasActivePayment = existingPayments.some(payment =>
+      payment.status === "SENT" || payment.status === "CONFIRMED"
+    );
+
+    if (hasActivePayment) {
+      return api.badRequest(res, "Order already has a payment in status 'SENT' or 'CONFIRMED'");
+    }
+
+    const payment = await idempotencyGuardService.runIdempotentRequest(
+      idempotency_key,
+      async () => {
+        const paymentRequest = tbankService.orderToPaymentRequest(order);
+        const paymentResponse = await tbankService.initPayment(paymentRequest);
+
+        if (!paymentResponse.Success) {
+          throw new Error(`Payment initiation failed: ${paymentResponse.ErrorCode}`);
+        }
+
+        // Create payment record in Firestore
+        const paymentData: Payment = {
+          id: '',
+          external_id: paymentResponse.PaymentId,
+          terminal_key: paymentResponse.TerminalKey,
+          payment_url: paymentResponse.PaymentURL,
+          order_id: orderId,
+          amount: order.total * 100, // Convert to kopecks
+          total: order.total * 100,
+          status: "SENT",
+          success: false,
+          created_at: new Date(),
+          updated_at: new Date(),
+        };
+
+        paymentService.add(paymentData)
+
+        // Update order status to PAYMENT_IN_PROGRESS if it's not already
+        if (order.status !== "PAYMENT_IN_PROGRESS") {
+          await orderService.update(order, { status: "PAYMENT_IN_PROGRESS" });
+        }
+
+        // Send Telegram notification to order owner
+        try {
+          // Get customer to get their chat ID
+          const customer = await customerService.find(order.owner.id);
+          // Format message using ORDER_PAYMENT_CREATED template
+          const messageValues = {
+            items: order.items.map(item => ({
+              name: item.name,
+              price: item.price * item.quantity,
+            })),
+            delivery: order.delivery ? {
+              deliveryStart: formatDate(order.delivery.delivery_start),
+              deliveryEnd: formatDate(order.delivery.delivery_end),
+            } : null,
+            total: order.total,
+            orderId: order.id,
+            paymentUrl: paymentResponse.PaymentURL,
+          };
+
+          const messageText = toMessage("ORDER_PAYMENT_CREATED", messageValues);
+
+          // Send Telegram message
+          await telegramService.sendMessage(customer!.id, messageText);
+        } catch (telegramError: any) {
+          // Log Telegram error but don't fail the payment creation
+          functions.logger.error("Failed to send Telegram notification:", telegramError);
+        }
+
+        return paymentData;
+      }
+    );
+
+    return api.send(res, payment);
+  } catch (err: any) {
+    functions.logger.error("Error creating payment:", err);
+
+    // Check if it's an idempotency error (duplicate request)
+    if (err.message && err.message.includes("already processed")) {
+      return api.badRequest(res, "Duplicate request detected");
+    }
+
     return api.error(res, err.message || "Internal server error");
   }
 });

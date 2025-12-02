@@ -100,13 +100,15 @@ export interface components {
     TinkoffPaymentPayload: {
       /** @description Ключ терминала */
       TerminalKey: string;
-      Token?: string;
+      Token: string;
       /** @description Сумма в копейках */
       Amount: number;
       /** @description Идентификатор заказа */
       OrderId: string;
       /** @description Описание заказа */
       Description?: string;
+      /** Format: date-time */
+      RedirectDueDate: string;
       DATA?: components["schemas"]["TinkoffPaymentData"];
       Receipt: components["schemas"]["TinkoffReceipt"];
     };

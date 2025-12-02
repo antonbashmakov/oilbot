@@ -1,5 +1,5 @@
-import {FieldValue, Firestore} from "firebase-admin/firestore";
-import {jsonify} from "./utils";
+import { FieldValue, Firestore } from "firebase-admin/firestore";
+import { jsonify } from "./utils";
 
 // Interface for entities that have an ID
 interface Entity {
@@ -55,7 +55,7 @@ abstract class AbstractService<T extends Entity> {
     const ref = this.getCollection().doc(object.id);
 
     // Atomically increment the population of the city by 50.
-    return ref.update({[field]: FieldValue.increment(value)});
+    return ref.update({ [field]: FieldValue.increment(value) });
   }
 
   setAll(objects: T[]): void {
@@ -63,7 +63,7 @@ abstract class AbstractService<T extends Entity> {
   }
 
   addForOwner(user: { id: string }, object: Omit<T, "owner">): Promise<T> {
-    const objectWithOwner = {...object, owner: {id: user.id}} as T;
+    const objectWithOwner = { ...object, owner: { id: user.id } } as T;
     return this.add(objectWithOwner);
   }
 
@@ -79,7 +79,12 @@ abstract class AbstractService<T extends Entity> {
 
     const fieldsToSave: Record<string, any> = {};
 
-    fields.forEach((field) => fieldsToSave[field] = object[field as keyof T]);
+    fields.forEach(field => {
+      const value = object[field as keyof T];
+      if (value !== undefined) {
+        fieldsToSave[field] = value;
+      }
+    });
 
     const objectToSave = Object.assign(jsonify(object), fieldsToSave);
 
@@ -94,7 +99,12 @@ abstract class AbstractService<T extends Entity> {
 
     const fieldsToSave: Record<string, any> = {};
 
-    fields.forEach((field) => fieldsToSave[field] = object[field as keyof T]);
+    fields.forEach(field => {
+      const value = object[field as keyof T];
+      if (value !== undefined) {
+        fieldsToSave[field] = value;
+      }
+    });
 
     const objectToSet = Object.assign(jsonify(object), fieldsToSave);
 
@@ -126,7 +136,7 @@ abstract class AbstractService<T extends Entity> {
   toPOJO(id: any, o: any): T | undefined {
     if (!o) return;
 
-    return {id, ...o} as T;
+    return { id, ...o } as T;
   }
   abstract getCollectionName(): string;
   abstract getExcludedFields(): string[];

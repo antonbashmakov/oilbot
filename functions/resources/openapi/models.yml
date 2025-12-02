@@ -158,14 +158,19 @@ components:
         Description:
           type: string
           description: "Описание заказа"
+        RedirectDueDate:  
+          type: string
+          format: date-time                
         DATA:
           $ref: '#/components/schemas/TinkoffPaymentData'
         Receipt:
           $ref: '#/components/schemas/TinkoffReceipt'
       required:
         - TerminalKey
-        - Amount
-        - OrderId
+        - Token
+        - Amount    
+        - OrderId    
+        - RedirectDueDate
         - Receipt
 
     ConversationMessage:

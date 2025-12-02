@@ -2,6 +2,7 @@ import axios from "axios";
 import * as dotenv from "dotenv";
 import * as functions from "firebase-functions";
 import * as crypto from "crypto";
+import * as moment from "moment";
 
 import {Order, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt} from "../../models";
 dotenv.config();
@@ -26,6 +27,16 @@ class TBankService {
       Items,
     };
 
+    // Calculate RedirectDueDate: one month ahead from current date
+    // Format: YYYY-MM-DDTHH24:MI:SS+GMT
+    // Using moment.js to handle date manipulation and formatting
+    const redirectDueDate = moment().add(1, 'month');
+    
+    // Format according to Tinkoff API requirements
+    // The format should be like: 2025-12-02T14:30:00+03:00
+    // Using format() with specific pattern
+    const RedirectDueDate = redirectDueDate.format('YYYY-MM-DDTHH:mm:ssZ');
+
     const body = {
       Token: "",
       TerminalKey: terminal,
@@ -37,6 +48,7 @@ class TBankService {
         Email: process.env.SUPPORT_EMAIL,
       },
       Receipt,
+      RedirectDueDate,
     };
 
     const rootFields = {...body, Password: password} as any;
@@ -50,19 +62,6 @@ class TBankService {
   }
 
   async initPayment(paymentRequest: TinkoffPaymentPayload) {
-    if (process.env.IS_TEST) {
-      return {
-        TerminalKey: "MOCK_TERMINAL",
-        Success: true,
-        Status: "NEW",
-        ErrorCode: 0,
-        PaymentId: "external-mock-id",
-        OrderId: paymentRequest.OrderId,
-        Amount: paymentRequest.Amount,
-        Token: "mock-token",
-        PaymentURL: `https://securepay.tinkoff.ru/${paymentRequest.OrderId}`,
-      };
-    }
 
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Init", paymentRequest, {
       headers: {
