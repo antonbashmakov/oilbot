@@ -1,5 +1,5 @@
 import db from "../setup";
-import { Order, Payment, OrderPaymentFailedEvent } from "../../models";
+import {Order, Payment, OrderPaymentFailedEvent} from "../../models";
 import OrderPaymentFailedProcessor from "../../services/events/OrderPaymentFailedProcessor";
 import OrderService from "../../services/OrderService";
 import PaymentService from "../../services/PaymentService";
@@ -32,7 +32,7 @@ describe("OrderPaymentFailedProcessor Integration Test", () => {
           fraction: 1,
           price_for_unit: 150,
           group: "TEST_GROUP",
-          owner: { id: "test-customer-id" },
+          owner: {id: "test-customer-id"},
         },
       ],
       status: "PAYMENT_IN_PROGRESS",
@@ -118,14 +118,14 @@ describe("OrderPaymentFailedProcessor Integration Test", () => {
       // Reset order status before each test by recreating the order
       await orderService.set({
         ...createdOrder,
-        status: "PAYMENT_IN_PROGRESS"
+        status: "PAYMENT_IN_PROGRESS",
       } as any);
-      
+
       // Reset payment status before each test by recreating the payment
       await paymentService.set({
         ...createdPayment,
         success: true,
-        status: "SENT"
+        status: "SENT",
       } as any);
 
       // Process the event

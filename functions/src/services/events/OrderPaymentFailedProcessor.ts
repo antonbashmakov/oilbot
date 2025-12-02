@@ -1,8 +1,8 @@
-import { OrderPaymentFailedEvent } from "../../models";
+import {OrderPaymentFailedEvent} from "../../models";
 import OrderService from "../OrderService";
 import PaymentService from "../PaymentService";
 import AbstractProcessor from "./AbstractProcessor";
-import { error } from "firebase-functions/logger";
+import {error} from "firebase-functions/logger";
 
 class OrderPaymentFailedProcessor extends AbstractProcessor {
   async process(event: OrderPaymentFailedEvent): Promise<void> {
@@ -20,16 +20,16 @@ class OrderPaymentFailedProcessor extends AbstractProcessor {
       throw new Error(`Payment not found ${externalPaymentId}`);
     }
 
-    await orderService.runTransactionally(async t => {
+    await orderService.runTransactionally(async (t) => {
       // Update order status to PAYMENT_FAILED
       const orderDocRef = orderService.getCollection().doc(order.id);
-      t.update(orderDocRef, { status: "PAYMENT_FAILED" });
+      t.update(orderDocRef, {status: "PAYMENT_FAILED"});
 
       // Update payment status with the failed status from webhook
       const paymentDocRef = paymentService.getCollection().doc(payment.id);
-      t.update(paymentDocRef, { 
+      t.update(paymentDocRef, {
         success: false,
-        status: paymentStatus
+        status: paymentStatus,
       });
     });
 
@@ -38,7 +38,7 @@ class OrderPaymentFailedProcessor extends AbstractProcessor {
       orderId,
       externalPaymentId,
       paymentStatus,
-      paymentId: payment.id
+      paymentId: payment.id,
     });
   }
 }

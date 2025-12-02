@@ -11,3 +11,4 @@ typings/
 node_modules/
 *.local
 .DS_Store
+dist

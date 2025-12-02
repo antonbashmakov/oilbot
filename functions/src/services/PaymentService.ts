@@ -24,11 +24,11 @@ class PaymentService extends AbstractService<Payment> {
     const result = await this.getCollection()
       .where("external_id", "==", id)
       .get();
-    
+
     if (result.empty) {
       return undefined;
     }
-    
+
     // Return the first payment found
     const doc = result.docs[0];
     return this.toPOJO(doc.id, doc.data()) as Payment;
@@ -38,12 +38,12 @@ class PaymentService extends AbstractService<Payment> {
     const result = await this.getCollection()
       .where("order_id", "==", orderId)
       .get();
-    
+
     if (result.empty) {
       return [];
     }
-    
-    return result.docs.map(doc => this.toPOJO(doc.id, doc.data()) as Payment);
+
+    return result.docs.map((doc) => this.toPOJO(doc.id, doc.data()) as Payment);
   }
 
   getExcludedFields(): string[] {

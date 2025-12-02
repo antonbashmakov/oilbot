@@ -35,7 +35,7 @@ c *{{deliveryStart}}* по *{{deliveryEnd}}*
 Общая стоимость заказа: {{total}}₽
 
 Благодарим за покупку. При каждом важном изменении заказа, мы будем присылать обновление в чат. По всем вопросам просим писать @antonoldenberg`,
-  ORDER_PAYMENT_CONFIRMED_ADMIN: `✅ Ордер оплачен!: {{orderId}}`,
+  ORDER_PAYMENT_CONFIRMED_ADMIN: "✅ Ордер оплачен!: {{orderId}}",
 };
 
 /**

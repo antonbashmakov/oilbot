@@ -1,8 +1,8 @@
 import db from "../setup";
-import { Order, Customer } from "../../models";
+import {Order, Customer} from "../../models";
 import OrderService from "../../services/OrderService";
 import CustomerService from "../../services/CustomerService";
-import { toMessage } from "../../messaging/util";
+import {toMessage} from "../../messaging/util";
 
 // Mock TelegramService
 jest.mock("../../services/TelegramService", () => {
@@ -27,7 +27,7 @@ describe("Payment Creation with Telegram Notification", () => {
   beforeEach(async () => {
     orderService = new OrderService(db as any);
     customerService = new CustomerService(db as any);
-    
+
     // Create test customer
     testCustomer = {
       id: "test-customer-id-123",
@@ -52,7 +52,7 @@ describe("Payment Creation with Telegram Notification", () => {
           fraction: 1,
           price_for_unit: 100,
           group: "TEST_GROUP",
-          owner: { id: testCustomer.id },
+          owner: {id: testCustomer.id},
         },
         {
           id: "test-item-2",
@@ -63,7 +63,7 @@ describe("Payment Creation with Telegram Notification", () => {
           fraction: 0.5,
           price_for_unit: 50,
           group: "TEST_GROUP",
-          owner: { id: testCustomer.id },
+          owner: {id: testCustomer.id},
         },
       ],
       status: "PENDING",
@@ -99,7 +99,7 @@ describe("Payment Creation with Telegram Notification", () => {
       };
 
       const messageValues = {
-        items: testOrder.items.map(item => ({
+        items: testOrder.items.map((item) => ({
           name: item.name,
           price: item.price * item.quantity,
         })),
@@ -113,14 +113,14 @@ describe("Payment Creation with Telegram Notification", () => {
       };
 
       const messageText = toMessage("ORDER_PAYMENT_CREATED", messageValues);
-      
+
       expect(messageText).toContain("🛒 Ваш заказ");
       expect(messageText).toContain("Test Item 1");
       expect(messageText).toContain("200 ₽"); // 100 * 2
       expect(messageText).toContain("Test Item 2");
       expect(messageText).toContain("50 ₽");
-      expect(messageText).toContain("Общая сумма: 250 ₽");
-      expect(messageText).toContain(`ID заказа: \`${testOrder.id}\``);
+      expect(messageText).toContain("Общая сумма:* *250 ₽*");
+      expect(messageText).toContain(`*ID заказа:* \`${testOrder.id}\``);
       expect(messageText).toContain(mockPaymentResponse.PaymentURL);
       expect(messageText).toContain("Доставка:");
       expect(messageText).toContain("01.12.2025");
@@ -141,7 +141,7 @@ describe("Payment Creation with Telegram Notification", () => {
       };
 
       const messageValues = {
-        items: orderWithoutDelivery.items.map(item => ({
+        items: orderWithoutDelivery.items.map((item) => ({
           name: item.name,
           price: item.price * item.quantity,
         })),
@@ -152,7 +152,7 @@ describe("Payment Creation with Telegram Notification", () => {
       };
 
       const messageText = toMessage("ORDER_PAYMENT_CREATED", messageValues);
-      
+
       expect(messageText).toContain("🛒 Ваш заказ");
       expect(messageText).toContain("❓ Доставка еще не определена");
       expect(messageText).not.toContain("Доставка:");
@@ -160,7 +160,7 @@ describe("Payment Creation with Telegram Notification", () => {
 
     it("should calculate item prices correctly", () => {
       const messageValues = {
-        items: testOrder.items.map(item => ({
+        items: testOrder.items.map((item) => ({
           name: item.name,
           price: item.price * item.quantity,
         })),
@@ -171,11 +171,11 @@ describe("Payment Creation with Telegram Notification", () => {
       };
 
       const messageText = toMessage("ORDER_PAYMENT_CREATED", messageValues);
-      
+
       // Check that prices are calculated correctly
-      expect(messageText).toContain("Test Item 1 : 200 ₽"); // 100 * 2
-      expect(messageText).toContain("Test Item 2 : 50 ₽"); // 50 * 1
-      expect(messageText).toContain("Общая сумма: 250 ₽"); // 200 + 50
+      expect(messageText).toContain("*Test Item 1 *: *200 ₽*"); // 100 * 2
+      expect(messageText).toContain("*Test Item 2 *: *50 ₽*"); // 50 * 1
+      expect(messageText).toContain("Общая сумма:* *250 ₽*"); // 200 + 50
     });
   });
 
@@ -192,7 +192,7 @@ describe("Payment Creation with Telegram Notification", () => {
       telegramService.sendMessage = mockSendMessage;
 
       const messageText = "Test message content";
-      
+
       await telegramService.sendMessage(testCustomer.id, messageText);
 
       expect(mockSendMessage).toHaveBeenCalledTimes(1);
@@ -208,7 +208,7 @@ describe("Payment Creation with Telegram Notification", () => {
       );
 
       telegramService.sendMessage = mockSendMessage;
-      
+
       await expect(telegramService.sendMessage(testCustomer.id, "test"))
         .rejects.toThrow("Telegram API error");
     });

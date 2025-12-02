@@ -6,7 +6,6 @@ import {
   admin,
   express,
   EventPublisher,
-  api,
   CONSTANTS,
 } from "./imports";
 import {OrderPaymentConfirmedEvent, OrderPaymentFailedEvent} from "../../models";
@@ -49,11 +48,6 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
   try {
     const body: PaymentWebhookBody = req.body;
 
-    // Validate required fields
-    if (!body.OrderId || !body.Success || !body.Status) {
-      return api.badRequest(res, "Missing required fields: OrderId, Success, Status");
-    }
-
     // Process successful confirmed payments
     if (body.Success && body.Status === "CONFIRMED") {
       const eventPublisher = new EventPublisher<OrderPaymentConfirmedEvent>(db);
@@ -76,7 +70,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
 
     // Process failed payment statuses
     const failedStatuses = ["REVERSED", "CANCELED", "REJECTED", "DEADLINE_EXPIRED"];
-    if (!body.Success || failedStatuses.includes(body.Status)) {
+    if (body.Success && failedStatuses.includes(body.Status)) {
       const eventPublisher = new EventPublisher<OrderPaymentFailedEvent>(db);
 
       const event: OrderPaymentFailedEvent = {
@@ -100,7 +94,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
     return res.status(200).json({status: "OK"});
   } catch (err: any) {
     functions.logger.error("Payment webhook error:", err);
-    
+
     // Always return 200 OK to the bank webhook even on errors
     // to prevent the bank from retrying
     return res.status(200).json({status: "OK"});

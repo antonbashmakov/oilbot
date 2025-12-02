@@ -1,5 +1,5 @@
 import TBankService from "../../services/payments/TBankService";
-import { Order } from "../../models";
+import {Order} from "../../models";
 import * as moment from "moment";
 
 describe("TBankService Unit Tests", () => {
@@ -8,7 +8,7 @@ describe("TBankService Unit Tests", () => {
 
   beforeEach(() => {
     tbankService = new TBankService();
-    
+
     testOrder = {
       id: "test-order-123",
       name: "Test Order",
@@ -23,7 +23,7 @@ describe("TBankService Unit Tests", () => {
           fraction: 1,
           price_for_unit: 100,
           group: "TEST_GROUP",
-          owner: { id: "test-customer-id" },
+          owner: {id: "test-customer-id"},
         },
       ],
       status: "PENDING",
@@ -39,7 +39,7 @@ describe("TBankService Unit Tests", () => {
   describe("orderToPaymentRequest", () => {
     it("should include RedirectDueDate field in payment request", () => {
       const paymentRequest = tbankService.orderToPaymentRequest(testOrder);
-      
+
       expect(paymentRequest).toHaveProperty("RedirectDueDate");
       expect(typeof paymentRequest.RedirectDueDate).toBe("string");
     });
@@ -47,7 +47,7 @@ describe("TBankService Unit Tests", () => {
     it("should format RedirectDueDate correctly", () => {
       const paymentRequest = tbankService.orderToPaymentRequest(testOrder);
       const redirectDueDate = paymentRequest.RedirectDueDate;
-      
+
       // Check format: YYYY-MM-DDTHH:mm:ssZ
       const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/;
       expect(redirectDueDate).toMatch(dateRegex);
@@ -56,18 +56,18 @@ describe("TBankService Unit Tests", () => {
     it("should set RedirectDueDate to one month ahead", () => {
       const paymentRequest = tbankService.orderToPaymentRequest(testOrder);
       const redirectDueDate = moment(paymentRequest.RedirectDueDate);
-      
+
       // Check that the date is approximately one month ahead
       // Allow for small differences due to timezone handling
-      const expectedDate = moment().add(1, 'month');
-      const diffInDays = Math.abs(redirectDueDate.diff(expectedDate, 'days'));
-      
+      const expectedDate = moment().add(1, "month");
+      const diffInDays = Math.abs(redirectDueDate.diff(expectedDate, "days"));
+
       expect(diffInDays).toBeLessThanOrEqual(1); // Allow 1 day difference for edge cases
     });
 
     it("should include all required fields in payment request", () => {
       const paymentRequest = tbankService.orderToPaymentRequest(testOrder);
-      
+
       expect(paymentRequest).toHaveProperty("TerminalKey");
       expect(paymentRequest).toHaveProperty("Amount");
       expect(paymentRequest.Amount).toBe(testOrder.total * 100); // Convert to kopecks
@@ -80,7 +80,7 @@ describe("TBankService Unit Tests", () => {
 
     it("should convert item prices to kopecks", () => {
       const paymentRequest = tbankService.orderToPaymentRequest(testOrder);
-      
+
       expect(paymentRequest.Receipt.Items).toHaveLength(1);
       expect(paymentRequest.Receipt.Items[0].Price).toBe(10000); // 100 * 100
       expect(paymentRequest.Receipt.Items[0].Amount).toBe(10000); // 100 * 100
@@ -95,21 +95,21 @@ describe("TBankService Unit Tests", () => {
         OrderId: "test-order",
         Password: "test-password",
       };
-      
+
       const token = tbankService["generateToken"](testObject);
-      
+
       // SHA256 hash should be 64 characters (hex)
       expect(token).toHaveLength(64);
       expect(token).toMatch(/^[a-f0-9]{64}$/);
     });
 
     it("should sort object keys before generating token", () => {
-      const testObject1 = { b: "2", a: "1", c: "3" };
-      const testObject2 = { a: "1", b: "2", c: "3" };
-      
+      const testObject1 = {b: "2", a: "1", c: "3"};
+      const testObject2 = {a: "1", b: "2", c: "3"};
+
       const token1 = tbankService["generateToken"](testObject1);
       const token2 = tbankService["generateToken"](testObject2);
-      
+
       // Should generate same token regardless of key order
       expect(token1).toBe(token2);
     });

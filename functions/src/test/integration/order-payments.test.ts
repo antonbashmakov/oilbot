@@ -1,5 +1,5 @@
 import db from "../setup";
-import { Order, Payment } from "../../models";
+import {Order, Payment} from "../../models";
 import OrderService from "../../services/OrderService";
 import PaymentService from "../../services/PaymentService";
 
@@ -32,7 +32,7 @@ describe("Order Payments Endpoint Integration Test", () => {
           fraction: 1,
           price_for_unit: 100,
           group: "TEST_GROUP",
-          owner: { id: "test-customer-id" },
+          owner: {id: "test-customer-id"},
         },
       ],
       status: "PAID",
@@ -59,7 +59,7 @@ describe("Order Payments Endpoint Integration Test", () => {
           fraction: 0.5,
           price_for_unit: 100,
           group: "TEST_GROUP",
-          owner: { id: "test-customer-id" },
+          owner: {id: "test-customer-id"},
         },
       ],
       status: "CONCILIATED",
@@ -139,7 +139,7 @@ describe("Order Payments Endpoint Integration Test", () => {
 
   it("should find conciliation order by reconciliated_order_id", async () => {
     const foundConciliationOrder = await orderService.findConciliationOrder(mainOrder.id);
-    
+
     expect(foundConciliationOrder).not.toBeNull();
     expect(foundConciliationOrder?.id).toBe("test-conciliation-order-id");
     expect(foundConciliationOrder?.reconciliated_order_id).toBe("test-main-order-id");

@@ -1,5 +1,5 @@
 import db from "../setup";
-import { Order, Payment, OrderPaymentConfirmedEvent } from "../../models";
+import {Order, Payment, OrderPaymentConfirmedEvent} from "../../models";
 import OrderPaymentConfirmedProcessor from "../../services/events/OrderPaymentConfirmedProcessor";
 import OrderService from "../../services/OrderService";
 import PaymentService from "../../services/PaymentService";
@@ -43,7 +43,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
           fraction: 1,
           price_for_unit: 150,
           group: "TEST_GROUP",
-          owner: { id: "test-customer-id" },
+          owner: {id: "test-customer-id"},
         },
       ],
       status: "PENDING",
@@ -70,7 +70,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
           fraction: 1,
           price_for_unit: 50,
           group: "TEST_GROUP",
-          owner: { id: "test-customer-id" },
+          owner: {id: "test-customer-id"},
         },
       ],
       status: "PAYMENT_IN_PROGRESS",
@@ -115,7 +115,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
       retries: 0,
       payload: {
         order_id: createdOrder.id,
-        external_id: 123456
+        external_id: 123456,
       },
     };
 
@@ -204,7 +204,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
           fraction: 1,
           price_for_unit: 150,
           group: "TEST_GROUP",
-          owner: { id: "test-customer-id" },
+          owner: {id: "test-customer-id"},
         },
       ],
       status: "PENDING",
@@ -257,7 +257,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
 
     // Verify detailed telegram message was sent using template
     const telegramCalls = mockTelegramService.sendMessage.mock.calls;
-    const customerMessageCall = telegramCalls.find(call => call[0] === "test-customer-id");
+    const customerMessageCall = telegramCalls.find((call) => call[0] === "test-customer-id");
     expect(customerMessageCall).toBeDefined();
 
     const message = customerMessageCall![1];
@@ -288,7 +288,7 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
 
     // Verify conciliation telegram message was sent
     const telegramCalls = mockTelegramService.sendMessage.mock.calls;
-    const customerMessageCall = telegramCalls.find(call => call[0] === "test-customer-id");
+    const customerMessageCall = telegramCalls.find((call) => call[0] === "test-customer-id");
     expect(customerMessageCall).toBeDefined();
 
     const message = customerMessageCall![1];

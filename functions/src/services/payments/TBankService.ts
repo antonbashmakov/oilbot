@@ -30,12 +30,12 @@ class TBankService {
     // Calculate RedirectDueDate: one month ahead from current date
     // Format: YYYY-MM-DDTHH24:MI:SS+GMT
     // Using moment.js to handle date manipulation and formatting
-    const redirectDueDate = moment().add(1, 'month');
-    
+    const redirectDueDate = moment().add(1, "month");
+
     // Format according to Tinkoff API requirements
     // The format should be like: 2025-12-02T14:30:00+03:00
     // Using format() with specific pattern
-    const RedirectDueDate = redirectDueDate.format('YYYY-MM-DDTHH:mm:ssZ');
+    const RedirectDueDate = redirectDueDate.format("YYYY-MM-DDTHH:mm:ssZ");
 
     const body = {
       Token: "",
@@ -62,7 +62,6 @@ class TBankService {
   }
 
   async initPayment(paymentRequest: TinkoffPaymentPayload) {
-
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Init", paymentRequest, {
       headers: {
         "Content-Type": "application/json",

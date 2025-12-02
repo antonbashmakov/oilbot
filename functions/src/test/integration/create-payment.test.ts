@@ -1,5 +1,5 @@
 import db from "../setup";
-import { Order, Payment } from "../../models";
+import {Order, Payment} from "../../models";
 import OrderService from "../../services/OrderService";
 import PaymentService from "../../services/PaymentService";
 import IdempotencyGuardService from "../../services/IdempotencyGuardService";
@@ -31,7 +31,7 @@ describe("Create Payment Endpoint Integration Test", () => {
           fraction: 1,
           price_for_unit: 100,
           group: "TEST_GROUP",
-          owner: { id: "test-customer-id" },
+          owner: {id: "test-customer-id"},
         },
       ],
       status: "PENDING",
@@ -50,7 +50,7 @@ describe("Create Payment Endpoint Integration Test", () => {
   it("should create a new payment when no active payments exist", async () => {
     // Test the idempotency guard service
     const idempotencyKey = "test-idempotency-key-1";
-    
+
     const result = await idempotencyGuardService.runIdempotentRequest(
       idempotencyKey,
       async () => {
@@ -83,7 +83,7 @@ describe("Create Payment Endpoint Integration Test", () => {
   it("should return the same result for duplicate idempotency key", async () => {
     const idempotencyKey = "test-idempotency-key-2";
     let callCount = 0;
-    
+
     const method = async () => {
       callCount++;
       const paymentRef = paymentService.getCollection().doc();
@@ -107,7 +107,7 @@ describe("Create Payment Endpoint Integration Test", () => {
 
     // First call
     const result1 = await idempotencyGuardService.runIdempotentRequest(idempotencyKey, method);
-    
+
     // Second call with same key
     const result2 = await idempotencyGuardService.runIdempotentRequest(idempotencyKey, method);
 
@@ -135,7 +135,7 @@ describe("Create Payment Endpoint Integration Test", () => {
 
     // Check if payment exists
     const existingPayments = await paymentService.findByOrderId(testOrder.id);
-    const hasActivePayment = existingPayments.some(payment => 
+    const hasActivePayment = existingPayments.some((payment) =>
       payment.status === "SENT" || payment.status === "CONFIRMED"
     );
 
@@ -164,7 +164,7 @@ describe("Create Payment Endpoint Integration Test", () => {
 
     // Check if payment exists
     const existingPayments = await paymentService.findByOrderId(testOrder.id);
-    const hasActivePayment = existingPayments.some(payment => 
+    const hasActivePayment = existingPayments.some((payment) =>
       payment.status === "SENT" || payment.status === "CONFIRMED"
     );
 

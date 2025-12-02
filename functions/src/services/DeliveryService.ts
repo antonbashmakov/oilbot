@@ -10,7 +10,7 @@ class DeliveryService extends AbstractService<Delivery> {
   }
 
   toPOJO(id: any, o: any): Delivery | undefined {
-    if(!o) return undefined;
+    if (!o) return undefined;
     return {...o, id, delivery_end: o.delivery_end.toDate(), delivery_start: o.delivery_start.toDate(), order_deadline: o.order_deadline?.toDate()};
   }
 
