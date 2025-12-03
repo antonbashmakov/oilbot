@@ -64,7 +64,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
         type: CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED,
         payload: {
           order_id: body.OrderId,
-          external_id: body.PaymentId,
+          external_id: `${body.PaymentId}`, // we do store them as strings
         },
       };
 
