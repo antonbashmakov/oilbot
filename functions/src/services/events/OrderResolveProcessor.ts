@@ -98,7 +98,7 @@ class OrderResolveProcessor extends AbstractProcessor {
         error_code: paymentResponse.ErrorCode,
         id: "",
         status: "SENT",
-        external_id: paymentResponse.PaymentId,
+        external_id: `${paymentResponse.PaymentId}`, // make sure we store it as string
         terminal_key: paymentResponse.TerminalKey,
         order_id: paymentResponse.OrderId,
         amount: paymentResponse.Amount,

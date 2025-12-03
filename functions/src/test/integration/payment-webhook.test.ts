@@ -54,7 +54,7 @@ describe("Payment Webhook Endpoint Integration Test", () => {
     const orderPaymentConfirmedEvent = orderPaymentConfirmedEvents[0];
     expect(orderPaymentConfirmedEvent.payload).toEqual({
       order_id: "9a99gND6Q5LPS0WFTNIj",
-      external_id: 7465191924,
+      external_id: "7465191924",
     });
     expect(orderPaymentConfirmedEvent.type).toBe(CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED);
     expect(orderPaymentConfirmedEvent.processed).toBe(false);
