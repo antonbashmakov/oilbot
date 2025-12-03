@@ -934,7 +934,7 @@ export interface components {
        * @description Customer balance amount
        * @example 150.75
        */
-      balance: number;
+      value: number;
       /**
        * Format: date-time
        * @description Balance creation timestamp

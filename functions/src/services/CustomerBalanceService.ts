@@ -15,7 +15,7 @@ class CustomerBalanceService extends AbstractService<CustomerBalance> {
       owner: {
         id: customerId,
       },
-      balance: 0,
+      value: 0,
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -28,7 +28,7 @@ class CustomerBalanceService extends AbstractService<CustomerBalance> {
   async updateBalance(customerId: string, change: number): Promise<CustomerBalance> {
     const balance = await this.obtainForCustomer(customerId);
 
-    await this.incrementField(balance, "balance", change);
+    await this.incrementField(balance, "value", change);
     await this.update(balance, {updated_at: new Date()});
 
     return balance;

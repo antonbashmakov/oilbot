@@ -64,7 +64,7 @@ describe("BalanceChangedProcessor Integration Test", () => {
 
     expect(balance).toBeDefined();
     expect(balance!.owner.id).toBe(createdCustomer.id);
-    expect(balance!.balance).toBe(-50); // Should be exactly -50, not -250 (idempotency)
+    expect(balance!.value).toBe(-50); // Should be exactly -50, not -250 (idempotency)
     expect(balance!.created_at).toBeInstanceOf(Date);
     expect(balance!.updated_at).toBeInstanceOf(Date);
   });
@@ -92,7 +92,7 @@ describe("BalanceChangedProcessor Integration Test", () => {
 
     expect(balance).toBeDefined();
     expect(balance?.owner.id).toBe(createdCustomer.id);
-    expect(balance?.balance).toBe(100);
+    expect(balance?.value).toBe(100);
   });
 
   it("should throw error when idempotent key is missing", async () => {
@@ -156,6 +156,6 @@ describe("BalanceChangedProcessor Integration Test", () => {
     const balance = await customerBalanceService.find(createdCustomer.id);
 
     expect(balance).toBeDefined();
-    expect(balance?.balance).toBe(70); // 100 - 30 = 70
+    expect(balance?.value).toBe(70); // 100 - 30 = 70
   });
 });

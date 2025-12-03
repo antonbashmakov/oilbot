@@ -1049,7 +1049,7 @@ components:
       required:
         - id
         - owner
-        - balance
+        - value
       properties:
         id:
           type: string
@@ -1057,7 +1057,7 @@ components:
           example: "payment-123456"      
         owner:
           $ref: '#/components/schemas/OwnerRef'
-        balance:
+        value:
           type: number
           format: float
           description: Customer balance amount
