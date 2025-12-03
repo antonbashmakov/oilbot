@@ -16,7 +16,9 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
 
     const order = await orderService.require(orderId);
 
+
     const payment = await paymentService.findByExternalId(event.payload.external_id);
+
     if (!payment) {
       throw new Error(`Payment not found  ${event.payload.external_id}`);
     }
@@ -26,7 +28,7 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
       t.update(orderDocRef, {status: "PAID"});
 
       const paymentDocRef = paymentService.getCollection().doc(payment.id);
-      t.update(paymentDocRef, {success: true});
+      t.update(paymentDocRef, {success: true, status: "CONFIRMED"});
 
       if (order.type === "CONCILIATION") {
         // For CONCILIATION orders, update the original order status

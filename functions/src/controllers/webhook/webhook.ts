@@ -49,7 +49,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
   try {
     const body: PaymentWebhookBody = req.body;
 
-    debug(body);
+    debug("Payment id : " + `${body.PaymentId}`);
 
     // Process successful confirmed payments
     if (body.Success && body.Status === "CONFIRMED") {

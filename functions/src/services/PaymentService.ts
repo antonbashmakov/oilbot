@@ -27,7 +27,7 @@ class PaymentService extends AbstractService<Payment> {
 
     if (result.empty) {
       result = await this.getCollection()
-        .where("external_id", "==", Number(id)) // legacy check, external_id was changed to strings 
+        .where("external_id", "==", Number(id)) // legacy check, external_id was changed to strings
         .get();
     }
     if (result.empty) {
