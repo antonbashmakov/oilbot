@@ -5,14 +5,15 @@ import User from "./User";
 export type DeliveryOverview = components["schemas"]["DeliveryOverview"];
 export type Stats = components["schemas"]["Stats"];
 export type Order = components["schemas"]["Order"];
-export type BaseOrderPicking = components["schemas"]["OrderPicking"];
 export type Delivery = components["schemas"]["Delivery"];
 export type Customer = components["schemas"]["Customer"];
 export type Item = components["schemas"]["Item"];
 export type CartItem = components["schemas"]["CartItem"];
 export type PickingItem = components["schemas"]["PickingItem"];
-export type BasePayment = components["schemas"]["Payment"];
-export type BaseCustomerBalance = components["schemas"]["CustomerBalance"];
+type BaseOrderPicking = components["schemas"]["OrderPicking"];
+type BasePayment = components["schemas"]["Payment"];
+type BaseCustomerBalance = components["schemas"]["CustomerBalance"];
+type BaseCustomerOverview = components["schemas"]["CustomerOverview"];
 
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
@@ -29,6 +30,9 @@ export type Payment = Omit<BasePayment, "created_at" | "updated_at" > & {
 export type CustomerBalance = Omit<BaseCustomerBalance, "created_at" | "updated_at" > & {
   created_at: Date;
   updated_at: Date;
+};
+export type CustomerOverview = Omit<BaseCustomerOverview, "balance" > & {
+  balance: CustomerBalance;
 };
 export type OrderPicking = Omit<BaseOrderPicking, "created_at" > & {
   created_at: Date;

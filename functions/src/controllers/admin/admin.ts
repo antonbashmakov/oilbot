@@ -15,11 +15,12 @@ import {
   toMessage,
   formatDate,
 } from "./imports";
-import {DeliveryOverview, OrderResolvedEvent, Stats, Payment} from "../../models";
+import {DeliveryOverview, OrderResolvedEvent, Stats, Payment, CustomerOverview} from "../../models";
 import OrderPickingService from "../../services/OrderPickingService";
 import EventPublisher from "../../services/EventPublisher";
 import IdempotencyGuardService from "../../services/IdempotencyGuardService";
 import TBankService from "../../services/payments/TBankService";
+import CustomerBalanceService from "../../services/CustomerBalanceService";
 // import { debug } from 'firebase-functions/logger';
 dotenv.config();
 
@@ -120,7 +121,7 @@ adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) 
     const {id} = req.params;
     const orderService = new OrderService(db);
 
-    const order = await orderService.find(id);
+    const order = (await orderService.find(id));
 
     if (!order) {
       return api.notFound(res, "Order not found");
@@ -128,9 +129,13 @@ adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) 
 
     const customerService = new CustomerService(db);
     const pickingService = new OrderPickingService(db);
+    const customerBalanceService = new CustomerBalanceService(db);
 
     const picking = await pickingService.find(id);
-    const customer = await customerService.find(order.owner!.id);
+    const customer = await customerService.require(order.owner!.id) as CustomerOverview;
+    const balance = await customerBalanceService.obtainForCustomer(customer.id);
+    customer.balance = balance;
+
 
     return api.send(res, {...order, picking, customer});
   } catch (err: any) {

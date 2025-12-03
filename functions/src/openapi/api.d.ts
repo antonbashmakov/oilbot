@@ -504,6 +504,9 @@ export interface components {
        */
       username?: string;
     };
+    CustomerOverview: WithRequired<{
+      balance: components["schemas"]["CustomerBalance"];
+    } & components["schemas"]["Customer"], "balance">;
     OrderPickingPatch: {
       /** @description Items to update in this order picking */
       items: components["schemas"]["PickingItem"][];
@@ -801,7 +804,7 @@ export interface components {
     };
     OrderOverview: WithRequired<{
       picking?: components["schemas"]["OrderPicking"];
-      customer: components["schemas"]["Customer"];
+      customer: components["schemas"]["CustomerOverview"];
     } & components["schemas"]["Order"], "customer">;
     User: {
       /**

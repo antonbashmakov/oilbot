@@ -527,7 +527,14 @@ components:
           type: string
           description: Customer's username
           example: "getting_drunk"
-
+    CustomerOverview: 
+      required:
+        - balance
+      allOf:
+        - $ref: '#/components/schemas/Customer'
+      properties:
+        balance: 
+          $ref: '#/components/schemas/CustomerBalance'
     OrderPickingPatch:
       type: object
       required:
@@ -902,7 +909,7 @@ components:
         picking:
           $ref: '#/components/schemas/OrderPicking'
         customer:
-          $ref: '#/components/schemas/Customer'
+          $ref: '#/components/schemas/CustomerOverview'
 
     User:
       type: object

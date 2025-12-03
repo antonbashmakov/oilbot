@@ -9,7 +9,7 @@ class CustomerBalanceService extends AbstractService<CustomerBalance> {
       return existingBalance;
     }
 
-    const balanceRef = this.getCollection().doc(customerId);
+    const balanceRef = this.getCollection().doc(`${customerId}`); // make sure it is a string
     const balance: CustomerBalance = {
       id: customerId,
       owner: {
