@@ -91,13 +91,13 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
     }
 
     // Always return 200 OK to the bank webhook
-    return res.status(200).json({status: "OK"});
+    return res.status(200).send("OK");
   } catch (err: any) {
     functions.logger.error("Payment webhook error:", err);
 
     // Always return 200 OK to the bank webhook even on errors
     // to prevent the bank from retrying
-    return res.status(200).json({status: "OK"});
+    return res.status(200).send("OK");
   }
 });
 

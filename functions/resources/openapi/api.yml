@@ -998,9 +998,9 @@ components:
           description: Internal payment ID
           example: "payment-123456"
         external_id:
-          type: number
+          type: string
           description: Payment ID from external payment provider
-          example: 123456
+          example: "123456"
         terminal_key:
           type: string
           description: Terminal key from payment provider

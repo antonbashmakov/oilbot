@@ -864,7 +864,7 @@ export interface components {
        */
       error_code?: number | null;
       /** @enum {string} */
-      status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT";
+      status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT" | "CANCELED" | "REJECTED";
       /**
        * @description Internal payment ID
        * @example payment-123456
@@ -874,7 +874,7 @@ export interface components {
        * @description Payment ID from external payment provider
        * @example 123456
        */
-      external_id: number;
+      external_id: string;
       /**
        * @description Terminal key from payment provider
        * @example TinkoffBankTest

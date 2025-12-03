@@ -20,7 +20,7 @@ class PaymentService extends AbstractService<Payment> {
   getCollectionName(): string {
     return COLLECTIONS.PAYMENTS;
   }
-  async findByExternalId(id: number): Promise<Payment | undefined> {
+  async findByExternalId(id: string): Promise<Payment | undefined> {
     const result = await this.getCollection()
       .where("external_id", "==", id)
       .get();

@@ -72,7 +72,7 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
     // Create test payment
     createdPayment = {
       id: "test-payment-id",
-      external_id: 123456,
+      external_id: "123456",
       terminal_key: "MOCK_TERMINAL",
       order_id: createdOrder.id,
       amount: 15000,

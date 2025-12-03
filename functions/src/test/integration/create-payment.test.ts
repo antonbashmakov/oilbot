@@ -58,7 +58,7 @@ describe("Create Payment Endpoint Integration Test", () => {
         const paymentRef = paymentService.getCollection().doc();
         const paymentData: Payment = {
           id: paymentRef.id,
-          external_id: 123456,
+          external_id: "123456",
           terminal_key: "TEST_TERMINAL",
           payment_url: "https://test-payment-url.com/1",
           order_id: testOrder.id,
@@ -89,7 +89,7 @@ describe("Create Payment Endpoint Integration Test", () => {
       const paymentRef = paymentService.getCollection().doc();
       const paymentData: Payment = {
         id: paymentRef.id,
-        external_id: 789012,
+        external_id: "789012",
         terminal_key: "TEST_TERMINAL",
         payment_url: "https://test-payment-url.com/2",
         order_id: testOrder.id,

@@ -1,8 +1,8 @@
 import * as request from "supertest";
 import db from "../setup";
-import {OrderPaymentConfirmedEvent, OrderPaymentFailedEvent} from "../../models";
+import { OrderPaymentConfirmedEvent, OrderPaymentFailedEvent } from "../../models";
 import OutboxEventService from "../../services/OutboxEventService";
-import {CONSTANTS} from "../../controllers/admin/imports";
+import { CONSTANTS } from "../../controllers/admin/imports";
 
 const WEBHOOK_BASE_URL = "http://127.0.0.1:5001/test-project/us-central1/webhooks";
 
@@ -41,7 +41,7 @@ describe("Payment Webhook Endpoint Integration Test", () => {
       .send(paymentWebhookBody)
       .expect(200);
 
-    expect(response.body.status).toBe("OK");
+    expect(response.text).toBe("OK");
 
     // Verify that ORDER_PAYMENT_CONFIRMED event was published
     const events = await outboxEventService.findAll();
@@ -61,7 +61,7 @@ describe("Payment Webhook Endpoint Integration Test", () => {
     expect(orderPaymentConfirmedEvent.retries).toBe(0);
   });
 
- it("should publish ORDER_PAYMENT_FAILED event for failed payment statuses", async () => {
+  it("should publish ORDER_PAYMENT_FAILED event for failed payment statuses", async () => {
     const paymentWebhookBody = {
       TerminalKey: "1754681033618",
       OrderId: "9a99gND6Q5LPS0WFTNIj",
@@ -86,7 +86,7 @@ describe("Payment Webhook Endpoint Integration Test", () => {
       .send(paymentWebhookBody)
       .expect(200);
 
-    expect(response.body.status).toBe("OK");
+    expect(response.text).toBe("OK");
 
     // Verify that ORDER_PAYMENT_FAILED event was published
     const events = await outboxEventService.findAll();
@@ -128,7 +128,7 @@ describe("Payment Webhook Endpoint Integration Test", () => {
       .send(paymentWebhookBody)
       .expect(200);
 
-    expect(response.body.status).toBe("OK");
+    expect(response.text).toBe("OK");
 
     // Verify that ORDER_PAYMENT_FAILED event was published (not ORDER_PAYMENT_CONFIRMED)
     const events = await outboxEventService.findAll();
@@ -171,7 +171,7 @@ describe("Payment Webhook Endpoint Integration Test", () => {
       .send(paymentWebhookBody)
       .expect(200);
 
-    expect(response.body.status).toBe("OK");
+    expect(response.text).toBe("OK");
 
     // Verify that no new events were published
     const events = await outboxEventService.findAll();
