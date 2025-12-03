@@ -16,7 +16,7 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
 
     const order = await orderService.require(orderId);
 
-    const payment = await paymentService.findByExternalId(`${event.payload.external_id}`);
+    const payment = await paymentService.findByExternalId(event.payload.external_id);
     if (!payment) {
       throw new Error(`Payment not found  ${event.payload.external_id}`);
     }

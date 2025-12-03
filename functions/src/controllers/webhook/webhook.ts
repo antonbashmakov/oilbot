@@ -9,6 +9,7 @@ import {
   CONSTANTS,
 } from "./imports";
 import {OrderPaymentConfirmedEvent, OrderPaymentFailedEvent} from "../../models";
+import {debug} from "firebase-functions/logger";
 
 dotenv.config();
 
@@ -47,6 +48,8 @@ interface PaymentWebhookBody {
 webhookApi.post("/payment", async (req: express.Request, res: express.Response) => {
   try {
     const body: PaymentWebhookBody = req.body;
+
+    debug(body);
 
     // Process successful confirmed payments
     if (body.Success && body.Status === "CONFIRMED") {
