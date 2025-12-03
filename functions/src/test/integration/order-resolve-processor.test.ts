@@ -1,11 +1,12 @@
 import db from "../setup";
-import {Order, OrderPicking, OrderResolvedEvent} from "../../models";
+import {BalanceChangedEvent, Order, OrderPicking, OrderResolvedEvent} from "../../models";
 import OrderResolveProcessor from "../../services/events/OrderResolveProcessor";
 import OrderService from "../../services/OrderService";
 import PaymentService from "../../services/PaymentService";
 import CustomerService from "../../services/CustomerService";
 import OrderPickingService from "../../services/OrderPickingService";
 import TBankService from "../../services/payments/TBankService";
+import OutboxEventService from "../../services/OutboxEventService";
 
 // Mock TBankService
 jest.mock("../../services/payments/TBankService");
@@ -59,6 +60,7 @@ describe("OrderResolveProcessor Integration Test", () => {
   let pickingService: OrderPickingService;
   let paymentService: PaymentService;
   let customerService: CustomerService;
+  let outboxEventService: OutboxEventService<BalanceChangedEvent>;
 
   let createdOrder: Order;
   let createdPicking: OrderPicking;
@@ -70,6 +72,7 @@ describe("OrderResolveProcessor Integration Test", () => {
     paymentService = new PaymentService(db as any);
     customerService = new CustomerService(db as any);
     pickingService = new OrderPickingService(db as any);
+    outboxEventService = new OutboxEventService(db as any);
 
     // Create test customer
     createdCustomer = {
@@ -231,6 +234,12 @@ describe("OrderResolveProcessor Integration Test", () => {
     // Verify original order status remains unchanged (no status update for negative diff)
     const updatedOrder = await orderService.find(createdOrder.id);
     expect(updatedOrder?.status).toBe("PENDING");
+
+    const events = await outboxEventService.findAll();
+    expect(events.length).toBe(1);
+    expect(events[0].type).toBe("BALANCE_CHANGED");
+    expect(events[0].payload.change).toBe(-50);
+    expect(events[0].payload.customer_id).toBe("test-customer-id");
   });
 
   it("should create CONCILIATION order pointing to original order when picking total is greater than order total", async () => {

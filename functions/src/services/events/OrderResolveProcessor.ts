@@ -57,7 +57,7 @@ class OrderResolveProcessor extends AbstractProcessor {
           created_at: new Date(),
           processed_at: new Date(),
           payload: {
-            customer_id: order.id,
+            customer_id: `${order.owner.id}`,
             change: diff,
           },
         };
