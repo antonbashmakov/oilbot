@@ -10,3 +10,5 @@ export type CartItem = components["schemas"]["CartItem"];
 export type OrderPickingPatch = components["schemas"]["OrderPickingPatch"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type Payment = components["schemas"]["Payment"];
+export type User = components["schemas"]["User"];
+export type SignupRequest = components["schemas"]["SignupRequest"];

@@ -4,7 +4,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { theme } from "@/theme";
 
 import { ApiConfigProvider } from '@/api/apiConfigContext';
-// import { UserProvider } from '@/api/user/provider';
+import { UserProvider } from '@/api/user/provider';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -14,8 +14,9 @@ const queryClient = new QueryClient();
 
 
 export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
-    let baseUrl = 'http://localhost:5001/posebestoimosti-473916/us-central1';
+    let baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || "wrong";// "https://us-central1-posebestoimosti-473916.cloudfunctions.net";
     //let baseUrl = 'https://us-central1-posebestoimosti-473916.cloudfunctions.net/';
+    /*
     if (typeof window !== 'undefined') {
 
         const host = window.location.host;
@@ -30,20 +31,19 @@ export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
         }
 
     }
+    */
     return <ChakraProvider value={theme}><QueryClientProvider client={queryClient}>
         <ApiConfigProvider value={{
             baseUrl,
             siteUrl: process.env.NEXT_PUBLIC_SITE_URL as string
         }}>
             <DndProvider backend={HTML5Backend}>
-                {/*<UserProvider>*/}
+                <UserProvider>
                     {children}
-                {/*</UserProvider>*/} 
+                </UserProvider> 
             </DndProvider>
         </ApiConfigProvider>
         <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider >
     </ChakraProvider>
 };
-
-

@@ -6,6 +6,8 @@ import {
     Delivery,
     Order,
     Payment,
+    User,
+    SignupRequest,
 } from "@/api/models";
 import { UseQueryResult } from "react-query";
 
@@ -129,5 +131,17 @@ export function useCreateOrderPayment(orderId?: string) {
         {
             orderId: orderId || ''
         }
+    );
+};
+
+export function useSignup() {
+    return usePostApi<
+        '/public/signup',
+        never,
+        SignupRequest
+    >(
+        '/public/signup',
+        [],
+        {} as never
     );
 };
