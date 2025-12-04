@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
 import "./globals.css";
 import { ColorModeProvider, DarkMode } from "@/components/ui/color-mode";
+import TopBar from "@/components/ui/TopBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default function RootLayout({
       >
         <Providers>
           <DarkMode>
+            <TopBar />
             {children}
           </DarkMode>
         </Providers>

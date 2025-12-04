@@ -20,6 +20,7 @@ import { ViewIcon, ViewOffIcon, EmailIcon, LockIcon } from "@chakra-ui/icons";
 import Link from "next/link";
 import { useLogin } from "@/api";
 import { useUser } from "@/api/user/provider";
+import { setAuthToken } from "@/utils/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,19 +48,20 @@ export default function LoginPage() {
     login(
       { email, password },
       {
-        onSuccess: (user : any) => {
-
+        onSuccess: (user: any) => {
           if (user) {
             // Store user in context (includes JWT token)
             setUser(user);
             
-            // Store JWT token separately if needed (already in user object)
+            // Store JWT token in both localStorage and cookie
             if (user.token) {
-              localStorage.setItem('token', user.token);
+              setAuthToken(user.token);
             }
             
-            // Redirect to deliveries page
-            router.push("/");
+            // Redirect to the original page or home page
+            const searchParams = new URLSearchParams(window.location.search);
+            const from = searchParams.get('from');
+            router.push(from || "/");
           } else {
             setError("Login failed. Please try again.");
           }

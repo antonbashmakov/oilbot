@@ -20,6 +20,7 @@ import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import Link from "next/link";
 import { useSignup } from "@/api";
 import { useUser } from "@/api/user/provider";
+import { setAuthToken } from "@/utils/auth";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -69,13 +70,15 @@ export default function SignupPage() {
             // Store user in context (includes JWT token)
             setUser(user);
             
-            // Store JWT token separately if needed (already in user object)
+            // Store JWT token in both localStorage and cookie
             if (user.token) {
-              localStorage.setItem('token', user.token);
+              setAuthToken(user.token);
             }
             
-            // Redirect to deliveries page
-            router.push("/");
+            // Redirect to the original page or home page
+            const searchParams = new URLSearchParams(window.location.search);
+            const from = searchParams.get('from');
+            router.push(from || "/");
           } else {
             setError("Signup failed. Please try again.");
           }
