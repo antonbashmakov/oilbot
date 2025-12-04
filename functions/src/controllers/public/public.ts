@@ -8,9 +8,11 @@ import {
   api,
   UserService,
 } from "./imports";
-import User from "../../models/User";
 import * as bcrypt from "bcrypt";
-import {v4 as uuidv4} from "uuid";
+import { generateToken } from "../../services/utils";
+import { User } from "../../models";
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 admin.initializeApp({}, "public");
 dotenv.config();
@@ -43,7 +45,7 @@ publicApi.post("/signup", async (req: express.Request, res: express.Response) =>
     }
 
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
     if (!emailRegex.test(email)) {
       return api.badRequest(res, "Invalid email format");
     }
@@ -59,17 +61,61 @@ publicApi.post("/signup", async (req: express.Request, res: express.Response) =>
       return api.badRequest(res, "User with this email already exists");
     }
 
-    const userId = uuidv4();
     const hash = await bcrypt.hash(password, 10);
-    const user = new User(userId, email, hash);
-    await userService.createUser(user);
+    const user: User = {
+      id: '',
+      email,
+      password: hash,
+      roles: [],
+      created_at : new Date()
+    };
+    
+    await userService.add(user);
 
     user.password = 'p'; // remove hash from public
+
+    user.token = generateToken(user);
 
     // Return the created user
     return api.send(res, user);
   } catch (err: any) {
     functions.logger.error("Signup error:", err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+publicApi.post("/login", async (req: express.Request, res: express.Response) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate required fields
+    if (!email || !password) {
+      return api.badRequest(res, "Missing required fields: email, password");
+    }
+    if (!emailRegex.test(email)) {
+      return api.badRequest(res, "Invalid email format");
+    }
+    const user = await userService.findByEmail(email);
+    if (!user) {
+      return api.unauthorized(res, "Invalid email or password");
+    }
+    if (!user.password) {
+      return api.unauthorized(res, "Invalid email or password");
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return api.unauthorized(res, "Invalid email or password");
+    }
+
+    // Remove password hash from response
+    user.password = 'p';
+    user.token = generateToken(user);
+
+    // Return the authenticated user
+    return api.send(res, user);
+  } catch (err: any) {
+    functions.logger.error("Login error:", err);
     return api.error(res, err.message || "Internal server error");
   }
 });

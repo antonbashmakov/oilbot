@@ -1,4 +1,7 @@
 import * as moment from "moment";
+import * as jwt from "jsonwebtoken";
+import { User } from "../models";
+
 
 // Constants
 const COMMON_ERROR = "Common error";
@@ -77,3 +80,9 @@ export const dateStringToTimestamp = (date: string): number => moment(new Date(d
 export const timestampToString = (date: number): string => moment(date).format("llll");
 export const readBase64String = (text: string): string => `${Buffer.from(text, "base64")}`;
 export const purgeHtml = (html: string): string => html.replace(/[\s]/gi, "");
+
+export const generateToken = (user: User): string => {
+  return jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, {
+    expiresIn: "1d",
+  });
+}
