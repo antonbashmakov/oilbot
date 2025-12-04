@@ -70,11 +70,9 @@ publicApi.post("/signup", async (req: express.Request, res: express.Response) =>
       created_at : new Date()
     };
     
-    await userService.add(user);
+    const saved = await userService.add(user);
 
-    user.password = 'p'; // remove hash from public
-
-    user.token = generateToken(user);
+    saved.token = generateToken(saved);
 
     // Return the created user
     return api.send(res, user);
@@ -99,11 +97,10 @@ publicApi.post("/login", async (req: express.Request, res: express.Response) => 
     if (!user) {
       return api.unauthorized(res, "Invalid email or password");
     }
-    if (!user.password) {
-      return api.unauthorized(res, "Invalid email or password");
-    }
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    const p = await userService.fetchPassword(user.id);
+
+    const passwordMatch = await bcrypt.compare(password, p);
     if (!passwordMatch) {
       return api.unauthorized(res, "Invalid email or password");
     }

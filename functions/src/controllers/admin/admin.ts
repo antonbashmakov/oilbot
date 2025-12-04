@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv";
 
-import {
+import UserService, {
   functions,
   cors,
   admin,
@@ -21,6 +21,8 @@ import EventPublisher from "../../services/EventPublisher";
 import IdempotencyGuardService from "../../services/IdempotencyGuardService";
 import TBankService from "../../services/payments/TBankService";
 import CustomerBalanceService from "../../services/CustomerBalanceService";
+import { logger } from "../../services/logger";
+import { authorize } from "../../services/utils";
 // import { debug } from 'firebase-functions/logger';
 dotenv.config();
 
@@ -41,19 +43,16 @@ adminApi.use(cors(
   {origin: true} // allows all cross origin xhr requests
 ));
 
-/*
 adminApi.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const userService = new UserService(admin);
+  const userService = new UserService(db);
   try {
-    return await authorize(req, res, next, userService, admin);
+    return await authorize(req, res, next, userService, "ADMIN");
   } catch (err: any) {
     logger.error(err);
     return api.error(res, err.message);
   }
 
 });
-
-*/
 
 adminApi.get("/deliveries", async (req: express.Request, res: express.Response) => {
   try {
