@@ -8,6 +8,7 @@ import {
     Payment,
     User,
     SignupRequest,
+    LoginRequest,
 } from "@/api/models";
 import { UseQueryResult } from "react-query";
 
@@ -141,6 +142,18 @@ export function useSignup() {
         SignupRequest
     >(
         '/public/signup',
+        [],
+        {} as never
+    );
+};
+
+export function useLogin() {
+    return usePostApi<
+        '/public/login',
+        never,
+        LoginRequest
+    >(
+        '/public/login',
         [],
         {} as never
     );

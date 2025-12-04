@@ -64,12 +64,18 @@ export default function SignupPage() {
     signup(
       { email, password },
       {
-        onSuccess: (response) => {
-          if (response?.data) {
-            // Store user in context
-            setUser(response.data);
+        onSuccess: (user: any) => {
+          if (user) {
+            // Store user in context (includes JWT token)
+            setUser(user);
+            
+            // Store JWT token separately if needed (already in user object)
+            if (user.token) {
+              localStorage.setItem('token', user.token);
+            }
+            
             // Redirect to deliveries page
-            router.push("/deliveries");
+            router.push("/");
           } else {
             setError("Signup failed. Please try again.");
           }
@@ -191,7 +197,6 @@ export default function SignupPage() {
                         <Button
                           onClick={() => setShowPassword(!showPassword)}
                           bg="bg.subtle"
-                          border="1px"
                           borderColor="border.medium"
                           borderLeft="none"
                           borderLeftRadius="0"
@@ -200,7 +205,7 @@ export default function SignupPage() {
                           height="12"
                           px={4}
                         >
-                          {showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                          {showPassword ? <ViewOffIcon color="white" /> : <ViewIcon color="white"/>}
                         </Button>
                       </Flex>
                     </Box>
@@ -231,7 +236,6 @@ export default function SignupPage() {
                         <Button
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           bg="bg.subtle"
-                          border="1px"
                           borderColor="border.medium"
                           borderLeft="none"
                           borderLeftRadius="0"
@@ -240,7 +244,7 @@ export default function SignupPage() {
                           height="12"
                           px={4}
                         >
-                          {showConfirmPassword ? <ViewOffIcon /> : <ViewIcon />}
+                          {showConfirmPassword ? <ViewOffIcon color="white"/> : <ViewIcon color="white"/>}
                         </Button>
                       </Flex>
                     </Box>

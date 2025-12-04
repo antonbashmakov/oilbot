@@ -503,6 +503,49 @@ export interface paths {
       };
     };
   };
+  "/public/login": {
+    /**
+     * Login a user
+     * @description Authenticate a user with email and password
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["LoginRequest"];
+        };
+      };
+      responses: {
+        /** @description User authenticated successfully */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["User"];
+            };
+          };
+        };
+        /** @description Bad request (e.g., missing fields, invalid credentials) */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized (invalid credentials) */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -861,6 +904,12 @@ export interface components {
        * @example sdfee335gsdfwDEfggh
        */
       password?: string;
+      /**
+       * Format: jwt
+       * @description jwt token
+       * @example sdfee335gsdfwDEfggh
+       */
+      token?: string;
       /** @description User roles */
       roles: ("AGENT" | "ADMIN")[];
       /**
@@ -994,6 +1043,19 @@ export interface components {
       email: string;
       /**
        * @description User's password (min 6 characters)
+       * @example password123
+       */
+      password: string;
+    };
+    LoginRequest: {
+      /**
+       * Format: email
+       * @description User's email address
+       * @example user@example.com
+       */
+      email: string;
+      /**
+       * @description User's password
        * @example password123
        */
       password: string;

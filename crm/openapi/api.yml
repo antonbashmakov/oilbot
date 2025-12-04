@@ -531,6 +531,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /public/login:
+    post:
+      summary: Login a user
+      description: Authenticate a user with email and password
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: User authenticated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request (e.g., missing fields, invalid credentials)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized (invalid credentials)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Customer:
@@ -969,6 +1013,11 @@ components:
           format: hash
           description: hashed password
           example: sdfee335gsdfwDEfggh
+        token:
+          type: string
+          format: jwt
+          description: jwt token
+          example: sdfee335gsdfwDEfggh
         roles:
           type: array
           description: User roles
@@ -1132,6 +1181,22 @@ components:
           description: User's password (min 6 characters)
           example: "password123"
           minLength: 6
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "user@example.com"
+        password:
+          type: string
+          description: User's password
+          example: "password123"
 tags:
   - name: Deliveries
     description: Operations related to deliveries

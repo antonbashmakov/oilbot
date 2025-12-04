@@ -12,3 +12,4 @@ export type PickingItem = components["schemas"]["PickingItem"];
 export type Payment = components["schemas"]["Payment"];
 export type User = components["schemas"]["User"];
 export type SignupRequest = components["schemas"]["SignupRequest"];
+export type LoginRequest = components["schemas"]["LoginRequest"];
