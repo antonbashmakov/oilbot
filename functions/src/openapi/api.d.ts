@@ -466,6 +466,43 @@ export interface paths {
       };
     };
   };
+  "/public/signup": {
+    /**
+     * Register a new user
+     * @description Create a new user account
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["SignupRequest"];
+        };
+      };
+      responses: {
+        /** @description User created successfully */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["User"];
+            };
+          };
+        };
+        /** @description Bad request (e.g., email already exists, invalid input) */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -819,13 +856,13 @@ export interface components {
        */
       email: string;
       /**
-       * @description User roles
-       * @example [
-       *   "admin",
-       *   "user"
-       * ]
+       * Format: hash
+       * @description hashed password
+       * @example sdfee335gsdfwDEfggh
        */
-      roles: string[];
+      password?: string;
+      /** @description User roles */
+      roles: ("AGENT" | "ADMIN")[];
       /**
        * Format: date-time
        * @description Creation timestamp
@@ -947,6 +984,19 @@ export interface components {
        * @example 2025-01-10T14:30:00Z
        */
       updated_at?: string;
+    };
+    SignupRequest: {
+      /**
+       * Format: email
+       * @description User's email address
+       * @example user@example.com
+       */
+      email: string;
+      /**
+       * @description User's password (min 6 characters)
+       * @example password123
+       */
+      password: string;
     };
   };
   responses: never;

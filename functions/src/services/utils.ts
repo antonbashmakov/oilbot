@@ -1,6 +1,4 @@
 import * as moment from "moment";
-import User from "../models/User";
-import {logger} from "./logger";
 
 // Constants
 const COMMON_ERROR = "Common error";
@@ -13,30 +11,6 @@ interface ExpressResponse {
   header(field: string, value: string): ExpressResponse;
   status(code: number): ExpressResponse;
   send(data: any): ExpressResponse;
-}
-
-// Interface for Express request object
-
-/*
-interface ExpressRequest {
-  headers: {
-    authorization?: string;
-  };
-  user?: User;
-}
-
-// Interface for Firebase Admin
-interface FirebaseAdmin {
-  auth(): {
-    verifyIdToken(token: string): Promise<any>;
-  };
-}
-
-*/
-// Interface for User Service
-interface UserService {
-  find(id: string): Promise<User | undefined>;
-  createUser(user: User): Promise<any>;
 }
 
 export const api = {
@@ -80,14 +54,6 @@ export const parseToken = (bearer: string | undefined): string | null => {
     return bearer.substring(7);
   }
   return null;
-};
-
-export const createUserObject = (user: any, userService: UserService): User => {
-  const userObject = new User(user.uid, user.email);
-  logger.info("creating user : ", userObject);
-
-  userService.createUser(userObject);
-  return userObject;
 };
 
 export const fetchEmail = (text: string | undefined): string | undefined => {

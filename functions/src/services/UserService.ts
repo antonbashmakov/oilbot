@@ -30,6 +30,21 @@ class UserService extends AbstractService<UserEntity> {
     return ref.set(userToSave);
   }
 
+  async findByEmail(email: string): Promise<UserEntity | undefined> {
+      const snapshot = await this.getCollection()
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+      
+      if (snapshot.empty) {
+        return undefined;
+      }
+      
+      const doc = snapshot.docs[0];
+      return this.toPOJO(doc.id, doc.data());
+
+  }
+
   getCollectionName(): string {
     return COLLECTIONS.USERS;
   }

@@ -12,7 +12,7 @@ import {
 } from "./imports";
 import * as dotenv from "dotenv";
 
-admin.initializeApp(functions.config().firebase, "public");
+admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
 
 const db = admin.firestore();
