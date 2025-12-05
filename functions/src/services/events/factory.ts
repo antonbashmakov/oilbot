@@ -17,7 +17,7 @@ const EVENT_PROCESSORS: { [key: string]: ProcessorConstructor } = {
   [CONSTANTS.EVENTS.BALANCE_CHANGED]: BalanceChangedProcessor,
   [CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED]: OrderPaymentConfirmedProcessor,
   [CONSTANTS.EVENTS.ORDER_PAYMENT_FAILED]: OrderPaymentFailedProcessor,
-  [CONSTANTS.EVENTS.ORDER_CANCELLED]: OrderCancelledProcessor,
+  [CONSTANTS.EVENTS.ORDER_CANCELED]: OrderCancelledProcessor,
 };
 
 export const toProcessor: (event: string) => ProcessorConstructor = (event: string) => {

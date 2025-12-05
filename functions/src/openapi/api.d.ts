@@ -245,6 +245,44 @@ export interface paths {
       };
     };
   };
+  "/admin/orders/{id}/cancel": {
+    /**
+     * Cancel an order
+     * @description Cancel an order and emit OrderCancelledEvent. Order can only be cancelled if status is PENDING, PAYMENT_IN_PROGRESS, PAYMENT_FAILED, or PAID.
+     */
+    put: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Order successfully cancelled */
+        204: {
+          content: never;
+        };
+        /** @description Bad request (e.g., order cannot be cancelled in current status) */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Order not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/admin/orders/{id}/conciliation": {
     /**
      * Get conciliation order

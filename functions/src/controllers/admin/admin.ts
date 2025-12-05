@@ -15,7 +15,7 @@ import UserService, {
   toMessage,
   formatDate,
 } from "./imports";
-import { DeliveryOverview, OrderResolvedEvent, Stats, Payment, CustomerOverview } from "../../models";
+import { DeliveryOverview, OrderResolvedEvent, Stats, Payment, CustomerOverview, OrderCancelledEvent } from "../../models";
 import OrderPickingService from "../../services/OrderPickingService";
 import EventPublisher from "../../services/EventPublisher";
 import IdempotencyGuardService from "../../services/IdempotencyGuardService";
@@ -100,33 +100,7 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
 
       return s;
     }, {} as { [key: string]: Stats });
-/*
-    const deliveryStats = activeOrders.reduce((ds, order) => {
-      const orderStats = order.items.reduce((os, item) => {
-        if (!os[item.item_id]) {
-          os[item.item_id] = { total: 0, quantity: 0, fraction: 0, name: item.name };
-        }
-        os[item.item_id].total += item.price * item.quantity;
-        os[item.item_id].fraction += item.fraction;
-        os[item.item_id].quantity += item.quantity;
 
-        return os;
-      }, {} as { [key: string]: Stats });
-
-      Object.keys(orderStats).forEach((key) => {
-        if (!ds[key]) {
-          ds[key] = { ...orderStats[key] };
-          return;
-        }
-
-        ds[key].total += orderStats[key].total;
-        ds[key].fraction += orderStats[key].fraction;
-        ds[key].name = orderStats[key].name;
-      });
-
-      return ds;
-    }, {} as { [key: string]: Stats });
-*/
     deliveryOverview.stats = Object.keys(stats).map((key) => stats[key]);
 
     return api.send(res, deliveryOverview);
@@ -287,6 +261,48 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
     await eventPublisher.publish(event);
 
     return api.send(res, {});
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+adminApi.put("/orders/:id/cancel", async (req: express.Request, res: express.Response) => {
+  try {
+    const { id } = req.params;
+
+    const orderService = new OrderService(db);
+    const order = await orderService.find(id);
+
+    if (!order) {
+      return api.notFound(res, "Order not found");
+    }
+
+    const cancellableStatuses = ["PENDING", "PAYMENT_IN_PROGRESS", "PAYMENT_FAILED", "PAID"];
+    if (!cancellableStatuses.includes(order.status)) {
+      return api.badRequest(res, `Order cannot be cancelled in current status: ${order.status}`);
+    }
+
+    // Update order status to CANCELED
+    await orderService.updateTransactionally(order, { status: "CANCELED" });
+
+    // Emit OrderCancelledEvent
+    const eventPublisher = new EventPublisher<OrderCancelledEvent>(db);
+
+    const event: OrderCancelledEvent = {
+      id: "", // will be set by OutboxEventService
+      idempotent_key: `order-cancelled-${order.id}`,
+      created_at: new Date(),
+      processed_at: new Date(),
+      processed: false,
+      retries: 0,
+      type: CONSTANTS.EVENTS.ORDER_CANCELED,
+      payload: { order_id: order.id },
+    };
+
+    await eventPublisher.publish(event);
+
+    return res.status(204).send();
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
