@@ -155,6 +155,9 @@ components:
         OrderId:
           type: string
           description: "Идентификатор заказа"
+        PaymentId:
+          type: string
+          description: "Идентификатор платежа"
         Description:
           type: string
           description: "Описание заказа"
@@ -172,6 +175,55 @@ components:
         - OrderId    
         - RedirectDueDate
         - Receipt
+    TinkoffResult:
+      type: object
+      properties:
+        TerminalKey:
+          type: string
+          example: "TBankTest"
+        OrderId:
+          type: string
+          example: "21057"
+        Success:
+          type: boolean
+          example: true
+        Status:
+          type: string
+          example: "REVERSED"
+        OriginalAmount:
+          type: number
+          example: 13000
+        NewAmount:
+          type: number
+          example: 5000
+        PaymentId:
+          type: string
+          example: "2304882"
+        ErrorCode:
+          type: string
+          example: "0"
+        Message:
+          type: string
+          example: "OK"
+        Details:
+          type: string
+          nullable: true
+          example: "None"
+        ExternalRequestId:
+          type: string
+          example: "756478567845678436"
+      required:
+        - TerminalKey
+        - OrderId
+        - Success
+        - Status
+        - OriginalAmount
+        - NewAmount
+        - PaymentId
+        - ErrorCode
+        - Message
+        - Details
+        - ExternalRequestId
 
     ConversationMessage:
       type: object

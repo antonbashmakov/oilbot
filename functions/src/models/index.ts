@@ -18,6 +18,7 @@ type BaseUser = components["schemas"]["User"];
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
 export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
+export type TinkoffResult = models["schemas"]["TinkoffResult"];
 
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 export type BaseConversationMessage = models["schemas"]["ConversationMessage"];
@@ -50,6 +51,11 @@ export type User = Omit<BaseUser, "created_at"> & {
 };
 
 export type OrderResolvedEvent = OutboxEvent & {
+  payload: {
+    order_id: string;
+  }
+};
+export type OrderCancelledEvent = OutboxEvent & {
   payload: {
     order_id: string;
   }

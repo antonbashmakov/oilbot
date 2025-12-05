@@ -105,12 +105,38 @@ export interface components {
       Amount: number;
       /** @description Идентификатор заказа */
       OrderId: string;
+      /** @description Идентификатор платежа */
+      PaymentId?: string;
       /** @description Описание заказа */
       Description?: string;
       /** Format: date-time */
       RedirectDueDate: string;
       DATA?: components["schemas"]["TinkoffPaymentData"];
       Receipt: components["schemas"]["TinkoffReceipt"];
+    };
+    TinkoffResult: {
+      /** @example TBankTest */
+      TerminalKey: string;
+      /** @example 21057 */
+      OrderId: string;
+      /** @example true */
+      Success: boolean;
+      /** @example REVERSED */
+      Status: string;
+      /** @example 13000 */
+      OriginalAmount: number;
+      /** @example 5000 */
+      NewAmount: number;
+      /** @example 2304882 */
+      PaymentId: string;
+      /** @example 0 */
+      ErrorCode: string;
+      /** @example OK */
+      Message: string;
+      /** @example None */
+      Details: string | null;
+      /** @example 756478567845678436 */
+      ExternalRequestId: string;
     };
     /** @description A message sent in a conversation */
     ConversationMessage: {

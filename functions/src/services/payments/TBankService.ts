@@ -4,7 +4,7 @@ import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import * as moment from "moment";
 
-import {Order, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt} from "../../models";
+import {Order, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
 dotenv.config();
 
 const terminal = process.env.TINKOFF_TERMINAL_ID || functions.config().tinkoff.TINKOFF_TERMINAL_ID;
@@ -63,6 +63,14 @@ class TBankService {
 
   async initPayment(paymentRequest: TinkoffPaymentPayload) {
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Init", paymentRequest, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  }
+  async cancelPayment(paymentRequest: TinkoffPaymentPayload): Promise<TinkoffResult> {
+    const response = await axios.post("https://securepay.tinkoff.ru/v2/Cancel", paymentRequest, {
       headers: {
         "Content-Type": "application/json",
       },

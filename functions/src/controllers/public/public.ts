@@ -75,7 +75,7 @@ publicApi.post("/signup", async (req: express.Request, res: express.Response) =>
     saved.token = generateToken(saved);
 
     // Return the created user
-    return api.send(res, user);
+    return api.send(res, saved);
   } catch (err: any) {
     functions.logger.error("Signup error:", err);
     return api.error(res, err.message || "Internal server error");
