@@ -8,7 +8,7 @@ interface Product {
   name: string;
   price: number;
   quantity: number;
-  status: 'CANCELLED' | 'PENDING' | 'COLLECTED';
+  status: 'CANCELED' | 'PENDING' | 'COLLECTED';
 }
 
 const DataTableWithButtonsExample: React.FC = () => {
@@ -55,7 +55,7 @@ const DataTableWithButtonsExample: React.FC = () => {
   };
 
   const isRowDisabled = (item: Product) => {
-    return item.status === 'CANCELLED';
+    return item.status === 'CANCELED';
   };
 
   const rowButtons = (item: Product) => {

@@ -722,7 +722,7 @@ components:
           enum:
             - PENDING
             - COLLECTED
-            - CANCELLED
+            - CANCELED
     OwnerRef:
       type: object
       required:
@@ -836,6 +836,7 @@ components:
       required:
         - total
         - fraction
+        - quantity
         - name
       properties:
         total:
@@ -848,6 +849,11 @@ components:
           format: float
           description: Fraction value
           example: 1.8
+        quantity:
+          type: number
+          format: integer
+          description: Quantity of items
+          example: 1
         name:
           type: string
           description: Name of the stats item
@@ -918,6 +924,16 @@ components:
       allOf:
         - $ref: '#/components/schemas/Delivery'
       properties:
+        activeOrders:
+          type: array
+          description: List of active orders in this delivery. All orders which are not CANCELED
+          items:
+            $ref: '#/components/schemas/Order'
+        removedOrders:
+          type: array
+          description: List of all CANCELED orders in this delivery
+          items:
+            $ref: '#/components/schemas/Order'
         stats:
           type: array
           description: Statistics for the delivery
@@ -959,10 +975,12 @@ components:
           enum:
             - PENDING
             - PAYMENT_IN_PROGRESS
+            - PAYMENT_FAILED
             - PAID
             - RESOLVING
             - CONCILIATION_PAYMENT_IN_PROGRESS
             - CONCILIATED
+            - CANCELED
         type:
           type: string
           enum:

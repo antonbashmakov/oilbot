@@ -85,7 +85,7 @@ export default function DeliveryDetailPage() {
         <DeliveryInformationCard delivery={delivery} />
         <Container mb="8" />
         {/* Orders Table */}
-        {delivery.orders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
+        {delivery.activeOrders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
           <Card.Header>
             <Heading p={0} size="lg" color="text.primary">
               Orders in Delivery
@@ -116,7 +116,7 @@ export default function DeliveryDetailPage() {
                 {
                   key: "numberOfItems",
                   header: "Items",
-                  accessor: (order) => order.number_of_Items,
+                  accessor: (order) => order.number_of_items,
                   align: "end",
                 },
                 {
@@ -151,6 +151,11 @@ export default function DeliveryDetailPage() {
                   key: "totalFraction",
                   header: "Total Fraction",
                   accessor: (item) => item.fraction,
+                },
+                {
+                  key: "totalQuantity",
+                  header: "Total Quantity",
+                  accessor: (item) => item.quantity,
                 },
                 {
                   key: "totalCost",

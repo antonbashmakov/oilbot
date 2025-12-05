@@ -2,6 +2,7 @@ import { Badge, BadgeProps } from "@chakra-ui/react";
 
 export type StatusValue =
   | "SENT"
+  | "CANCELED"
   | "CONFIRMED"
   | "FAILED"
   | "TIMED_OUT"
@@ -12,7 +13,8 @@ export type StatusValue =
   | "PAID"
   | "RESOLVING"
   | "CONCILIATION_PAYMENT_IN_PROGRESS"
-  | "CONCILIATED";
+  | "CONCILIATED"
+  | "PAYMENT_FAILED";
 
 interface StatusBadgeProps extends Omit<BadgeProps, "children"> {
   status: StatusValue;
@@ -68,6 +70,15 @@ const getStatusConfig = (status: StatusValue) => {
         darkColor: "red.300",
       };
     case "REJECTED":
+      return {
+        colorScheme: "red",
+        label: "Rejected",
+        bg: "red.100",
+        color: "red.800",
+        darkBg: "red.900/40",
+        darkColor: "red.300",
+      };
+    case "PAYMENT_FAILED":
       return {
         colorScheme: "red",
         label: "Rejected",

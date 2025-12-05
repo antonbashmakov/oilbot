@@ -666,7 +666,7 @@ export interface components {
     };
     PickingItem: ({
       /** @enum {unknown} */
-      status?: "PENDING" | "COLLECTED" | "CANCELLED";
+      status?: "PENDING" | "COLLECTED" | "CANCELED";
     }) & components["schemas"]["OrderItem"];
     OwnerRef: {
       /**
@@ -784,6 +784,12 @@ export interface components {
        */
       fraction: number;
       /**
+       * Format: integer
+       * @description Quantity of items
+       * @example 1
+       */
+      quantity: number;
+      /**
        * @description Name of the stats item
        * @example Сёмга филе Филе на коже 1.8 Кг
        */
@@ -839,6 +845,10 @@ export interface components {
       owner?: components["schemas"]["OwnerRef"];
     };
     DeliveryOverview: {
+      /** @description List of active orders in this delivery. All orders which are not CANCELED */
+      activeOrders?: components["schemas"]["Order"][];
+      /** @description List of all CANCELED orders in this delivery */
+      removedOrders?: components["schemas"]["Order"][];
       /** @description Statistics for the delivery */
       stats?: components["schemas"]["Stats"][];
     } & components["schemas"]["Delivery"];
@@ -862,7 +872,7 @@ export interface components {
       /** @description Items in this order */
       items: components["schemas"]["CartItem"][];
       /** @enum {string} */
-      status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED";
+      status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED" | "CANCELED";
       /**
        * @description Current status of the order
        * @example PAID

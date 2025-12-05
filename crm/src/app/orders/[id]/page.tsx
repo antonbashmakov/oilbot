@@ -31,79 +31,79 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useCallback, useEffect, useState } from "react";
 import { AddIcon, MinusIcon, LockIcon } from "@chakra-ui/icons";
 
-  const columns: Column<CartItem>[] = [
-    { key: "id", header: "ID", accessor: (item) => item.id },
-    { key: "name", header: "Name", accessor: (item) => item.name },
-    {
-      key: "fraction",
-      field: "fraction",
-      summarizable: true,
-      header: "Fraction",
-      accessor: (item) => item.fraction
-    },
-    {
-      key: "quantity",
-      header: "Quantity",
-      accessor: (item) => item.quantity,
-      align: "end",
-    },
-    {
-      key: "price",
-      field: "price",
-      summarizable: true,
-      header: "Price",
-      accessor: (item) => item.price.toFixed(2),
-      align: "end",
-    },
-  ];
+const columns: Column<CartItem>[] = [
+  { key: "id", header: "ID", accessor: (item) => item.id },
+  { key: "name", header: "Name", accessor: (item) => item.name },
+  {
+    key: "fraction",
+    field: "fraction",
+    summarizable: true,
+    header: "Fraction",
+    accessor: (item) => item.fraction
+  },
+  {
+    key: "quantity",
+    header: "Quantity",
+    accessor: (item) => item.quantity,
+    align: "end",
+  },
+  {
+    key: "price",
+    field: "price",
+    summarizable: true,
+    header: "Price",
+    accessor: (item) => item.price.toFixed(2),
+    align: "end",
+  },
+];
 
-  const pickingColumns: Column<PickingItem>[] = [
-    {
-      key: 'collected-status',
-      header: '',
-      accessor: (item) => <>{item.status === 'COLLECTED' && <Status.Root colorPalette="blue">
-        <Status.Indicator />
-      </Status.Root>}</>,
-    },
-    {
-      key: 'id',
-      header: 'ID',
-      accessor: (item) => item.id,
-      width: '80px',
-    },
-    {
-      key: 'name',
-      header: 'Name',
-      accessor: (item) => item.name,
-    },
-    {
-      key: 'fraction',
-      header: 'Fraction',
-      accessor: (item) => item.fraction,
-      editable: true,
-      field: 'fraction',
-      renderer: DecimalDataField,
-    },
-    {
-      key: 'price',
-      header: 'Price',
-      accessor: (item) => Math.floor(item.price_for_unit * item.fraction * item.quantity),
-    },
-    {
-      key: 'price_for_unit',
-      header: 'Price For Unit',
-      editable: true,
-      field: 'price_for_unit',
-      renderer: DecimalDataField,
-      accessor: (item) => item.price_for_unit,
-    },
-    {
-      key: 'quantity',
-      header: 'Quantity',
-      accessor: (item) => item.quantity,
-      field: 'quantity',
-    },
-  ];
+const pickingColumns: Column<PickingItem>[] = [
+  {
+    key: 'collected-status',
+    header: '',
+    accessor: (item) => <>{item.status === 'COLLECTED' && <Status.Root colorPalette="blue">
+      <Status.Indicator />
+    </Status.Root>}</>,
+  },
+  {
+    key: 'id',
+    header: 'ID',
+    accessor: (item) => item.id,
+    width: '80px',
+  },
+  {
+    key: 'name',
+    header: 'Name',
+    accessor: (item) => item.name,
+  },
+  {
+    key: 'fraction',
+    header: 'Fraction',
+    accessor: (item) => item.fraction,
+    editable: true,
+    field: 'fraction',
+    renderer: DecimalDataField,
+  },
+  {
+    key: 'price',
+    header: 'Price',
+    accessor: (item) => Math.floor(item.price_for_unit * item.fraction * item.quantity),
+  },
+  {
+    key: 'price_for_unit',
+    header: 'Price For Unit',
+    editable: true,
+    field: 'price_for_unit',
+    renderer: DecimalDataField,
+    accessor: (item) => item.price_for_unit,
+  },
+  {
+    key: 'quantity',
+    header: 'Quantity',
+    accessor: (item) => item.quantity,
+    field: 'quantity',
+  },
+];
 
 export default function OrderPage() {
   const { id: orderId } = useParams();
@@ -134,10 +134,10 @@ export default function OrderPage() {
   );
 
   useEffect(() => setIsMissingOriginalPayment(!originalPayments?.filter(p => (p.status === 'SENT' || p.status === 'CONFIRMED')).length), [originalPayments]);
-  useEffect(() => setIsMissingConsolidationPayment( order?.status === 'RESOLVING' && !conciliationPayments?.filter(p => (p.status === 'SENT' || p.status === 'CONFIRMED')).length), [conciliationPayments]);
+  useEffect(() => setIsMissingConsolidationPayment(order?.status === 'RESOLVING' && !conciliationPayments?.filter(p => (p.status === 'SENT' || p.status === 'CONFIRMED')).length), [conciliationPayments]);
 
   const isRowDisabled = (item: PickingItem) => {
-    return isCollecting || !isOrderEditable || (item.status === 'CANCELLED');
+    return isCollecting || !isOrderEditable || (item.status === 'CANCELED');
   };
 
   const rowButtons = (item: PickingItem) => {
@@ -259,8 +259,10 @@ export default function OrderPage() {
                   </Flex>
                 )}
               </Flex>
-              {!order.picking && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Start Picking</Button>}
-              <Button disabled={!isReadyForConsolidation} loading={isConsolidating} onClick={onConsolidateClick} colorScheme="blue">Consolidate</Button>
+              <Flex gap={2}>
+                {!order.picking && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Start Picking</Button>}
+                <Button disabled={!isReadyForConsolidation} loading={isConsolidating} onClick={onConsolidateClick} colorScheme="blue">Consolidate</Button>
+              </Flex>
             </Flex>
 
             <Grid templateColumns="repeat(3, 1fr)" gap={6}>
@@ -392,13 +394,13 @@ export default function OrderPage() {
                     <Card.Body>
                       <HStack justifyContent={'space-between'}>
                         <Heading size="md">Original</Heading>
-                        <Button 
+                        <Button
                           disabled={!isMissingOriginalPayment || isCreatingOriginalPayment}
                           loading={isCreatingOriginalPayment}
                           onClick={onCreateOriginalPaymentClick}
-                          size="2xs" 
-                          colorScheme="dark" 
-                          bg="blue.800" 
+                          size="2xs"
+                          colorScheme="dark"
+                          bg="blue.800"
                           color="white"
                         >
                           New payment
@@ -411,13 +413,13 @@ export default function OrderPage() {
                       <Separator />
                       <HStack mt={2} justifyContent={'space-between'}>
                         <Heading size="md">Closing</Heading>
-                        <Button 
+                        <Button
                           disabled={!isMissingConsolidationPayment || isCreatingConciliationPayment || !conciliationOrder?.id}
                           loading={isCreatingConciliationPayment}
                           onClick={onCreateConciliationPaymentClick}
-                          size="2xs" 
-                          colorScheme="dark" 
-                          bg="blue.800" 
+                          size="2xs"
+                          colorScheme="dark"
+                          bg="blue.800"
                           color="white"
                         >
                           New payment
