@@ -53,9 +53,9 @@ export default function LoginPage() {
             // Store user in context (includes JWT token)
             setUser(user);
             
-            // Store JWT token in both localStorage and cookie
+            // Store JWT token and user data in both localStorage and cookie
             if (user.token) {
-              setAuthToken(user.token);
+              setAuthToken(user.token, user);
             }
             
             // Redirect to the original page or home page
