@@ -9,7 +9,7 @@ import {
   UserService,
 } from "./imports";
 import * as bcrypt from "bcrypt";
-import {generateToken} from "../../services/utils";
+import {generateToken, who} from "../../services/utils";
 import {User} from "../../models";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -114,6 +114,27 @@ publicApi.post("/login", async (req: express.Request, res: express.Response) => 
   } catch (err: any) {
     functions.logger.error("Login error:", err);
     return api.error(res, err.message || "Internal server error");
+  }
+});
+
+publicApi.get("/users/me", async (req: express.Request, res: express.Response) => {
+  try {
+    // Get user from request (set by authorize middleware)
+    const user = await who(req, new UserService(db));
+    
+    if (!user) {
+      return api.ok(res);
+    }
+    
+    return api.send(res, user);
+  } catch (err: any) {
+    functions.logger.error(err);
+    // The authorize function already sends error responses, so we just need to return
+    // If error wasn't handled by authorize, handle it here
+    if (!res.headersSent) {
+      return api.error(res, err.message || "Internal server error");
+    }
+    return;
   }
 });
 

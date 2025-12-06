@@ -9,8 +9,11 @@ import {
   CustomerService,
   CartItemService,
   OrderService,
+  UserService,
 } from "./imports";
+import { authorize } from "../../services/utils";
 import * as dotenv from "dotenv";
+import { logger } from "firebase-functions/v1";
 
 admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
@@ -29,13 +32,23 @@ const customerService = new CustomerService(db);
 const cartItemService = new CartItemService(db);
 const orderService = new OrderService(db);
 
-const publicApi = express();
+const privateApi = express();
 
-publicApi.use(cors(
+privateApi.use(cors(
   {origin: true} // allows all cross origin xhr requests
 ));
 
-publicApi.get("/deliveries", async (req: express.Request, res: express.Response) => {
+privateApi.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const userService = new UserService(db);
+  try {
+    return await authorize(req, res, next, userService);
+  } catch (err: any) {
+    logger.error(err);
+    return api.error(res, err.message);
+  }
+});
+
+privateApi.get("/deliveries", async (req: express.Request, res: express.Response) => {
   try {
     const deliveries = await deliveryService.findAll();
     api.send(res, deliveries);
@@ -45,7 +58,7 @@ publicApi.get("/deliveries", async (req: express.Request, res: express.Response)
   }
 });
 
-publicApi.get("/deliveries/:id", async (req: express.Request, res: express.Response) => {
+privateApi.get("/deliveries/:id", async (req: express.Request, res: express.Response) => {
   try {
     const {id} = req.params;
     const delivery = await deliveryService.find(id);
@@ -61,7 +74,7 @@ publicApi.get("/deliveries/:id", async (req: express.Request, res: express.Respo
   }
 });
 
-publicApi.get("/items/category/:category", async (req: express.Request, res: express.Response) => {
+privateApi.get("/items/category/:category", async (req: express.Request, res: express.Response) => {
   try {
     const {category} = req.params;
     const items = await itemService.findByCategory(category);
@@ -72,7 +85,7 @@ publicApi.get("/items/category/:category", async (req: express.Request, res: exp
   }
 });
 
-publicApi.post("/customers/:customerId/cart/items/:itemId", async (req: express.Request, res: express.Response) => {
+privateApi.post("/customers/:customerId/cart/items/:itemId", async (req: express.Request, res: express.Response) => {
   try {
     const {customerId, itemId} = req.params;
 
@@ -94,7 +107,7 @@ publicApi.post("/customers/:customerId/cart/items/:itemId", async (req: express.
   }
 });
 
-publicApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
+privateApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
     const {customerId} = req.params;
 
@@ -116,4 +129,4 @@ publicApi.post("/customers/:customerId/orders", async (req: express.Request, res
   }
 });
 
-export default publicApi;
+export default privateApi;

@@ -1,8 +1,8 @@
 import * as moment from "moment";
 import * as jwt from "jsonwebtoken";
-import {User} from "../models";
+import { User } from "../models";
 import UserService from "./UserService";
-import {express} from "../controllers/private/imports";
+import { express } from "../controllers/private/imports";
 
 
 // Constants
@@ -16,36 +16,41 @@ interface ExpressResponse {
   header(field: string, value: string): ExpressResponse;
   status(code: number): ExpressResponse;
   send(data: any): ExpressResponse;
+  end(): ExpressResponse;
 }
 
 export const api = {
   badRequest: (response: ExpressResponse, message = "", code = "BAD_REQUEST"): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(400).send({error: {code, message}}),
+    .status(400).send({ error: { code, message } }),
 
   notFound: (response: ExpressResponse, message = ""): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(404).send({error: {code: "NOT_FOUND", message: (message || NOT_FOUND)}}),
+    .status(404).send({ error: { code: "NOT_FOUND", message: (message || NOT_FOUND) } }),
 
   error: (response: ExpressResponse, message = "", code: string = COMMON_ERROR): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(500).send({error: {code, message}}),
+    .status(500).send({ error: { code, message } }),
 
   send: (response: ExpressResponse, data: any = {}): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
     .status(200).send(data),
 
+  ok: (response: ExpressResponse): ExpressResponse => response
+    //.header(CONTENT_TYPE, APPLICATION_JSON)
+    .status(204).end(),
+
   redirect: (response: ExpressResponse, data: any = {}): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(301).send({code: "REDIRECT", data}),
+    .status(301).send({ code: "REDIRECT", data }),
 
   forbidden: (response: ExpressResponse, message = "", code = "FORBIDDEN"): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(403).send({error: {code, message}}),
+    .status(403).send({ error: { code, message } }),
 
   unauthorized: (response: ExpressResponse, message = "", code = "UNAUTHORIZED"): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(401).send({error: {code, message}}),
+    .status(401).send({ error: { code, message } }),
 };
 
 export const jsonify = (object: any): any => JSON.parse(JSON.stringify(object));
@@ -84,13 +89,13 @@ export const readBase64String = (text: string): string => `${Buffer.from(text, "
 export const purgeHtml = (html: string): string => html.replace(/[\s]/gi, "");
 
 export const generateToken = (user: User): string => {
-  return jwt.sign({id: user.id}, process.env.JWT_SECRET as string, {
+  return jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, {
     expiresIn: "1d",
   });
 };
 
 
-export const authorize = async (req: express.Request, res: express.Response, next: express.NextFunction, userService: UserService, role: "ADMIN" | "AGENT") => {
+export const authorize = async (req: express.Request, res: express.Response, next: express.NextFunction, userService: UserService, role?: "ADMIN" | "AGENT") => {
   if (!req.headers.authorization) {
     if (!next) {
       return Promise.reject(new Error("MISSING_AUTH_HEADER"));
@@ -103,15 +108,33 @@ export const authorize = async (req: express.Request, res: express.Response, nex
   if (!token) return api.forbidden(res);
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string};
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
     const user = await userService.require(decoded.id);
 
-    if (!user.roles.includes(role)) return api.forbidden(res);
+    if (role && !user.roles.includes(role)) return api.forbidden(res);
 
     (req as any).user = user;
   } catch (err) {
-    return res.status(401).json({message: "Invalid token"});
+    return res.status(401).json({ message: "Invalid token" });
   }
 
   if (next) return next();
+};
+export const who = async (req: express.Request, userService: UserService) => {
+  if (!req.headers.authorization) {
+    return undefined;
+  }
+
+  const token = parseToken(req.headers.authorization.trim());
+
+  if (!token) return undefined;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+    const user = await userService.require(decoded.id);
+
+    return user;
+  } catch (err) {
+    return undefined;
+  } 
 };
