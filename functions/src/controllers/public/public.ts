@@ -121,11 +121,11 @@ publicApi.get("/users/me", async (req: express.Request, res: express.Response) =
   try {
     // Get user from request (set by authorize middleware)
     const user = await who(req, new UserService(db));
-    
+
     if (!user) {
       return api.ok(res);
     }
-    
+
     return api.send(res, user);
   } catch (err: any) {
     functions.logger.error(err);

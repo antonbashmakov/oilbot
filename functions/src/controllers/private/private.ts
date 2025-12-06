@@ -11,9 +11,9 @@ import {
   OrderService,
   UserService,
 } from "./imports";
-import { authorize } from "../../services/utils";
+import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
-import { logger } from "firebase-functions/v1";
+import {logger} from "firebase-functions/v1";
 
 admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
