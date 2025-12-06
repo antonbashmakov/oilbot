@@ -1,4 +1,4 @@
-import { useApiQuery, usePatchApi, usePostApi } from "@/api/rq";
+import { useApiQuery, usePatchApi, usePostApi, usePutApi } from "@/api/rq";
 import {
     DeliveryOverview,
     OrderOverview,
@@ -131,6 +131,23 @@ export function useCreateOrderPayment(orderId?: string) {
         ],
         {
             orderId: orderId || ''
+        }
+    );
+};
+
+export function useCancelOrder(id?: string) {
+    return usePutApi<
+        '/admin/orders/{id}/cancel',
+        { id: string },
+        void
+    >(
+        '/admin/orders/{id}/cancel',
+        [
+            '/admin/orders/{id}',
+            '/admin/orders/{orderId}/payments',
+        ],
+        {
+            id: id || ''
         }
     );
 };

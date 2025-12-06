@@ -255,6 +255,41 @@ paths:
         '204':
           description: Order successfully resolved
 
+  /admin/orders/{id}/cancel:
+    put:
+      summary: Cancel an order
+      description: Cancel an order and emit OrderCancelledEvent. Order can only be cancelled if status is PENDING, PAYMENT_IN_PROGRESS, PAYMENT_FAILED, or PAID.
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Order successfully cancelled
+        '400':
+          description: Bad request (e.g., order cannot be cancelled in current status)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /admin/orders/{id}/conciliation:
     get:
       summary: Get conciliation order

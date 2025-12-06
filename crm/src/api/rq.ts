@@ -116,6 +116,46 @@ export function usePostApi<
     );
 }
 
+export function usePutApi<
+    K extends keyof paths,
+    P extends PathParameters<paths, K, 'put'>,
+    Body = RequestBody<paths, K, 'put'>
+>(
+    path: K,
+    invalidates: string[],
+    fixedParams: P,
+    options?: Parameters<typeof useMutation>[2]
+) {
+    const { PUT } = useClient();
+    const queryClient = useQueryClient();
+
+    return useMutation<
+        ResponseType<paths, K, 'put'>, 
+        Error,
+        Body
+    >(
+        async (request) => {
+            // @ts-ignore
+            const response = await PUT(path, {
+                params: {
+                    path: fixedParams, 
+                },
+                body: request,
+            });
+
+            const data = response.data as ResponseType<paths, K, 'put'>;
+
+            // Invalidate related queries
+            await queryClient.invalidateQueries(invalidates);
+
+            return data; 
+        },
+        {
+            ...options,
+        }
+    );
+}
+
 
 // @ts-ignore
 export function usePostApiQuery<P extends PathsWithMethod<paths, 'post'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<paths[P], 'post'>>, options: UseQueryOptions<any> = {}) {

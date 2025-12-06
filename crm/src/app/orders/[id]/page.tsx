@@ -19,12 +19,13 @@ import {
   IconButton,
   Status,
   Tabs,
-  HStack
+  HStack,
+  Dialog,
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
 import { CartItem, PickingItem } from "@/api/models";
-import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery, useCreateOrderPayment } from "@/api";
+import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery, useCreateOrderPayment, useCancelOrder } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
 import { PaymentCard } from "@/components/ui/PaymentCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -114,6 +115,7 @@ export default function OrderPage() {
   const [isMissingOriginalPayment, setIsMissingOriginalPayment] = useState<boolean>(false);
   const [isMissingConsolidationPayment, setIsMissingConsolidationPayment] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("order-items");
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState<boolean>(false);
 
   const { data: order } = useAdminOrderOverviewQuery(orderId as string);
   const { data: conciliationOrder } = useAdminOrderConciliationQuery(orderId as string);
@@ -124,6 +126,7 @@ export default function OrderPage() {
   const { mutate: collectPicking, isLoading: isCollecting } = useCollectPickingItem(orderId as string, selectedItem?.id);
   const { mutate: createOriginalPayment, isLoading: isCreatingOriginalPayment } = useCreateOrderPayment(orderId as string);
   const { mutate: createConciliationPayment, isLoading: isCreatingConciliationPayment } = useCreateOrderPayment(conciliationOrder?.id);
+  const { mutate: cancelOrder, isLoading: isCancelling } = useCancelOrder(orderId as string);
 
   // Sort payments into original and conciliation arrays
   const originalPayments = payments.filter(payment =>
@@ -209,6 +212,30 @@ export default function OrderPage() {
     }
   }, [conciliationOrder?.id, createConciliationPayment]);
 
+  const onCancelClick = useCallback(() => {
+    setIsCancelDialogOpen(true);
+  }, []);
+
+  const onCancelConfirm = useCallback(() => {
+    console.log('Order cancellation confirmed for order:', orderId);
+    cancelOrder(undefined, {
+      onSuccess: () => {
+        console.log('Order cancelled successfully');
+        setIsCancelDialogOpen(false);
+        // The mutation will invalidate the order query, causing a refetch
+      },
+      onError: (error) => {
+        console.error('Failed to cancel order:', error);
+        // Keep dialog open to show error? Or close and show toast?
+        setIsCancelDialogOpen(false);
+      }
+    });
+  }, [orderId, cancelOrder]);
+
+  const onCancelCancel = useCallback(() => {
+    setIsCancelDialogOpen(false);
+  }, []);
+
   useEffect(() => {
     if (selectedItem?.id) {
       collectPicking();
@@ -262,6 +289,7 @@ export default function OrderPage() {
               <Flex gap={2}>
                 {!order.picking && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Start Picking</Button>}
                 <Button disabled={!isReadyForConsolidation} loading={isConsolidating} onClick={onConsolidateClick} colorScheme="blue">Consolidate</Button>
+                <Button onClick={onCancelClick} bg="red.500" color="white" variant="outline" loading={isCancelling}>Cancel</Button>
               </Flex>
             </Flex>
 
@@ -439,6 +467,31 @@ export default function OrderPage() {
           }
         </VStack>
       </Container>
+
+      {/* Cancel Order Confirmation Dialog */}
+      <Dialog.Root open={isCancelDialogOpen} onOpenChange={(e) => setIsCancelDialogOpen(e.open)}>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content bg="bg.primary">
+            <Dialog.Header>
+              <Dialog.Title>Do you want to cancel the order?</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+              <VStack gap={4} align="stretch">
+                <Text color="text.secondary">All payments will be cancelled.</Text>
+              </VStack>
+            </Dialog.Body>
+            <Dialog.Footer>
+              <Button variant="outline" onClick={onCancelCancel}>
+                No, Keep Order
+              </Button>
+              <Button bg="red.500" color="white" colorScheme="dark" onClick={onCancelConfirm}>
+                Yes, Cancel Order
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </Box>
   );
 }
