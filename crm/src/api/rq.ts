@@ -1,7 +1,7 @@
 import { FetchOptions } from 'openapi-fetch';
 import { paths } from '@/api/openapi/crm';
 import { FilterKeys, PathsWithMethod } from 'openapi-typescript-helpers';
-import { useMutation, useQueries, useQuery, useQueryClient, UseQueryOptions, UseQueryResult } from 'react-query';
+import { useMutation, useQueries, useQuery, useQueryClient, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import useClient from '@/api/useClient';
 import { PathParameters, RequestBody, ResponseType } from '@/utils/request';
 
@@ -14,9 +14,6 @@ export function getApiQueryParams<P extends PathsWithMethod<paths, 'get'>>(p: P 
 export async function handleResult<D, E, T extends { data?: D, error?: E }>(result: Promise<T>): Promise<D | undefined> {
     const { data, error } = await result;
 
-
-    // console.log("API Result", { data, error });
-
     if (error) {
         throw error;
     }
@@ -28,13 +25,12 @@ export async function handleResult<D, E, T extends { data?: D, error?: E }>(resu
 export function useApiQuery<P extends PathsWithMethod<paths, 'get'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<paths[P], 'get'>>, options: UseQueryOptions<any> = {}) {
     const { GET } = useClient();
     // @ts-ignore
-    return useQuery(getApiQueryParams(p, init), () => handleResult(GET(p as P, init)),
-        // @ts-ignore
-
-        {
-            enabled: !!p,
-            ...options
-        })
+    return useQuery({ 
+        queryKey: getApiQueryParams(p, init),
+        queryFn: () => handleResult(GET(p as P, init)),
+        enabled: !!p,
+        ...options
+    });
 }
 
 export function usePatchApi<
@@ -45,17 +41,18 @@ export function usePatchApi<
     path: K,
     invalidates: string[],
     fixedParams: P,
-    options?: Parameters<typeof useMutation>[2]
+    options?: Parameters<typeof useMutation>[1]
 ) {
     const { PATCH } = useClient();
     const queryClient = useQueryClient();
 
+    
     return useMutation<
         ResponseType<paths, K, 'patch'>, 
         Error,
         Body
-    >(
-        async (request) => {
+    >({
+        mutationFn: async (request) => {
             // @ts-ignore
             const response = await PATCH(path, {
                 params: {
@@ -65,16 +62,14 @@ export function usePatchApi<
             });
 
             const data = response.data as ResponseType<paths, K, 'patch'>;
-
-            // Invalidate related queries
-            await queryClient.invalidateQueries(invalidates);
-
             return data; 
         },
-        {
-            ...options,
-        }
-    );
+        onSuccess: () => {
+            // Invalidate related queries
+            queryClient.invalidateQueries({ queryKey: invalidates });
+        },
+        ...options,
+    });
 }
 export function usePostApi<
     K extends keyof paths,
@@ -84,7 +79,7 @@ export function usePostApi<
     path: K,
     invalidates: string[],
     fixedParams: P,
-    options?: Parameters<typeof useMutation>[2]
+    options?: Parameters<typeof useMutation>[1]
 ) {
     const { POST } = useClient();
     const queryClient = useQueryClient();
@@ -93,8 +88,8 @@ export function usePostApi<
         ResponseType<paths, K, 'post'>, 
         Error,
         Body
-    >(
-        async (request) => {
+    >({
+        mutationFn: async (request) => {
             // @ts-ignore
             const response = await POST(path, {
                 params: {
@@ -104,16 +99,14 @@ export function usePostApi<
             });
 
             const data = response.data as ResponseType<paths, K, 'post'>;
-
-            // Invalidate related queries
-            await queryClient.invalidateQueries(invalidates);
-
             return data; 
         },
-        {
-            ...options,
-        }
-    );
+        onSuccess: () => {
+            // Invalidate related queries
+            queryClient.invalidateQueries({ queryKey: invalidates });
+        },
+        ...options,
+    });
 }
 
 export function usePutApi<
@@ -124,7 +117,7 @@ export function usePutApi<
     path: K,
     invalidates: string[],
     fixedParams: P,
-    options?: Parameters<typeof useMutation>[2]
+    options?: Parameters<typeof useMutation>[1]
 ) {
     const { PUT } = useClient();
     const queryClient = useQueryClient();
@@ -133,8 +126,8 @@ export function usePutApi<
         ResponseType<paths, K, 'put'>, 
         Error,
         Body
-    >(
-        async (request) => {
+    >({
+        mutationFn: async (request) => {
             // @ts-ignore
             const response = await PUT(path, {
                 params: {
@@ -144,16 +137,14 @@ export function usePutApi<
             });
 
             const data = response.data as ResponseType<paths, K, 'put'>;
-
-            // Invalidate related queries
-            await queryClient.invalidateQueries(invalidates);
-
             return data; 
         },
-        {
-            ...options,
-        }
-    );
+        onSuccess: () => {
+            // Invalidate related queries
+            queryClient.invalidateQueries({ queryKey: invalidates });
+        },
+        ...options,
+    });
 }
 
 
@@ -161,13 +152,13 @@ export function usePutApi<
 export function usePostApiQuery<P extends PathsWithMethod<paths, 'post'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<paths[P], 'post'>>, options: UseQueryOptions<any> = {}) {
     const { POST } = useClient();
     // @ts-ignore
-    return useQuery(getApiQueryParams(p, init), () => handleResult(POST(p as P, init)),
-        // @ts-ignore
-        {
-            enabled: !!p,
-            retry: 1,
-            ...options,
-        })
+    return useQuery({ 
+        queryKey: getApiQueryParams(p, init),
+        queryFn: () => handleResult(POST(p as P, init)),
+        enabled: !!p,
+        retry: 1,
+        ...options,
+    });
 }
 /*
 
@@ -208,15 +199,17 @@ export function usePatchApiQuery<P extends PathsWithMethod<paths, 'patch'>>(p: P
 export function useApiQueries<P extends PathsWithMethod<paths, 'get'>>(p: P | undefined | '', inits: FetchOptions<FilterKeys<paths[P], 'get'>>[], options: UseQueryOptions<any> = {}) {
     const { GET } = useClient();
 
-    const results = useQueries(inits.map(init => ({
-        queryKey: getApiQueryParams(p, init),
-        queryFn: () => handleResult(GET(p as P, init))
-    })));
+    const results = useQueries({
+        queries: inits.map(init => ({
+            queryKey: getApiQueryParams(p, init),
+            queryFn: () => handleResult(GET(p as P, init))
+        }))
+    });
 
     return combineResults(results);
 }
 
-export const combineResults = <P, T>(results: UseQueryResult<T>[]): UseQueryResult<T[]> => {
+export const combineResults = <T>(results: any[]): UseQueryResult<T[]> => {
     // Determine overall status
     const isLoading = results.some(result => result.isLoading);
     const isError = results.some(result => result.isError);
@@ -230,5 +223,5 @@ export const combineResults = <P, T>(results: UseQueryResult<T>[]): UseQueryResu
         isSuccess,
         data,
         error: isError ? results.find(result => result.isError)?.error : undefined,
-    } as UseQueryResult<T[]>
+    } as UseQueryResult<T[]>;
 }

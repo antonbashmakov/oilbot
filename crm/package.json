@@ -9,13 +9,17 @@
     "lint": "eslint",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "openapi": "openapi-typescript openapi/api.yml -o src/api/openapi/crm.d.ts"
+    "openapi": "openapi-typescript openapi/api.yml -o src/api/openapi/crm.d.ts",
+    "deploy": "next build && firebase deploy --only hosting",
+    "serve": "firebase serve --only hosting"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
     "@chakra-ui/react": "^3.29.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-query-devtools": "^5.91.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.24",
     "next": "16.0.3",
@@ -25,8 +29,7 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "19.2.0",
-    "react-icons": "^5.5.0",
-    "react-query": "^3.39.3"
+    "react-icons": "^5.5.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.3",
@@ -41,6 +44,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
     "eslint-plugin-storybook": "^10.0.8",
+    "firebase-tools": "^13.0.0",
     "openapi-typescript": "^6.7.0",
     "storybook": "^10.0.8",
     "tailwindcss": "^4",

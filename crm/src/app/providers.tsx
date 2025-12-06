@@ -5,10 +5,11 @@ import { theme } from "@/theme";
 
 import { ApiConfigProvider } from '@/api/apiConfigContext';
 import { UserProvider } from '@/api/user/provider';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { ReactQueryDevtools } from 'react-query/devtools'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
 
 const queryClient = new QueryClient();
 

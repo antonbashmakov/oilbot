@@ -10,7 +10,7 @@ import {
     SignupRequest,
     LoginRequest,
 } from "@/api/models";
-import { UseQueryResult } from "react-query";
+import { UseQueryResult } from "@tanstack/react-query";
 
 export type QueryControlOptions = {
     enabled?: boolean
