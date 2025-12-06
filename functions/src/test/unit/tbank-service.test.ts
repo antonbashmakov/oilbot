@@ -1,12 +1,17 @@
 import TBankService from "../../services/payments/TBankService";
-import {Order} from "../../models";
+import {Order, Payment} from "../../models";
 import * as moment from "moment";
 
 describe("TBankService Unit Tests", () => {
   let tbankService: TBankService;
   let testOrder: Order;
+  let testPayment: Payment;
 
   beforeEach(() => {
+    // Mock environment variables
+    process.env.TINKOFF_TERMINAL_ID = "1754681033595DEMO";
+    process.env.TINKOFF_TERMINAL_PASSWORD = "Z48jVsFhs!cISDgo";
+    
     tbankService = new TBankService();
 
     testOrder = {
@@ -34,6 +39,26 @@ describe("TBankService Unit Tests", () => {
         id: "test-customer-id",
       },
     } as any;
+
+    testPayment = {
+      id: "test-payment-id",
+      external_id: "7503417791",
+      terminal_key: "1754681033595DEMO",
+      payment_url: "https://test-payment-url.com",
+      order_id: "test-order-123",
+      amount: 10000,
+      total: 10000,
+      status: "SENT",
+      success: false,
+      created_at: new Date(),
+      updated_at: new Date(),
+    } as any;
+  });
+
+  afterEach(() => {
+    // Clean up environment variables
+    delete process.env.TINKOFF_TERMINAL_ID;
+    delete process.env.TINKOFF_TERMINAL_PASSWORD;
   });
 
   describe("orderToPaymentRequest", () => {
@@ -112,6 +137,66 @@ describe("TBankService Unit Tests", () => {
 
       // Should generate same token regardless of key order
       expect(token1).toBe(token2);
+    });
+  });
+
+  describe("paymentToCancelRequest", () => {
+    it("should create cancellation request with correct PaymentId", () => {
+      const cancelRequest = tbankService.paymentToCancelRequest(testPayment);
+
+      expect(cancelRequest).toHaveProperty("PaymentId", "7503417791");
+      expect(cancelRequest).toHaveProperty("TerminalKey", "1754681033595DEMO");
+      expect(cancelRequest).toHaveProperty("Token");
+      expect(typeof cancelRequest.Token).toBe("string");
+    });
+
+    it("should generate correct token for cancellation request", () => {
+      const cancelRequest = tbankService.paymentToCancelRequest(testPayment);
+      
+      // The token should be generated from: TerminalKey + PaymentId + Password
+      // Sorted alphabetically: Password, PaymentId, TerminalKey
+      const expectedTokenInput = {
+        TerminalKey: "1754681033595DEMO",
+        PaymentId: "7503417791",
+        Password: "Z48jVsFhs!cISDgo"
+      };
+      
+      // Calculate expected token
+      const sortedValues = Object.keys(expectedTokenInput)
+        .sort()
+        .map(k => expectedTokenInput[k as keyof typeof expectedTokenInput])
+        .join("");
+      
+      const expectedHash = require("crypto")
+        .createHash("sha256")
+        .update(sortedValues)
+        .digest("hex");
+
+        console.log('>>>>>>>>>>> ', expectedHash)
+      
+      expect(cancelRequest.Token).toBe(expectedHash);
+    });
+
+    it("should include only required fields in cancellation request", () => {
+      const cancelRequest = tbankService.paymentToCancelRequest(testPayment);
+      
+      const expectedKeys = ["Token", "TerminalKey", "PaymentId"];
+      const actualKeys = Object.keys(cancelRequest);
+      
+      expect(actualKeys.sort()).toEqual(expectedKeys.sort());
+      expect(actualKeys).toHaveLength(3);
+    });
+
+    it("should handle payment with numeric external_id", () => {
+      const paymentWithNumericId = {
+        ...testPayment,
+        external_id: "7503417791" // numeric instead of string
+      } as any;
+      
+      const cancelRequest = tbankService.paymentToCancelRequest(paymentWithNumericId);
+      
+      // PaymentId should be converted to string in the request
+      expect(cancelRequest.PaymentId).toBe("7503417791");
     });
   });
 });

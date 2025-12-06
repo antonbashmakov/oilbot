@@ -16,6 +16,7 @@ type BaseCustomerOverview = components["schemas"]["CustomerOverview"];
 type BaseUser = components["schemas"]["User"];
 
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
+export type TinkoffPaymentCancelationRequest = models["schemas"]["TinkoffPaymentCancelationRequest"];
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
 export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 export type TinkoffResult = models["schemas"]["TinkoffResult"];
@@ -96,5 +97,5 @@ export interface IdempotentObject<T = any> {
   id: string;
   created_at: Date;
   data: T;
-};
+}
 

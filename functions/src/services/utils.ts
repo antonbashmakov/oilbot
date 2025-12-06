@@ -1,8 +1,8 @@
 import * as moment from "moment";
 import * as jwt from "jsonwebtoken";
-import { User } from "../models";
+import {User} from "../models";
 import UserService from "./UserService";
-import { express } from "../controllers/private/imports";
+import {express} from "../controllers/private/imports";
 
 
 // Constants
@@ -84,35 +84,34 @@ export const readBase64String = (text: string): string => `${Buffer.from(text, "
 export const purgeHtml = (html: string): string => html.replace(/[\s]/gi, "");
 
 export const generateToken = (user: User): string => {
-  return jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, {
+  return jwt.sign({id: user.id}, process.env.JWT_SECRET as string, {
     expiresIn: "1d",
   });
 };
 
 
 export const authorize = async (req: express.Request, res: express.Response, next: express.NextFunction, userService: UserService, role: "ADMIN" | "AGENT") => {
-
-    if (!req.headers.authorization) {
-        if (!next) {
-            return Promise.reject(new Error('MISSING_AUTH_HEADER'));
-        }
-        return api.forbidden(res);
+  if (!req.headers.authorization) {
+    if (!next) {
+      return Promise.reject(new Error("MISSING_AUTH_HEADER"));
     }
+    return api.forbidden(res);
+  }
 
-    const token = parseToken(req.headers.authorization.trim());
+  const token = parseToken(req.headers.authorization.trim());
 
-    if(!token) return api.forbidden(res);
+  if (!token) return api.forbidden(res);
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string};
-        const user = await userService.require(decoded.id);
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string};
+    const user = await userService.require(decoded.id);
 
-        if(!user.roles.includes(role)) return api.forbidden(res);
+    if (!user.roles.includes(role)) return api.forbidden(res);
 
-        (req as any).user = user;
-    } catch (err) {
-        return res.status(401).json({ message: "Invalid token" });
-    }
+    (req as any).user = user;
+  } catch (err) {
+    return res.status(401).json({message: "Invalid token"});
+  }
 
-    if (next) return next();
-}
+  if (next) return next();
+};

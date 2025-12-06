@@ -4,7 +4,7 @@ import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import * as moment from "moment";
 
-import {Order, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
+import {Order, Payment, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
 dotenv.config();
 
 const terminal = process.env.TINKOFF_TERMINAL_ID || functions.config().tinkoff.TINKOFF_TERMINAL_ID;
@@ -60,6 +60,19 @@ class TBankService {
 
     return body;
   }
+  paymentToCancelRequest(payment: Payment): TinkoffPaymentCancelationRequest {
+    const body = {
+      Token: "",
+      TerminalKey: terminal,
+      PaymentId: payment.external_id,
+    };
+
+    const rootFields = {...body, Password: password} as any;
+
+    body.Token = this.generateToken(rootFields);
+
+    return body;
+  }
 
   async initPayment(paymentRequest: TinkoffPaymentPayload) {
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Init", paymentRequest, {
@@ -69,7 +82,7 @@ class TBankService {
     });
     return response.data;
   }
-  async cancelPayment(paymentRequest: TinkoffPaymentPayload): Promise<TinkoffResult> {
+  async cancelPayment(paymentRequest: TinkoffPaymentCancelationRequest): Promise<TinkoffResult> {
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Cancel", paymentRequest, {
       headers: {
         "Content-Type": "application/json",

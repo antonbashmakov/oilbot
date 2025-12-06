@@ -8,8 +8,8 @@ import {
   EventPublisher,
   CONSTANTS,
 } from "./imports";
-import { OrderPaymentConfirmedEvent, OrderPaymentFailedEvent } from "../../models";
-import { debug } from "firebase-functions/logger";
+import {OrderPaymentConfirmedEvent, OrderPaymentFailedEvent} from "../../models";
+import {debug} from "firebase-functions/logger";
 
 dotenv.config();
 
@@ -26,7 +26,7 @@ if (process.env.GCLOUD_PROJECT !== "test-project" && db.databaseId !== process.e
 const webhookApi = express();
 
 webhookApi.use(cors(
-  { origin: true } // allows all cross origin xhr requests
+  {origin: true} // allows all cross origin xhr requests
 ));
 
 webhookApi.use(express.json());
@@ -72,7 +72,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
     }
 
     // Process failed payment statuses
-    const failedStatuses = ["REVERSED", "CANCELED", "REJECTED", "DEADLINE_EXPIRED"]; // TBank send canceLed with one L 
+    const failedStatuses = ["REVERSED", "CANCELED", "REJECTED", "DEADLINE_EXPIRED"]; // TBank send canceLed with one L
     if (body.Success && failedStatuses.includes(body.Status)) {
       const eventPublisher = new EventPublisher<OrderPaymentFailedEvent>(db);
 

@@ -114,6 +114,13 @@ export interface components {
       DATA?: components["schemas"]["TinkoffPaymentData"];
       Receipt: components["schemas"]["TinkoffReceipt"];
     };
+    TinkoffPaymentCancelationRequest: {
+      /** @description Ключ терминала */
+      TerminalKey: string;
+      Token: string;
+      /** @description Идентификатор платежа */
+      PaymentId?: string;
+    };
     TinkoffResult: {
       /** @example TBankTest */
       TerminalKey: string;

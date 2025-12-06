@@ -138,11 +138,10 @@ abstract class AbstractService<T extends Entity> {
 
     const ret = {id, ...o} as T;
 
-    if(o.created_at) {
+    if (o.created_at) {
       ret.created_at = o.created_at.toDate();
     }
 
-    
 
     return ret;
   }

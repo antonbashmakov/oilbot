@@ -9,8 +9,8 @@ import {
   UserService,
 } from "./imports";
 import * as bcrypt from "bcrypt";
-import { generateToken } from "../../services/utils";
-import { User } from "../../models";
+import {generateToken} from "../../services/utils";
+import {User} from "../../models";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -37,7 +37,7 @@ publicApi.use(express.json());
 
 publicApi.post("/signup", async (req: express.Request, res: express.Response) => {
   try {
-    const { email, password } = req.body;
+    const {email, password} = req.body;
 
     // Validate required fields
     if (!email || !password) {
@@ -45,7 +45,7 @@ publicApi.post("/signup", async (req: express.Request, res: express.Response) =>
     }
 
     // Validate email format
-    
+
     if (!emailRegex.test(email)) {
       return api.badRequest(res, "Invalid email format");
     }
@@ -63,13 +63,13 @@ publicApi.post("/signup", async (req: express.Request, res: express.Response) =>
 
     const hash = await bcrypt.hash(password, 10);
     const user: User = {
-      id: '',
+      id: "",
       email,
       password: hash,
       roles: [],
-      created_at : new Date()
+      created_at: new Date(),
     };
-    
+
     const saved = await userService.add(user);
 
     saved.token = generateToken(saved);
@@ -84,7 +84,7 @@ publicApi.post("/signup", async (req: express.Request, res: express.Response) =>
 
 publicApi.post("/login", async (req: express.Request, res: express.Response) => {
   try {
-    const { email, password } = req.body;
+    const {email, password} = req.body;
 
     // Validate required fields
     if (!email || !password) {
@@ -106,7 +106,7 @@ publicApi.post("/login", async (req: express.Request, res: express.Response) => 
     }
 
     // Remove password hash from response
-    user.password = 'p';
+    user.password = "p";
     user.token = generateToken(user);
 
     // Return the authenticated user

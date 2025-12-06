@@ -175,6 +175,24 @@ components:
         - OrderId    
         - RedirectDueDate
         - Receipt
+
+    TinkoffPaymentCancelationRequest:
+      type: object
+      properties:
+        TerminalKey:
+          type: string
+          description: "Ключ терминала"
+        Token:
+          type: string
+        PaymentId:
+          type: string
+          description: "Идентификатор платежа"
+      required:
+        - TerminalKey
+        - Token
+        - Receipt
+
+
     TinkoffResult:
       type: object
       properties:

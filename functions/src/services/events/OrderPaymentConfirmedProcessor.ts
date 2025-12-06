@@ -1,10 +1,10 @@
-import { OrderPaymentConfirmedEvent } from "../../models";
+import {OrderPaymentConfirmedEvent} from "../../models";
 import OrderService from "../OrderService";
 import PaymentService from "../PaymentService";
 import TelegramService from "../TelegramService";
 import AbstractProcessor from "./AbstractProcessor";
-import { toMessage } from "../../messaging/util";
-import { error, warn } from "firebase-functions/logger";
+import {toMessage} from "../../messaging/util";
+import {error, warn} from "firebase-functions/logger";
 
 class OrderPaymentConfirmedProcessor extends AbstractProcessor {
   async process(event: OrderPaymentConfirmedEvent): Promise<void> {
@@ -25,42 +25,42 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
 
     await orderService.runTransactionally(async (t) => {
       const orderDocRef = orderService.getCollection().doc(order.id);
-      t.update(orderDocRef, { status: "PAID" });
+      t.update(orderDocRef, {status: "PAID"});
 
       const paymentDocRef = paymentService.getCollection().doc(payment.id);
-      t.update(paymentDocRef, { success: true, status: "CONFIRMED" });
+      t.update(paymentDocRef, {success: true, status: "CONFIRMED"});
 
       if (order.type === "CONCILIATION") {
         // For CONCILIATION orders, update the original order status
         const originalOrderDocRef = orderService.getCollection().doc(order.reconciliated_order_id!);
-        t.update(originalOrderDocRef, { status: "CONCILIATED" });
+        t.update(originalOrderDocRef, {status: "CONCILIATED"});
       }
     });
 
     switch (order.type) {
-      case "CONCILIATION": {
-        const templateValues = {
-          originalOrderId: order.reconciliated_order_id,
-        };
-        const message = toMessage("ORDER_PAYMENT_CONFIRMED_CONCILIATION", templateValues);
-        telegramService.sendMessage(order.owner.id, message).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_CONCILIATION to ${order.owner.id}: ${e}`));
-        break;
-      }
+    case "CONCILIATION": {
+      const templateValues = {
+        originalOrderId: order.reconciliated_order_id,
+      };
+      const message = toMessage("ORDER_PAYMENT_CONFIRMED_CONCILIATION", templateValues);
+      telegramService.sendMessage(order.owner.id, message).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_CONCILIATION to ${order.owner.id}: ${e}`));
+      break;
+    }
 
-      case "ORIGINAL": {
-        const templateValues = {
-          items: order.items.map((item) => ({
-            name: item.name,
-            price: item.price,
-          })),
-          total: order.total,
-        };
-        const message = toMessage("ORDER_PAYMENT_CONFIRMED_ORIGINAL", templateValues);
-        telegramService.sendMessage(order.owner.id, message).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_ORIGINAL to ${order.owner.id}: ${e}`));
-        break;
-      }
+    case "ORIGINAL": {
+      const templateValues = {
+        items: order.items.map((item) => ({
+          name: item.name,
+          price: item.price,
+        })),
+        total: order.total,
+      };
+      const message = toMessage("ORDER_PAYMENT_CONFIRMED_ORIGINAL", templateValues);
+      telegramService.sendMessage(order.owner.id, message).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_ORIGINAL to ${order.owner.id}: ${e}`));
+      break;
+    }
 
-      default: warn(`Got not existing order type: ${order.type}`);
+    default: warn(`Got not existing order type: ${order.type}`);
     }
 
     // Send notification to hardcoded chat ID
