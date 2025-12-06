@@ -26,10 +26,10 @@ export function useApiQuery<P extends PathsWithMethod<paths, 'get'>>(p: P | unde
     const { GET } = useClient();
     // @ts-ignore
     return useQuery({ 
+        ...options,
         queryKey: getApiQueryParams(p, init),
         queryFn: () => handleResult(GET(p as P, init)),
         enabled: !!p,
-        ...options
     });
 }
 
@@ -153,47 +153,14 @@ export function usePostApiQuery<P extends PathsWithMethod<paths, 'post'>>(p: P |
     const { POST } = useClient();
     // @ts-ignore
     return useQuery({ 
+        ...options,
+        // @ts-ignore
         queryKey: getApiQueryParams(p, init),
         queryFn: () => handleResult(POST(p as P, init)),
         enabled: !!p,
         retry: 1,
-        ...options,
     });
 }
-/*
-
-// @ts-ignore
-export function usePatchApiQuery<P extends PathsWithMethod<paths, 'patch'>>(p: P , init: FetchOptions<FilterKeys<paths[P], 'patch'>>, invalidates: string[], options: UseQueryOptions<any> = {}) {
-    const { PATCH } = useClient();
-
-    const queryClient = useQueryClient();
-
-
-    return (request: GenerateLoanRequest) => (PATCH(p, {
-        params: {
-            path: {
-                loanId
-            }
-        },
-        body: request
-    })).then(async res => {
-        await queryClient.invalidateQueries({
-            queryKey: [invalidates.map(i => [i])]
-        });
-         return res;
-    });
-    const {PATCH} = useClient();
-    // @ts-ignore
-    return useQuery(getApiQueryParams(p, init), () => handleResult(PATCH(p as P, init)), 
-        // @ts-ignore
-        {
-            enabled: !!p,
-            retry: 1,
-            ...options,
-        })
-}
-
-*/
 
 // @ts-ignore
 export function useApiQueries<P extends PathsWithMethod<paths, 'get'>>(p: P | undefined | '', inits: FetchOptions<FilterKeys<paths[P], 'get'>>[], options: UseQueryOptions<any> = {}) {

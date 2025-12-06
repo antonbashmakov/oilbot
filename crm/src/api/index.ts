@@ -86,7 +86,7 @@ export const useAdminDeliveryQuery = (id?: string): UseQueryResult<DeliveryOverv
                 id: id || ""
             }
         }
-    }, { retry: 1, enabled: !!id })
+    }, { retry: 1, enabled: !!id } as any)
 };
 export const useAdminOrderOverviewQuery = (id?: string): UseQueryResult<OrderOverview> => {
     return useApiQuery("/admin/orders/{id}", {
@@ -95,7 +95,7 @@ export const useAdminOrderOverviewQuery = (id?: string): UseQueryResult<OrderOve
                 id: id || ""
             }
         }
-    }, { retry: 1, enabled: !!id })
+    }, { retry: 1, enabled: !!id } as any)
 };
 
 export const useAdminOrderConciliationQuery = (id?: string): UseQueryResult<Order> => {
@@ -105,7 +105,7 @@ export const useAdminOrderConciliationQuery = (id?: string): UseQueryResult<Orde
                 id: id || ""
             }
         }
-    }, { retry: 1, enabled: !!id })
+    }, { retry: 1, enabled: !!id } as any)
 };
 
 export const useAdminOrderPaymentsQuery = (orderId?: string): UseQueryResult<Payment[]> => {
@@ -115,7 +115,7 @@ export const useAdminOrderPaymentsQuery = (orderId?: string): UseQueryResult<Pay
                 orderId: orderId || ""
             }
         }
-    }, { retry: 1, enabled: !!orderId })
+    }, { retry: 1, enabled: !!orderId }  as any)
 };
 
 export function useCreateOrderPayment(orderId?: string) {

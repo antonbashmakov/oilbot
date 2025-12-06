@@ -25,7 +25,8 @@ import { setAuthToken } from "@/utils/auth";
 export default function LoginPage() {
   const router = useRouter();
   const { setUser } = useUser();
-  const { mutate: login, isLoading: isSubmitting } = useLogin();
+  
+  const { mutate: login, isPending: isSubmitting } = useLogin();
   
   // Form state
   const [email, setEmail] = useState("");

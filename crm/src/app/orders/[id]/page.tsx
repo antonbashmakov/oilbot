@@ -121,12 +121,12 @@ export default function OrderPage() {
   const { data: conciliationOrder } = useAdminOrderConciliationQuery(orderId as string);
   const { data: payments = [] } = useAdminOrderPaymentsQuery(orderId as string);
   const { mutate: mutatePicking } = usePatchOrderPicking(orderId as string);
-  const { mutate: mutateStartPicking, isLoading: isStartPicking } = useStartOrderPicking(orderId as string);
-  const { mutate: mutateConsolidate, isLoading: isConsolidating } = useConsolidateOrder(orderId as string);
-  const { mutate: collectPicking, isLoading: isCollecting } = useCollectPickingItem(orderId as string, selectedItem?.id);
-  const { mutate: createOriginalPayment, isLoading: isCreatingOriginalPayment } = useCreateOrderPayment(orderId as string);
-  const { mutate: createConciliationPayment, isLoading: isCreatingConciliationPayment } = useCreateOrderPayment(conciliationOrder?.id);
-  const { mutate: cancelOrder, isLoading: isCancelling } = useCancelOrder(orderId as string);
+  const { mutate: mutateStartPicking, isPending: isStartPicking } = useStartOrderPicking(orderId as string);
+  const { mutate: mutateConsolidate, isPending: isConsolidating } = useConsolidateOrder(orderId as string);
+  const { mutate: collectPicking, isPending: isCollecting } = useCollectPickingItem(orderId as string, selectedItem?.id);
+  const { mutate: createOriginalPayment, isPending: isCreatingOriginalPayment } = useCreateOrderPayment(orderId as string);
+  const { mutate: createConciliationPayment, isPending: isCreatingConciliationPayment } = useCreateOrderPayment(conciliationOrder?.id);
+  const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder(orderId as string);
 
   // Sort payments into original and conciliation arrays
   const originalPayments = payments.filter(payment =>
