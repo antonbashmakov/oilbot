@@ -175,3 +175,9 @@ export function useLogin() {
         {} as never
     );
 };
+
+export const useUserQuery = (): UseQueryResult<User> => {
+  // Only enable the query if we have a token
+  const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('token');
+  return useApiQuery( "/public/users/me", {}, { enabled: hasToken } as any );
+}

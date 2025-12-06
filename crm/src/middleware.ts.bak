@@ -13,6 +13,12 @@ export function middleware(request: NextRequest) {
   // Get the user token from cookies
   const token = request.cookies.get('token')?.value;
   const hasUser = !!token;
+
+   const rawCookie = request.headers.get('cookie') || '';
+  console.log('Headers:', request.headers);
+  console.log('Raw cookies:', rawCookie);
+  console.log('What are cookies? : ', request.cookies);
+  console.log('What is token? : ', token);
   
   // Get user roles from cookie
   const userRolesCookie = request.cookies.get('user_roles')?.value;

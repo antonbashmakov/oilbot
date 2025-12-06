@@ -19,12 +19,10 @@ import { Card } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon, EmailIcon, LockIcon } from "@chakra-ui/icons";
 import Link from "next/link";
 import { useLogin } from "@/api";
-import { useUser } from "@/api/user/provider";
 import { setAuthToken } from "@/utils/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setUser } = useUser();
   
   const { mutate: login, isPending: isSubmitting } = useLogin();
   
@@ -51,9 +49,6 @@ export default function LoginPage() {
       {
         onSuccess: (user: any) => {
           if (user) {
-            // Store user in context (includes JWT token)
-            setUser(user);
-            
             // Store JWT token and user data in both localStorage and cookie
             if (user.token) {
               setAuthToken(user.token, user);
@@ -63,6 +58,9 @@ export default function LoginPage() {
             const searchParams = new URLSearchParams(window.location.search);
             const from = searchParams.get('from');
             router.push(from || "/");
+            
+            // Force a page reload to trigger UserProvider refetch
+            window.location.reload();
           } else {
             setError("Login failed. Please try again.");
           }

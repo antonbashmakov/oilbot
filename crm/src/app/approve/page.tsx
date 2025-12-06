@@ -74,30 +74,7 @@ export default function ApprovePage() {
               </Text>
             </VStack>
 
-            {/* Action Button */}
-            <ChakraLink
-              as={Link}
-              href="/login"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              gap="2"
-              width="full"
-              maxW="240px"
-              bg="primary.500"
-              color="white"
-              _hover={{ bg: "primary.600", textDecoration: "none" }}
-              borderRadius="lg"
-              py="3"
-              px="6"
-              fontSize="sm"
-              fontWeight="bold"
-              letterSpacing="0.015em"
-              transition="background-color 0.2s"
-            >
-              <ArrowBackIcon size="sm"/>
-              Back to Login
-            </ChakraLink>
+
           </VStack>
         </Box>
       </Container>

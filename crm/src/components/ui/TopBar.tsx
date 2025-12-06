@@ -18,7 +18,7 @@ import { clearAuthToken } from "@/utils/auth";
 
 export default function TopBar() {
   const router = useRouter();
-  const { user, setUser } = useUser();
+  const { user, setUser, isLoading } = useUser();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -42,8 +42,9 @@ export default function TopBar() {
     router.push("/login");
   };
 
-  if (!user) {
-    return null; // Don't show top bar if user is not logged in
+  // Don't show top bar while loading or if user is not logged in
+  if (isLoading || !user) {
+    return null;
   }
 
   return (

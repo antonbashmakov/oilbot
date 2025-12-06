@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import "./globals.css";
 import { ColorModeProvider, DarkMode } from "@/components/ui/color-mode";
 import TopBar from "@/components/ui/TopBar";
+import AuthWrapper from "./AuthWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,8 +33,10 @@ export default function RootLayout({
       >
         <Providers>
           <DarkMode>
-            <TopBar />
-            {children}
+            <AuthWrapper>
+              <TopBar />
+              {children}
+            </AuthWrapper>
           </DarkMode>
         </Providers>
       </body>

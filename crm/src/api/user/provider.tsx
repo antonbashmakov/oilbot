@@ -1,12 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { User } from '@/api/models';
+import { useUserQuery } from '@/api';
+import { UseQueryResult } from '@tanstack/react-query';
 
 interface UserContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -16,42 +20,31 @@ interface UserProviderProps {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Load user from localStorage on initial render
-  useEffect(() => {
-    const loadUserFromStorage = () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      } catch (error) {
-        console.error('Failed to load user from localStorage:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadUserFromStorage();
-  }, []);
-
-  // Update localStorage when user changes
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('user');
-    }
-  }, [user]);
+  const { data: user, isLoading, isError, refetch }: UseQueryResult<User> = useUserQuery();
 
   const handleSetUser = (newUser: User | null) => {
-    setUser(newUser);
+    // Note: Since we're using API query, we can't directly set user
+    // This function is kept for compatibility but will trigger a refetch
+    if (newUser === null) {
+      // Clear local storage and cookies when logging out
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+      document.cookie = 'user_roles=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+    }
+    refetch();
+  };
+
+  const contextValue: UserContextType = {
+    user: user || null,
+    setUser: handleSetUser,
+    isLoading,
+    isError,
+    refetch,
   };
 
   return (
-    <UserContext.Provider value={{ user, setUser: handleSetUser, isLoading }}>
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );
