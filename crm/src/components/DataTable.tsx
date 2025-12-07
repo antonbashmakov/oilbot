@@ -168,7 +168,7 @@ export function DataTable<T>({
     <Box bg="surface.container"
       borderStyle="solid"
       border="1px"
-      borderRadius="sm"
+      borderRadius="xl"
       borderColor="border.subtle">
       {title && (
         <Box p="4" borderBottom="1px" borderColor="border.subtle">

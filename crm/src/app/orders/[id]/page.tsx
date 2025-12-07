@@ -270,7 +270,6 @@ export default function OrderPage() {
             </Breadcrumb.List>
           </Breadcrumb.Root>
 
-          {/*< DataTableWithSummaryExample />*/}
           {order && <>
 
             <Flex justify="space-between" align="center">

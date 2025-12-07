@@ -923,6 +923,8 @@ export interface components {
     DeliveryOverview: {
       /** @description List of active orders in this delivery. All orders which are not CANCELED */
       activeOrders?: components["schemas"]["Order"][];
+      /** @description List of active orders in this delivery. All orders which are not CANCELED */
+      cancelledOrders?: components["schemas"]["Order"][];
       /** @description List of all CANCELED orders in this delivery */
       removedOrders?: components["schemas"]["Order"][];
       /** @description Statistics for the delivery */

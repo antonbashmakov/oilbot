@@ -1002,6 +1002,11 @@ components:
           description: List of active orders in this delivery. All orders which are not CANCELED
           items:
             $ref: '#/components/schemas/Order'
+        cancelledOrders:
+          type: array
+          description: List of active orders in this delivery. All orders which are not CANCELED
+          items:
+            $ref: '#/components/schemas/Order'
         removedOrders:
           type: array
           description: List of all CANCELED orders in this delivery

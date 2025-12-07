@@ -15,29 +15,7 @@ import { DataTable } from "@/components/DataTable";
 import { DeliveryInformationCard } from "../DeliveryInformationCard";
 import { useAdminDeliveryQuery } from "@/api";
 import Link from "next/link";
-
-// Order status badge component
-function OrderStatusBadge({ status }: { status: string }) {
-  const statusColors = {
-    PENDING: "yellow",
-    PAID: "green",
-    RESOLVING: "yellow",
-    CONCILIATION_PAYMENT_IN_PROGRESS: "yellow",
-  };
-
-  const statusLabels = {
-    PENDING: "Pending",
-    PAID: "Paid",
-    RESOLVING: "Resolving",
-    CONCILIATION_PAYMENT_IN_PROGRESS: "Payment in Progress",
-  };
-
-  return (
-    <Badge colorPalette={statusColors[status as keyof typeof statusColors]}>
-      {statusLabels[status as keyof typeof statusLabels]}
-    </Badge>
-  );
-}
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export default function DeliveryDetailPage() {
   const params = useParams();
@@ -85,14 +63,11 @@ export default function DeliveryDetailPage() {
         <DeliveryInformationCard delivery={delivery} />
         <Container mb="8" />
         {/* Orders Table */}
-        {delivery.activeOrders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
-          <Card.Header>
-            <Heading p={0} size="lg" color="text.primary">
-              Orders in Delivery
-            </Heading>
-          </Card.Header>
+        {delivery.activeOrders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle" mb="8">
+
           <Card.Body p={0}>
             <DataTable
+              title="Orders in Delivery"
               getKey={i => i.id}
               columns={[
                 {
@@ -111,33 +86,30 @@ export default function DeliveryDetailPage() {
                 {
                   key: "status",
                   header: "Status",
-                  accessor: (order) => <OrderStatusBadge status={order.status} />,
+                  accessor: (order) => <StatusBadge status={order.status} />,
                 },
                 {
                   key: "numberOfItems",
                   header: "Items",
-                  accessor: (order) => order.number_of_items,
-                  align: "end",
+                  accessor: (order) => order.items.length,
                 },
                 {
                   key: "totalValue",
+                  field: "total",
                   header: "Total Value",
                   accessor: (order) => order.total,
+                  summarizable: true,
                   align: "end",
                 },
               ]}
-              data={delivery.orders}
+              data={delivery.activeOrders}
             />
           </Card.Body>
         </Card.Root>}
-        {delivery.stats && delivery.stats.length > 0 && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle">
-          <Card.Header>
-            <Heading p={0} size="lg" color="text.primary">
-              Statistics
-            </Heading>
-          </Card.Header>
-          <Card.Body p={0}>
+        {delivery.stats && delivery.stats.length > 0 && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle" mb="8">
+          <Card.Body p={0} >
             <DataTable
+              title="Statistics"
               getKey={i => i.name}
               columns={[
                 {
@@ -159,14 +131,61 @@ export default function DeliveryDetailPage() {
                 },
                 {
                   key: "totalCost",
+                  field: "total",
                   header: "Total Cost",
                   accessor: (item) => item.total,
+                  summarizable: true,
+                  align: "end",
                 },
               ]}
               data={delivery.stats!}
             />
           </Card.Body>
         </Card.Root>}
+
+        {/* Canceled Orders Table */}
+        {delivery.cancelledOrders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle" mb="8">
+
+          <Card.Body p={0}>
+            <DataTable
+              title="Canceled Orders"
+              getKey={i => i.id}
+              columns={[
+                {
+                  key: "id",
+                  header: "Order ID",
+
+                  accessor: (order) => (
+                    <Link target="_blank" href={`/orders/${order.id}`}><Text fontWeight="medium">{order.id}</Text></Link>
+                  ),
+                },
+                {
+                  key: "customerName",
+                  header: "Customer Name",
+                  accessor: (order) => order.owner.id,
+                },
+                {
+                  key: "status",
+                  header: "Status",
+                  accessor: (order) => <StatusBadge status={order.status} />,
+                },
+                {
+                  key: "numberOfItems",
+                  header: "Items",
+                  accessor: (order) => order.number_of_items,
+                  align: "end",
+                },
+                {
+                  key: "totalValue",
+                  header: "Total Value",
+                  accessor: (order) => order.total,
+                  align: "end",
+                },
+              ]}
+              data={delivery.cancelledOrders}
+            />
+          </Card.Body>
+        </Card.Root>}        
       </Container>
       }
     </Box>
