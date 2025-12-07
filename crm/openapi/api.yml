@@ -80,6 +80,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /admin/deliveries/{id}/stats/{format}:
+    get:
+      summary: Get delivery statistics in CSV format
+      description: Retrieve delivery order statistics filtered by status and export as CSV
+      tags:
+        - Deliveries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Delivery ID
+          schema:
+            type: string
+        - name: format
+          in: path
+          required: true
+          description: Output format
+          schema:
+            type: string
+            enum: [CSV]
+        - name: status
+          in: query
+          required: false
+          description: Filter orders by status
+          schema:
+            type: string
+            enum:
+              - PENDING
+              - PAYMENT_IN_PROGRESS
+              - PAYMENT_FAILED
+              - PAID
+              - RESOLVING
+              - CONCILIATION_PAYMENT_IN_PROGRESS
+              - CONCILIATED
+              - CANCELED
+      responses:
+        '200':
+          description: Successful response with CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              description: Attachment filename
+        '404':
+          description: Delivery not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /admin/orders/{id}:
     get:
       summary: Get order overview by ID

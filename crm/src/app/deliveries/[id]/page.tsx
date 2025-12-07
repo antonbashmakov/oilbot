@@ -13,15 +13,18 @@ import {
 } from "@chakra-ui/react";
 import { DataTable } from "@/components/DataTable";
 import { DeliveryInformationCard } from "../DeliveryInformationCard";
-import { useAdminDeliveryQuery } from "@/api";
+import { useAdminDeliveryQuery, useDownloadDeliveryStats } from "@/api";
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { useState } from "react";
 
 export default function DeliveryDetailPage() {
   const params = useParams();
   const deliveryId = params.id as string;
 
   const { data: delivery } = useAdminDeliveryQuery(deliveryId);
+  const downloadStatsMutation = useDownloadDeliveryStats();
+  const [isDownloading, setDownloading] = useState(false);
 
   const handleEdit = () => {
     console.log("Edit delivery:", deliveryId);
@@ -33,11 +36,33 @@ export default function DeliveryDetailPage() {
     // Implement mark delivered functionality
   };
 
+  const handleDownloadReport = async () => {
+    try {
+      setDownloading(true);
+      const response = await downloadStatsMutation(delivery!.id);
+
+      console.log(response);
+      // Get the blob from response
+      const blob = await response.blob();
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `delivery-${deliveryId}-stats.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading report:", error);
+    }
+    setDownloading(false);
+
+  };
+
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
-
-
-
       {delivery && <Container maxW="7xl">
         {/* Header with title and buttons */}
         <Flex justify="space-between" align="center" mb="8">
@@ -106,42 +131,58 @@ export default function DeliveryDetailPage() {
             />
           </Card.Body>
         </Card.Root>}
-        {delivery.stats && delivery.stats.length > 0 && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle" mb="8">
-          <Card.Body p={0} >
-            <DataTable
-              title="Statistics"
-              getKey={i => i.name}
-              columns={[
-                {
-                  key: "itemName",
-                  header: "Item Name",
-                  accessor: (item) => (
-                    <Text fontWeight="medium">{item.name}</Text>
-                  ),
-                },
-                {
-                  key: "totalFraction",
-                  header: "Total Fraction",
-                  accessor: (item) => item.fraction,
-                },
-                {
-                  key: "totalQuantity",
-                  header: "Total Quantity",
-                  accessor: (item) => item.quantity,
-                },
-                {
-                  key: "totalCost",
-                  field: "total",
-                  header: "Total Cost",
-                  accessor: (item) => item.total,
-                  summarizable: true,
-                  align: "end",
-                },
-              ]}
-              data={delivery.stats!}
-            />
-          </Card.Body>
-        </Card.Root>}
+        {delivery.stats && delivery.stats.length > 0 && (
+          <>
+            <Flex justify="flex-end" mb="4">
+              <button
+                onClick={handleDownloadReport}
+                disabled={isDownloading}
+                className="flex items-center justify-center gap-2 h-9 px-3 rounded-md border border-gray-600 bg-surface-dark text-gray-300 hover:bg-gray-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined text-base">download</span>
+                <span>
+                  {isDownloading ? "Downloading..." : "Download Report"}
+                </span>
+              </button>
+            </Flex>
+            <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle" mb="8">
+              <Card.Body p={0} >
+                <DataTable
+                  title="Statistics"
+                  getKey={i => i.name}
+                  columns={[
+                    {
+                      key: "itemName",
+                      header: "Item Name",
+                      accessor: (item) => (
+                        <Text fontWeight="medium">{item.name}</Text>
+                      ),
+                    },
+                    {
+                      key: "totalFraction",
+                      header: "Total Fraction",
+                      accessor: (item) => item.fraction,
+                    },
+                    {
+                      key: "totalQuantity",
+                      header: "Total Quantity",
+                      accessor: (item) => item.quantity,
+                    },
+                    {
+                      key: "totalCost",
+                      field: "total",
+                      header: "Total Cost",
+                      accessor: (item) => item.total,
+                      summarizable: true,
+                      align: "end",
+                    },
+                  ]}
+                  data={delivery.stats!}
+                />
+              </Card.Body>
+            </Card.Root>
+          </>
+        )}
 
         {/* Canceled Orders Table */}
         {delivery.cancelledOrders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle" mb="8">
@@ -185,7 +226,7 @@ export default function DeliveryDetailPage() {
               data={delivery.cancelledOrders}
             />
           </Card.Body>
-        </Card.Root>}        
+        </Card.Root>}
       </Container>
       }
     </Box>

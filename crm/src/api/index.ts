@@ -11,6 +11,8 @@ import {
     LoginRequest,
 } from "@/api/models";
 import { UseQueryResult } from "@tanstack/react-query";
+import useClient from "@/api/useClient";
+import { useMutation } from "@tanstack/react-query";
 
 export type QueryControlOptions = {
     enabled?: boolean
@@ -115,7 +117,7 @@ export const useAdminOrderPaymentsQuery = (orderId?: string): UseQueryResult<Pay
                 orderId: orderId || ""
             }
         }
-    }, { retry: 1, enabled: !!orderId }  as any)
+    }, { retry: 1, enabled: !!orderId } as any)
 };
 
 export function useCreateOrderPayment(orderId?: string) {
@@ -177,7 +179,29 @@ export function useLogin() {
 };
 
 export const useUserQuery = (): UseQueryResult<User> => {
-  // Only enable the query if we have a token
-  const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('token');
-  return useApiQuery( "/public/users/me", {}, { enabled: hasToken } as any );
+    // Only enable the query if we have a token
+    const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('token');
+    return useApiQuery("/public/users/me", {}, { enabled: hasToken } as any);
+}
+
+export function useDownloadDeliveryStats() {
+
+    let token  = (typeof window !== 'undefined') ? localStorage.getItem("token") : "";
+
+    return async (id?: string) => {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/admin/deliveries/${id}/stats/CSV?status=CANCELED`, {
+            method: "GET",
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error downloading report: ${response.statusText}`);
+        }
+
+        return response;
+    }
+
+
 }

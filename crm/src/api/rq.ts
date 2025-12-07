@@ -14,7 +14,6 @@ export function getApiQueryParams<P extends PathsWithMethod<paths, 'get'>>(p: P 
 export async function handleResult<D, E, T extends { data?: D, error?: E, response: { status: number} }>(result: Promise<T>): Promise<D | undefined> {
 
     const { data, error, response } = await result;
-    console.log('=====', await result);
 
     if (error) {
         throw error;

@@ -72,6 +72,50 @@ export interface paths {
       };
     };
   };
+  "/admin/deliveries/{id}/stats/{format}": {
+    /**
+     * Get delivery statistics in CSV format
+     * @description Retrieve delivery order statistics filtered by status and export as CSV
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Filter orders by status */
+          status?: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED" | "CANCELED";
+        };
+        path: {
+          /** @description Delivery ID */
+          id: string;
+          /** @description Output format */
+          format: "CSV";
+        };
+      };
+      responses: {
+        /** @description Successful response with CSV file */
+        200: {
+          headers: {
+            /** @description Attachment filename */
+            "Content-Disposition"?: string;
+          };
+          content: {
+            "text/csv": string;
+          };
+        };
+        /** @description Delivery not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/admin/orders/{id}": {
     /**
      * Get order overview by ID
