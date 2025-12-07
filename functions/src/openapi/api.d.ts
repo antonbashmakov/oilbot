@@ -504,6 +504,44 @@ export interface paths {
       };
     };
   };
+  "/public/users/me": {
+    /**
+     * Get current user information
+     * @description Retrieve the authenticated user's information
+     */
+    get: {
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["User"];
+            };
+          };
+        };
+        /** @description Unauthorized (user not authenticated) */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description User not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/public/signup": {
     /**
      * Register a new user
@@ -885,6 +923,8 @@ export interface components {
     DeliveryOverview: {
       /** @description List of active orders in this delivery. All orders which are not CANCELED */
       activeOrders?: components["schemas"]["Order"][];
+      /** @description List of active orders in this delivery. All orders which are not CANCELED */
+      cancelledOrders?: components["schemas"]["Order"][];
       /** @description List of all CANCELED orders in this delivery */
       removedOrders?: components["schemas"]["Order"][];
       /** @description Statistics for the delivery */
