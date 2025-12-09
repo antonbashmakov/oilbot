@@ -15,14 +15,15 @@ import UserService, {
   toMessage,
   formatDate,
 } from "./imports";
-import { DeliveryOverview, OrderResolvedEvent, Stats, Payment, CustomerOverview, OrderCancelledEvent } from "../../models";
+import {DeliveryOverview, OrderResolvedEvent, Stats, Payment, CustomerOverview, OrderCancelledEvent} from "../../models";
 import OrderPickingService from "../../services/OrderPickingService";
 import EventPublisher from "../../services/EventPublisher";
 import IdempotencyGuardService from "../../services/IdempotencyGuardService";
 import TBankService from "../../services/payments/TBankService";
 import CustomerBalanceService from "../../services/CustomerBalanceService";
-import { logger } from "../../services/logger";
-import { authorize } from "../../services/utils";
+import {logger} from "../../services/logger";
+import {authorize} from "../../services/utils";
+import {localeMiddleware} from "../../middleware/localeMiddleware";
 // import { debug } from 'firebase-functions/logger';
 dotenv.config();
 
@@ -40,8 +41,10 @@ const adminApi = express();
 
 
 adminApi.use(cors(
-  { origin: true } // allows all cross origin xhr requests
+  {origin: true} // allows all cross origin xhr requests
 ));
+
+adminApi.use(localeMiddleware);
 
 adminApi.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const userService = new UserService(db);
@@ -68,7 +71,7 @@ adminApi.get("/deliveries", async (req: express.Request, res: express.Response) 
 
 adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const deliveryService = new DeliveryService(db);
     const orderService = new OrderService(db);
     const delivery = await deliveryService.find(id);
@@ -82,14 +85,14 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
     const activeOrders = orders.filter((o) => o.status !== "CANCELED");
     const cancelledOrders = orders.filter((o) => o.status === "CANCELED");
 
-    const deliveryOverview = { ...delivery, orders, activeOrders, cancelledOrders } as DeliveryOverview;
+    const deliveryOverview = {...delivery, orders, activeOrders, cancelledOrders} as DeliveryOverview;
 
 
     const allItems = activeOrders.flatMap((o) => o.items);
 
     const stats = allItems.reduce((s, i) => {
       if (!s[i.item_id]) {
-        s[i.item_id] = { total: 0, quantity: 0, fraction: 0, name: i.name, group: i.group };
+        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name, group: i.group};
       }
       s[i.item_id].total += i.price * i.quantity;
       s[i.item_id].fraction += i.fraction;
@@ -97,7 +100,7 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
 
 
       return s;
-    }, {} as { [key: string]: Stats  & { group: string } });
+    }, {} as { [key: string]: Stats & { group: string } });
 
     deliveryOverview.stats = Object.keys(stats).map((key) => stats[key]);
 
@@ -110,8 +113,8 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
 
 adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: express.Response) => {
   try {
-    const { id, format } = req.params;
-    const { status } = req.query;
+    const {id, format} = req.params;
+    const {status} = req.query;
 
     // Validate format parameter
     if (format !== "CSV") {
@@ -119,13 +122,13 @@ adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: 
     }
     const validStatuses = [
       "PENDING", "PAYMENT_IN_PROGRESS", "PAYMENT_FAILED", "PAID",
-      "RESOLVING", "CONCILIATION_PAYMENT_IN_PROGRESS", "CONCILIATED", "CANCELED"
+      "RESOLVING", "CONCILIATION_PAYMENT_IN_PROGRESS", "CONCILIATED", "CANCELED",
     ];
     if (!validStatuses.includes(status as string)) {
       return api.badRequest(res, "Wrong status provided.");
     }
 
-      const deliveryService = new DeliveryService(db);
+    const deliveryService = new DeliveryService(db);
     const orderService = new OrderService(db);
     const delivery = await deliveryService.find(id);
 
@@ -139,7 +142,7 @@ adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: 
 
     const stats = allItems.reduce((s, i) => {
       if (!s[i.item_id]) {
-        s[i.item_id] = { total: 0, quantity: 0, fraction: 0, name: i.name };
+        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name};
       }
       s[i.item_id].total += i.price * i.quantity;
       s[i.item_id].fraction += i.fraction;
@@ -150,15 +153,15 @@ adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: 
     // Convert stats to CSV
     const csvRows = [];
     // Header row
-    csvRows.push(["item_id", "name",  "total", "fraction", "quantity"].join(","));
+    csvRows.push(["item_id", "name", "total", "fraction", "quantity"].join(","));
 
     // Data rows
     Object.entries(stats).forEach(([itemId, stat]) => {
       // Escape quotes and handle commas in names
-      const escapedName = stat.name.includes(",") || stat.name.includes('"')
-        ? `"${stat.name.replace(/"/g, '""')}"`
-        : stat.name;
-      csvRows.push([itemId, escapedName,  stat.total, stat.fraction, stat.quantity].join(","));
+      const escapedName = stat.name.includes(",") || stat.name.includes("\"") ?
+        `"${stat.name.replace(/"/g, "\"\"")}"` :
+        stat.name;
+      csvRows.push([itemId, escapedName, stat.total, stat.fraction, stat.quantity].join(","));
     });
 
     const csvContent = csvRows.join("\n");
@@ -176,7 +179,7 @@ adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: 
 
 adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const orderService = new OrderService(db);
 
     const order = (await orderService.find(id));
@@ -195,7 +198,7 @@ adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) 
     customer.balance = balance;
 
 
-    return api.send(res, { ...order, picking, customer });
+    return api.send(res, {...order, picking, customer});
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
@@ -204,8 +207,8 @@ adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) 
 
 adminApi.patch("/order-pickings/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
-    const { items } = req.body;
+    const {id} = req.params;
+    const {items} = req.body;
 
     if (!items || !Array.isArray(items)) {
       return api.error(res, "Items array is required");
@@ -237,7 +240,7 @@ adminApi.patch("/order-pickings/:id", async (req: express.Request, res: express.
 
 adminApi.post("/orders/:id/order-picking", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
@@ -258,7 +261,7 @@ adminApi.post("/orders/:id/order-picking", async (req: express.Request, res: exp
 
 adminApi.post("/order-pickings/:pickingId/items/:itemId/collect", async (req: express.Request, res: express.Response) => {
   try {
-    const { pickingId, itemId } = req.params;
+    const {pickingId, itemId} = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(pickingId);
@@ -285,7 +288,7 @@ adminApi.post("/order-pickings/:pickingId/items/:itemId/collect", async (req: ex
 
 adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
@@ -306,7 +309,7 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
     }
 
 
-    await orderService.updateTransactionally(order, { status: "RESOLVING" });
+    await orderService.updateTransactionally(order, {status: "RESOLVING"});
 
     const eventPublisher = new EventPublisher<OrderResolvedEvent>(db);
 
@@ -318,7 +321,7 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
       processed: false,
       retries: 0,
       type: CONSTANTS.EVENTS.ORDER_RESOLVED,
-      payload: { order_id: order.id },
+      payload: {order_id: order.id},
 
     };
 
@@ -333,7 +336,7 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
 
 adminApi.put("/orders/:id/cancel", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
@@ -348,7 +351,7 @@ adminApi.put("/orders/:id/cancel", async (req: express.Request, res: express.Res
     }
 
     // Update order status to CANCELED
-    await orderService.updateTransactionally(order, { status: "CANCELED" });
+    await orderService.updateTransactionally(order, {status: "CANCELED"});
 
     // Emit OrderCancelledEvent
     const eventPublisher = new EventPublisher<OrderCancelledEvent>(db);
@@ -361,7 +364,7 @@ adminApi.put("/orders/:id/cancel", async (req: express.Request, res: express.Res
       processed: false,
       retries: 0,
       type: CONSTANTS.EVENTS.ORDER_CANCELED,
-      payload: { order_id: order.id },
+      payload: {order_id: order.id},
     };
 
     await eventPublisher.publish(event);
@@ -375,7 +378,7 @@ adminApi.put("/orders/:id/cancel", async (req: express.Request, res: express.Res
 
 adminApi.get("/orders/:id/conciliation", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const orderService = new OrderService(db);
 
     const conciliationOrder = await orderService.findConciliationOrder(id);
@@ -389,7 +392,7 @@ adminApi.get("/orders/:id/conciliation", async (req: express.Request, res: expre
 
 adminApi.get("/orders/:orderId/payments", async (req: express.Request, res: express.Response) => {
   try {
-    const { orderId } = req.params;
+    const {orderId} = req.params;
     const orderService = new OrderService(db);
     const paymentService = new PaymentService(db);
 
@@ -423,8 +426,8 @@ adminApi.get("/orders/:orderId/payments", async (req: express.Request, res: expr
 
 adminApi.post("/orders/:orderId/payments", async (req: express.Request, res: express.Response) => {
   try {
-    const { orderId } = req.params;
-    const { idempotency_key } = req.body;
+    const {orderId} = req.params;
+    const {idempotency_key} = req.body;
 
     if (!idempotency_key) {
       return api.badRequest(res, "idempotency_key is required");
@@ -482,7 +485,7 @@ adminApi.post("/orders/:orderId/payments", async (req: express.Request, res: exp
 
         // Update order status to PAYMENT_IN_PROGRESS if it's not already
         if (order.status !== "PAYMENT_IN_PROGRESS") {
-          await orderService.update(order, { status: "PAYMENT_IN_PROGRESS" });
+          await orderService.update(order, {status: "PAYMENT_IN_PROGRESS"});
         }
 
         // Send Telegram notification to order owner

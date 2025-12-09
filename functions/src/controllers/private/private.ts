@@ -14,6 +14,7 @@ import {
 import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
 import {logger} from "firebase-functions/v1";
+import {localeMiddleware} from "../../middleware/localeMiddleware";
 
 admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
@@ -37,6 +38,8 @@ const privateApi = express();
 privateApi.use(cors(
   {origin: true} // allows all cross origin xhr requests
 ));
+
+privateApi.use(localeMiddleware);
 
 privateApi.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const userService = new UserService(db);

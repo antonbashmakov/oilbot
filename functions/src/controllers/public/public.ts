@@ -9,8 +9,9 @@ import {
   UserService,
 } from "./imports";
 import * as bcrypt from "bcrypt";
-import {generateToken, who} from "../../services/utils";
-import {User} from "../../models";
+import { generateToken, who } from "../../services/utils";
+import { User } from "../../models";
+import { localeMiddleware } from "../../middleware/localeMiddleware";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -30,14 +31,20 @@ const userService = new UserService(db);
 const publicApi = express();
 
 publicApi.use(cors(
-  {origin: true} // allows all cross origin xhr requests
+  {
+    origin: true,
+    credentials: true, // allow cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  } // allows all cross origin xhr requests
 ));
+
+publicApi.use(localeMiddleware);
 
 publicApi.use(express.json());
 
 publicApi.post("/signup", async (req: express.Request, res: express.Response) => {
   try {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     // Validate required fields
     if (!email || !password) {
@@ -84,7 +91,7 @@ publicApi.post("/signup", async (req: express.Request, res: express.Response) =>
 
 publicApi.post("/login", async (req: express.Request, res: express.Response) => {
   try {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     // Validate required fields
     if (!email || !password) {

@@ -37,7 +37,6 @@ export const api = {
     .status(200).send(data),
 
   ok: (response: ExpressResponse): ExpressResponse => response
-    // .header(CONTENT_TYPE, APPLICATION_JSON)
     .status(204).end(),
 
   redirect: (response: ExpressResponse, data: any = {}): ExpressResponse => response
