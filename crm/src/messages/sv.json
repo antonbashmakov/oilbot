@@ -1,0 +1,171 @@
+{
+  "login": {
+    "title": "Logga in till CRM",
+    "subtitle": "Välkommen tillbaka! Vänligen ange dina uppgifter.",
+    "email": "E-post",
+    "emailPlaceholder": "Ange din e-postadress",
+    "password": "Lösenord",
+    "passwordPlaceholder": "Ange ditt lösenord",
+    "rememberMe": "Kom ihåg mig",
+    "forgotPassword": "Glömt lösenord?",
+    "signIn": "Logga in",
+    "noAccount": "Har du inget konto?",
+    "signUp": "Registrera dig",
+    "footer": "© 2024 Ditt företag. Alla rättigheter förbehållna.",
+    "errors": {
+      "fillAllFields": "Vänligen fyll i alla fält",
+      "loginFailed": "Inloggning misslyckades. Försök igen.",
+      "checkCredentials": "Inloggning misslyckades. Kontrollera dina uppgifter och försök igen."
+    }
+  },
+  "signup": {
+    "title": "Skapa ditt konto",
+    "subtitle": "Gå med i vår plattform för att effektivt hantera dina kundrelationer.",
+    "email": "E-post",
+    "emailPlaceholder": "you@company.com",
+    "password": "Lösenord",
+    "passwordPlaceholder": "Ange ditt lösenord",
+    "confirmPassword": "Bekräfta lösenord",
+    "confirmPasswordPlaceholder": "Ange ditt lösenord igen",
+    "terms": "Jag godkänner {terms} och {privacy}.",
+    "termsLink": "Användarvillkor",
+    "privacyLink": "Integritetspolicy",
+    "createAccount": "Skapa konto",
+    "alreadyHaveAccount": "Har du redan ett konto?",
+    "login": "Logga in",
+    "needHelp": "Behöver du hjälp?",
+    "contactUs": "Kontakta oss",
+    "errors": {
+      "fillAllFields": "Vänligen fyll i alla fält",
+      "passwordsDontMatch": "Lösenorden matchar inte",
+      "agreeToTerms": "Du måste godkänna villkoren och bestämmelserna",
+      "passwordTooShort": "Lösenordet måste vara minst 6 tecken långt",
+      "signupFailed": "Registrering misslyckades. Försök igen."
+    }
+  },
+  "approve": {
+    "title": "Vänta på att ditt konto aktiveras",
+    "description": "Din handledare kommer att granska kontot inom kort.\nDu kommer att få ett e-postmeddelande när det har godkänts.",
+    "copyright": "© 2023 CRM System v2.0. Alla rättigheter förbehållna.",
+    "contactSupport": "Kontakta support",
+    "privacyPolicy": "Integritetspolicy"
+  },
+  "orders": {
+    "breadcrumbs": {
+      "dashboard": "Instrumentpanel",
+      "orders": "Beställningar"
+    },
+    "pageTitle": "Beställning {orderId}",
+    "status": {
+      "locked": "Beställningen är låst"
+    },
+    "buttons": {
+      "startPicking": "Starta plockning",
+      "consolidate": "Konsolidera",
+      "cancel": "Avbryt",
+      "newPayment": "Ny betalning"
+    },
+    "tabs": {
+      "orderItems": "Beställningsrader",
+      "closingOrder": "Avslutande beställning"
+    },
+    "table": {
+      "products": "Produkter",
+      "closingOrderItems": "Avslutande beställningsrader",
+      "columns": {
+        "id": "ID",
+        "name": "Namn",
+        "fraction": "Andel",
+        "quantity": "Antal",
+        "price": "Pris",
+        "priceForUnit": "Pris per enhet"
+      }
+    },
+    "infoMessages": {
+      "note": "Notera",
+      "changeFraction": "Ändra andelskolumnen för att återspegla de plockade varorna.",
+      "clickStartPicking": "Klicka på 'Starta plockning' för att börja orderplockningsprocessen.",
+      "noClosingOrder": "Ingen avslutande beställning hittades för denna beställning."
+    },
+    "cards": {
+      "closingOrderInfo": "Information om avslutande beställning",
+      "customer": "Kund",
+      "orderCalculation": "Beställningsberäkning",
+      "original": "Original",
+      "picking": "Plockning",
+      "finalTotal": "Slutsumma",
+      "closing": "Avslutning"
+    },
+    "dataList": {
+      "orderId": "Beställnings-ID",
+      "status": "Status"
+    },
+    "dialog": {
+      "cancelTitle": "Vill du avbryta beställningen?",
+      "cancelMessage": "Alla betalningar kommer att avbrytas.",
+      "keepOrder": "Nej, behåll beställning",
+      "cancelOrder": "Ja, avbryt beställning"
+    }
+  },
+  "deliveries": {
+    "pageTitle": "Leverans #{deliveryNumber}",
+    "buttons": {
+      "edit": "Redigera",
+      "markDelivered": "Markera som levererad",
+      "downloadReport": "Ladda ner rapport",
+      "downloading": "Laddar ner..."
+    },
+    "tables": {
+      "ordersInDelivery": "Beställningar i leverans",
+      "statistics": "Statistik",
+      "canceledOrders": "Avbrutna beställningar"
+    },
+    "columns": {
+      "orderId": "Beställnings-ID",
+      "customerName": "Kundnamn",
+      "status": "Status",
+      "items": "Artiklar",
+      "totalValue": "Totalt värde",
+      "itemName": "Artikelnamn",
+      "totalFraction": "Total andel",
+      "totalQuantity": "Total kvantitet",
+      "totalCost": "Total kostnad"
+    }
+  },
+  "dashboard": {
+    "pageTitle": "CRM Instrumentpanel",
+    "pageSubtitle": "Översikt över leverans- och beställningsinformation",
+    "cards": {
+      "upcomingDeliveries": "Kommande leveranser",
+      "ordersWithoutDeliveries": "Beställningar utan leveranser"
+    },
+    "tables": {
+      "deliveries": "Leveranser"
+    },
+    "columns": {
+      "id": "ID",
+      "name": "Namn",
+      "description": "Beskrivning",
+      "orders": "Beställningar",
+      "deliveryStart": "Leveransstart",
+      "deliveryEnd": "Leveransslut",
+      "status": "Status",
+      "group": "Grupp"
+    },
+    "kpis": {
+      "totalPendingDeliveries": "Totalt antal väntande leveranser",
+      "totalPendingDeliveriesDescription": "Leveranser som väntar på bearbetning",
+      "orphansOrders": "Föräldralösa beställningar",
+      "orphansOrdersDescription": "Beställningar utan leveranser",
+      "averageOrderValue": "Genomsnittligt beställningsvärde",
+      "averageOrderValueDescription": "Genomsnittligt värde per beställning"
+    },
+    "status": {
+      "needsDelivery": "Behöver leverans"
+    },
+    "labels": {
+      "created": "Skapad",
+      "items": "artiklar"
+    }
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "login": {
+    "title": "Вход в CRM",
+    "subtitle": "С возвращением! Пожалуйста, введите свои данные.",
+    "email": "Электронная почта",
+    "emailPlaceholder": "Введите вашу электронную почту",
+    "password": "Пароль",
+    "passwordPlaceholder": "Введите ваш пароль",
+    "rememberMe": "Запомнить меня",
+    "forgotPassword": "Забыли пароль?",
+    "signIn": "Войти",
+    "noAccount": "Нет аккаунта?",
+    "signUp": "Зарегистрироваться",
+    "footer": "© 2024 Ваша компания. Все права защищены.",
+    "errors": {
+      "fillAllFields": "Пожалуйста, заполните все поля",
+      "loginFailed": "Ошибка входа. Пожалуйста, попробуйте снова.",
+      "checkCredentials": "Ошибка входа. Пожалуйста, проверьте свои учетные данные и попробуйте снова."
+    }
+  },
+  "signup": {
+    "title": "Создайте свой аккаунт",
+    "subtitle": "Присоединяйтесь к нашей платформе для эффективного управления отношениями с клиентами.",
+    "email": "Электронная почта",
+    "emailPlaceholder": "you@company.com",
+    "password": "Пароль",
+    "passwordPlaceholder": "Введите ваш пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "confirmPasswordPlaceholder": "Повторите ваш пароль",
+    "terms": "Я согласен с {terms} и {privacy}.",
+    "termsLink": "Условиями обслуживания",
+    "privacyLink": "Политикой конфиденциальности",
+    "createAccount": "Создать аккаунт",
+    "alreadyHaveAccount": "Уже есть аккаунт?",
+    "login": "Войти",
+    "needHelp": "Нужна помощь?",
+    "contactUs": "Свяжитесь с нами",
+    "errors": {
+      "fillAllFields": "Пожалуйста, заполните все поля",
+      "passwordsDontMatch": "Пароли не совпадают",
+      "agreeToTerms": "Вы должны согласиться с условиями и положениями",
+      "passwordTooShort": "Пароль должен содержать не менее 6 символов",
+      "signupFailed": "Ошибка регистрации. Пожалуйста, попробуйте снова."
+    }
+  },
+  "approve": {
+    "title": "Ожидайте активации вашего аккаунта",
+    "description": "Ваш руководитель скоро проверит аккаунт.\nВы получите письмо после одобрения.",
+    "copyright": "© 2023 CRM System v2.0. Все права защищены.",
+    "contactSupport": "Связаться с поддержкой",
+    "privacyPolicy": "Политика конфиденциальности"
+  },
+  "orders": {
+    "breadcrumbs": {
+      "dashboard": "Панель управления",
+      "orders": "Заказы"
+    },
+    "pageTitle": "Заказ {orderId}",
+    "status": {
+      "locked": "Заказ заблокирован"
+    },
+    "buttons": {
+      "startPicking": "Начать сборку",
+      "consolidate": "Консолидировать",
+      "cancel": "Отменить",
+      "newPayment": "Новый платеж"
+    },
+    "tabs": {
+      "orderItems": "Позиции заказа",
+      "closingOrder": "Закрывающий заказ"
+    },
+    "table": {
+      "products": "Товары",
+      "closingOrderItems": "Позиции закрывающего заказа",
+      "columns": {
+        "id": "ID",
+        "name": "Название",
+        "fraction": "Доля",
+        "quantity": "Количество",
+        "price": "Цена",
+        "priceForUnit": "Цена за единицу"
+      }
+    },
+    "infoMessages": {
+      "note": "Примечание",
+      "changeFraction": "Измените столбец доли, чтобы отразить собранные товары.",
+      "clickStartPicking": "Нажмите 'Начать сборку', чтобы начать процесс сборки заказа.",
+      "noClosingOrder": "Закрывающий заказ не найден для этого заказа."
+    },
+    "cards": {
+      "closingOrderInfo": "Информация о закрывающем заказе",
+      "customer": "Клиент",
+      "orderCalculation": "Расчет заказа",
+      "original": "Исходный",
+      "picking": "Сборка",
+      "finalTotal": "Итоговая сумма",
+      "closing": "Закрытие"
+    },
+    "dataList": {
+      "orderId": "ID заказа",
+      "status": "Статус"
+    },
+    "dialog": {
+      "cancelTitle": "Вы хотите отменить заказ?",
+      "cancelMessage": "Все платежи будут отменены.",
+      "keepOrder": "Нет, оставить заказ",
+      "cancelOrder": "Да, отменить заказ"
+    }
+  },
+  "deliveries": {
+    "pageTitle": "Доставка #{deliveryNumber}",
+    "buttons": {
+      "edit": "Редактировать",
+      "markDelivered": "Отметить доставленным",
+      "downloadReport": "Скачать отчет",
+      "downloading": "Загрузка..."
+    },
+    "tables": {
+      "ordersInDelivery": "Заказы в доставке",
+      "statistics": "Статистика",
+      "canceledOrders": "Отмененные заказы"
+    },
+    "columns": {
+      "orderId": "ID заказа",
+      "customerName": "Имя клиента",
+      "status": "Статус",
+      "items": "Товары",
+      "totalValue": "Общая стоимость",
+      "itemName": "Название товара",
+      "totalFraction": "Общая доля",
+      "totalQuantity": "Общее количество",
+      "totalCost": "Общая стоимость"
+    }
+  },
+  "dashboard": {
+    "pageTitle": "CRM Панель управления",
+    "pageSubtitle": "Обзор информации о доставках и заказах",
+    "cards": {
+      "upcomingDeliveries": "Предстоящие доставки",
+      "ordersWithoutDeliveries": "Заказы без доставок"
+    },
+    "tables": {
+      "deliveries": "Доставки"
+    },
+    "columns": {
+      "id": "ID",
+      "name": "Название",
+      "description": "Описание",
+      "orders": "Заказы",
+      "deliveryStart": "Начало доставки",
+      "deliveryEnd": "Конец доставки",
+      "status": "Статус",
+      "group": "Группа"
+    },
+    "kpis": {
+      "totalPendingDeliveries": "Всего ожидающих доставок",
+      "totalPendingDeliveriesDescription": "Доставки, ожидающие обработки",
+      "orphansOrders": "Заказы-сироты",
+      "orphansOrdersDescription": "Заказы без доставок",
+      "averageOrderValue": "Средняя стоимость заказа",
+      "averageOrderValueDescription": "Средняя стоимость за заказ"
+    },
+    "status": {
+      "needsDelivery": "Требуется доставка"
+    },
+    "labels": {
+      "created": "Создано",
+      "items": "товаров"
+    }
+  }
+}

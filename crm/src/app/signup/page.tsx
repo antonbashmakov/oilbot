@@ -21,11 +21,13 @@ import Link from "next/link";
 import { useSignup } from "@/api";
 import { useUser } from "@/api/user/provider";
 import { setAuthToken } from "@/utils/auth";
+import { useTranslations } from 'next-intl';
 
 export default function SignupPage() {
   const router = useRouter();
   const { setUser } = useUser();
   const { mutate: signup, isPending: isSubmitting } = useSignup();
+  const t = useTranslations('signup');
   
   // Form state
   const [email, setEmail] = useState("");
@@ -42,22 +44,22 @@ export default function SignupPage() {
     
     // Basic validation
     if (!email || !password || !confirmPassword) {
-      setError("Please fill in all fields");
+      setError(t('errors.fillAllFields'));
       return;
     }
     
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t('errors.passwordsDontMatch'));
       return;
     }
     
     if (!agreeToTerms) {
-      setError("You must agree to the terms and conditions");
+      setError(t('errors.agreeToTerms'));
       return;
     }
     
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+      setError(t('errors.passwordTooShort'));
       return;
     }
     
@@ -80,7 +82,7 @@ export default function SignupPage() {
             const from = searchParams.get('from');
             router.push(from || "/");
           } else {
-            setError("Signup failed. Please try again.");
+            setError(t('errors.signupFailed'));
           }
         },
         onError: (error: any) => {
@@ -88,7 +90,7 @@ export default function SignupPage() {
           setError(
             error?.error?.message || 
             error?.message || 
-            "Signup failed. Please try again."
+            t('errors.signupFailed')
           );
         }
       }
@@ -126,10 +128,10 @@ export default function SignupPage() {
                 {/* Header */}
                 <Box textAlign="center" mb={2}>
                   <Heading as="h2" size="lg" color="text.primary" mb={2}>
-                    Create Your Account
+                    {t('title')}
                   </Heading>
                   <Text color="text.secondary">
-                    Join our platform to manage your customer relationships effectively.
+                    {t('subtitle')}
                   </Text>
                 </Box>
 
@@ -154,12 +156,12 @@ export default function SignupPage() {
                     {/* Email Field */}
                     <Box width="full">
                       <Text as="label" display="block" color="text.primary" fontSize="md" fontWeight="medium" mb={2}>
-                        Email
+                        {t('email')}
                       </Text>
                       <Input
                         id="email"
                         type="email"
-                        placeholder="you@company.com"
+                        placeholder={t('emailPlaceholder')}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         bg="bg.subtle"
@@ -177,13 +179,13 @@ export default function SignupPage() {
                     {/* Password Field */}
                     <Box width="full">
                       <Text as="label" display="block" color="text.primary" fontSize="md" fontWeight="medium" mb={2}>
-                        Password
+                        {t('password')}
                       </Text>
                       <Flex width="full">
                         <Input
                           id="password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
+                          placeholder={t('passwordPlaceholder')}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           bg="bg.subtle"
@@ -216,13 +218,13 @@ export default function SignupPage() {
                     {/* Confirm Password Field */}
                     <Box width="full">
                       <Text as="label" display="block" color="text.primary" fontSize="md" fontWeight="medium" mb={2}>
-                        Confirm Password
+                        {t('confirmPassword')}
                       </Text>
                       <Flex width="full">
                         <Input
                           id="confirm-password"
                           type={showConfirmPassword ? "text" : "password"}
-                          placeholder="Re-enter your password"
+                          placeholder={t('confirmPasswordPlaceholder')}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           bg="bg.subtle"
@@ -270,11 +272,11 @@ export default function SignupPage() {
                         <Text as="label" color="text.primary" fontSize="sm" fontWeight="medium" cursor="pointer">
                           I agree to the{" "}
                           <ChakraLink as={Link} href="#" color="primary.500" _hover={{ textDecoration: "underline" }}>
-                            Terms of Service
+                            {t('termsLink')}
                           </ChakraLink>{" "}
                           and{" "}
                           <ChakraLink as={Link} href="#" color="primary.500" _hover={{ textDecoration: "underline" }}>
-                            Privacy Policy
+                            {t('privacyLink')}
                           </ChakraLink>.
                         </Text>
                       </HStack>
@@ -291,7 +293,7 @@ export default function SignupPage() {
                       loading={isSubmitting}
                       disabled={!agreeToTerms}
                     >
-                      Create Account
+                      {t('createAccount')}
                     </Button>
                   </VStack>
                 </form>
@@ -299,9 +301,9 @@ export default function SignupPage() {
                 {/* Login Link */}
                 <Box textAlign="center" mt={4}>
                   <Text color="text.secondary" fontSize="sm">
-                    Already have an account?{" "}
+                    {t('alreadyHaveAccount')}{" "}
                     <ChakraLink as={Link} href="/login" color="primary.500" fontWeight="medium" _hover={{ textDecoration: "underline" }}>
-                      Log in
+                      {t('login')}
                     </ChakraLink>
                   </Text>
                 </Box>
@@ -312,9 +314,9 @@ export default function SignupPage() {
           {/* Footer */}
           <Box textAlign="center">
             <Text color="text.secondary" fontSize="sm">
-              Need help?{" "}
+              {t('needHelp')}{" "}
               <ChakraLink as={Link} href="#" color="primary.500" fontWeight="medium" _hover={{ textDecoration: "underline" }}>
-                Contact Us
+                {t('contactUs')}
               </ChakraLink>
             </Text>
           </Box>

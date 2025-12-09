@@ -11,7 +11,7 @@ export function getApiQueryParams<P extends PathsWithMethod<paths, 'get'>>(p: P 
     return [p, init.params];
 }
 
-export async function handleResult<D, E, T extends { data?: D, error?: E, response: { status: number} }>(result: Promise<T>): Promise<D | undefined> {
+export async function handleResult<D, E, T extends { data?: D, error?: E, response: { status: number} }>(result: Promise<T>): Promise<D | undefined | null> {
 
     const { data, error, response } = await result;
 
@@ -19,7 +19,7 @@ export async function handleResult<D, E, T extends { data?: D, error?: E, respon
         throw error;
     }
 
-    if(response.status === 204) return undefined;
+    if(response.status === 204) return null;
 
     return data
 }
@@ -27,6 +27,7 @@ export async function handleResult<D, E, T extends { data?: D, error?: E, respon
 // @ts-ignore
 export function useApiQuery<P extends PathsWithMethod<paths, 'get'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<paths[P], 'get'>>, options: UseQueryOptions<any> = {}) {
     const { GET } = useClient();
+    
     // @ts-ignore
     return useQuery({ 
         ...options,

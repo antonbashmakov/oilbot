@@ -16,6 +16,7 @@ import { KPICard } from "@/components/ui/KPICard";
 import { DataTable, Column } from "@/components/DataTable";
 import { useAdminDeliveriesQuery } from "@/api";
 import Link from "next/link";
+import { useTranslations } from 'next-intl';
 
 // Mock data for orders without deliveries
 const mockOrphanOrders = [
@@ -60,6 +61,7 @@ const  StatusBadge = ({ status }: { status: string }) => {
 
 export default function Dashboard() {
   const [orphanOrders] = useState(mockOrphanOrders);
+  const t = useTranslations('dashboard');
 
   const {data: deliveries} = useAdminDeliveriesQuery();
 
@@ -76,38 +78,38 @@ export default function Dashboard() {
         {/* Header */}
         <Stack direction="column" gap="2" align="start" mb="8">
           <Heading size="2xl" color="text.primary">
-            CRM Dashboard
+            {t('pageTitle')}
           </Heading>
           <Text color="text.secondary" fontSize="lg">
-            Overview of delivery and order information
+            {t('pageSubtitle')}
           </Text>
         </Stack>
 
         {/* Deliveries Table */}
         { deliveries && deliveries.length > 0 && <Card.Root bg="surface.container" border="1px" borderColor="border.subtle" mb="8">
           <Card.Header pb="0">
-            <Heading size="lg" color="text.primary">Upcoming Deliveries</Heading>
+            <Heading size="lg" color="text.primary">{t('cards.upcomingDeliveries')}</Heading>
           </Card.Header>
           <Card.Body>
             <DataTable
               getKey={i => i.id}
-              title="Deliveries"
+              title={t('tables.deliveries')}
               columns={[
                 {
                   key: "id",
-                  header: "ID",
+                  header: t('columns.id'),
                   accessor: (delivery) => (
                      <Link target="_blank" href={`/deliveries/${delivery.id}`}><Text fontWeight="medium">{delivery.id}</Text></Link>
                   ),
                 },
                 {
                   key: "name",
-                  header: "Name",
+                  header: t('columns.name'),
                   accessor: (delivery) => delivery.number,
                 },
                 {
                   key: "description",
-                  header: "Description",
+                  header: t('columns.description'),
                   accessor: (delivery) => (
                     <Text maxW="200px" title={delivery.description} truncate>
                       {delivery.description}
@@ -116,28 +118,28 @@ export default function Dashboard() {
                 },
                 {
                   key: "numberOfOrders",
-                  header: "Orders",
+                  header: t('columns.orders'),
                   accessor: (delivery) => 'N/A',
                   align: "end",
                 },
                 {
                   key: "deliveryStart",
-                  header: "Delivery Start",
+                  header: t('columns.deliveryStart'),
                   accessor: (delivery) => delivery.delivery_start,
                 },
                 {
                   key: "deliveryEnd",
-                  header: "Delivery End",
+                  header: t('columns.deliveryEnd'),
                   accessor: (delivery) => delivery.delivery_end,
                 },
                 {
                   key: "status",
-                  header: "Status",
+                  header: t('columns.status'),
                   accessor: (delivery) => <StatusBadge status={delivery.status} />,
                 },
                 {
                   key: "group",
-                  header: "Group",
+                  header: t('columns.group'),
                   accessor: (delivery) => delivery.group,
                 },
               ]}
@@ -149,26 +151,26 @@ export default function Dashboard() {
         {/* KPI Cards */}
         <SimpleGrid columns={{ base: 1, md: 3 }} gap="6" mb="8">
           <KPICard
-            name="Total Pending Deliveries"
+            name={t('kpis.totalPendingDeliveries')}
             value={totalPendingDeliveries}
-            description="Deliveries awaiting processing"
+            description={t('kpis.totalPendingDeliveriesDescription')}
           />
           <KPICard
-            name="Orphans Orders"
+            name={t('kpis.orphansOrders')}
             value={orphansOrders}
-            description="Orders without deliveries"
+            description={t('kpis.orphansOrdersDescription')}
           />
           <KPICard
-            name="Average Order Value"
+            name={t('kpis.averageOrderValue')}
             value={`$${averageOrderValue}`}
-            description="Average value per order"
+            description={t('kpis.averageOrderValueDescription')}
           />
         </SimpleGrid>
 
         {/* Orphan Orders List */}
         <Card.Root border="1px" borderColor="border.subtle">
           <Card.Header>
-            <Heading size="lg" color="text.primary">Orders Without Deliveries</Heading>
+            <Heading size="lg" color="text.primary">{t('cards.ordersWithoutDeliveries')}</Heading>
           </Card.Header>
           <Card.Body>
             <Stack direction="column" gap="4">
@@ -181,7 +183,7 @@ export default function Dashboard() {
                           {order.id} - {order.customer}
                         </Text>
                         <Text color="text.secondary" fontSize="sm">
-                          Created: {order.createdAt}
+                          {t('labels.created')}: {order.createdAt}
                         </Text>
                       </Stack>
                       <Flex gap="4" align="center">
@@ -190,11 +192,11 @@ export default function Dashboard() {
                             ${order.value}
                           </Text>
                           <Text color="text.secondary" fontSize="sm">
-                            {order.items} items
+                            {order.items} {t('labels.items')}
                           </Text>
                         </Stack>
                         <Badge colorPalette="accent.orange" variant="subtle">
-                          Needs Delivery
+                          {t('status.needsDelivery')}
                         </Badge>
                       </Flex>
                     </Flex>

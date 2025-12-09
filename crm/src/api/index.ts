@@ -181,13 +181,12 @@ export function useLogin() {
 export const useUserQuery = (): UseQueryResult<User> => {
     // Only enable the query if we have a token
     const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('token');
-    return useApiQuery("/public/users/me", {}, { enabled: hasToken } as any);
+    return useApiQuery("/public/users/me", {credentials: "include"}, { enabled: hasToken } as any);
 }
 
 export function useDownloadDeliveryStats() {
 
     let token  = (typeof window !== 'undefined') ? localStorage.getItem("token") : "";
-
     return async (id?: string) => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/admin/deliveries/${id}/stats/CSV?status=CANCELED`, {
             method: "GET",

@@ -2,6 +2,8 @@
 
 import { ChakraProvider } from "@chakra-ui/react";
 import { theme } from "@/theme";
+import { NextIntlClientProvider } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 import { ApiConfigProvider } from '@/api/apiConfigContext';
 import { UserProvider } from '@/api/user/provider';
@@ -10,41 +12,54 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
+// Import translation files statically
+import enMessages from '../messages/en.json';
+import ruMessages from '../messages/ru.json';
+import svMessages from '../messages/sv.json';
 
 const queryClient = new QueryClient();
 
+const messagesMap = {
+  en: enMessages,
+  ru: ruMessages,
+  "sv-se": svMessages,
+};
 
 export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
-    let baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || "wrong";// "https://us-central1-posebestoimosti-473916.cloudfunctions.net";
-    //let baseUrl = 'https://us-central1-posebestoimosti-473916.cloudfunctions.net/';
-    /*
-    if (typeof window !== 'undefined') {
+  const [locale, setLocale] = useState<string>('en');
 
-        const host = window.location.host;
-        // Temporary solution before API gateway etc
-        if (host.endsWith('.run.app')) {
-            baseUrl = `https://${host.replace('boui', 'crm')}/api/crm`
+  useEffect(() => {
+    // Get locale from cookie
+    const cookieLocale = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('locale='))
+      ?.split('=')[1] || 'en';
 
-        }
-        if (window.location.hostname !== 'localhost') {
-            baseUrl = `https://${host}:5001/posebestoimosti-473916/us-central1/`
-            //baseUrl = `https://us-central1-posebestoimosti-473916.cloudfunctions.net/`
-        }
+    setLocale(cookieLocale);
+  }, []);
 
-    }
-    */
-    return <ChakraProvider value={theme}><QueryClientProvider client={queryClient}>
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || "wrong";
+
+  return (
+    <ChakraProvider value={theme}>
+      <QueryClientProvider client={queryClient}>
         <ApiConfigProvider value={{
-            baseUrl,
-            siteUrl: process.env.NEXT_PUBLIC_SITE_URL as string
+          baseUrl,
+          siteUrl: process.env.NEXT_PUBLIC_SITE_URL as string
         }}>
-            <DndProvider backend={HTML5Backend}>
-                <UserProvider>
-                    {children}
-                </UserProvider> 
-            </DndProvider>
+          <DndProvider backend={HTML5Backend}>
+
+            <UserProvider>
+              <NextIntlClientProvider locale={locale} messages={messagesMap[locale as keyof typeof messagesMap] || messagesMap.en}>
+
+                {children}
+              </NextIntlClientProvider>
+
+            </UserProvider>
+          </DndProvider>
         </ApiConfigProvider>
         <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider >
+      </QueryClientProvider>
     </ChakraProvider>
+  );
 };

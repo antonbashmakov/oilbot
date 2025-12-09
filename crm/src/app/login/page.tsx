@@ -20,9 +20,11 @@ import { ViewIcon, ViewOffIcon, EmailIcon, LockIcon } from "@chakra-ui/icons";
 import Link from "next/link";
 import { useLogin } from "@/api";
 import { setAuthToken } from "@/utils/auth";
+import { useTranslations } from 'next-intl';
 
 export default function LoginPage() {
   const router = useRouter();
+  const t = useTranslations('login');
   
   const { mutate: login, isPending: isSubmitting } = useLogin();
   
@@ -39,7 +41,7 @@ export default function LoginPage() {
     
     // Basic validation
     if (!email || !password) {
-      setError("Please fill in all fields");
+      setError(t('errors.fillAllFields'));
       return;
     }
     
@@ -62,7 +64,7 @@ export default function LoginPage() {
             // Force a page reload to trigger UserProvider refetch
             window.location.reload();
           } else {
-            setError("Login failed. Please try again.");
+            setError(t('errors.loginFailed'));
           }
         },
         onError: (error: any) => {
@@ -70,7 +72,7 @@ export default function LoginPage() {
           setError(
             error?.error?.message || 
             error?.message || 
-            "Login failed. Please check your credentials and try again."
+            t('errors.checkCredentials')
           );
         }
       }
@@ -106,10 +108,10 @@ export default function LoginPage() {
               </Flex>
               <VStack gap={2} align="center">
                 <Heading as="h1" size="xl" color="text.primary" textAlign="center">
-                  Sign in to your CRM
+                  {t('title')}
                 </Heading>
                 <Text color="text.secondary" textAlign="center">
-                  Welcome back! Please enter your details.
+                  {t('subtitle')}
                 </Text>
               </VStack>
             </VStack>
@@ -140,7 +142,7 @@ export default function LoginPage() {
                     {/* Email Field */}
                     <Box width="full">
                       <Text as="label" display="block" color="text.primary" fontSize="sm" fontWeight="medium" mb={2}>
-                        Email
+                        {t('email')}
                       </Text>
                       <Flex width="full" position="relative">
                         <Box
@@ -156,7 +158,7 @@ export default function LoginPage() {
                         <Input
                           id="email"
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder={t('emailPlaceholder')}
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           bg="bg.subtle"
@@ -176,7 +178,7 @@ export default function LoginPage() {
                     {/* Password Field */}
                     <Box width="full">
                       <Text as="label" display="block" color="text.primary" fontSize="sm" fontWeight="medium" mb={2}>
-                        Password
+                        {t('password')}
                       </Text>
                       <Flex width="full" position="relative">
                         <Box
@@ -192,7 +194,7 @@ export default function LoginPage() {
                         <Input
                           id="password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
+                          placeholder={t('passwordPlaceholder')}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           bg="bg.subtle"
@@ -243,7 +245,7 @@ export default function LoginPage() {
                           <Checkbox.Control />
                         </Checkbox.Root>
                         <Text as="label" color="text.primary" fontSize="sm" fontWeight="medium" cursor="pointer">
-                          Remember Me
+                          {t('rememberMe')}
                         </Text>
                       </HStack>
                       <ChakraLink
@@ -254,7 +256,7 @@ export default function LoginPage() {
                         fontWeight="medium"
                         _hover={{ textDecoration: "underline" }}
                       >
-                        Forgot Password?
+                        {t('forgotPassword')}
                       </ChakraLink>
                     </Flex>
 
@@ -268,7 +270,7 @@ export default function LoginPage() {
                       fontWeight="semibold"
                       loading={isSubmitting}
                     >
-                      Sign In
+                      {t('signIn')}
                     </Button>
                   </VStack>
                 </form>
@@ -276,9 +278,9 @@ export default function LoginPage() {
                 {/* Signup Link */}
                 <Box textAlign="center" mt={4}>
                   <Text color="text.secondary" fontSize="sm">
-                    Don't have an account?{" "}
+                    {t('noAccount')}{" "}
                     <ChakraLink as={Link} href="/signup" color="primary.500" fontWeight="medium" _hover={{ textDecoration: "underline" }}>
-                      Sign up
+                      {t('signUp')}
                     </ChakraLink>
                   </Text>
                 </Box>
@@ -289,7 +291,7 @@ export default function LoginPage() {
           {/* Footer */}
           <Box textAlign="center">
             <Text color="text.secondary" fontSize="sm">
-              © 2024 Your Company. All rights reserved.
+              {t('footer')}
             </Text>
           </Box>
         </VStack>

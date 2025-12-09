@@ -17,10 +17,12 @@ import { useAdminDeliveryQuery, useDownloadDeliveryStats } from "@/api";
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 
 export default function DeliveryDetailPage() {
   const params = useParams();
   const deliveryId = params.id as string;
+  const t = useTranslations('deliveries');
 
   const { data: delivery } = useAdminDeliveryQuery(deliveryId);
   const downloadStatsMutation = useDownloadDeliveryStats();
@@ -68,7 +70,7 @@ export default function DeliveryDetailPage() {
         <Flex justify="space-between" align="center" mb="8">
           <Box>
             <Heading size="2xl" color="text.primary">
-              Delivery #{delivery.number}
+              {t('pageTitle', { deliveryNumber: delivery.number })}
             </Heading>
             <Text color="text.secondary" fontSize="lg" mt="2">
               {delivery.description}
@@ -76,10 +78,10 @@ export default function DeliveryDetailPage() {
           </Box>
           <Flex gap="4">
             <Button variant="outline" onClick={handleEdit}>
-              Edit
+              {t('buttons.edit')}
             </Button>
             <Button colorPalette="green" onClick={handleMarkDelivered}>
-              Mark Delivered
+              {t('buttons.markDelivered')}
             </Button>
           </Flex>
         </Flex>
@@ -92,12 +94,12 @@ export default function DeliveryDetailPage() {
 
           <Card.Body p={0}>
             <DataTable
-              title="Orders in Delivery"
+              title={t('tables.ordersInDelivery')}
               getKey={i => i.id}
               columns={[
                 {
                   key: "id",
-                  header: "Order ID",
+                  header: t('columns.orderId'),
 
                   accessor: (order) => (
                     <Link target="_blank" href={`/orders/${order.id}`}><Text fontWeight="medium">{order.id}</Text></Link>
@@ -105,23 +107,23 @@ export default function DeliveryDetailPage() {
                 },
                 {
                   key: "customerName",
-                  header: "Customer Name",
+                  header: t('columns.customerName'),
                   accessor: (order) => order.owner.id,
                 },
                 {
                   key: "status",
-                  header: "Status",
+                  header: t('columns.status'),
                   accessor: (order) => <StatusBadge status={order.status} />,
                 },
                 {
                   key: "numberOfItems",
-                  header: "Items",
+                  header: t('columns.items'),
                   accessor: (order) => order.items.length,
                 },
                 {
                   key: "totalValue",
                   field: "total",
-                  header: "Total Value",
+                  header: t('columns.totalValue'),
                   accessor: (order) => order.total,
                   summarizable: true,
                   align: "end",
@@ -141,37 +143,37 @@ export default function DeliveryDetailPage() {
               >
                 <span className="material-symbols-outlined text-base">download</span>
                 <span>
-                  {isDownloading ? "Downloading..." : "Download Report"}
+                  {isDownloading ? t('buttons.downloading') : t('buttons.downloadReport')}
                 </span>
               </button>
             </Flex>
             <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle" mb="8">
               <Card.Body p={0} >
                 <DataTable
-                  title="Statistics"
+                  title={t('tables.statistics')}
                   getKey={i => i.name}
                   columns={[
                     {
                       key: "itemName",
-                      header: "Item Name",
+                      header: t('columns.itemName'),
                       accessor: (item) => (
                         <Text fontWeight="medium">{item.name}</Text>
                       ),
                     },
                     {
                       key: "totalFraction",
-                      header: "Total Fraction",
+                      header: t('columns.totalFraction'),
                       accessor: (item) => item.fraction,
                     },
                     {
                       key: "totalQuantity",
-                      header: "Total Quantity",
+                      header: t('columns.totalQuantity'),
                       accessor: (item) => item.quantity,
                     },
                     {
                       key: "totalCost",
                       field: "total",
-                      header: "Total Cost",
+                      header: t('columns.totalCost'),
                       accessor: (item) => item.total,
                       summarizable: true,
                       align: "end",
@@ -189,12 +191,12 @@ export default function DeliveryDetailPage() {
 
           <Card.Body p={0}>
             <DataTable
-              title="Canceled Orders"
+              title={t('tables.canceledOrders')}
               getKey={i => i.id}
               columns={[
                 {
                   key: "id",
-                  header: "Order ID",
+                  header: t('columns.orderId'),
 
                   accessor: (order) => (
                     <Link target="_blank" href={`/orders/${order.id}`}><Text fontWeight="medium">{order.id}</Text></Link>
@@ -202,23 +204,23 @@ export default function DeliveryDetailPage() {
                 },
                 {
                   key: "customerName",
-                  header: "Customer Name",
+                  header: t('columns.customerName'),
                   accessor: (order) => order.owner.id,
                 },
                 {
                   key: "status",
-                  header: "Status",
+                  header: t('columns.status'),
                   accessor: (order) => <StatusBadge status={order.status} />,
                 },
                 {
                   key: "numberOfItems",
-                  header: "Items",
+                  header: t('columns.items'),
                   accessor: (order) => order.number_of_items,
                   align: "end",
                 },
                 {
                   key: "totalValue",
-                  header: "Total Value",
+                  header: t('columns.totalValue'),
                   accessor: (order) => order.total,
                   align: "end",
                 },

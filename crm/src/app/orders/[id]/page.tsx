@@ -31,83 +31,12 @@ import { PaymentCard } from "@/components/ui/PaymentCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useCallback, useEffect, useState } from "react";
 import { AddIcon, MinusIcon, LockIcon } from "@chakra-ui/icons";
+import { useTranslations } from 'next-intl';
 
-const columns: Column<CartItem>[] = [
-  { key: "id", header: "ID", accessor: (item) => item.id },
-  { key: "name", header: "Name", accessor: (item) => item.name },
-  {
-    key: "fraction",
-    field: "fraction",
-    summarizable: true,
-    header: "Fraction",
-    accessor: (item) => item.fraction
-  },
-  {
-    key: "quantity",
-    header: "Quantity",
-    accessor: (item) => item.quantity,
-    align: "end",
-  },
-  {
-    key: "price",
-    field: "price",
-    summarizable: true,
-    header: "Price",
-    accessor: (item) => item.price.toFixed(2),
-    align: "end",
-  },
-];
-
-const pickingColumns: Column<PickingItem>[] = [
-  {
-    key: 'collected-status',
-    header: '',
-    accessor: (item) => <>{item.status === 'COLLECTED' && <Status.Root colorPalette="blue">
-      <Status.Indicator />
-    </Status.Root>}</>,
-  },
-  {
-    key: 'id',
-    header: 'ID',
-    accessor: (item) => item.id,
-    width: '80px',
-  },
-  {
-    key: 'name',
-    header: 'Name',
-    accessor: (item) => item.name,
-  },
-  {
-    key: 'fraction',
-    header: 'Fraction',
-    accessor: (item) => item.fraction,
-    editable: true,
-    field: 'fraction',
-    renderer: DecimalDataField,
-  },
-  {
-    key: 'price',
-    header: 'Price',
-    accessor: (item) => Math.floor(item.price_for_unit * item.fraction * item.quantity),
-  },
-  {
-    key: 'price_for_unit',
-    header: 'Price For Unit',
-    editable: true,
-    field: 'price_for_unit',
-    renderer: DecimalDataField,
-    accessor: (item) => item.price_for_unit,
-  },
-  {
-    key: 'quantity',
-    header: 'Quantity',
-    accessor: (item) => item.quantity,
-    field: 'quantity',
-  },
-];
 
 export default function OrderPage() {
   const { id: orderId } = useParams();
+  const t = useTranslations('orders');
 
   const [selectedItem, setSelectedItem] = useState<PickingItem>()
   const [isReadyForConsolidation, setIsReadyForConsolidation] = useState<boolean>(false);
@@ -247,6 +176,80 @@ export default function OrderPage() {
     setIsOrderEditable((order?.status === 'PENDING' || order?.status === 'PAID'));
   }, [order]);
 
+  // Column definitions using translations
+  const columns: Column<CartItem>[] = [
+    { key: "id", header: t('table.columns.id'), accessor: (item) => item.id },
+    { key: "name", header: t('table.columns.name'), accessor: (item) => item.name },
+    {
+      key: "fraction",
+      field: "fraction",
+      summarizable: true,
+      header: t('table.columns.fraction'),
+      accessor: (item) => item.fraction
+    },
+    {
+      key: "quantity",
+      header: t('table.columns.quantity'),
+      accessor: (item) => item.quantity,
+      align: "end",
+    },
+    {
+      key: "price",
+      field: "price",
+      summarizable: true,
+      header: t('table.columns.price'),
+      accessor: (item) => item.price.toFixed(2),
+      align: "end",
+    },
+  ];
+
+  const pickingColumns: Column<PickingItem>[] = [
+    {
+      key: 'collected-status',
+      header: '',
+      accessor: (item) => <>{item.status === 'COLLECTED' && <Status.Root colorPalette="blue">
+        <Status.Indicator />
+      </Status.Root>}</>,
+    },
+    {
+      key: 'id',
+      header: t('table.columns.id'),
+      accessor: (item) => item.id,
+      width: '80px',
+    },
+    {
+      key: 'name',
+      header: t('table.columns.name'),
+      accessor: (item) => item.name,
+    },
+    {
+      key: 'fraction',
+      header: t('table.columns.fraction'),
+      accessor: (item) => item.fraction,
+      editable: true,
+      field: 'fraction',
+      renderer: DecimalDataField,
+    },
+    {
+      key: 'price',
+      header: t('table.columns.price'),
+      accessor: (item) => Math.floor(item.price_for_unit * item.fraction * item.quantity),
+    },
+    {
+      key: 'price_for_unit',
+      header: t('table.columns.priceForUnit'),
+      editable: true,
+      field: 'price_for_unit',
+      renderer: DecimalDataField,
+      accessor: (item) => item.price_for_unit,
+    },
+    {
+      key: 'quantity',
+      header: t('table.columns.quantity'),
+      accessor: (item) => item.quantity,
+      field: 'quantity',
+    },
+  ];
 
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
@@ -257,11 +260,11 @@ export default function OrderPage() {
           <Breadcrumb.Root>
             <Breadcrumb.List>
               <Breadcrumb.Item>
-                <Breadcrumb.Link href="/dashboard">Dashboard</Breadcrumb.Link>
+                <Breadcrumb.Link href="/dashboard">{t('breadcrumbs.dashboard')}</Breadcrumb.Link>
               </Breadcrumb.Item>
               <Breadcrumb.Separator />
               <Breadcrumb.Item>
-                <Breadcrumb.Link href="/orders">Orders</Breadcrumb.Link>
+                <Breadcrumb.Link href="/orders">{t('breadcrumbs.orders')}</Breadcrumb.Link>
               </Breadcrumb.Item>
               <Breadcrumb.Separator />
               <Breadcrumb.Item>
@@ -275,20 +278,20 @@ export default function OrderPage() {
             <Flex justify="space-between" align="center">
               <Flex align="center" gap={4}>
                 <Heading size="2xl" color="text.primary">
-                  Order {orderId}
+                  {t('pageTitle', { orderId: orderId as string })}
                 </Heading>
                 <StatusBadge status={order.status} />
                 {!isOrderEditable && (
                   <Flex align="center" gap={1} color="gray.500">
                     <LockIcon boxSize={4} />
-                    <Text fontSize="sm">The order is locked</Text>
+                    <Text fontSize="sm">{t('status.locked')}</Text>
                   </Flex>
                 )}
               </Flex>
               <Flex gap={2}>
-                {!order.picking && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">Start Picking</Button>}
-                <Button disabled={!isReadyForConsolidation} loading={isConsolidating} onClick={onConsolidateClick} colorScheme="blue">Consolidate</Button>
-                <Button onClick={onCancelClick} bg="red.500" color="white" variant="outline" loading={isCancelling}>Cancel</Button>
+                {!order.picking && <Button loading={isStartPicking} onClick={onStartPickingClick} colorScheme="blue">{t('buttons.startPicking')}</Button>}
+                <Button disabled={!isReadyForConsolidation} loading={isConsolidating} onClick={onConsolidateClick} colorScheme="blue">{t('buttons.consolidate')}</Button>
+                <Button onClick={onCancelClick} bg="red.500" color="white" variant="outline" loading={isCancelling}>{t('buttons.cancel')}</Button>
               </Flex>
             </Flex>
 
@@ -296,8 +299,8 @@ export default function OrderPage() {
               <GridItem colSpan={2}>
                 <Tabs.Root bg="surface.container" value={activeTab} onValueChange={(e) => setActiveTab(e.value)}>
                   <Tabs.List>
-                    <Tabs.Trigger value="order-items">Order Items</Tabs.Trigger>
-                    <Tabs.Trigger disabled={!conciliationOrder || !conciliationOrder.items} value="closing-order">Closing Order</Tabs.Trigger>
+                    <Tabs.Trigger value="order-items">{t('tabs.orderItems')}</Tabs.Trigger>
+                    <Tabs.Trigger disabled={!conciliationOrder || !conciliationOrder.items} value="closing-order">{t('tabs.closingOrder')}</Tabs.Trigger>
                   </Tabs.List>
                   <Tabs.Content value="order-items">
                     <VStack gap={6} align="stretch" mt={4}>
@@ -308,15 +311,15 @@ export default function OrderPage() {
                       />
                       <InfoMessage
                         type="info"
-                        badgeText="Note"
-                        message={order.picking ? "Change the fraction column to reflect the picked items." : "Click 'Start Picking' to begin the order picking process."}
+                        badgeText={t('infoMessages.note')}
+                        message={order.picking ? t('infoMessages.changeFraction') : t('infoMessages.clickStartPicking')}
                       />
 
                       {
                         order.picking && <DataTable
                           columns={pickingColumns}
                           data={order.picking.items}
-                          title="Products"
+                          title={t('table.products')}
                           isSaving={false}
                           onSave={onSave}
                           isRowDisabled={isRowDisabled}
@@ -332,16 +335,16 @@ export default function OrderPage() {
                         <>
                           <Card.Root>
                             <Card.Header>
-                              <Heading size="md">Closing Order Information</Heading>
+                              <Heading size="md">{t('cards.closingOrderInfo')}</Heading>
                             </Card.Header>
                             <Card.Body>
                               <DataList.Root orientation="horizontal" maxW="md">
                                 <DataList.Item key="conciliation-id">
-                                  <DataList.ItemLabel>Order ID</DataList.ItemLabel>
+                                  <DataList.ItemLabel>{t('dataList.orderId')}</DataList.ItemLabel>
                                   <DataList.ItemValue>{conciliationOrder.id}</DataList.ItemValue>
                                 </DataList.Item>
                                 <DataList.Item key="conciliation-status">
-                                  <DataList.ItemLabel>Status</DataList.ItemLabel>
+                                  <DataList.ItemLabel>{t('dataList.status')}</DataList.ItemLabel>
                                   <DataList.ItemValue>
                                     <StatusBadge status={conciliationOrder.status} />
                                   </DataList.ItemValue>
@@ -353,7 +356,7 @@ export default function OrderPage() {
                           <DataTable
                             columns={columns}
                             data={conciliationOrder.items}
-                            title="Closing Order Items"
+                            title={t('table.closingOrderItems')}
                             getKey={i => i.id}
                             isRowDisabled={() => true}
                           />
@@ -362,7 +365,7 @@ export default function OrderPage() {
                         <InfoMessage
                           type="info"
                           badgeText="Info"
-                          message="No closing order found for this order."
+                          message={t('infoMessages.noClosingOrder')}
                         />
                       )}
                     </VStack>
@@ -374,7 +377,7 @@ export default function OrderPage() {
                 <VStack gap={6} align="stretch" >
                   <Card.Root bg="surface.container">
                     <Card.Header>
-                      <Heading size="md">Customer</Heading>
+                      <Heading size="md">{t('cards.customer')}</Heading>
                     </Card.Header>
                     <Card.Body>
                       <Flex align="center" gap={4}>
@@ -395,22 +398,22 @@ export default function OrderPage() {
 
                   <Card.Root bg="surface.container">
                     <Card.Header>
-                      <Heading size="md">Order Calculation</Heading>
+                      <Heading size="md">{t('cards.orderCalculation')}</Heading>
                     </Card.Header>
                     <Card.Body>
                       <DataList.Root orientation="horizontal" maxW="md">
 
                         <DataList.Item key="calculation-original">
-                          <DataList.ItemLabel>Original</DataList.ItemLabel>
+                          <DataList.ItemLabel>{t('cards.original')}</DataList.ItemLabel>
                           <DataList.ItemValue>{order.total}</DataList.ItemValue>
                         </DataList.Item>
                         <DataList.Item key="calculation-picking">
-                          <DataList.ItemLabel>Picking</DataList.ItemLabel>
+                          <DataList.ItemLabel>{t('cards.picking')}</DataList.ItemLabel>
                           <DataList.ItemValue>{order.picking?.total || 0}</DataList.ItemValue>
                         </DataList.Item>
                         <Separator />
                         <DataList.Item key="calculation-final" fontWeight="bold">
-                          <DataList.ItemLabel>Final Total</DataList.ItemLabel>
+                          <DataList.ItemLabel>{t('cards.finalTotal')}</DataList.ItemLabel>
                           <DataList.ItemValue>{(order.total || 0) - (order.picking?.total || 0)}</DataList.ItemValue>
                         </DataList.Item>
 
@@ -420,7 +423,7 @@ export default function OrderPage() {
                   <Card.Root bg="surface.container">
                     <Card.Body>
                       <HStack justifyContent={'space-between'}>
-                        <Heading size="md">Original</Heading>
+                        <Heading size="md">{t('cards.original')}</Heading>
                         <Button
                           disabled={!isMissingOriginalPayment || isCreatingOriginalPayment}
                           loading={isCreatingOriginalPayment}
@@ -430,7 +433,7 @@ export default function OrderPage() {
                           bg="blue.800"
                           color="white"
                         >
-                          New payment
+                          {t('buttons.newPayment')}
                         </Button>
                       </HStack>
 
@@ -439,7 +442,7 @@ export default function OrderPage() {
                       ))}
                       <Separator />
                       <HStack mt={2} justifyContent={'space-between'}>
-                        <Heading size="md">Closing</Heading>
+                        <Heading size="md">{t('cards.closing')}</Heading>
                         <Button
                           disabled={!isMissingConsolidationPayment || isCreatingConciliationPayment || !conciliationOrder?.id}
                           loading={isCreatingConciliationPayment}
@@ -449,7 +452,7 @@ export default function OrderPage() {
                           bg="blue.800"
                           color="white"
                         >
-                          New payment
+                          {t('buttons.newPayment')}
                         </Button>
                       </HStack>
                       {conciliationPayments.map((payment) => (
@@ -473,19 +476,19 @@ export default function OrderPage() {
         <Dialog.Positioner>
           <Dialog.Content bg="bg.primary">
             <Dialog.Header>
-              <Dialog.Title>Do you want to cancel the order?</Dialog.Title>
+              <Dialog.Title>{t('dialog.cancelTitle')}</Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
               <VStack gap={4} align="stretch">
-                <Text color="text.secondary">All payments will be cancelled.</Text>
+                <Text color="text.secondary">{t('dialog.cancelMessage')}</Text>
               </VStack>
             </Dialog.Body>
             <Dialog.Footer>
               <Button variant="outline" onClick={onCancelCancel}>
-                No, Keep Order
+                {t('dialog.keepOrder')}
               </Button>
               <Button bg="red.500" color="white" colorScheme="dark" onClick={onCancelConfirm}>
-                Yes, Cancel Order
+                {t('dialog.cancelOrder')}
               </Button>
             </Dialog.Footer>
           </Dialog.Content>

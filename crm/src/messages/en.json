@@ -1,0 +1,171 @@
+{
+  "login": {
+    "title": "Sign in to your CRM",
+    "subtitle": "Welcome back! Please enter your details.",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "rememberMe": "Remember Me",
+    "forgotPassword": "Forgot Password?",
+    "signIn": "Sign In",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "footer": "© 2024 Your Company. All rights reserved.",
+    "errors": {
+      "fillAllFields": "Please fill in all fields",
+      "loginFailed": "Login failed. Please try again.",
+      "checkCredentials": "Login failed. Please check your credentials and try again."
+    }
+  },
+  "signup": {
+    "title": "Create Your Account",
+    "subtitle": "Join our platform to manage your customer relationships effectively.",
+    "email": "Email",
+    "emailPlaceholder": "you@company.com",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "terms": "I agree to the {terms} and {privacy}.",
+    "termsLink": "Terms of Service",
+    "privacyLink": "Privacy Policy",
+    "createAccount": "Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "login": "Log in",
+    "needHelp": "Need help?",
+    "contactUs": "Contact Us",
+    "errors": {
+      "fillAllFields": "Please fill in all fields",
+      "passwordsDontMatch": "Passwords do not match",
+      "agreeToTerms": "You must agree to the terms and conditions",
+      "passwordTooShort": "Password must be at least 6 characters long",
+      "signupFailed": "Signup failed. Please try again."
+    }
+  },
+  "approve": {
+    "title": "Wait for your account to be enabled",
+    "description": "Your supervisor will examine the account shortly.\nYou will receive an email once approved.",
+    "copyright": "© 2023 CRM System v2.0. All rights reserved.",
+    "contactSupport": "Contact Support",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "orders": {
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "orders": "Orders"
+    },
+    "pageTitle": "Order {orderId}",
+    "status": {
+      "locked": "The order is locked"
+    },
+    "buttons": {
+      "startPicking": "Start Picking",
+      "consolidate": "Consolidate",
+      "cancel": "Cancel",
+      "newPayment": "New payment"
+    },
+    "tabs": {
+      "orderItems": "Order Items",
+      "closingOrder": "Closing Order"
+    },
+    "table": {
+      "products": "Products",
+      "closingOrderItems": "Closing Order Items",
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "fraction": "Fraction",
+        "quantity": "Quantity",
+        "price": "Price",
+        "priceForUnit": "Price For Unit"
+      }
+    },
+    "infoMessages": {
+      "note": "Note",
+      "changeFraction": "Change the fraction column to reflect the picked items.",
+      "clickStartPicking": "Click 'Start Picking' to begin the order picking process.",
+      "noClosingOrder": "No closing order found for this order."
+    },
+    "cards": {
+      "closingOrderInfo": "Closing Order Information",
+      "customer": "Customer",
+      "orderCalculation": "Order Calculation",
+      "original": "Original",
+      "picking": "Picking",
+      "finalTotal": "Final Total",
+      "closing": "Closing"
+    },
+    "dataList": {
+      "orderId": "Order ID",
+      "status": "Status"
+    },
+    "dialog": {
+      "cancelTitle": "Do you want to cancel the order?",
+      "cancelMessage": "All payments will be cancelled.",
+      "keepOrder": "No, Keep Order",
+      "cancelOrder": "Yes, Cancel Order"
+    }
+  },
+  "deliveries": {
+    "pageTitle": "Delivery #{deliveryNumber}",
+    "buttons": {
+      "edit": "Edit",
+      "markDelivered": "Mark Delivered",
+      "downloadReport": "Download Report",
+      "downloading": "Downloading..."
+    },
+    "tables": {
+      "ordersInDelivery": "Orders in Delivery",
+      "statistics": "Statistics",
+      "canceledOrders": "Canceled Orders"
+    },
+    "columns": {
+      "orderId": "Order ID",
+      "customerName": "Customer Name",
+      "status": "Status",
+      "items": "Items",
+      "totalValue": "Total Value",
+      "itemName": "Item Name",
+      "totalFraction": "Total Fraction",
+      "totalQuantity": "Total Quantity",
+      "totalCost": "Total Cost"
+    }
+  },
+  "dashboard": {
+    "pageTitle": "CRM Dashboard",
+    "pageSubtitle": "Overview of delivery and order information",
+    "cards": {
+      "upcomingDeliveries": "Upcoming Deliveries",
+      "ordersWithoutDeliveries": "Orders Without Deliveries"
+    },
+    "tables": {
+      "deliveries": "Deliveries"
+    },
+    "columns": {
+      "id": "ID",
+      "name": "Name",
+      "description": "Description",
+      "orders": "Orders",
+      "deliveryStart": "Delivery Start",
+      "deliveryEnd": "Delivery End",
+      "status": "Status",
+      "group": "Group"
+    },
+    "kpis": {
+      "totalPendingDeliveries": "Total Pending Deliveries",
+      "totalPendingDeliveriesDescription": "Deliveries awaiting processing",
+      "orphansOrders": "Orphans Orders",
+      "orphansOrdersDescription": "Orders without deliveries",
+      "averageOrderValue": "Average Order Value",
+      "averageOrderValueDescription": "Average value per order"
+    },
+    "status": {
+      "needsDelivery": "Needs Delivery"
+    },
+    "labels": {
+      "created": "Created",
+      "items": "items"
+    }
+  }
+}
