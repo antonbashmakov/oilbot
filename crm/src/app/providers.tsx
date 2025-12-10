@@ -26,17 +26,18 @@ const messagesMap = {
 };
 
 export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const [locale, setLocale] = useState<string>('en');
+  const [locale, setLocale] = useState<string>('ru');
 
   useEffect(() => {
     // Get locale from cookie
     const cookieLocale = document.cookie
       .split('; ')
       .find(row => row.startsWith('locale='))
-      ?.split('=')[1] || 'en';
+      ?.split('=')[1] || 'ru';
 
     setLocale(cookieLocale);
   }, []);
+
 
   let baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || "wrong";
 
@@ -51,7 +52,6 @@ export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
 
             <UserProvider>
               <NextIntlClientProvider locale={locale} messages={messagesMap[locale as keyof typeof messagesMap] || messagesMap.en}>
-
                 {children}
               </NextIntlClientProvider>
 

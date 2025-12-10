@@ -11,14 +11,17 @@ import {
   VStack,
   Menu,
   Portal,
+  Badge,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, EmailIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import { useUser } from "@/api/user/provider";
 import { clearAuthToken } from "@/utils/auth";
+import { useBuildInfo } from "@/hooks/useBuildInfo";
 
 export default function TopBar() {
   const router = useRouter();
   const { user, setUser, isLoading } = useUser();
+  const { buildInfo } = useBuildInfo();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +79,18 @@ export default function TopBar() {
           <Text fontSize="xl" fontWeight="bold" color="text.primary">
             CRM Dashboard
           </Text>
+          {buildInfo && (
+            <Badge
+              colorScheme="blue"
+              variant="subtle"
+              fontSize="xs"
+              px="2"
+              py="1"
+              borderRadius="md"
+            >
+              v{buildInfo.version} ({buildInfo.commitHash})
+            </Badge>
+          )}
         </HStack>
 
         {/* Right side - User menu */}
