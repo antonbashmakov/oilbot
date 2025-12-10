@@ -6,8 +6,12 @@ import useClient from '@/api/useClient';
 import { PathParameters, RequestBody, ResponseType } from '@/utils/request';
 
 
+type ApiPaths = {
+  [G in keyof paths as `/api${G & string}`]: paths[G];
+};
+
 // @ts-ignore
-export function getApiQueryParams<P extends PathsWithMethod<paths, 'get'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<paths[P], 'get'>>) {
+export function getApiQueryParams<P extends PathsWithMethod<ApiPaths, 'get'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<ApiPaths[P], 'get'>>) {
     return [p, init.params];
 }
 
@@ -25,7 +29,7 @@ export async function handleResult<D, E, T extends { data?: D, error?: E, respon
 }
 
 // @ts-ignore
-export function useApiQuery<P extends PathsWithMethod<paths, 'get'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<paths[P], 'get'>>, options: UseQueryOptions<any> = {}) {
+export function useApiQuery<P extends PathsWithMethod<ApiPaths, 'get'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<ApiPaths[P], 'get'>>, options: UseQueryOptions<any> = {}) {
     const { GET } = useClient();
     
     // @ts-ignore
@@ -38,9 +42,9 @@ export function useApiQuery<P extends PathsWithMethod<paths, 'get'>>(p: P | unde
 }
 
 export function usePatchApi<
-    K extends keyof paths,
-    P extends PathParameters<paths, K, 'patch'>,
-    Body = RequestBody<paths, K, 'patch'>
+    K extends keyof ApiPaths,
+    P extends PathParameters<ApiPaths, K, 'patch'>,
+    Body = RequestBody<ApiPaths, K, 'patch'>
 >(
     path: K,
     invalidates: string[],
@@ -52,7 +56,7 @@ export function usePatchApi<
 
     
     return useMutation<
-        ResponseType<paths, K, 'patch'>, 
+        ResponseType<ApiPaths, K, 'patch'>, 
         Error,
         Body
     >({
@@ -65,7 +69,7 @@ export function usePatchApi<
                 body: request,
             });
 
-            const data = response.data as ResponseType<paths, K, 'patch'>;
+            const data = response.data as ResponseType<ApiPaths, K, 'patch'>;
             return data; 
         },
         onSuccess: () => {
@@ -76,9 +80,9 @@ export function usePatchApi<
     });
 }
 export function usePostApi<
-    K extends keyof paths,
-    P extends PathParameters<paths, K, 'post'>,
-    Body = RequestBody<paths, K, 'post'>
+    K extends keyof ApiPaths,
+    P extends PathParameters<ApiPaths, K, 'post'>,
+    Body = RequestBody<ApiPaths, K, 'post'>
 >(
     path: K,
     invalidates: string[],
@@ -89,7 +93,7 @@ export function usePostApi<
     const queryClient = useQueryClient();
 
     return useMutation<
-        ResponseType<paths, K, 'post'>, 
+        ResponseType<ApiPaths, K, 'post'>, 
         Error,
         Body
     >({
@@ -102,7 +106,7 @@ export function usePostApi<
                 body: request,
             });
 
-            const data = response.data as ResponseType<paths, K, 'post'>;
+            const data = response.data as ResponseType<ApiPaths, K, 'post'>;
             return data; 
         },
         onSuccess: () => {
@@ -114,9 +118,9 @@ export function usePostApi<
 }
 
 export function usePutApi<
-    K extends keyof paths,
-    P extends PathParameters<paths, K, 'put'>,
-    Body = RequestBody<paths, K, 'put'>
+    K extends keyof ApiPaths,
+    P extends PathParameters<ApiPaths, K, 'put'>,
+    Body = RequestBody<ApiPaths, K, 'put'>
 >(
     path: K,
     invalidates: string[],
@@ -127,7 +131,7 @@ export function usePutApi<
     const queryClient = useQueryClient();
 
     return useMutation<
-        ResponseType<paths, K, 'put'>, 
+        ResponseType<ApiPaths, K, 'put'>, 
         Error,
         Body
     >({
@@ -140,7 +144,7 @@ export function usePutApi<
                 body: request,
             });
 
-            const data = response.data as ResponseType<paths, K, 'put'>;
+            const data = response.data as ResponseType<ApiPaths, K, 'put'>;
             return data; 
         },
         onSuccess: () => {
@@ -153,7 +157,7 @@ export function usePutApi<
 
 
 // @ts-ignore
-export function usePostApiQuery<P extends PathsWithMethod<paths, 'post'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<paths[P], 'post'>>, options: UseQueryOptions<any> = {}) {
+export function usePostApiQuery<P extends PathsWithMethod<ApiPaths, 'post'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<ApiPaths[P], 'post'>>, options: UseQueryOptions<any> = {}) {
     const { POST } = useClient();
     // @ts-ignore
     return useQuery({ 
@@ -167,7 +171,7 @@ export function usePostApiQuery<P extends PathsWithMethod<paths, 'post'>>(p: P |
 }
 
 // @ts-ignore
-export function useApiQueries<P extends PathsWithMethod<paths, 'get'>>(p: P | undefined | '', inits: FetchOptions<FilterKeys<paths[P], 'get'>>[], options: UseQueryOptions<any> = {}) {
+export function useApiQueries<P extends PathsWithMethod<ApiPaths, 'get'>>(p: P | undefined | '', inits: FetchOptions<FilterKeys<ApiPaths[P], 'get'>>[], options: UseQueryOptions<any> = {}) {
     const { GET } = useClient();
 
     const results = useQueries({

@@ -22,6 +22,8 @@ const queryClient = new QueryClient();
 const messagesMap = {
   en: enMessages,
   ru: ruMessages,
+  "ru-ru": ruMessages,
+  sv: svMessages,
   "sv-se": svMessages,
 };
 
@@ -39,7 +41,7 @@ export const Providers: React.FC<React.PropsWithChildren> = ({ children }) => {
   }, []);
 
 
-  let baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || "wrong";
+  let baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL || "";
 
   return (
     <ChakraProvider value={theme}>

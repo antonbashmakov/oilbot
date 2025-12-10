@@ -11,8 +11,6 @@ import {
     LoginRequest,
 } from "@/api/models";
 import { UseQueryResult } from "@tanstack/react-query";
-import useClient from "@/api/useClient";
-import { useMutation } from "@tanstack/react-query";
 
 export type QueryControlOptions = {
     enabled?: boolean
@@ -20,31 +18,31 @@ export type QueryControlOptions = {
 
 
 export const useAdminDeliveriesQuery = (): UseQueryResult<Delivery[]> => {
-    return useApiQuery("/admin/deliveries", {})
+    return useApiQuery("/api/admin/deliveries", {})
 };
 
 export function usePatchOrderPicking(id?: string) {
     return usePatchApi<
-        '/admin/order-pickings/{id}',
+        '/api/admin/order-pickings/{id}',
         { id: string },
         OrderPickingPatch
     >(
-        '/admin/order-pickings/{id}',
+        '/api/admin/order-pickings/{id}',
         [
-            '/admin/orders/{id}'
+            '/api/admin/orders/{id}'
         ],
         { id: id || '' }
     );
 };
 export function useCollectPickingItem(pickingId?: string, itemId?: string) {
     return usePostApi<
-        '/admin/order-pickings/{pickingId}/items/{itemId}/collect',
+        '/api/admin/order-pickings/{pickingId}/items/{itemId}/collect',
         { pickingId: string, itemId: string },
         void
     >(
-        '/admin/order-pickings/{pickingId}/items/{itemId}/collect',
+        '/api/admin/order-pickings/{pickingId}/items/{itemId}/collect',
         [
-            '/admin/orders/{id}'
+            '/api/admin/orders/{id}'
         ],
         {
             pickingId: pickingId || '',
@@ -54,13 +52,13 @@ export function useCollectPickingItem(pickingId?: string, itemId?: string) {
 };
 export function useConsolidateOrder(id?: string) {
     return usePostApi<
-        '/admin/orders/{id}/consolidate',
+        '/api/admin/orders/{id}/consolidate',
         { id: string },
         void
     >(
-        '/admin/orders/{id}/consolidate',
+        '/api/admin/orders/{id}/consolidate',
         [
-            '/admin/orders/{id}'
+            '/api/admin/orders/{id}'
         ],
         {
             id: id || ''
@@ -69,20 +67,20 @@ export function useConsolidateOrder(id?: string) {
 };
 export function useStartOrderPicking(id?: string) {
     return usePostApi<
-        '/admin/orders/{id}/order-picking',
+        '/api/admin/orders/{id}/order-picking',
         { id: string },
         void
     >(
-        '/admin/orders/{id}/order-picking',
+        '/api/admin/orders/{id}/order-picking',
         [
-            '/admin/orders/{id}'
+            '/api/admin/orders/{id}'
         ],
         { id: id || '' }
     );
 };
 
 export const useAdminDeliveryQuery = (id?: string): UseQueryResult<DeliveryOverview> => {
-    return useApiQuery("/admin/deliveries/{id}", {
+    return useApiQuery("/api/admin/deliveries/{id}", {
         params: {
             path: {
                 id: id || ""
@@ -91,7 +89,7 @@ export const useAdminDeliveryQuery = (id?: string): UseQueryResult<DeliveryOverv
     }, { retry: 1, enabled: !!id } as any)
 };
 export const useAdminOrderOverviewQuery = (id?: string): UseQueryResult<OrderOverview> => {
-    return useApiQuery("/admin/orders/{id}", {
+    return useApiQuery("/api/admin/orders/{id}", {
         params: {
             path: {
                 id: id || ""
@@ -101,7 +99,7 @@ export const useAdminOrderOverviewQuery = (id?: string): UseQueryResult<OrderOve
 };
 
 export const useAdminOrderConciliationQuery = (id?: string): UseQueryResult<Order> => {
-    return useApiQuery("/admin/orders/{id}/conciliation", {
+    return useApiQuery("/api/admin/orders/{id}/conciliation", {
         params: {
             path: {
                 id: id || ""
@@ -111,7 +109,7 @@ export const useAdminOrderConciliationQuery = (id?: string): UseQueryResult<Orde
 };
 
 export const useAdminOrderPaymentsQuery = (orderId?: string): UseQueryResult<Payment[]> => {
-    return useApiQuery("/admin/orders/{orderId}/payments", {
+    return useApiQuery("/api/admin/orders/{orderId}/payments", {
         params: {
             path: {
                 orderId: orderId || ""
@@ -122,14 +120,14 @@ export const useAdminOrderPaymentsQuery = (orderId?: string): UseQueryResult<Pay
 
 export function useCreateOrderPayment(orderId?: string) {
     return usePostApi<
-        '/admin/orders/{orderId}/payments',
+        '/api/admin/orders/{orderId}/payments',
         { orderId: string },
         { idempotency_key: string }
     >(
-        '/admin/orders/{orderId}/payments',
+        '/api/admin/orders/{orderId}/payments',
         [
-            '/admin/orders/{orderId}/payments',
-            '/admin/orders/{id}'
+            '/api/admin/orders/{orderId}/payments',
+            '/api/admin/orders/{id}'
         ],
         {
             orderId: orderId || ''
@@ -139,14 +137,14 @@ export function useCreateOrderPayment(orderId?: string) {
 
 export function useCancelOrder(id?: string) {
     return usePutApi<
-        '/admin/orders/{id}/cancel',
+        '/api/admin/orders/{id}/cancel',
         { id: string },
         void
     >(
-        '/admin/orders/{id}/cancel',
+        '/api/admin/orders/{id}/cancel',
         [
-            '/admin/orders/{id}',
-            '/admin/orders/{orderId}/payments',
+            '/api/admin/orders/{id}',
+            '/api/admin/orders/{orderId}/payments',
         ],
         {
             id: id || ''
@@ -156,11 +154,11 @@ export function useCancelOrder(id?: string) {
 
 export function useSignup() {
     return usePostApi<
-        '/public/signup',
+        '/api/public/signup',
         never,
         SignupRequest
     >(
-        '/public/signup',
+        '/api/public/signup',
         [],
         {} as never
     );
@@ -168,11 +166,11 @@ export function useSignup() {
 
 export function useLogin() {
     return usePostApi<
-        '/public/login',
+        '/api/public/login',
         never,
         LoginRequest
     >(
-        '/public/login',
+        '/api/public/login',
         [],
         {} as never
     );
@@ -181,7 +179,7 @@ export function useLogin() {
 export const useUserQuery = (): UseQueryResult<User> => {
     // Only enable the query if we have a token
     const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('token');
-    return useApiQuery("/public/users/me", {credentials: "include"}, { enabled: hasToken } as any);
+    return useApiQuery("/api/public/users/me", {credentials: "include"}, { enabled: hasToken } as any);
 }
 
 export function useDownloadDeliveryStats() {
@@ -201,6 +199,4 @@ export function useDownloadDeliveryStats() {
 
         return response;
     }
-
-
 }
