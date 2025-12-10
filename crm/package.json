@@ -1,17 +1,19 @@
 {
   "name": "crm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "prebuild": "node scripts/generate-build-info.js",
     "start": "next start",
     "lint": "eslint",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "openapi": "openapi-typescript openapi/api.yml -o src/api/openapi/crm.d.ts",
-    "deploy": "next build && firebase deploy --only hosting",
-    "serve": "firebase serve --only hosting"
+    "deploy": "npm run bump-version && next build && firebase deploy --only hosting",
+    "serve": "firebase serve --only hosting",
+    "bump-version": "node scripts/bump-version.js"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
