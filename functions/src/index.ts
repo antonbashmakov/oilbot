@@ -6,8 +6,8 @@ admin.initializeApp();
 import privateApi from "./controllers/private/private";
 import adminApi from "./controllers/admin";
 import webhookApi from "./controllers/webhook";
-import { publicApi } from "./controllers/public";
-import { db } from "./controllers/db";
+import {publicApi} from "./controllers/public";
+import {db} from "./controllers/db";
 
 export const processOutboxEvent = db.processOutboxEvent;
 
@@ -48,7 +48,7 @@ if (process.env.FUNCTIONS_EMULATOR) {
       req.url = req.url.replace(/^\/(api\/)?private/, "");
       return privateApi(req, res);
     }
-    if (req.path.startsWith("/api/admin")  || req.path.startsWith("/admin")) {
+    if (req.path.startsWith("/api/admin") || req.path.startsWith("/admin")) {
       req.url = req.url.replace(/^\/(api\/)?admin/, "");
       return adminApi(req, res);
     }
@@ -56,7 +56,7 @@ if (process.env.FUNCTIONS_EMULATOR) {
   });
 }
 
-export { priv as private, adm as admin, webhooks as webhooks, pub as public };
+export {priv as private, adm as admin, webhooks as webhooks, pub as public};
 
 if (api) {
   exports.api = api;

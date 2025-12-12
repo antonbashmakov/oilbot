@@ -43,7 +43,6 @@ export default function DeliveryDetailPage() {
       setDownloading(true);
       const response = await downloadStatsMutation(delivery!.id);
 
-      console.log(response);
       // Get the blob from response
       const blob = await response.blob();
 

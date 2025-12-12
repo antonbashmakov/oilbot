@@ -186,7 +186,7 @@ export function useDownloadDeliveryStats() {
 
     let token  = (typeof window !== 'undefined') ? localStorage.getItem("token") : "";
     return async (id?: string) => {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL}/admin/deliveries/${id}/stats/CSV?status=CANCELED`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL || ''}/api/admin/deliveries/${id}/stats/CSV?status=CANCELED`, {
             method: "GET",
             headers: {
                 'Authorization': `Bearer ${token}`,
