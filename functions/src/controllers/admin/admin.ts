@@ -31,6 +31,8 @@ admin.initializeApp({}, "admin");
 
 const db = admin.firestore();
 
+console.log('>>>>>>>>>>>>', process.env.GCLOUD_PROJECT)
+
 if (process.env.GCLOUD_PROJECT !== "test-project" && db.databaseId !== process.env.DATABASE_ID) {
   db.settings({
     databaseId: process.env.DATABASE_ID,

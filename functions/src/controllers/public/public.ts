@@ -32,10 +32,7 @@ const publicApi = express();
 
 publicApi.use(cors(
   {
-    origin: [
-      "https://posebestoimosti-473916.firebaseapp.com",
-      "https://posebestoimosti-473916.web.app",
-    ],
+    origin: true,
     credentials: true, // allow cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   } // allows all cross origin xhr requests
