@@ -167,5 +167,9 @@
       "created": "Создано",
       "items": "товаров"
     }
+  },
+  "messenger": {
+    "communication": "Общение",
+    "typeMessage": "Введите сообщение..."
   }
 }

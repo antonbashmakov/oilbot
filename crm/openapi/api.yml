@@ -481,6 +481,96 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /admin/customers/{customerId}/messages:
+    get:
+      summary: Get all messages for a customer
+      description: Retrieve all conversation messages for a specific customer
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConversationMessage'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Send a message to a customer
+      description: Send a text message to a customer via Telegram and save it to CONVERSATION_MESSAGES
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: The text message to send
+                  example: "Hello, this is a test message"
+      responses:
+        '200':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/ConversationMessage'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /private/items/category/{category}:
     get:
@@ -1216,6 +1306,42 @@ components:
               type: string
               description: Error message
               example: "Delivery not found"
+    ConversationMessage:
+      type: object
+      description: A message sent in a conversation
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the message
+          readOnly: true
+        thread_id:
+          type: string
+          description: Unique identifier a thread those messages belongs to
+        provider:
+          type: string
+          enum: [TELEGRAM, OTHER]
+          description: The provider used to send the message
+        role:
+          type: string
+          enum: [CUSTOMER, ADMIN]
+          description: The provider used to send the message
+        recipient_id:
+          type: string
+          description: The chat ID where the message was sent
+        text:
+          type: string
+          description: The content of the message
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the message was created
+      required:
+        - id
+        - provider
+        - chat_id
+        - text
+        - role
+        - created_at
 
     Payment:
       type: object

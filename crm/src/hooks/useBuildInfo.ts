@@ -22,6 +22,7 @@ export function useBuildInfo() {
           throw new Error(`Failed to fetch build info: ${response.status}`);
         }
         const data: BuildInfo = await response.json();
+
         setBuildInfo(data);
       } catch (err) {
         console.error('Error loading build info:', err);

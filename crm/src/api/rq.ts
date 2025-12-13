@@ -37,7 +37,7 @@ export function useApiQuery<P extends PathsWithMethod<ApiPaths, 'get'>>(p: P | u
         ...options,
         queryKey: getApiQueryParams(p, init),
         queryFn: () => handleResult(GET(p as P, init)),
-        enabled: !!p,
+        enabled: !!p && options.enabled,
     });
 }
 

@@ -25,10 +25,11 @@ import {
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
 import { CartItem, PickingItem } from "@/api/models";
-import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery, useCreateOrderPayment, useCancelOrder } from "@/api";
+import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery, useCreateOrderPayment, useCancelOrder, useAdminCustomerMessagesQuery, useSendCustomerMessage } from "@/api";
 import { InfoMessage } from "@/components/ui/InfoMessage";
 import { PaymentCard } from "@/components/ui/PaymentCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Messenger } from "@/components/ui/Messenger";
 import { useCallback, useEffect, useState } from "react";
 import { AddIcon, MinusIcon, LockIcon } from "@chakra-ui/icons";
 import { useTranslations } from 'next-intl';
@@ -56,6 +57,10 @@ export default function OrderPage() {
   const { mutate: createOriginalPayment, isPending: isCreatingOriginalPayment } = useCreateOrderPayment(orderId as string);
   const { mutate: createConciliationPayment, isPending: isCreatingConciliationPayment } = useCreateOrderPayment(conciliationOrder?.id);
   const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder(orderId as string);
+  
+  // Customer messages
+  const { data: messages = [], refetch: refetchMessages } = useAdminCustomerMessagesQuery(order?.customer!.id);
+  const { mutate: sendMessage, isPending: isSendingMessage } = useSendCustomerMessage(order?.customer!.id);
 
   // Sort payments into original and conciliation arrays
   const originalPayments = payments.filter(payment =>
@@ -140,6 +145,24 @@ export default function OrderPage() {
       createConciliationPayment({ idempotency_key: idempotencyKey });
     }
   }, [conciliationOrder?.id, createConciliationPayment]);
+
+  const onSendMessage = useCallback((text: string) => {
+    if (order?.customer?.id) {
+      sendMessage({ text }, {
+        onSuccess: () => {
+          refetchMessages();
+        }
+      });
+    }
+  }, [order?.customer?.id, sendMessage, refetchMessages]);
+
+  useEffect(() => {
+
+    if(!order) return;
+
+    refetchMessages();
+
+  }, [order?.customer?.id, refetchMessages]);
 
   const onCancelClick = useCallback(() => {
     setIsCancelDialogOpen(true);
@@ -395,6 +418,12 @@ export default function OrderPage() {
                       </Flex>
                     </Card.Body>
                   </Card.Root>
+
+                  {/* Messenger component */}
+                  <Messenger
+                    messages={messages}
+                    onMessage={onSendMessage}
+                  />
 
                   <Card.Root bg="surface.container">
                     <Card.Header>

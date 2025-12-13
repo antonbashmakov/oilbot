@@ -167,5 +167,9 @@
       "created": "Skapad",
       "items": "artiklar"
     }
+  },
+  "messenger": {
+    "communication": "Kommunikation",
+    "typeMessage": "Skriv meddelande..."
   }
 }

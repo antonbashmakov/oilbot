@@ -450,6 +450,91 @@ export interface paths {
       };
     };
   };
+  "/admin/customers/{customerId}/messages": {
+    /**
+     * Get all messages for a customer
+     * @description Retrieve all conversation messages for a specific customer
+     */
+    get: {
+      parameters: {
+        path: {
+          /** @description Customer ID */
+          customerId: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["ConversationMessage"][];
+            };
+          };
+        };
+        /** @description Customer not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /**
+     * Send a message to a customer
+     * @description Send a text message to a customer via Telegram and save it to CONVERSATION_MESSAGES
+     */
+    post: {
+      parameters: {
+        path: {
+          /** @description Customer ID */
+          customerId: string;
+        };
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            /**
+             * @description The text message to send
+             * @example Hello, this is a test message
+             */
+            text: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Message sent successfully */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["ConversationMessage"];
+            };
+          };
+        };
+        /** @description Customer not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/private/items/category/{category}": {
     /**
      * Get items by category
@@ -1072,6 +1157,32 @@ export interface components {
          */
         message: string;
       };
+    };
+    /** @description A message sent in a conversation */
+    ConversationMessage: {
+      /** @description Unique identifier for the message */
+      id: string;
+      /** @description Unique identifier a thread those messages belongs to */
+      thread_id?: string;
+      /**
+       * @description The provider used to send the message
+       * @enum {string}
+       */
+      provider: "TELEGRAM" | "OTHER";
+      /**
+       * @description The provider used to send the message
+       * @enum {string}
+       */
+      role: "CUSTOMER" | "ADMIN";
+      /** @description The chat ID where the message was sent */
+      recipient_id?: string;
+      /** @description The content of the message */
+      text: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the message was created
+       */
+      created_at: string;
     };
     Payment: {
       /**

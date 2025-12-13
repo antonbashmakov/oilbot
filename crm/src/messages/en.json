@@ -167,5 +167,9 @@
       "created": "Created",
       "items": "items"
     }
+  },
+  "messenger": {
+    "communication": "Communication",
+    "typeMessage": "Type message..."
   }
 }

@@ -9,6 +9,7 @@ import {
     User,
     SignupRequest,
     LoginRequest,
+    ConversationMessage,
 } from "@/api/models";
 import { UseQueryResult } from "@tanstack/react-query";
 
@@ -136,20 +137,46 @@ export function useCreateOrderPayment(orderId?: string) {
 };
 
 export function useCancelOrder(id?: string) {
-    return usePutApi<
-        '/api/admin/orders/{id}/cancel',
-        { id: string },
-        void
-    >(
-        '/api/admin/orders/{id}/cancel',
-        [
-            '/api/admin/orders/{id}',
-            '/api/admin/orders/{orderId}/payments',
-        ],
-        {
-            id: id || ''
-        }
-    );
+  return usePutApi<
+    '/api/admin/orders/{id}/cancel',
+    { id: string },
+    void
+  >(
+    '/api/admin/orders/{id}/cancel',
+    [
+      '/api/admin/orders/{id}',
+      '/api/admin/orders/{orderId}/payments',
+    ],
+    {
+      id: id || ''
+    }
+  );
+};
+
+export const useAdminCustomerMessagesQuery = (customerId?: string): UseQueryResult<ConversationMessage[]> => {
+  return useApiQuery("/api/admin/customers/{customerId}/messages", {
+    params: {
+      path: {
+        customerId: customerId || ""
+      }
+    }
+  }, { retry: 1, enabled: !!customerId } as any)
+};
+
+export function useSendCustomerMessage(customerId?: string) {
+  return usePostApi<
+    '/api/admin/customers/{customerId}/messages',
+    { customerId: string },
+    { text: string }
+  >(
+    '/api/admin/customers/{customerId}/messages',
+    [
+      '/api/admin/customers/{customerId}/messages'
+    ],
+    {
+      customerId: customerId || ''
+    }
+  );
 };
 
 export function useSignup() {
