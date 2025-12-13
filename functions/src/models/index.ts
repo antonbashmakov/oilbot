@@ -22,7 +22,7 @@ export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 export type TinkoffResult = models["schemas"]["TinkoffResult"];
 
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
-export type BaseConversationMessage = models["schemas"]["ConversationMessage"];
+export type BaseConversationMessage = components["schemas"]["ConversationMessage"];
 
 export type Payment = Omit<BasePayment, "created_at" | "updated_at" > & {
   created_at: Date;

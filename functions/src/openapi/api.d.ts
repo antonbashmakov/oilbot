@@ -72,6 +72,50 @@ export interface paths {
       };
     };
   };
+  "/admin/deliveries/{id}/stats/{format}": {
+    /**
+     * Get delivery statistics in CSV format
+     * @description Retrieve delivery order statistics filtered by status and export as CSV
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Filter orders by status */
+          status?: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED" | "CANCELED";
+        };
+        path: {
+          /** @description Delivery ID */
+          id: string;
+          /** @description Output format */
+          format: "CSV";
+        };
+      };
+      responses: {
+        /** @description Successful response with CSV file */
+        200: {
+          headers: {
+            /** @description Attachment filename */
+            "Content-Disposition"?: string;
+          };
+          content: {
+            "text/csv": string;
+          };
+        };
+        /** @description Delivery not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/admin/orders/{id}": {
     /**
      * Get order overview by ID
@@ -392,6 +436,91 @@ export interface paths {
           };
         };
         /** @description Order not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/admin/customers/{customerId}/messages": {
+    /**
+     * Get all messages for a customer
+     * @description Retrieve all conversation messages for a specific customer
+     */
+    get: {
+      parameters: {
+        path: {
+          /** @description Customer ID */
+          customerId: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["ConversationMessage"][];
+            };
+          };
+        };
+        /** @description Customer not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /**
+     * Send a message to a customer
+     * @description Send a text message to a customer via Telegram and save it to CONVERSATION_MESSAGES
+     */
+    post: {
+      parameters: {
+        path: {
+          /** @description Customer ID */
+          customerId: string;
+        };
+      };
+      requestBody: {
+        content: {
+          "application/json": {
+            /**
+             * @description The text message to send
+             * @example Hello, this is a test message
+             */
+            text: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Message sent successfully */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["ConversationMessage"];
+            };
+          };
+        };
+        /** @description Customer not found */
         404: {
           content: {
             "application/json": components["schemas"]["Error"];
@@ -1028,6 +1157,32 @@ export interface components {
          */
         message: string;
       };
+    };
+    /** @description A message sent in a conversation */
+    ConversationMessage: {
+      /** @description Unique identifier for the message */
+      id: string;
+      /** @description Unique identifier a thread those messages belongs to */
+      thread_id?: string;
+      /**
+       * @description The provider used to send the message
+       * @enum {string}
+       */
+      provider: "TELEGRAM" | "OTHER";
+      /**
+       * @description The provider used to send the message
+       * @enum {string}
+       */
+      role: "CUSTOMER" | "ADMIN";
+      /** @description The chat ID where the message was sent */
+      recipient_id?: string;
+      /** @description The content of the message */
+      text: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the message was created
+       */
+      created_at: string;
     };
     Payment: {
       /**

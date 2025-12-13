@@ -26,6 +26,7 @@ class TelegramService {
       return {
         id: ret.data.result.id,
         provider: "TELEGRAM",
+        role: "ADMIN",
         recipient_id: chatId,
         text: ret.data.result.text,
         created_at: new Date(),

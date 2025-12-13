@@ -15,15 +15,16 @@ import UserService, {
   toMessage,
   formatDate,
 } from "./imports";
-import {DeliveryOverview, OrderResolvedEvent, Stats, Payment, CustomerOverview, OrderCancelledEvent} from "../../models";
+import { DeliveryOverview, OrderResolvedEvent, Stats, Payment, CustomerOverview, OrderCancelledEvent, ConversationMessage } from "../../models";
 import OrderPickingService from "../../services/OrderPickingService";
 import EventPublisher from "../../services/EventPublisher";
 import IdempotencyGuardService from "../../services/IdempotencyGuardService";
 import TBankService from "../../services/payments/TBankService";
 import CustomerBalanceService from "../../services/CustomerBalanceService";
-import {logger} from "../../services/logger";
-import {authorize} from "../../services/utils";
-import {localeMiddleware} from "../../middleware/localeMiddleware";
+import ConversationMessageService from "../../services/ConversationMessageService";
+import { logger } from "../../services/logger";
+import { authorize } from "../../services/utils";
+import { localeMiddleware } from "../../middleware/localeMiddleware";
 // import { debug } from 'firebase-functions/logger';
 dotenv.config();
 
@@ -43,7 +44,7 @@ const adminApi = express();
 
 
 adminApi.use(cors(
-  {origin: true} // allows all cross origin xhr requests
+  { origin: true } // allows all cross origin xhr requests
 ));
 
 adminApi.use(localeMiddleware);
@@ -73,7 +74,7 @@ adminApi.get("/deliveries", async (req: express.Request, res: express.Response) 
 
 adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const deliveryService = new DeliveryService(db);
     const orderService = new OrderService(db);
     const delivery = await deliveryService.find(id);
@@ -87,14 +88,14 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
     const activeOrders = orders.filter((o) => o.status !== "CANCELED");
     const cancelledOrders = orders.filter((o) => o.status === "CANCELED");
 
-    const deliveryOverview = {...delivery, orders, activeOrders, cancelledOrders} as DeliveryOverview;
+    const deliveryOverview = { ...delivery, orders, activeOrders, cancelledOrders } as DeliveryOverview;
 
 
     const allItems = activeOrders.flatMap((o) => o.items);
 
     const stats = allItems.reduce((s, i) => {
       if (!s[i.item_id]) {
-        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name, group: i.group};
+        s[i.item_id] = { total: 0, quantity: 0, fraction: 0, name: i.name, group: i.group };
       }
       s[i.item_id].total += i.price * i.quantity;
       s[i.item_id].fraction += i.fraction;
@@ -115,8 +116,8 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
 
 adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: express.Response) => {
   try {
-    const {id, format} = req.params;
-    const {status} = req.query;
+    const { id, format } = req.params;
+    const { status } = req.query;
 
     // Validate format parameter
     if (format !== "CSV") {
@@ -144,7 +145,7 @@ adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: 
 
     const stats = allItems.reduce((s, i) => {
       if (!s[i.item_id]) {
-        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name};
+        s[i.item_id] = { total: 0, quantity: 0, fraction: 0, name: i.name };
       }
       s[i.item_id].total += i.price * i.quantity;
       s[i.item_id].fraction += i.fraction;
@@ -181,7 +182,7 @@ adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: 
 
 adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const orderService = new OrderService(db);
 
     const order = (await orderService.find(id));
@@ -200,7 +201,7 @@ adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) 
     customer.balance = balance;
 
 
-    return api.send(res, {...order, picking, customer});
+    return api.send(res, { ...order, picking, customer });
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
@@ -209,8 +210,8 @@ adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) 
 
 adminApi.patch("/order-pickings/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
-    const {items} = req.body;
+    const { id } = req.params;
+    const { items } = req.body;
 
     if (!items || !Array.isArray(items)) {
       return api.error(res, "Items array is required");
@@ -242,7 +243,7 @@ adminApi.patch("/order-pickings/:id", async (req: express.Request, res: express.
 
 adminApi.post("/orders/:id/order-picking", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
@@ -263,7 +264,7 @@ adminApi.post("/orders/:id/order-picking", async (req: express.Request, res: exp
 
 adminApi.post("/order-pickings/:pickingId/items/:itemId/collect", async (req: express.Request, res: express.Response) => {
   try {
-    const {pickingId, itemId} = req.params;
+    const { pickingId, itemId } = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(pickingId);
@@ -290,7 +291,7 @@ adminApi.post("/order-pickings/:pickingId/items/:itemId/collect", async (req: ex
 
 adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
@@ -311,7 +312,7 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
     }
 
 
-    await orderService.updateTransactionally(order, {status: "RESOLVING"});
+    await orderService.updateTransactionally(order, { status: "RESOLVING" });
 
     const eventPublisher = new EventPublisher<OrderResolvedEvent>(db);
 
@@ -323,7 +324,7 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
       processed: false,
       retries: 0,
       type: CONSTANTS.EVENTS.ORDER_RESOLVED,
-      payload: {order_id: order.id},
+      payload: { order_id: order.id },
 
     };
 
@@ -338,7 +339,7 @@ adminApi.post("/orders/:id/consolidate", async (req: express.Request, res: expre
 
 adminApi.put("/orders/:id/cancel", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
@@ -353,7 +354,7 @@ adminApi.put("/orders/:id/cancel", async (req: express.Request, res: express.Res
     }
 
     // Update order status to CANCELED
-    await orderService.updateTransactionally(order, {status: "CANCELED"});
+    await orderService.updateTransactionally(order, { status: "CANCELED" });
 
     // Emit OrderCancelledEvent
     const eventPublisher = new EventPublisher<OrderCancelledEvent>(db);
@@ -366,7 +367,7 @@ adminApi.put("/orders/:id/cancel", async (req: express.Request, res: express.Res
       processed: false,
       retries: 0,
       type: CONSTANTS.EVENTS.ORDER_CANCELED,
-      payload: {order_id: order.id},
+      payload: { order_id: order.id },
     };
 
     await eventPublisher.publish(event);
@@ -380,7 +381,7 @@ adminApi.put("/orders/:id/cancel", async (req: express.Request, res: express.Res
 
 adminApi.get("/orders/:id/conciliation", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const orderService = new OrderService(db);
 
     const conciliationOrder = await orderService.findConciliationOrder(id);
@@ -394,7 +395,7 @@ adminApi.get("/orders/:id/conciliation", async (req: express.Request, res: expre
 
 adminApi.get("/orders/:orderId/payments", async (req: express.Request, res: express.Response) => {
   try {
-    const {orderId} = req.params;
+    const { orderId } = req.params;
     const orderService = new OrderService(db);
     const paymentService = new PaymentService(db);
 
@@ -428,8 +429,8 @@ adminApi.get("/orders/:orderId/payments", async (req: express.Request, res: expr
 
 adminApi.post("/orders/:orderId/payments", async (req: express.Request, res: express.Response) => {
   try {
-    const {orderId} = req.params;
-    const {idempotency_key} = req.body;
+    const { orderId } = req.params;
+    const { idempotency_key } = req.body;
 
     if (!idempotency_key) {
       return api.badRequest(res, "idempotency_key is required");
@@ -487,7 +488,7 @@ adminApi.post("/orders/:orderId/payments", async (req: express.Request, res: exp
 
         // Update order status to PAYMENT_IN_PROGRESS if it's not already
         if (order.status !== "PAYMENT_IN_PROGRESS") {
-          await orderService.update(order, {status: "PAYMENT_IN_PROGRESS"});
+          await orderService.update(order, { status: "PAYMENT_IN_PROGRESS" });
         }
 
         // Send Telegram notification to order owner
@@ -531,6 +532,68 @@ adminApi.post("/orders/:orderId/payments", async (req: express.Request, res: exp
       return api.badRequest(res, "Duplicate request detected");
     }
 
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+adminApi.post("/customers/:customerId/messages", async (req: express.Request, res: express.Response) => {
+  try {
+    const { customerId } = req.params;
+    const { text } = req.body;
+
+    if (!text) {
+      return api.badRequest(res, "text is required");
+    }
+
+    const customerService = new CustomerService(db);
+    const telegramService = new TelegramService();
+    const conversationMessageService = new ConversationMessageService(db);
+
+    // Get customer from db
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    await telegramService.sendMessage(customer.id, text);
+
+    const message: ConversationMessage = {
+      id: "", // will be generated by Firestore
+      thread_id: `admin-to-${customerId}`,
+      provider: "TELEGRAM",
+      recipient_id: `${customer.id}`, // rework all ids to string after NY delivery
+      text,
+      role: "ADMIN",
+      created_at: new Date(),
+    }
+    const savedMessage = await conversationMessageService.add(message);
+    return api.send(res, savedMessage);
+
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+adminApi.get("/customers/:customerId/messages", async (req: express.Request, res: express.Response) => {
+  try {
+    const { customerId } = req.params;
+
+    const customerService = new CustomerService(db);
+    const conversationMessageService = new ConversationMessageService(db);
+
+    // Get customer from db to verify they exist
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    // Get conversation messages for this customer using efficient query
+    const customerMessages = await conversationMessageService.findByRecipientId(customerId);
+
+    return api.send(res, customerMessages);
+  } catch (err: any) {
+    functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
   }
 });

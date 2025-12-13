@@ -16,6 +16,19 @@ class ConversationMessageService extends AbstractService<ConversationMessage> {
   getCollectionName(): string {
     return COLLECTIONS.CONVERSATION_MESSAGES;
   }
+
+  async findByRecipientId(recipientId: string): Promise<ConversationMessage[]> {
+    const result = await this.getCollection()
+      .where("recipient_id", "==", recipientId)
+      .get();
+
+    if (result.empty) {
+      return [];
+    }
+
+    return result.docs.map((doc) => this.toPOJO(doc.id, doc.data()) as ConversationMessage);
+  }
+
   getExcludedFields(): string[] {
     return ["created_at"];
   }
