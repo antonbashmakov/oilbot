@@ -180,6 +180,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update an order
+      description: Update an order's name
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderPatch'
+      responses:
+        '200':
+          description: Order successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Order'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /admin/order-pickings/{id}:
     patch:
@@ -851,6 +900,14 @@ components:
           description: Items to update in this order picking
           items:
             $ref: '#/components/schemas/PickingItem'
+
+    OrderPatch:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the customer
+          example: "Updated Order Name"
 
     OrderPicking:
       type: object
