@@ -16,8 +16,10 @@ import { DeliveryInformationCard } from "../DeliveryInformationCard";
 import { useAdminDeliveryQuery, useDownloadDeliveryStats } from "@/api";
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from 'next-intl';
+import { Order } from "@/api/models";
+import _ from "lodash";
 
 export default function DeliveryDetailPage() {
   const params = useParams();
@@ -27,6 +29,7 @@ export default function DeliveryDetailPage() {
   const { data: delivery } = useAdminDeliveryQuery(deliveryId);
   const downloadStatsMutation = useDownloadDeliveryStats();
   const [isDownloading, setDownloading] = useState(false);
+  const [activeOrders, setActiveOrders] = useState<Order[]>();
 
   const handleEdit = () => {
     console.log("Edit delivery:", deliveryId);
@@ -62,6 +65,13 @@ export default function DeliveryDetailPage() {
 
   };
 
+  useEffect(() => {
+    if (delivery) {
+      const active = _.sortBy(delivery.orders, "owner.id");
+      setActiveOrders(active);
+    }
+  }, [delivery]);
+
   return (
     <Box bg="bg.primary" minH="100vh" py="8">
       {delivery && <Container maxW="7xl">
@@ -89,7 +99,7 @@ export default function DeliveryDetailPage() {
         <DeliveryInformationCard delivery={delivery} />
         <Container mb="8" />
         {/* Orders Table */}
-        {delivery.activeOrders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle" mb="8">
+        {activeOrders && <Card.Root bg="bg.primary" border="1px" borderColor="border.subtle" mb="8">
 
           <Card.Body p={0}>
             <DataTable
@@ -103,6 +113,11 @@ export default function DeliveryDetailPage() {
                   accessor: (order) => (
                     <Link target="_blank" href={`/orders/${order.id}`}><Text fontWeight="medium">{order.id}</Text></Link>
                   ),
+                },
+                {
+                  key: "name",
+                  header: t('columns.name'),
+                  accessor: (order) => order.name,
                 },
                 {
                   key: "customerName",
@@ -128,7 +143,7 @@ export default function DeliveryDetailPage() {
                   align: "end",
                 },
               ]}
-              data={delivery.activeOrders}
+              data={activeOrders}
             />
           </Card.Body>
         </Card.Root>}

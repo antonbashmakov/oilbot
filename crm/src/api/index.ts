@@ -3,6 +3,7 @@ import {
     DeliveryOverview,
     OrderOverview,
     OrderPickingPatch,
+    OrderPatch,
     Delivery,
     Order,
     Payment,
@@ -29,6 +30,20 @@ export function usePatchOrderPicking(id?: string) {
         OrderPickingPatch
     >(
         '/api/admin/order-pickings/{id}',
+        [
+            '/api/admin/orders/{id}'
+        ],
+        { id: id || '' }
+    );
+};
+
+export function usePatchOrder(id?: string) {
+    return usePatchApi<
+        '/api/admin/orders/{id}',
+        { id: string },
+        OrderPatch
+    >(
+        '/api/admin/orders/{id}',
         [
             '/api/admin/orders/{id}'
         ],

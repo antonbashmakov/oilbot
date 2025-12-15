@@ -21,11 +21,13 @@ import {
   Tabs,
   HStack,
   Dialog,
+  Editable,
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
 import { CartItem, PickingItem } from "@/api/models";
-import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery, useCreateOrderPayment, useCancelOrder, useAdminCustomerMessagesQuery, useSendCustomerMessage } from "@/api";
+import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, usePatchOrder, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery, useCreateOrderPayment, useCancelOrder, useAdminCustomerMessagesQuery, useSendCustomerMessage } from "@/api";
+import { LuPencilLine, LuX, LuCheck } from "react-icons/lu";
 import { InfoMessage } from "@/components/ui/InfoMessage";
 import { PaymentCard } from "@/components/ui/PaymentCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -57,6 +59,7 @@ export default function OrderPage() {
   const { mutate: createOriginalPayment, isPending: isCreatingOriginalPayment } = useCreateOrderPayment(orderId as string);
   const { mutate: createConciliationPayment, isPending: isCreatingConciliationPayment } = useCreateOrderPayment(conciliationOrder?.id);
   const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder(orderId as string);
+  const { mutate: patchOrder, isPending: isPatchingOrder } = usePatchOrder(orderId as string);
   
   // Customer messages
   const { data: messages = [], refetch: refetchMessages } = useAdminCustomerMessagesQuery(order?.customer!.id);
@@ -317,6 +320,41 @@ export default function OrderPage() {
                 <Button onClick={onCancelClick} bg="red.500" color="white" variant="outline" loading={isCancelling}>{t('buttons.cancel')}</Button>
               </Flex>
             </Flex>
+
+            <Editable.Root
+              defaultValue={order.name || ''}
+              placeholder="Click to edit order name"
+              onValueCommit={(e) => {
+
+                const value = e.value || '';
+                if (value !== order.name) {
+                  
+                  patchOrder({ name: value });
+                }
+              }}
+              width="100%"
+              maxW="md"
+            >
+              <Editable.Preview py={2} px={3} borderWidth="1px" borderRadius="md" />
+              <Editable.Input py={2} px={3} borderWidth="1px" borderRadius="md" />
+              <Editable.Control>
+                <Editable.EditTrigger asChild>
+                  <IconButton variant="ghost" size="xs">
+                    <LuPencilLine />
+                  </IconButton>
+                </Editable.EditTrigger>
+                <Editable.CancelTrigger asChild>
+                  <IconButton variant="outline" size="xs">
+                    <LuX />
+                  </IconButton>
+                </Editable.CancelTrigger>
+                <Editable.SubmitTrigger asChild>
+                  <IconButton variant="outline" size="xs">
+                    <LuCheck />
+                  </IconButton>
+                </Editable.SubmitTrigger>
+              </Editable.Control>
+            </Editable.Root>
 
             <Grid templateColumns="repeat(3, 1fr)" gap={6}>
               <GridItem colSpan={2}>

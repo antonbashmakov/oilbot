@@ -153,6 +153,53 @@ export interface paths {
         };
       };
     };
+    /**
+     * Update an order
+     * @description Update an order's name
+     */
+    patch: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          id: string;
+        };
+      };
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["OrderPatch"];
+        };
+      };
+      responses: {
+        /** @description Order successfully updated */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["Order"];
+            };
+          };
+        };
+        /** @description Bad request */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Order not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
   };
   "/admin/order-pickings/{id}": {
     /**
@@ -795,6 +842,13 @@ export interface components {
     OrderPickingPatch: {
       /** @description Items to update in this order picking */
       items: components["schemas"]["PickingItem"][];
+    };
+    OrderPatch: {
+      /**
+       * @description Name of the customer
+       * @example Updated Order Name
+       */
+      name?: string;
     };
     OrderPicking: {
       /**

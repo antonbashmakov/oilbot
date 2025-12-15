@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useUser } from "@/api/user/provider";
 
@@ -8,9 +8,19 @@ import { useUser } from "@/api/user/provider";
 const publicPaths = ["/login", "/signup", "/approve"];
 
 export default function AuthWrapper({ children }: { children: React.ReactNode }) {
+
+  const [mounted, setMounted] = useState(false)
   const router = useRouter();
   const pathname = usePathname();
   const { user, isLoading, isError } = useUser();
+
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+
+
 
   useEffect(() => {
     // Don't do anything while loading
@@ -51,15 +61,17 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
       return;
     }
   }, [user, isLoading, isError, pathname, router]);
-
+  if (!mounted) {
+    return null // 👈 SAME on server and client
+  }
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "center", 
-        alignItems: "center", 
-        height: "100vh" 
+      <div style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh"
       }}>
         <div>Loading...</div>
       </div>
