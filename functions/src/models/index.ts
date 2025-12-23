@@ -14,6 +14,7 @@ type BasePayment = components["schemas"]["Payment"];
 type BaseCustomerBalance = components["schemas"]["CustomerBalance"];
 type BaseCustomerOverview = components["schemas"]["CustomerOverview"];
 type BaseUser = components["schemas"]["User"];
+type BaseComment = components["schemas"]["Comment"];
 
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffPaymentCancelationRequest = models["schemas"]["TinkoffPaymentCancelationRequest"];
@@ -48,6 +49,9 @@ export type ConversationMessage = Omit<BaseConversationMessage, "created_at"> & 
   created_at: Date;
 };
 export type User = Omit<BaseUser, "created_at"> & {
+  created_at: Date;
+};
+export type Comment = Omit<BaseComment, "created_at"> & {
   created_at: Date;
 };
 
@@ -98,4 +102,3 @@ export interface IdempotentObject<T = any> {
   created_at: Date;
   data: T;
 }
-

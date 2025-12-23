@@ -621,6 +621,100 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /admin/comments:
+    get:
+      summary: Get comments
+      description: Retrieve comments with optional filtering by entity_id and class
+      tags:
+        - Comments
+      parameters:
+        - name: entity_id
+          in: query
+          required: false
+          description: Filter comments by entity ID
+          schema:
+            type: string
+        - name: class
+          in: query
+          required: false
+          description: Filter comments by class/type
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a comment
+      description: Create a new comment
+      tags:
+        - Comments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+                - entity_id
+                - class
+              properties:
+                text:
+                  type: string
+                  description: The comment text content
+                  example: "This is a comment"
+                entity_id:
+                  type: string
+                  description: ID of the entity this comment belongs to
+                  example: "order-456"
+                class:
+                  type: string
+                  description: The class/type of the comment
+                  example: "NOTE"
+      responses:
+        '200':
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Comment'
+        '400':
+          description: Bad request (e.g., missing required fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /private/items/category/{category}:
     get:
       summary: Get items by category
@@ -1296,6 +1390,8 @@ components:
           $ref: '#/components/schemas/OrderPicking'
         customer:
           $ref: '#/components/schemas/CustomerOverview'
+        comments:
+          $ref: '#/components/schemas/Comment'
 
     User:
       type: object
@@ -1538,6 +1634,41 @@ components:
           type: string
           description: User's password
           example: "password123"
+
+    Comment:
+      type: object
+      required:
+        - text
+        - owner
+        - created_at
+        - id
+        - entity_id
+        - class
+      properties:
+        text:
+          type: string
+          description: The comment text content
+          example: "This is a comment"
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+          description: The owner of the comment
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the comment was created
+          example: "2025-01-10T14:30:00Z"
+        id:
+          type: string
+          description: Unique identifier for the comment
+          example: "comment-123456"
+        entity_id:
+          type: string
+          description: ID of the entity this comment belongs to
+          example: "order-456"
+        class:
+          type: string
+          description: The class/type of the comment
+          example: "NOTE"
 tags:
   - name: Deliveries
     description: Operations related to deliveries
@@ -1551,3 +1682,5 @@ tags:
     description: Operations related to orders
   - name: Authentication
     description: User authentication and registration
+  - name: Comments
+    description: Operations related to comments
