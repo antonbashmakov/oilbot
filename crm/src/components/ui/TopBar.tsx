@@ -111,10 +111,7 @@ export default function TopBar() {
                     {user.roles?.join(", ")}
                   </Text>
                 </VStack>
-                <ChevronDownIcon
-                  transform={isMenuOpen ? "rotate(180deg)" : "none"}
-                  transition="transform 0.2s"
-                />
+
               </HStack>
             </Menu.Trigger>
             <Portal>

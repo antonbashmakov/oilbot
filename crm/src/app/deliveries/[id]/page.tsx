@@ -18,7 +18,7 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useEffect, useState } from "react";
 import { useTranslations } from 'next-intl';
-import { Order } from "@/api/models";
+import { Order, Stats } from "@/api/models";
 import _ from "lodash";
 
 export default function DeliveryDetailPage() {
@@ -30,6 +30,7 @@ export default function DeliveryDetailPage() {
   const downloadStatsMutation = useDownloadDeliveryStats();
   const [isDownloading, setDownloading] = useState(false);
   const [activeOrders, setActiveOrders] = useState<Order[]>();
+  const [stats, setStats] = useState<Stats[]>();
 
   const handleEdit = () => {
     console.log("Edit delivery:", deliveryId);
@@ -67,8 +68,10 @@ export default function DeliveryDetailPage() {
 
   useEffect(() => {
     if (delivery) {
-      const active = _.sortBy(delivery.orders, "owner.id");
+      const active = _.sortBy(delivery.activeOrders, "owner.id");
+      const stats = _.sortBy(delivery.stats!, "name");
       setActiveOrders(active);
+      setStats(stats);
     }
   }, [delivery]);
 
@@ -147,7 +150,7 @@ export default function DeliveryDetailPage() {
             />
           </Card.Body>
         </Card.Root>}
-        {delivery.stats && delivery.stats.length > 0 && (
+        {stats && stats.length > 0 && (
           <>
             <Flex justify="flex-end" mb="4">
               <button
@@ -193,7 +196,7 @@ export default function DeliveryDetailPage() {
                       align: "end",
                     },
                   ]}
-                  data={delivery.stats!}
+                  data={stats!}
                 />
               </Card.Body>
             </Card.Root>

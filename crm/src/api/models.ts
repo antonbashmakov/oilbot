@@ -15,3 +15,4 @@ export type User = components["schemas"]["User"];
 export type SignupRequest = components["schemas"]["SignupRequest"];
 export type LoginRequest = components["schemas"]["LoginRequest"];
 export type ConversationMessage = components["schemas"]["ConversationMessage"];
+export type Comment = components["schemas"]["Comment"];

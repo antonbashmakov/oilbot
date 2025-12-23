@@ -25,7 +25,7 @@ import {
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
-import { CartItem, PickingItem } from "@/api/models";
+import { CartItem, Order, PickingItem } from "@/api/models";
 import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, usePatchOrder, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery, useCreateOrderPayment, useCancelOrder, useAdminCustomerMessagesQuery, useSendCustomerMessage } from "@/api";
 import { LuPencilLine, LuX, LuCheck } from "react-icons/lu";
 import { InfoMessage } from "@/components/ui/InfoMessage";
@@ -35,6 +35,8 @@ import { Messenger } from "@/components/ui/Messenger";
 import { useCallback, useEffect, useState } from "react";
 import { AddIcon, MinusIcon, LockIcon } from "@chakra-ui/icons";
 import { useTranslations } from 'next-intl';
+import _ from "lodash";
+import Comments from "@/components/ui/Comments";
 
 
 export default function OrderPage() {
@@ -48,6 +50,8 @@ export default function OrderPage() {
   const [isMissingConsolidationPayment, setIsMissingConsolidationPayment] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("order-items");
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState<boolean>(false);
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [pickingItems, setPickingItems] = useState<PickingItem[]>([]);
 
   const { data: order } = useAdminOrderOverviewQuery(orderId as string);
   const { data: conciliationOrder } = useAdminOrderConciliationQuery(orderId as string);
@@ -166,6 +170,26 @@ export default function OrderPage() {
     refetchMessages();
 
   }, [order?.customer?.id, refetchMessages]);
+
+  useEffect(() => {
+
+    if(!order) return;
+
+    setItems(_.sortBy(order.items, "name"));
+
+    if(!order.picking) return;
+
+    setPickingItems(_.sortBy(order.picking.items, "name"));
+
+  }, [order?.items]);
+
+  useEffect(() => {
+
+    if(!order?.picking) return;
+
+    setPickingItems(_.sortBy(order.picking.items, "name"));
+
+  }, [order?.picking]);
 
   const onCancelClick = useCallback(() => {
     setIsCancelDialogOpen(true);
@@ -367,7 +391,7 @@ export default function OrderPage() {
                     <VStack gap={6} align="stretch" mt={4}>
                       <DataTable
                         columns={columns}
-                        data={order.items}
+                        data={items}
                         getKey={i => i.id}
                       />
                       <InfoMessage
@@ -379,7 +403,7 @@ export default function OrderPage() {
                       {
                         order.picking && <DataTable
                           columns={pickingColumns}
-                          data={order.picking.items}
+                          data={pickingItems}
                           title={t('table.products')}
                           isSaving={false}
                           onSave={onSave}
@@ -462,6 +486,7 @@ export default function OrderPage() {
                     messages={messages}
                     onMessage={onSendMessage}
                   />
+                  <Comments entityId={orderId as string} commentClass="ORDER" />
 
                   <Card.Root bg="surface.container">
                     <Card.Header>

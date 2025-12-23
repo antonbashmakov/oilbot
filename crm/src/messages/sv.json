@@ -125,6 +125,7 @@
       "customerName": "Kundnamn",
       "status": "Status",
       "items": "Artiklar",
+      "name": "Namn",
       "totalValue": "Totalt värde",
       "itemName": "Artikelnamn",
       "totalFraction": "Total andel",

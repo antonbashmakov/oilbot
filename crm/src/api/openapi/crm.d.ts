@@ -582,6 +582,91 @@ export interface paths {
       };
     };
   };
+  "/admin/comments": {
+    /**
+     * Get comments
+     * @description Retrieve comments with optional filtering by entity_id and class
+     */
+    get: {
+      parameters: {
+        query?: {
+          /** @description Filter comments by entity ID */
+          entity_id?: string;
+          /** @description Filter comments by class/type */
+          class?: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["Comment"][];
+            };
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /**
+     * Create a comment
+     * @description Create a new comment
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            /**
+             * @description The comment text content
+             * @example This is a comment
+             */
+            text: string;
+            /**
+             * @description ID of the entity this comment belongs to
+             * @example order-456
+             */
+            entity_id: string;
+            /**
+             * @description The class/type of the comment
+             * @example NOTE
+             */
+            class: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Comment created successfully */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["Comment"];
+            };
+          };
+        };
+        /** @description Bad request (e.g., missing required fields) */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/private/items/category/{category}": {
     /**
      * Get items by category
@@ -1156,6 +1241,7 @@ export interface components {
     OrderOverview: WithRequired<{
       picking?: components["schemas"]["OrderPicking"];
       customer: components["schemas"]["CustomerOverview"];
+      comments?: components["schemas"]["Comment"];
     } & components["schemas"]["Order"], "customer">;
     User: {
       /**
@@ -1356,6 +1442,36 @@ export interface components {
        * @example password123
        */
       password: string;
+    };
+    Comment: {
+      /**
+       * @description The comment text content
+       * @example This is a comment
+       */
+      text: string;
+      /** @description The owner of the comment */
+      owner: components["schemas"]["OwnerRef"];
+      /**
+       * Format: date-time
+       * @description Timestamp when the comment was created
+       * @example 2025-01-10T14:30:00Z
+       */
+      created_at: string;
+      /**
+       * @description Unique identifier for the comment
+       * @example comment-123456
+       */
+      id: string;
+      /**
+       * @description ID of the entity this comment belongs to
+       * @example order-456
+       */
+      entity_id: string;
+      /**
+       * @description The class/type of the comment
+       * @example NOTE
+       */
+      class: string;
     };
   };
   responses: never;

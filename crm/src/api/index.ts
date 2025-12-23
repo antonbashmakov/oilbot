@@ -11,6 +11,7 @@ import {
     SignupRequest,
     LoginRequest,
     ConversationMessage,
+    Comment,
 } from "@/api/models";
 import { UseQueryResult } from "@tanstack/react-query";
 
@@ -223,6 +224,31 @@ export const useUserQuery = (): UseQueryResult<User> => {
     const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('token');
     return useApiQuery("/api/public/users/me", {credentials: "include"}, { enabled: hasToken } as any);
 }
+
+export const useAdminCommentsQuery = (entityId?: string, commentClass?: string): UseQueryResult<Comment[]> => {
+  return useApiQuery("/api/admin/comments", {
+    params: {
+      query: {
+        entity_id: entityId || "",
+        class: commentClass || ""
+      }
+    }
+  }, { retry: 1, enabled: !!entityId } as any)
+};
+
+export function useCreateComment() {
+  return usePostApi<
+    '/api/admin/comments',
+    never,
+    { text: string; entity_id: string; class: string }
+  >(
+    '/api/admin/comments',
+    [
+      '/api/admin/comments'
+    ],
+    {} as never
+  );
+};
 
 export function useDownloadDeliveryStats() {
 

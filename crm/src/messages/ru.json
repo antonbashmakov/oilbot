@@ -125,6 +125,7 @@
       "customerName": "Имя клиента",
       "status": "Статус",
       "items": "Товары",
+      "name": "Название",
       "totalValue": "Общая стоимость",
       "itemName": "Название товара",
       "totalFraction": "Общая доля",
