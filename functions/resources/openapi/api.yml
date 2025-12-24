@@ -1234,6 +1234,17 @@ components:
           type: string
           description: Name of the stats item
           example: "Сёмга филе Филе на коже 1.8 Кг"
+          
+    DeliveryOverviewItemStats:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Stats'  
+      properties:
+        orders: 
+          type: array   
+          items:
+            $ref: '#/components/schemas/Order'
+
 
     Delivery:
       type: object
@@ -1319,8 +1330,7 @@ components:
           type: array
           description: Statistics for the delivery
           items:
-            $ref: '#/components/schemas/Stats'
-
+            $ref: '#/components/schemas/DeliveryOverviewItemStats'
     Order:
       type: object
       required:

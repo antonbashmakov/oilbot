@@ -89,20 +89,28 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
 
     const deliveryOverview = {...delivery, orders, activeOrders, cancelledOrders} as DeliveryOverview;
 
+    const itemToOrders: {[key: string]: {[key : string]: Order}} = {};
+
+    activeOrders.forEach((o) => o.items.forEach((i) => {
+      if (!itemToOrders[i.item_id]) itemToOrders[i.item_id] = {};
+
+      itemToOrders[i.item_id][o.id] = o;
+    }));
 
     const allItems = activeOrders.flatMap((o) => o.items);
 
     const stats = allItems.reduce((s, i) => {
       if (!s[i.item_id]) {
-        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name, group: i.group};
+        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name, group: i.group, orders: []};
       }
       s[i.item_id].total += i.price * i.quantity;
       s[i.item_id].fraction += i.fraction;
       s[i.item_id].quantity += i.quantity;
+      s[i.item_id].orders = Object.values(itemToOrders[i.item_id]);
 
 
       return s;
-    }, {} as { [key: string]: Stats & { group: string } });
+    }, {} as { [key: string]: Stats & { group: string, orders: Order[] } });
 
     deliveryOverview.stats = Object.keys(stats).map((key) => stats[key]);
 

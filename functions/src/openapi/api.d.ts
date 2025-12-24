@@ -1139,6 +1139,9 @@ export interface components {
        */
       name: string;
     };
+    DeliveryOverviewItemStats: {
+      orders?: components["schemas"]["Order"][];
+    } & components["schemas"]["Stats"];
     Delivery: {
       /**
        * @description Unique identifier for the delivery
@@ -1196,7 +1199,7 @@ export interface components {
       /** @description List of all CANCELED orders in this delivery */
       removedOrders?: components["schemas"]["Order"][];
       /** @description Statistics for the delivery */
-      stats?: components["schemas"]["Stats"][];
+      stats?: components["schemas"]["DeliveryOverviewItemStats"][];
     } & components["schemas"]["Delivery"];
     Order: {
       /**
