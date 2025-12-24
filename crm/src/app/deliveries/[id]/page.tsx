@@ -18,7 +18,7 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useEffect, useState } from "react";
 import { useTranslations } from 'next-intl';
-import { Order, Stats } from "@/api/models";
+import { DeliveryOverviewItemStats, Order, Stats } from "@/api/models";
 import _ from "lodash";
 
 export default function DeliveryDetailPage() {
@@ -30,7 +30,7 @@ export default function DeliveryDetailPage() {
   const downloadStatsMutation = useDownloadDeliveryStats();
   const [isDownloading, setDownloading] = useState(false);
   const [activeOrders, setActiveOrders] = useState<Order[]>();
-  const [stats, setStats] = useState<Stats[]>();
+  const [stats, setStats] = useState<DeliveryOverviewItemStats[]>();
 
   const handleEdit = () => {
     console.log("Edit delivery:", deliveryId);
@@ -193,6 +193,13 @@ export default function DeliveryDetailPage() {
                       header: t('columns.totalCost'),
                       accessor: (item) => item.total,
                       summarizable: true,
+                      align: "end",
+                    },
+                    {
+                      key: "orders",
+                      field: "orders",
+                      header: t('columns.orders'),
+                      accessor: (item) => <>{item.orders?.map(o => <Link target="_blank" href={`/orders/${o.id}`}>{o.id}, </Link>)}</>,
                       align: "end",
                     },
                   ]}

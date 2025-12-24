@@ -126,6 +126,7 @@
       "status": "Status",
       "items": "Artiklar",
       "name": "Namn",
+      "orders": "Beställningar",
       "totalValue": "Totalt värde",
       "itemName": "Artikelnamn",
       "totalFraction": "Total andel",

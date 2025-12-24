@@ -126,6 +126,7 @@
       "status": "Status",
       "items": "Items",
       "name": "Name",
+      "orders": "Orders",
       "totalValue": "Total Value",
       "itemName": "Item Name",
       "totalFraction": "Total Fraction",
