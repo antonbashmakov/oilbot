@@ -883,6 +883,44 @@ export interface paths {
       };
     };
   };
+  "/agent/deliveries/{id}": {
+    /**
+     * Get delivery agent overview by ID
+     * @description Retrieve delivery agent overview including pickups and deliveries
+     */
+    get: {
+      parameters: {
+        path: {
+          /** @description Delivery agent ID */
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Successful response */
+        200: {
+          content: {
+            "application/json": {
+              /** @example OK */
+              code?: string;
+              data?: components["schemas"]["DeliveryAgentOverview"];
+            };
+          };
+        };
+        /** @description Delivery agent not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -1475,6 +1513,22 @@ export interface components {
        * @example NOTE
        */
       class: string;
+    };
+    DeliveryAgentOverview: {
+      /**
+       * @description Unique identifier for the delivery agent
+       * @example agent-123
+       */
+      id: string;
+      /**
+       * @description Name of the delivery agent
+       * @example John Doe
+       */
+      name: string;
+      /** @description List of pickup orders */
+      pickups: components["schemas"]["Order"][];
+      /** @description List of delivery orders */
+      deliveries: components["schemas"]["Order"][];
     };
   };
   responses: never;

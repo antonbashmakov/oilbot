@@ -12,6 +12,7 @@ import {
     LoginRequest,
     ConversationMessage,
     Comment,
+    DeliveryAgentOverview,
 } from "@/api/models";
 import { UseQueryResult } from "@tanstack/react-query";
 
@@ -98,6 +99,16 @@ export function useStartOrderPicking(id?: string) {
 
 export const useAdminDeliveryQuery = (id?: string): UseQueryResult<DeliveryOverview> => {
     return useApiQuery("/api/admin/deliveries/{id}", {
+        params: {
+            path: {
+                id: id || ""
+            }
+        }
+    }, { retry: 1, enabled: !!id } as any)
+};
+
+export const useAgentDeliveryQuery = (id?: string): UseQueryResult<DeliveryAgentOverview> => {
+    return useApiQuery("/api/agent/deliveries/{id}", {
         params: {
             path: {
                 id: id || ""

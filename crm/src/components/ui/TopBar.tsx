@@ -79,7 +79,7 @@ export default function TopBar() {
           <Text fontSize="xl" fontWeight="bold" color="text.primary">
             CRM Dashboard
           </Text>
-          {buildInfo && (
+          {/*buildInfo && (
             <Badge
               colorScheme="blue"
               variant="subtle"
@@ -90,7 +90,7 @@ export default function TopBar() {
             >
               v{buildInfo.version} ({buildInfo.commitHash})
             </Badge>
-          )}
+          )*/}
         </HStack>
 
         {/* Right side - User menu */}
