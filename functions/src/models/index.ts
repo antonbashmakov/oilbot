@@ -2,6 +2,7 @@ import {components} from "../openapi/api";
 import {components as models} from "../openapi/models";
 
 export type DeliveryOverview = components["schemas"]["DeliveryOverview"];
+export type DeliveryAgentOverview = components["schemas"]["DeliveryAgentOverview"];
 export type Stats = components["schemas"]["Stats"];
 export type Order = components["schemas"]["Order"];
 export type Delivery = components["schemas"]["Delivery"];

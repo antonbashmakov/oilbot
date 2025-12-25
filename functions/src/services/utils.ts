@@ -3,6 +3,7 @@ import * as jwt from "jsonwebtoken";
 import {User} from "../models";
 import UserService from "./UserService";
 import {express} from "../controllers/private/imports";
+import {intersection} from "lodash";
 
 
 // Constants
@@ -93,8 +94,10 @@ export const generateToken = (user: User): string => {
   });
 };
 
+export type ROLE = "ADMIN" | "AGENT";
 
-export const authorize = async (req: express.Request, res: express.Response, next: express.NextFunction, userService: UserService, role?: "ADMIN" | "AGENT") => {
+
+export const authorize = async (req: express.Request, res: express.Response, next: express.NextFunction, userService: UserService, roles?: ROLE[]) => {
   if (!req.headers.authorization) {
     if (!next) {
       return Promise.reject(new Error("MISSING_AUTH_HEADER"));
@@ -109,8 +112,9 @@ export const authorize = async (req: express.Request, res: express.Response, nex
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
     const user = await userService.require(decoded.id);
+    const intersections = intersection(user.roles, roles);
 
-    if (role && !user.roles.includes(role)) return api.forbidden(res);
+    if (roles && !intersections.length) return api.forbidden(res);
 
     (req as any).user = user;
   } catch (err) {

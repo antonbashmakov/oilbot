@@ -5,6 +5,7 @@ admin.initializeApp();
 
 import privateApi from "./controllers/private/private";
 import adminApi from "./controllers/admin";
+import agentApi from "./controllers/agent";
 import webhookApi from "./controllers/webhook";
 import {publicApi} from "./controllers/public";
 import {db} from "./controllers/db";
@@ -36,6 +37,14 @@ const pub = functions.https.onRequest((req, res) => {
   return publicApi(req, res);
 });
 
+const agnt = functions.https.onRequest((req, res) => {
+  // Remove /api/agent from the request path so Express router sees correct routes
+  if (req.path.startsWith("/api/agent")) {
+    req.url = req.url.replace(/^\/api\/agent/, "");
+  }
+  return agentApi(req, res);
+});
+
 let api: functions.HttpsFunction | undefined;
 if (process.env.FUNCTIONS_EMULATOR) {
   api = functions.https.onRequest((req, res) => {
@@ -52,13 +61,16 @@ if (process.env.FUNCTIONS_EMULATOR) {
       req.url = req.url.replace(/^\/(api\/)?admin/, "");
       return adminApi(req, res);
     }
+    if (req.path.startsWith("/api/agent") || req.path.startsWith("/agent")) {
+      req.url = req.url.replace(/^\/(api\/)?agent/, "");
+      return agentApi(req, res);
+    }
     throw res.status(404).send("No such function found");
   });
 }
 
-export {priv as private, adm as admin, webhooks as webhooks, pub as public};
+export {priv as private, adm as admin, webhooks as webhooks, pub as public, agnt as agent};
 
 if (api) {
   exports.api = api;
 }
-
