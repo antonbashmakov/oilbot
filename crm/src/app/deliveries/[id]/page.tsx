@@ -199,7 +199,7 @@ export default function DeliveryDetailPage() {
                       key: "orders",
                       field: "orders",
                       header: t('columns.orders'),
-                      accessor: (item) => <>{item.orders?.map(o => <Link target="_blank" href={`/orders/${o.id}`}>{o.id}, </Link>)}</>,
+                      accessor: (item) => <>{item.orders?.map(o => <Link target="_blank" href={`/orders/${o.id}`}>{o.name || o.id.substring(0, 3).concat("...")}  </Link>)}</>,
                       align: "end",
                     },
                   ]}

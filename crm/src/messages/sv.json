@@ -90,6 +90,7 @@
     "cards": {
       "closingOrderInfo": "Information om avslutande beställning",
       "customer": "Kund",
+      "balance": "Nuvarande Balans",
       "orderCalculation": "Beställningsberäkning",
       "original": "Original",
       "picking": "Plockning",

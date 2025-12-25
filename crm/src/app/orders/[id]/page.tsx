@@ -33,7 +33,7 @@ import { PaymentCard } from "@/components/ui/PaymentCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Messenger } from "@/components/ui/Messenger";
 import { useCallback, useEffect, useState } from "react";
-import { AddIcon, MinusIcon, LockIcon } from "@chakra-ui/icons";
+import { AddIcon, MinusIcon, LockIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import { useTranslations } from 'next-intl';
 import _ from "lodash";
 import Comments from "@/components/ui/Comments";
@@ -478,6 +478,28 @@ export default function OrderPage() {
                           {!order.customer.username && <Text color="text.secondary">{order.customer.id}</Text>}
                         </Box>
                       </Flex>
+                      {order.customer?.balance && (
+                        <Flex mt={4} align="center" justify="space-between" p={4} borderRadius="lg" bg="surface.elevated">
+                          <Box>
+                            <Text fontSize="sm" color="text.secondary">{t('cards.balance')}</Text>
+                            <Text fontSize="3xl" fontWeight="bold" color="green.500">
+                              {order.customer.balance.value.toFixed(2)} ₽
+                            </Text>
+                          </Box>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            colorScheme="primary"
+                            borderRadius="full"
+                            w={10}
+                            h={10}
+                            p={0}
+                            _hover={{ bg: 'primary.blue', color: 'white' }}
+                          >
+                            <ArrowForwardIcon />
+                          </Button>
+                        </Flex>
+                      )}
                     </Card.Body>
                   </Card.Root>
 

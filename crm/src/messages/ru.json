@@ -90,6 +90,7 @@
     "cards": {
       "closingOrderInfo": "Информация о закрывающем заказе",
       "customer": "Клиент",
+      "balance": "Текущий баланс",
       "orderCalculation": "Расчет заказа",
       "original": "Исходный",
       "picking": "Сборка",

@@ -90,6 +90,7 @@
     "cards": {
       "closingOrderInfo": "Closing Order Information",
       "customer": "Customer",
+      "balance": "Current Balance",
       "orderCalculation": "Order Calculation",
       "original": "Original",
       "picking": "Picking",
