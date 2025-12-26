@@ -921,6 +921,44 @@ export interface paths {
       };
     };
   };
+  "/agent/orders/{id}/deliver": {
+    /**
+     * Mark order as delivered
+     * @description Set order status to DELIVERED
+     */
+    put: {
+      parameters: {
+        path: {
+          /** @description Order ID */
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Order successfully marked as delivered */
+        204: {
+          content: never;
+        };
+        /** @description Bad request (e.g., order cannot be delivered in current status) */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Order not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Internal server error */
+        500: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
 }
 
 export type webhooks = Record<string, never>;
@@ -972,6 +1010,11 @@ export interface components {
        * @example Updated Order Name
        */
       name?: string;
+      /**
+       * @description Address of shipping
+       * @example Oak str 1.
+       */
+      shipping_address?: string;
     };
     OrderPicking: {
       /**
@@ -1259,12 +1302,12 @@ export interface components {
        * @description Address
        * @example Str 1, city
        */
-      shippingAddress?: string;
+      shipping_address?: string;
       delivery?: components["schemas"]["DeliveryRef"];
       /** @description Items in this order */
       items: components["schemas"]["CartItem"][];
       /** @enum {string} */
-      status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED" | "CANCELED";
+      status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED" | "CANCELED" | "DELIVERED";
       /**
        * @description Current status of the order
        * @example PAID

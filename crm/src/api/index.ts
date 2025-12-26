@@ -14,7 +14,8 @@ import {
     Comment,
     DeliveryAgentOverview,
 } from "@/api/models";
-import { UseQueryResult } from "@tanstack/react-query";
+import { UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
+import useClient from "@/api/useClient";
 
 export type QueryControlOptions = {
     enabled?: boolean
@@ -179,6 +180,26 @@ export function useCancelOrder(id?: string) {
     }
   );
 };
+
+export function useDeliverOrder() {
+  const { PUT } = useClient();
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, string>({
+    mutationFn: async (orderId) => {
+      const response = await PUT('/api/agent/orders/{id}/deliver', {
+        params: {
+          path: { id: orderId },
+        },
+      });
+      // The endpoint returns 204 No Content, so data is null
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/agent/deliveries/{id}'] });
+    },
+  });
+}
 
 export const useAdminCustomerMessagesQuery = (customerId?: string): UseQueryResult<ConversationMessage[]> => {
   return useApiQuery("/api/admin/customers/{customerId}/messages", {

@@ -174,5 +174,40 @@
   "messenger": {
     "communication": "Kommunikation",
     "typeMessage": "Skriv meddelande..."
+  },
+  "deliveryProcess": {
+    "myRoute": "Min rutt",
+    "todaysShift": "Dagens skift",
+    "delivered": "Levererat",
+    "remaining": "Återstående",
+    "deliveries": "Leveranser",
+    "selfPickup": "Självhämtning",
+    "viewDetails": "Visa detaljer",
+    "hideDetails": "Dölj detaljer",
+    "markDelivered": "Markera som levererad",
+    "deliveredBadge": "LEVERERAD",
+    "confirmDelivery": "Bekräfta leverans",
+    "confirmMessage": "Är du säker på att du vill markera denna beställning som levererad?",
+    "cancel": "Avbryt",
+    "confirm": "Bekräfta",
+    "loading": "Laddar...",
+    "customerFallback": "Kund {id}",
+    "storePickup": "Självhämtning - Disk {counter}",
+    "itemsTotal": "{items} artiklar • ${total}",
+    "orderBadge": "#{id}",
+    "pickupBadge": "#PU-{id}",
+    "moreItems": "+{count} till"
+  },
+  "orderDeliveryCard": {
+    "addDeliveryAddress": "Lägg till leveransadress",
+    "streetAddress": "Gatuadress",
+    "city": "Stad",
+    "state": "Region",
+    "zipCode": "Postnummer",
+    "saveAddress": "Spara adress",
+    "streetAddressPlaceholder": "t.ex. Storgatan 123",
+    "cityPlaceholder": "Stad",
+    "statePlaceholder": "Region",
+    "zipCodePlaceholder": "Postnummer"
   }
 }

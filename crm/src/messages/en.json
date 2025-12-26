@@ -174,5 +174,40 @@
   "messenger": {
     "communication": "Communication",
     "typeMessage": "Type message..."
+  },
+  "deliveryProcess": {
+    "myRoute": "My Route",
+    "todaysShift": "Today's Shift",
+    "delivered": "Delivered",
+    "remaining": "Remaining",
+    "deliveries": "Deliveries",
+    "selfPickup": "Self Pickup",
+    "viewDetails": "View Details",
+    "hideDetails": "Hide Details",
+    "markDelivered": "Mark Delivered",
+    "deliveredBadge": "DELIVERED",
+    "confirmDelivery": "Confirm Delivery",
+    "confirmMessage": "Are you sure you want to mark this order as delivered?",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "customerFallback": "Customer {id}",
+    "storePickup": "Store Pickup - Counter {counter}",
+    "itemsTotal": "{items} items • ${total}",
+    "orderBadge": "#{id}",
+    "pickupBadge": "#PU-{id}",
+    "moreItems": "+{count} more"
+  },
+  "orderDeliveryCard": {
+    "addDeliveryAddress": "Add Delivery Address",
+    "streetAddress": "Street Address",
+    "city": "City",
+    "state": "State",
+    "zipCode": "Zip Code",
+    "saveAddress": "Save Address",
+    "streetAddressPlaceholder": "e.g. 123 Main St",
+    "cityPlaceholder": "City",
+    "statePlaceholder": "State",
+    "zipCodePlaceholder": "Zip Code"
   }
 }

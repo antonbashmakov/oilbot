@@ -227,7 +227,7 @@ adminApi.get("/orders/:id", async (req: express.Request, res: express.Response) 
 adminApi.patch("/orders/:id", async (req: express.Request, res: express.Response) => {
   try {
     const {id} = req.params;
-    const {name} = req.body;
+    const {name, shipping_address} = req.body;
 
     const orderService = new OrderService(db);
     const order = await orderService.find(id);
@@ -245,6 +245,9 @@ adminApi.patch("/orders/:id", async (req: express.Request, res: express.Response
     const updateData: Partial<Order> = {};
     if (name !== undefined) {
       updateData.name = name;
+    }
+    if (shipping_address !== undefined) {
+      updateData.shipping_address = shipping_address;
     }
 
     // If no fields to update, return the order as is

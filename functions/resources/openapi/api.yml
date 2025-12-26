@@ -982,6 +982,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /agent/orders/{id}/deliver:
+    put:
+      summary: Mark order as delivered
+      description: Set order status to DELIVERED
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Order successfully marked as delivered
+        '400':
+          description: Bad request (e.g., order cannot be delivered in current status)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Customer:
@@ -1041,6 +1076,10 @@ components:
           type: string
           description: Name of the customer
           example: "Updated Order Name"
+        shipping_address:
+          type: string
+          description: Address of shipping
+          example: "Oak str 1."
 
     OrderPicking:
       type: object
@@ -1393,7 +1432,7 @@ components:
           type: string
           description: Name of the customer
           example: "Order 1"
-        shippingAddress:
+        shipping_address:
           type: string
           description: Address
           example: "Str 1, city"
@@ -1415,6 +1454,7 @@ components:
             - CONCILIATION_PAYMENT_IN_PROGRESS
             - CONCILIATED
             - CANCELED
+            - DELIVERED
         type:
           type: string
           enum:

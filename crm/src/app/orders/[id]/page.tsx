@@ -37,6 +37,8 @@ import { AddIcon, MinusIcon, LockIcon, ArrowForwardIcon } from "@chakra-ui/icons
 import { useTranslations } from 'next-intl';
 import _ from "lodash";
 import Comments from "@/components/ui/Comments";
+import { OrderDeliveryCard, AddressData } from "@/components/ui/OrderDeliveryCard";
+
 
 
 export default function OrderPage() {
@@ -575,6 +577,18 @@ export default function OrderPage() {
 
                     </Card.Body>
                   </Card.Root>
+                    {/* Delivery Address Card */}
+                    <Box mt={4}>
+                      <OrderDeliveryCard
+                        initialValues={{ streetAddress: order.shipping_address || "" }}
+                        onSubmit={(address) => {
+                          // Combine address fields into a single string for shipping_address
+                          const shippingAddress = address.streetAddress; // For now only streetAddress
+                          patchOrder({ shipping_address: shippingAddress });
+                        }}
+                        isLoading={isPatchingOrder}
+                      />
+                    </Box>                  
                 </VStack>
               </GridItem>
             </Grid>

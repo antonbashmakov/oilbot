@@ -48,7 +48,7 @@ agentApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
   try {
     const {id} = req.params;
     const deliveryService = new DeliveryService(db);
-    
+
     // Fetch the agent user
     const delivery = await deliveryService.find(id);
     if (!delivery) {
@@ -60,8 +60,8 @@ agentApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
     const orders = await orderService.findOrders(delivery);
 
     const activeOrders = orders.filter((o) => o.status !== "CANCELED");
-    const deliveries = activeOrders.filter(o => !!o.shippingAddress);
-    const pickups = activeOrders.filter(o => !o.shippingAddress);
+    const deliveries = activeOrders.filter((o) => !!o.shipping_address);
+    const pickups = activeOrders.filter((o) => !o.shipping_address);
 
 
     // TODO: Implement proper logic to fetch pickup and delivery orders assigned to this agent
@@ -74,6 +74,34 @@ agentApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
     };
 
     return api.send(res, deliveryAgentOverview);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+agentApi.put("/orders/:id/deliver", async (req: express.Request, res: express.Response) => {
+  try {
+    const {id} = req.params;
+    const orderService = new OrderService(db);
+
+    // Fetch the order
+    const order = await orderService.find(id);
+    if (!order) {
+      return api.notFound(res, "Order not found");
+    }
+
+    // Check if order can be marked as delivered
+    // For now, we'll allow any status transition to DELIVERED except CANCELED
+    if (order.status === "CANCELED") {
+      return api.badRequest(res, "Canceled order cannot be marked as delivered");
+    }
+
+    // Update order status to DELIVERED
+    await orderService.update(order, {status: "DELIVERED"});
+
+    // Return 204 No Content
+    return res.status(204).send();
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");

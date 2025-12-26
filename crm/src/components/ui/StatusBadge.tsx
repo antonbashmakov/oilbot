@@ -14,6 +14,7 @@ export type StatusValue =
   | "RESOLVING"
   | "CONCILIATION_PAYMENT_IN_PROGRESS"
   | "CONCILIATED"
+  | "DELIVERED"
   | "PAYMENT_FAILED";
 
 interface StatusBadgeProps extends Omit<BadgeProps, "children"> {

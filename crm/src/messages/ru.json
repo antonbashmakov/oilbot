@@ -174,5 +174,40 @@
   "messenger": {
     "communication": "Общение",
     "typeMessage": "Введите сообщение..."
+  },
+  "deliveryProcess": {
+    "myRoute": "Мой маршрут",
+    "todaysShift": "Сегодняшняя смена",
+    "delivered": "Доставлено",
+    "remaining": "Осталось",
+    "deliveries": "Доставки",
+    "selfPickup": "Самовывоз",
+    "viewDetails": "Показать детали",
+    "hideDetails": "Скрыть детали",
+    "markDelivered": "Отметить доставленным",
+    "deliveredBadge": "ДОСТАВЛЕНО",
+    "confirmDelivery": "Подтвердить доставку",
+    "confirmMessage": "Вы уверены, что хотите отметить этот заказ как доставленный?",
+    "cancel": "Отмена",
+    "confirm": "Подтвердить",
+    "loading": "Загрузка...",
+    "customerFallback": "Клиент {id}",
+    "storePickup": "Самовывоз - Стойка {counter}",
+    "itemsTotal": "{items} товаров • ${total}",
+    "orderBadge": "#{id}",
+    "pickupBadge": "#PU-{id}",
+    "moreItems": "+{count} еще"
+  },
+  "orderDeliveryCard": {
+    "addDeliveryAddress": "Добавить адрес доставки",
+    "streetAddress": "Улица, дом",
+    "city": "Город",
+    "state": "Область",
+    "zipCode": "Почтовый индекс",
+    "saveAddress": "Сохранить адрес",
+    "streetAddressPlaceholder": "например, ул. Ленина, д. 10",
+    "cityPlaceholder": "Город",
+    "statePlaceholder": "Область",
+    "zipCodePlaceholder": "Почтовый индекс"
   }
 }
