@@ -4,6 +4,7 @@ import BalanceChangedProcessor from "./BalanceChangedProcessor";
 import OrderPaymentConfirmedProcessor from "./OrderPaymentConfirmedProcessor";
 import OrderPaymentFailedProcessor from "./OrderPaymentFailedProcessor";
 import OrderCancelledProcessor from "./OrderCancelledProcessor";
+import OrderConciliatedProcessor from "./OrderConciliatedProcessor";
 import AbstractProcessor from "./AbstractProcessor";
 import {Firestore} from "firebase-admin/firestore";
 import {CONSTANTS} from "../../controllers/admin/imports";
@@ -18,6 +19,7 @@ const EVENT_PROCESSORS: { [key: string]: ProcessorConstructor } = {
   [CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED]: OrderPaymentConfirmedProcessor,
   [CONSTANTS.EVENTS.ORDER_PAYMENT_FAILED]: OrderPaymentFailedProcessor,
   [CONSTANTS.EVENTS.ORDER_CANCELED]: OrderCancelledProcessor,
+  [CONSTANTS.EVENTS.ORDER_CONCILIATED]: OrderConciliatedProcessor,
 };
 
 export const toProcessor: (event: string) => ProcessorConstructor = (event: string) => {

@@ -19,9 +19,10 @@ import {
 } from "@chakra-ui/react";
 import { useAgentDeliveryQuery, useDeliverOrder } from "@/api";
 import { LuTruck, LuPackage, LuCheck, LuMapPin, LuStore } from "react-icons/lu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Order } from "@/api/models";
 import { useTranslations } from 'next-intl';
+import _ from "lodash";
 
 export default function DeliveryProcessPage() {
   const params = useParams();
@@ -30,6 +31,7 @@ export default function DeliveryProcessPage() {
   const deliverOrderMutation = useDeliverOrder();
   const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
   const [confirmOrderId, setConfirmOrderId] = useState<string | null>(null);
+  const [deliveries, setDeliveries] = useState<Order[]>([]);
   const t = useTranslations('deliveryProcess');
 
   // Compute delivered count based on order status
@@ -55,6 +57,13 @@ export default function DeliveryProcessPage() {
   const handleCancel = () => {
     setConfirmOrderId(null);
   };
+
+  useEffect(() => {
+
+    if(!delivery) return;
+    
+    setDeliveries(_.sortBy(delivery.deliveries, "shipping_address"))
+  }, [delivery]);
 
   const toggleExpand = (orderId: string) => {
     setExpandedOrders(prev =>
@@ -116,7 +125,7 @@ export default function DeliveryProcessPage() {
           >
             <Box textAlign="center">
               <Text fontSize="xs" color="text.secondary" fontWeight="bold" textTransform="uppercase">
-                {t('delivered')}
+                {t('delivered')} 
               </Text>
               <Flex align="baseline" justify="center" gap={1}>
                 <Text fontSize="2xl" fontWeight="black" color="status.successDark">
@@ -151,13 +160,16 @@ export default function DeliveryProcessPage() {
               </Heading>
             </Flex>
             <VStack gap={4} align="stretch">
-              {delivery?.deliveries?.map((order: Order) => (
+              {deliveries.map((order: Order) => (
                 <Card.Root key={order.id} bg="surface.container" borderWidth="1px" borderColor="border.subtle" borderRadius="xl" overflow="hidden">
                   <Card.Body p={5}>
                     <Flex justify="space-between" align="start" mb={4}>
                       <Box>
                         <Heading size="md" color="text.primary"> 
-                          {order.name || order.id.slice(-4)}
+                          {order.name || order.id.slice(-4)} 
+                        </Heading>
+                        <Heading size="md" color="text.primary"> 
+                          {order.shipping_address}
                         </Heading>
                         <Flex align="center" gap={1} mt={1} color="text.secondary" fontSize="sm">
                           <Icon as={LuMapPin} boxSize={4} />

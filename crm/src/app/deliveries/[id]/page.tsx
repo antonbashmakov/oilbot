@@ -123,6 +123,11 @@ export default function DeliveryDetailPage() {
                   accessor: (order) => order.name,
                 },
                 {
+                  key: "shipping_address",
+                  header: t('columns.shipping_address'),
+                  accessor: (order) => order.shipping_address,
+                },
+                {
                   key: "customerName",
                   header: t('columns.customerName'),
                   accessor: (order) => order.owner.id,

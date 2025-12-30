@@ -237,9 +237,12 @@ adminApi.patch("/orders/:id", async (req: express.Request, res: express.Response
     }
 
     // Validate that order can be edited (similar to other order update endpoints)
+    /*
     if (order.status !== "PENDING" && order.status !== "PAID") {
       return api.badRequest(res, "Order is not editable");
     }
+
+    */
 
     // Update only the name field if provided
     const updateData: Partial<Order> = {};

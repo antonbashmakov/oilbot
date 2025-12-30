@@ -124,6 +124,7 @@
     "columns": {
       "orderId": "Order ID",
       "customerName": "Customer Name",
+      "shipping_address": "Shipping Address",
       "status": "Status",
       "items": "Items",
       "name": "Name",

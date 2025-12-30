@@ -124,6 +124,7 @@
     "columns": {
       "orderId": "ID заказа",
       "customerName": "Имя клиента",
+      "shipping_address": "Адрес доставки",
       "status": "Статус",
       "items": "Товары",
       "name": "Название",

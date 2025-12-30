@@ -53,6 +53,10 @@
         "function": "admin"
       },
       {
+        "source": "/api/agent/**",
+        "function": "agent"
+      },
+      {
         "source": "**",
         "function": "ssrposebestoimosti47391",
         "region": "europe-west1"
