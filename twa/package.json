@@ -1,23 +1,26 @@
 {
-  "name": "telegram-miniapp-store",
+  "name": "twa",
+  "version": "0.1.0",
   "private": true,
-  "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"vite\"",
-    "build": "vite build",
-    "preview": "vite preview",
-    "api": "json-server --watch mock/db.json --port 4000"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.15.0",
-    "axios": "^1.6.0"
+    "next": "16.1.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.0.0",
-    "vite": "^4.0.0",
-    "json-server": "^0.17.4",
-    "concurrently": "^8.2.0"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
