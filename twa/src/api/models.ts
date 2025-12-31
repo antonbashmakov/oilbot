@@ -1,20 +1,121 @@
-import {components} from "@/api/openapi/crm";
+import {components} from "./openapi/api";
+import {components as models} from "./openapi/models";
 
 export type DeliveryOverview = components["schemas"]["DeliveryOverview"];
-export type OrderOverview = components["schemas"]["OrderOverview"];
-export type Stats = components["schemas"]["Stats"];
-export type DeliveryOverviewItemStats = components["schemas"]["DeliveryOverviewItemStats"];
-export type Order = components["schemas"]["Order"];
-export type OrderPicking = components["schemas"]["OrderPicking"];
-export type Delivery = components["schemas"]["Delivery"];
-export type CartItem = components["schemas"]["CartItem"];
-export type OrderPickingPatch = components["schemas"]["OrderPickingPatch"];
-export type OrderPatch = components["schemas"]["OrderPatch"];
-export type PickingItem = components["schemas"]["PickingItem"];
-export type Payment = components["schemas"]["Payment"];
-export type User = components["schemas"]["User"];
-export type SignupRequest = components["schemas"]["SignupRequest"];
-export type LoginRequest = components["schemas"]["LoginRequest"];
-export type ConversationMessage = components["schemas"]["ConversationMessage"];
-export type Comment = components["schemas"]["Comment"];
+export type BaseDeliveryRef = components["schemas"]["DeliveryRef"];
 export type DeliveryAgentOverview = components["schemas"]["DeliveryAgentOverview"];
+export type Stats = components["schemas"]["Stats"];
+export type Order = components["schemas"]["Order"];
+export type BaseDelivery = components["schemas"]["Delivery"];
+export type Customer = components["schemas"]["Customer"];
+export type Item = components["schemas"]["Item"];
+export type BaseItemOverview = components["schemas"]["ItemOverview"];
+export type CartItem = components["schemas"]["CartItem"];
+export type PickingItem = components["schemas"]["PickingItem"];
+type BaseOrderPicking = components["schemas"]["OrderPicking"];
+type BasePayment = components["schemas"]["Payment"];
+type BaseCustomerBalance = components["schemas"]["CustomerBalance"];
+type BaseCustomerOverview = components["schemas"]["CustomerOverview"];
+type BaseUser = components["schemas"]["User"];
+type BaseComment = components["schemas"]["Comment"];
+
+export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
+export type TinkoffPaymentCancelationRequest = models["schemas"]["TinkoffPaymentCancelationRequest"];
+export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
+export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
+export type TinkoffResult = models["schemas"]["TinkoffResult"];
+
+export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
+export type BaseConversationMessage = components["schemas"]["ConversationMessage"];
+
+export type Payment = Omit<BasePayment, "created_at" | "updated_at" > & {
+  created_at: Date;
+  updated_at: Date;
+  confirmed_at?: Date;
+};
+export type CustomerBalance = Omit<BaseCustomerBalance, "created_at" | "updated_at" > & {
+  created_at: Date;
+  updated_at: Date;
+};
+export type CustomerOverview = Omit<BaseCustomerOverview, "balance" > & {
+  balance: CustomerBalance;
+};
+export type OrderPicking = Omit<BaseOrderPicking, "created_at" > & {
+  created_at: Date;
+};
+export type OutboxEvent = Omit<BaseOutboxEvent, "created_at" | "processedAt"> & {
+  created_at: Date;
+  processed_at?: Date;
+  payload?: { [key: string]: any };
+};
+export type ConversationMessage = Omit<BaseConversationMessage, "created_at"> & {
+  created_at: Date;
+};
+export type User = Omit<BaseUser, "created_at"> & {
+  created_at: Date;
+};
+export type Comment = Omit<BaseComment, "created_at"> & {
+  created_at: Date;
+};
+
+export type OrderResolvedEvent = OutboxEvent & {
+  payload: {
+    order_id: string;
+  }
+};
+export type OrderCancelledEvent = OutboxEvent & {
+  payload: {
+    order_id: string;
+  }
+};
+export type OrderConciliatedEvent = OutboxEvent & {
+  payload: {
+    order_id: string;
+  }
+};
+export type BalanceChangedEvent = OutboxEvent & {
+  payload: {
+    customer_id: string;
+    change: number;
+  }
+};
+export type PaymentCreatedEvent = OutboxEvent & {
+  payload: {
+    payment_id: string;
+  }
+};
+
+export type OrderPaymentConfirmedEvent = OutboxEvent & {
+  payload: {
+    order_id: string;
+    external_id: string;
+  }
+};
+
+export type OrderPaymentFailedEvent = OutboxEvent & {
+  payload: {
+    order_id: string;
+    external_id: number;
+    status: string;
+  }
+};
+export type Delivery = BaseDelivery & {
+  order_deadline: Date;
+  delivery_start: Date;
+  delivery_end: Date;
+};
+
+export type DeliveryRef = BaseDeliveryRef & {
+  order_deadline: Date;
+  delivery_start: Date;
+  delivery_end: Date;
+};
+export type ItemOverview = BaseItemOverview & {
+  deliveries:  DeliveryRef[];
+};
+
+export interface IdempotentObject<T = any> {
+  id: string;
+  created_at: Date;
+  data: T;
+}

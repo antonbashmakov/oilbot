@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useGetItemsQuery } from '@/api';
 import { categories, navItems } from '@/data/products';
+import { format } from "date-fns";
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -120,9 +121,9 @@ export default function Home() {
       </div>
 
       {/* Product Grid */}
-      {items.length > 0 ? (
+      {items && items.length  > 0 ? (
         <div className="grid grid-cols-2 gap-x-4 gap-y-6 p-4">
-          {items.map((item: any, index: number) => {
+          {items?.map((item, index: number) => {
             // Determine delivery info based on index
             const deliveryOptions = [
               { time: 'Tomorrow, 10 AM', icon: 'local_shipping' as const },
@@ -132,7 +133,7 @@ export default function Home() {
               { time: 'Sat, 9 AM', icon: 'local_shipping' as const },
               { time: 'Today, 5 PM', icon: 'bolt' as const },
             ];
-            const delivery = deliveryOptions[index % deliveryOptions.length];
+            const delivery = item.deliveries[0];
             
             // Determine badge based on index
             let badge = undefined;
@@ -180,21 +181,17 @@ export default function Home() {
                     {item.name || `Product ${index + 1}`}
                   </h3>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-primary text-lg font-bold">${(item.total || 0).toFixed(2)}</span>
-                    <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">/ unit</span>
+                    <span className="text-primary text-lg font-bold">{(item.fraction_price_out || 0).toFixed(0)} ₽</span>
+                    <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">/ {item.unit_description}</span>
                   </div>
                   <div className="flex items-center gap-1.5 mt-1">
                     <span
-                      className={`material-symbols-outlined text-[14px] ${
-                        delivery.icon === 'local_shipping'
-                          ? 'text-green-600 dark:text-green-400'
-                          : 'text-yellow-600 dark:text-yellow-400'
-                      }`}
+                      className={`material-symbols-outlined text-[14px] text-green-600 dark:text-green-400`}
                     >
-                      {delivery.icon}
+                      local_shipping
                     </span>
                     <p className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">
-                      {delivery.time}
+                      {format(new Date(delivery.delivery_end), "dd MMM yyyy")}
                     </p>
                   </div>
                 </div>
