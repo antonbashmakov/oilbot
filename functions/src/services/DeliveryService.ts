@@ -6,7 +6,12 @@ import {Delivery} from "../models";
 class DeliveryService extends AbstractService<Delivery> {
   findDeliveriesByStatus(status: Delivery["status"]): Promise<Delivery[]> {
     return this.getCollection().where("status", "==", status).orderBy("delivery_start", "desc")
-      .get().then((result : any) => result.docs.map((doc: any) => doc.data() as Delivery));
+      .get().then((result : any) => result.docs.map((doc: any) => this.toPOJO(doc.id, doc.data()) as Delivery));
+  }
+
+  findClosestByGroups(groups: Delivery["group"][]): Promise<Delivery[]> {
+    return this.getCollection().where("group", "in", groups).where("status", "==", "PENDING").orderBy("delivery_start", "desc")
+      .get().then((result : any) => result.docs.map((doc: any) => this.toPOJO(doc.id, doc.data()) as Delivery));
   }
 
   toPOJO(id: any, o: any): Delivery | undefined {

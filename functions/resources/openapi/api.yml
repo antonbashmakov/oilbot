@@ -767,7 +767,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Item'
+                      $ref: '#/components/schemas/ItemOverview'
         '500':
           description: Internal server error
           content:
@@ -1108,7 +1108,6 @@ components:
           description: Items to update in this order picking
           items:
             $ref: '#/components/schemas/PickingItem'
-
     OrderPatch:
       type: object
       properties:
@@ -1120,7 +1119,6 @@ components:
           type: string
           description: Address of shipping
           example: "Oak str 1."
-
     OrderPicking:
       type: object
       required:
@@ -1218,6 +1216,74 @@ components:
             - PENDING
             - COLLECTED
             - CANCELED
+    ItemOverview:
+      type: object
+      required:
+        - category
+        - description
+        - fraction
+        - fraction_price_out
+        - group
+        - id
+        - link
+        - name
+        - price_out
+        - unit
+        - unit_description
+      properties:
+        deliveries:
+          type: array
+          description: Deliveries containing this item group
+          items:
+            $ref: '#/components/schemas/DeliveryRef'      
+        category:
+          type: string
+          description: Item category
+          example: "MEAT"
+        description:
+          type: string
+          description: Item description
+          example: "мясо"
+        fraction:
+          type: number
+          format: float
+          description: Fraction value
+          example: 1.2
+        fraction_price_out:
+          type: number
+          format: float
+          description: Fraction price out
+          example: 1439
+        group:
+          type: string
+          description: Item group
+          example: "BALASHOV"
+        id:
+          type: string
+          description: Unique identifier for the item
+          example: "06088197-f7ef-4bf2-8b3f-2f4a05c6c104"
+        link:
+          type: string
+          description: Link to item details
+          example: "https://t.me/posebestoimosti_saratov/214"
+        name:
+          type: string
+          description: Item name
+          example: "Телятина Филе (Тендер Лоин)"
+        price_out:
+          type: number
+          format: float
+          description: Price out
+          example: 1199
+        unit:
+          type: string
+          description: Unit of measurement
+          example: "Кг"
+        unit_description:
+          type: string
+          description: Unit description
+          example: "Отруб"
+
     OwnerRef:
       type: object
       required:
@@ -1264,7 +1330,7 @@ components:
         - row_number
         - status
         - unit
-        - unti_description
+        - unit_description
       properties:
         category:
           type: string
@@ -1322,11 +1388,10 @@ components:
           type: string
           description: Unit of measurement
           example: "Кг"
-        unti_description:
+        unit_description:
           type: string
           description: Unit description
           example: "Отруб"
-
     Stats:
       type: object
       required:

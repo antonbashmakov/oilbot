@@ -2,12 +2,14 @@ import {components} from "../openapi/api";
 import {components as models} from "../openapi/models";
 
 export type DeliveryOverview = components["schemas"]["DeliveryOverview"];
+export type BaseDeliveryRef = components["schemas"]["DeliveryRef"];
 export type DeliveryAgentOverview = components["schemas"]["DeliveryAgentOverview"];
 export type Stats = components["schemas"]["Stats"];
 export type Order = components["schemas"]["Order"];
-export type Delivery = components["schemas"]["Delivery"];
+export type BaseDelivery = components["schemas"]["Delivery"];
 export type Customer = components["schemas"]["Customer"];
 export type Item = components["schemas"]["Item"];
+export type BaseItemOverview = components["schemas"]["ItemOverview"];
 export type CartItem = components["schemas"]["CartItem"];
 export type PickingItem = components["schemas"]["PickingItem"];
 type BaseOrderPicking = components["schemas"]["OrderPicking"];
@@ -96,6 +98,20 @@ export type OrderPaymentFailedEvent = OutboxEvent & {
     external_id: number;
     status: string;
   }
+};
+export type Delivery = BaseDelivery & {
+  order_deadline: Date;
+  delivery_start: Date;
+  delivery_end: Date;
+};
+
+export type DeliveryRef = BaseDeliveryRef & {
+  order_deadline: Date;
+  delivery_start: Date;
+  delivery_end: Date;
+};
+export type ItemOverview = BaseItemOverview & {
+  deliveries:  DeliveryRef[];
 };
 
 export interface IdempotentObject<T = any> {

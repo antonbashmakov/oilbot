@@ -14,7 +14,9 @@ import {
 //import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
 //import {logger} from "firebase-functions/v1";
-import {localeMiddleware} from "../../middleware/localeMiddleware";
+import { localeMiddleware } from "../../middleware/localeMiddleware";
+import { DeliveryRef, ItemOverview } from "../../models";
+import _ = require("lodash");
 
 admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
@@ -36,7 +38,7 @@ const orderService = new OrderService(db);
 const privateApi = express();
 
 privateApi.use(cors(
-  {origin: true} // allows all cross origin xhr requests
+  { origin: true } // allows all cross origin xhr requests
 ));
 
 privateApi.use(localeMiddleware);
@@ -66,7 +68,7 @@ privateApi.get("/deliveries", async (req: express.Request, res: express.Response
 
 privateApi.get("/deliveries/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const delivery = await deliveryService.find(id);
 
     if (!delivery) {
@@ -82,15 +84,39 @@ privateApi.get("/deliveries/:id", async (req: express.Request, res: express.Resp
 
 privateApi.get("/items/category/:category", async (req: express.Request, res: express.Response) => {
   try {
-    const {category} = req.params;
+    const { category } = req.params;
 
-    if (category === "all" ) {
-      const items = await itemService.findAll();
-      return api.send(res, items);
+    const deliveryService = new DeliveryService(db);
+
+    let items;
+
+    if (category === "all") {
+      items = await itemService.findAll();
+    } else {
+      items = await itemService.findByCategory(category);
     }
 
-    const items = await itemService.findByCategory(category);
-    return api.send(res, items);
+    const groups = [...new Set(items.map(item => item.group))];
+
+    const groupDeliveries = await deliveryService.findClosestByGroups(groups);
+    const deliveryMap: { [key: string]: DeliveryRef[] } = _.groupBy(groupDeliveries, "group");
+
+    const itemOverviews = items.map((item) => ({
+      name: item.name,
+      category: item.category,
+      group: item.group,
+      unit: item.unit,
+      unit_description:
+        item.unit_description,
+      fraction: item.fraction,
+      price_out: item.price_out,
+      description: item.description,
+      fraction_price_out: item.fraction_price_out,
+      id: item.id, link: item.link,
+      deliveries: deliveryMap[item.group] || []
+    } as ItemOverview));
+
+    return api.send(res, itemOverviews);
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
@@ -99,7 +125,7 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
 
 privateApi.post("/customers/:customerId/cart/items/:itemId", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId, itemId} = req.params;
+    const { customerId, itemId } = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
@@ -121,14 +147,14 @@ privateApi.post("/customers/:customerId/cart/items/:itemId", async (req: express
 
 privateApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId} = req.params;
+    const { customerId } = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, "Customer not found");
     }
 
-    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
+    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
     if (!cartItems || cartItems.length === 0) {
       return api.send(res, {});
     }

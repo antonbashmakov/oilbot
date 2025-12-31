@@ -572,6 +572,68 @@ export interface components {
             /** @enum {string} */
             status?: "PENDING" | "COLLECTED" | "CANCELED";
         } & components["schemas"]["CartItem"];
+        ItemOverview: {
+            /** @description Deliveries containing this item group */
+            deliveries?: components["schemas"]["DeliveryRef"][];
+            /**
+             * @description Item category
+             * @example MEAT
+             */
+            category: string;
+            /**
+             * @description Item description
+             * @example мясо
+             */
+            description: string;
+            /**
+             * Format: float
+             * @description Fraction value
+             * @example 1.2
+             */
+            fraction: number;
+            /**
+             * Format: float
+             * @description Fraction price out
+             * @example 1439
+             */
+            fraction_price_out: number;
+            /**
+             * @description Item group
+             * @example BALASHOV
+             */
+            group: string;
+            /**
+             * @description Unique identifier for the item
+             * @example 06088197-f7ef-4bf2-8b3f-2f4a05c6c104
+             */
+            id: string;
+            /**
+             * @description Link to item details
+             * @example https://t.me/posebestoimosti_saratov/214
+             */
+            link: string;
+            /**
+             * @description Item name
+             * @example Телятина Филе (Тендер Лоин)
+             */
+            name: string;
+            /**
+             * Format: float
+             * @description Price out
+             * @example 1199
+             */
+            price_out: number;
+            /**
+             * @description Unit of measurement
+             * @example Кг
+             */
+            unit: string;
+            /**
+             * @description Unit description
+             * @example Отруб
+             */
+            unit_description: string;
+        };
         OwnerRef: {
             /**
              * @description Owner ID
@@ -672,7 +734,7 @@ export interface components {
              * @description Unit description
              * @example Отруб
              */
-            unti_description: string;
+            unit_description: string;
         };
         Stats: {
             /**
@@ -1865,7 +1927,7 @@ export interface operations {
                     "application/json": {
                         /** @example OK */
                         code?: string;
-                        data?: components["schemas"]["Item"][];
+                        data?: components["schemas"]["ItemOverview"][];
                     };
                 };
             };
