@@ -1,0 +1,1849 @@
+openapi: 3.0.0
+info:
+  title: Posebestoimosti API
+  description: API for managing deliveries and users
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@posebestoimosti.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT    
+
+servers:
+  - url: http://prod.posebesto.ru:5001
+    description: Production server
+  - url: http://dev.posebesto.ru:5001
+    description: Development server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /admin/deliveries:
+    get:
+      operationId: getAllDeliveries
+      summary: Get all deliveries
+      description: Retrieve a list of all deliveries
+      tags:
+        - Deliveries
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Delivery'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/deliveries/{id}:
+    get:
+      operationId: getDeliveryById
+      summary: Get delivery by ID
+      description: Retrieve a specific delivery by its ID
+      tags:
+        - Deliveries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Delivery ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/DeliveryOverview'
+        '404':
+          description: Delivery not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/deliveries/{id}/stats/{format}:
+    get:
+      operationId: getDeliveryStats
+      summary: Get delivery statistics in CSV format
+      description: Retrieve delivery order statistics filtered by status and export as CSV
+      tags:
+        - Deliveries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Delivery ID
+          schema:
+            type: string
+        - name: format
+          in: path
+          required: true
+          description: Output format
+          schema:
+            type: string
+            enum: [CSV]
+        - name: status
+          in: query
+          required: false
+          description: Filter orders by status
+          schema:
+            type: string
+            enum:
+              - PENDING
+              - PAYMENT_IN_PROGRESS
+              - PAYMENT_FAILED
+              - PAID
+              - RESOLVING
+              - CONCILIATION_PAYMENT_IN_PROGRESS
+              - CONCILIATED
+              - CANCELED
+      responses:
+        '200':
+          description: Successful response with CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              description: Attachment filename
+        '404':
+          description: Delivery not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/orders/{id}:
+    get:
+      operationId: getOrderOverview
+      summary: Get order overview by ID
+      description: Retrieve a specific delivery by its ID
+      tags:
+        - Deliveries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/OrderOverview'
+        '404':
+          description: Delivery not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      operationId: updateOrder
+      summary: Update an order
+      description: Update an order's name
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderPatch'
+      responses:
+        '200':
+          description: Order successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Order'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/order-pickings/{id}:
+    patch:
+      operationId: updateOrderPicking
+      summary: Update order picking items
+      description: Update the items in an order picking
+      tags:
+        - Order Pickings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order Picking ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderPickingPatch'
+      responses:
+        '200':
+          description: Order picking successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/OrderPicking'
+        '404':
+          description: Order picking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/order-pickings/{pickingId}/items/{itemId}/collect:
+    post:
+      operationId: collectOrderPickingItem
+      summary: Collect an item in an order picking
+      description: Mark an item in an order picking as collected.
+      tags:
+        - Order Pickings
+      parameters:
+        - name: pickingId
+          in: path
+          required: true
+          description: Order Picking ID
+          schema:
+            type: string
+        - name: itemId
+          in: path
+          required: true
+          description: Item ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Item successfully collected
+        '404':
+          description: Order picking or item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/orders/{id}/order-picking:
+    post:
+      operationId: startOrderPicking
+      summary: Start order picking process
+      description: Check if order picking exists, return existing one or create new from order
+      tags:
+        - Order Pickings
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order picking found or created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/OrderPicking'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/orders/{id}/consolidate:
+    post:
+      operationId: consolidateOrder
+      summary: Resolve an order
+      description: Marks an order as resolved.
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Order successfully resolved
+
+  /admin/orders/{id}/cancel:
+    put:
+      operationId: cancelOrder
+      summary: Cancel an order
+      description: Cancel an order and emit OrderCancelledEvent. Order can only be cancelled if status is PENDING, PAYMENT_IN_PROGRESS, PAYMENT_FAILED, or PAID.
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Order successfully cancelled
+        '400':
+          description: Bad request (e.g., order cannot be cancelled in current status)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/orders/{id}/conciliation:
+    get:
+      operationId: getConciliationOrder
+      summary: Get conciliation order
+      description: Retrieve the conciliation order for a given order ID
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Order'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/orders/{orderId}/payments:
+    get:
+      operationId: getPaymentsForOrder
+      summary: Get all payments for an order
+      description: Retrieve all payments for an order, including payments from conciliation orders
+      tags:
+        - Orders
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Payment'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      operationId: createPaymentForOrder
+      summary: Create a new payment for an order
+      description: Create a new payment for an order using idempotency key. Returns 400 if order already has a payment in status 'SENT' or 'CONFIRMED'
+      tags:
+        - Orders
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - idempotency_key
+              properties:
+                idempotency_key:
+                  type: string
+                  description: Idempotency key to prevent duplicate payment creation
+                  example: "unique-key-123"
+      responses:
+        '200':
+          description: Payment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Payment'
+        '400':
+          description: Order already has a payment in status 'SENT' or 'CONFIRMED'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /admin/customers/{customerId}/messages:
+    get:
+      operationId: getMessagesForCustomer
+      summary: Get all messages for a customer
+      description: Retrieve all conversation messages for a specific customer
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConversationMessage'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      operationId: sendMessageToCustomer
+      summary: Send a message to a customer
+      description: Send a text message to a customer via Telegram and save it to CONVERSATION_MESSAGES
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: The text message to send
+                  example: "Hello, this is a test message"
+      responses:
+        '200':
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/ConversationMessage'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/comments:
+    get:
+      operationId: getComments
+      summary: Get comments
+      description: Retrieve comments with optional filtering by entity_id and class
+      tags:
+        - Comments
+      parameters:
+        - name: entity_id
+          in: query
+          required: false
+          description: Filter comments by entity ID
+          schema:
+            type: string
+        - name: class
+          in: query
+          required: false
+          description: Filter comments by class/type
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      operationId: createComment
+      summary: Create a comment
+      description: Create a new comment
+      tags:
+        - Comments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+                - entity_id
+                - class
+              properties:
+                text:
+                  type: string
+                  description: The comment text content
+                  example: "This is a comment"
+                entity_id:
+                  type: string
+                  description: ID of the entity this comment belongs to
+                  example: "order-456"
+                class:
+                  type: string
+                  description: The class/type of the comment
+                  example: "NOTE"
+      responses:
+        '200':
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Comment'
+        '400':
+          description: Bad request (e.g., missing required fields)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/items/category/{category}:
+    
+    get:
+      operationId: getItemsByCategory
+      summary: Get items by category
+      description: Retrieve a list of items for a specific category
+      tags:
+        - Items
+      parameters:
+        - name: category
+          in: path
+          required: true
+          description: Category name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/customers/{customerId}/cart/items/{itemId}:
+    post:
+      operationId: addItemToCart
+      summary: Add item to cart
+      description: Add an item to a customer's cart
+      tags:
+        - Cart
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: number
+        - name: itemId
+          in: path
+          required: true
+          description: Item ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/customers/{customerId}/orders:
+    
+    post:
+      operationId: createOrderFromCart
+      summary: Create order from cart
+      description: Create a new order from a customer's cart
+      tags:
+        - Orders
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Order'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /public/users/me:
+    get:
+      operationId: getCurrentUser
+      summary: Get current user information
+      description: Retrieve the authenticated user's information
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized (user not authenticated)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /public/signup:
+    post:
+      operationId: signupUser
+      summary: Register a new user
+      description: Create a new user account
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request (e.g., email already exists, invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /public/login:
+    post:
+      operationId: loginUser  
+      summary: Login a user
+      description: Authenticate a user with email and password
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: User authenticated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request (e.g., missing fields, invalid credentials)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized (invalid credentials)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agent/deliveries/{id}:
+    
+    get:
+      operationId: getDeliveryAgentOverview
+      summary: Get delivery agent overview by ID
+      description: Retrieve delivery agent overview including pickups and deliveries
+      tags:
+        - Deliveries
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Delivery agent ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/DeliveryAgentOverview'
+        '404':
+          description: Delivery agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agent/orders/{id}/deliver:
+    put:
+      operationId: markOrderAsDelivered
+      summary: Mark order as delivered
+      description: Set order status to DELIVERED
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Order successfully marked as delivered
+        '400':
+          description: Bad request (e.g., order cannot be delivered in current status)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Customer:
+      type: object
+      required:
+        - id
+        - language_code
+      properties:
+        first_name:
+          type: string
+          description: Customer's first name
+          example: "Антон"
+        last_name:
+          type: string
+          description: Customer's first name
+          example: "Антон"
+        id:
+          type: string
+          description: Unique identifier for the customer
+          example: "1019705782"
+        is_bot:
+          type: boolean
+          nullable: true
+          description: Whether the customer is a bot
+          example: null
+        language_code:
+          type: string
+          description: Customer's language code
+          example: "ru"
+        username:
+          type: string
+          description: Customer's username
+          example: "getting_drunk"
+    CustomerOverview: 
+      type: object
+      required:
+        - balance
+      allOf:
+        - $ref: '#/components/schemas/Customer'
+      properties:
+        balance: 
+          $ref: '#/components/schemas/CustomerBalance'
+    OrderPickingPatch:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          description: Items to update in this order picking
+          items:
+            $ref: '#/components/schemas/PickingItem'
+
+    OrderPatch:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the customer
+          example: "Updated Order Name"
+        shipping_address:
+          type: string
+          description: Address of shipping
+          example: "Oak str 1."
+
+    OrderPicking:
+      type: object
+      required:
+        - delivery
+        - id
+        - items
+        - owner
+        - status
+        - total
+        - type
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the cart item
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"      
+        delivery:
+          $ref: '#/components/schemas/DeliveryRef'
+        items:
+          type: array
+          description: Items in this order picking
+          items:
+            $ref: '#/components/schemas/PickingItem'
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+        status:
+          type: string
+          description: Order picking status
+          example: "PENDING"
+        total:
+          type: number
+          format: float
+          description: Total value
+          example: 0
+        type:
+          type: string
+          description: Order picking type
+          example: "ORIGINAL"
+    CartItem:
+      type: object
+      required:
+        - fraction
+        - group
+        - id
+        - item_id
+        - name
+        - owner
+        - price
+        - quantity
+        - price_for_unit
+      properties:
+        fraction:
+          type: number
+          format: float
+          description: Fraction value
+          example: 0.42
+        group:
+          type: string
+          description: Item group
+          example: "MOSCOW"
+        id:
+          type: string
+          description: Unique identifier for the cart item
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"
+        item_id:
+          type: string
+          description: Unique identifier for the cart item
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"
+        name:
+          type: string
+          description: Item name
+          example: "Горгонзола (Бразилия) Кусок 0.42 Кг"
+        price:
+            type: number
+            format: float
+            description: Price for the total quantity and fraction
+            example: 609
+        price_for_unit:
+            type: number
+            format: float
+            description: Price for one unit
+            example: 609
+        quantity:
+            type: integer
+            description: Quantity
+            example: 1          
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+    PickingItem:
+      allOf:
+        - $ref: '#/components/schemas/CartItem'
+      properties:
+        status:
+          type: string
+          enum:
+            - PENDING
+            - COLLECTED
+            - CANCELED
+    OwnerRef:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Owner ID
+          example: "270053857"
+    DeliveryRef:
+      type: object
+      required:
+        - delivery_end
+        - delivery_start
+        - id
+      properties:
+        delivery_end:
+          type: string
+          format: date-time
+          description: Delivery end date and time
+          example: "2025-11-23T00:00:00.000Z"
+        delivery_start:
+          type: string
+          format: date-time
+          description: Delivery start date and time
+          example: "2025-11-21T00:00:00.000Z"
+        id:
+          type: string
+          description: Unique identifier for the order picking
+          example: "ef4d5632-ba34-4488-97a5-b9b7af299535"      
+    Item:
+      type: object
+      required:
+        - category
+        - description
+        - fraction
+        - fraction_price_out
+        - group
+        - id
+        - link
+        - name
+        - price_in
+        - price_out
+        - row_number
+        - status
+        - unit
+        - unti_description
+      properties:
+        category:
+          type: string
+          description: Item category
+          example: "MEAT"
+        description:
+          type: string
+          description: Item description
+          example: "мясо"
+        fraction:
+          type: number
+          format: float
+          description: Fraction value
+          example: 1.2
+        fraction_price_out:
+          type: number
+          format: float
+          description: Fraction price out
+          example: 1439
+        group:
+          type: string
+          description: Item group
+          example: "BALASHOV"
+        id:
+          type: string
+          description: Unique identifier for the item
+          example: "06088197-f7ef-4bf2-8b3f-2f4a05c6c104"
+        link:
+          type: string
+          description: Link to item details
+          example: "https://t.me/posebestoimosti_saratov/214"
+        name:
+          type: string
+          description: Item name
+          example: "Телятина Филе (Тендер Лоин)"
+        price_in:
+          type: number
+          format: float
+          description: Price in
+          example: 1000
+        price_out:
+          type: number
+          format: float
+          description: Price out
+          example: 1199
+        row_number:
+          type: integer
+          description: Row number
+          example: 11
+        status:
+          type: string
+          description: Item status
+          example: "ACTIVE"
+        unit:
+          type: string
+          description: Unit of measurement
+          example: "Кг"
+        unti_description:
+          type: string
+          description: Unit description
+          example: "Отруб"
+
+    Stats:
+      type: object
+      required:
+        - total
+        - fraction
+        - quantity
+        - name
+      properties:
+        total:
+          type: number
+          format: float
+          description: Total value
+          example: 4498
+        fraction:
+          type: number
+          format: float
+          description: Fraction value
+          example: 1.8
+        quantity:
+          type: number
+          format: integer
+          description: Quantity of items
+          example: 1
+        name:
+          type: string
+          description: Name of the stats item
+          example: "Сёмга филе Филе на коже 1.8 Кг"
+          
+    DeliveryOverviewItemStats:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Stats'  
+      properties:
+        orders: 
+          type: array   
+          items:
+            $ref: '#/components/schemas/Order'
+
+
+    Delivery:
+      type: object
+      required:
+        - id
+        - number
+        - status
+        - description
+        - order_deadline
+        - delivery_start
+        - delivery_end
+        - group
+        - orders
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the delivery
+          example: "delivery-123"
+        number:
+          type: integer
+          description: Delivery number
+          example: 1001
+        description:
+          type: string
+          description: Description of the delivery
+          example: "Weekly grocery delivery"
+        status:
+          type: string
+          enum:
+            - PENDING
+            - IN_TRANSIT
+            - IN_TRANSIT_BACK
+            - FULFILLED
+          description: Current status of the delivery
+          example: "PENDING"
+        order_deadline:
+          type: string
+          format: date-time
+          description: Deadline for placing orders
+          example: "2025-01-15T23:59:59Z"
+        delivery_start:
+          type: string
+          format: date-time
+          description: Start date and time of delivery
+          example: "2025-01-16T08:00:00Z"
+        delivery_end:
+          type: string
+          format: date-time
+          description: End date and time of delivery
+          example: "2025-01-16T18:00:00Z"
+        group:
+          type: string
+          description: Delivery group identifier
+          example: "group-a"
+        orders:
+          type: array
+          description: List of orders in this delivery
+          items:
+            $ref: '#/components/schemas/Order'
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+
+    DeliveryOverview:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Delivery'
+      properties:
+        activeOrders:
+          type: array
+          description: List of active orders in this delivery. All orders which are not CANCELED
+          items:
+            $ref: '#/components/schemas/Order'
+        cancelledOrders:
+          type: array
+          description: List of active orders in this delivery. All orders which are not CANCELED
+          items:
+            $ref: '#/components/schemas/Order'
+        removedOrders:
+          type: array
+          description: List of all CANCELED orders in this delivery
+          items:
+            $ref: '#/components/schemas/Order'
+        stats:
+          type: array
+          description: Statistics for the delivery
+          items:
+            $ref: '#/components/schemas/DeliveryOverviewItemStats'
+    Order:
+      type: object
+      required:
+        - id
+        - items
+        - status
+        - owner
+        - total
+        - type
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the order
+          example: "order-456"
+        reconciliated_order_id:
+          type: string
+          description: Original order this order is consolidated with
+          example: "order-45611"
+        name:
+          type: string
+          description: Name of the customer
+          example: "Order 1"
+        shipping_address:
+          type: string
+          description: Address
+          example: "Str 1, city"
+        delivery:
+          $ref: '#/components/schemas/DeliveryRef'
+        items:
+          type: array
+          description: Items in this order
+          items:
+            $ref: '#/components/schemas/CartItem'
+        status:
+          type: string
+          enum:
+            - PENDING
+            - PAYMENT_IN_PROGRESS
+            - PAYMENT_FAILED
+            - PAID
+            - RESOLVING
+            - CONCILIATION_PAYMENT_IN_PROGRESS
+            - CONCILIATED
+            - CANCELED
+            - DELIVERED
+        type:
+          type: string
+          enum:
+            - CONCILIATION
+            - ORIGINAL
+          description: Current status of the order
+          example: "CONCILIATION"
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+        number_of_items:
+          type: integer
+          description: Number of items in the order
+          example: 5
+        total:
+          type: number
+          format: float
+          description: Total value of the order
+          example: 150.75
+    OrderOverview:
+      type: object
+      required:
+        - customer
+      allOf:
+        - $ref: '#/components/schemas/Order'
+      properties:
+        picking:
+          $ref: '#/components/schemas/OrderPicking'
+        customer:
+          $ref: '#/components/schemas/CustomerOverview'
+        comments:
+          $ref: '#/components/schemas/Comment'
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - roles
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the user
+          example: "user-123"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "user@example.com"
+        password:
+          type: string
+          format: hash
+          description: hashed password
+          example: sdfee335gsdfwDEfggh
+        token:
+          type: string
+          format: jwt
+          description: jwt token
+          example: sdfee335gsdfwDEfggh
+        roles:
+          type: array
+          description: User roles
+          items:
+            type: string
+            enum:
+              - AGENT
+              - ADMIN
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2025-01-01T00:00:00Z"
+        label:
+          type: object
+          description: User label information
+          properties:
+            expiration:
+              type: integer
+              description: Label expiration timestamp
+              example: 1735689600
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code
+              example: "NOT_FOUND"
+            message:
+              type: string
+              description: Error message
+              example: "Delivery not found"
+    ConversationMessage:
+      type: object
+      description: A message sent in a conversation
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the message
+          readOnly: true
+        thread_id:
+          type: string
+          description: Unique identifier a thread those messages belongs to
+        provider:
+          type: string
+          enum: [TELEGRAM, OTHER]
+          description: The provider used to send the message
+        role:
+          type: string
+          enum: [CUSTOMER, ADMIN]
+          description: The provider used to send the message
+        recipient_id:
+          type: string
+          description: The chat ID where the message was sent
+        text:
+          type: string
+          description: The content of the message
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the message was created
+      required:
+        - id
+        - provider
+        - thread_id
+        - text
+        - role
+        - created_at
+
+    Payment:
+      type: object
+      required:
+        - id
+        - external_id
+        - terminal_key
+        - payment_url
+        - order_id
+        - amount
+        - total
+        - status
+        - success
+        - created_at
+        - updated_at
+      properties:
+        payment_url:
+          type: string
+          description: URL for payment processing
+          example: "https://securepay.tinkoff.ru/payment/init"
+        error_code:
+          type: number
+          nullable: true
+          description: Error code from payment provider
+          example: 0
+        status:
+          type: string
+          enum:
+            - SENT
+            - CONFIRMED
+            - FAILED
+            - TIMED_OUT
+            - CANCELED
+            - REJECTED
+        id:
+          type: string
+          description: Internal payment ID
+          example: "payment-123456"
+        external_id:
+          type: string
+          description: Payment ID from external payment provider
+          example: "123456"
+        terminal_key:
+          type: string
+          description: Terminal key from payment provider
+          example: "TinkoffBankTest"
+        order_id:
+          type: string
+          description: Order ID associated with the payment
+          example: "order-456"
+        amount:
+          type: integer
+          description: Payment amount in minor units (kopecks)
+          example: 15000
+        total:
+          type: integer
+          description: Payment amount in minor units (kopecks)
+          example: 15000
+        success:
+          type: boolean
+          description: Whether the payment was successful
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: Payment creation timestamp
+          example: "2025-01-10T14:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Payment creation timestamp
+          example: "2025-01-10T14:30:00Z"
+        confirmed_at:
+          type: string
+          format: date-time
+          description: Payment creation timestamp
+          example: "2025-01-10T14:30:00Z"
+
+    CustomerBalance:
+      type: object
+      required:
+        - id
+        - owner
+        - value
+      properties:
+        id:
+          type: string
+          description: Internal payment ID
+          example: "payment-123456"      
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+        value:
+          type: number
+          format: float
+          description: Customer balance amount
+          example: 150.75
+        created_at:
+          type: string
+          format: date-time
+          description: Balance creation timestamp
+          example: "2025-01-10T14:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Balance last update timestamp
+          example: "2025-01-10T14:30:00Z"
+
+    SignupRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "user@example.com"
+        password:
+          type: string
+          description: User's password (min 6 characters)
+          example: "password123"
+          minLength: 6
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "user@example.com"
+        password:
+          type: string
+          description: User's password
+          example: "password123"
+
+    Comment:
+      type: object
+      required:
+        - text
+        - owner
+        - created_at
+        - id
+        - entity_id
+        - class
+      properties:
+        text:
+          type: string
+          description: The comment text content
+          example: "This is a comment"
+        owner:
+          $ref: '#/components/schemas/OwnerRef'
+          description: The owner of the comment
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the comment was created
+          example: "2025-01-10T14:30:00Z"
+        id:
+          type: string
+          description: Unique identifier for the comment
+          example: "comment-123456"
+        entity_id:
+          type: string
+          description: ID of the entity this comment belongs to
+          example: "order-456"
+        class:
+          type: string
+          description: The class/type of the comment
+          example: "NOTE"
+    DeliveryAgentOverview:
+      type: object
+      required:
+        - id
+        - name
+        - pickups
+        - deliveries
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the delivery agent
+          example: "agent-123"
+        name:
+          type: string
+          description: Name of the delivery agent
+          example: "John Doe"
+        pickups:
+          type: array
+          description: List of pickup orders
+          items:
+            $ref: '#/components/schemas/Order'
+        deliveries:
+          type: array
+          description: List of delivery orders
+          items:
+            $ref: '#/components/schemas/Order'
+tags:
+  - name: Deliveries
+    description: Operations related to deliveries
+  - name: Order Pickings
+    description: Operations related to order pickings
+  - name: Users
+  - name: Items
+  - name: Cart
+    description: Operations related to cart
+  - name: Orders
+    description: Operations related to orders
+  - name: Authentication
+    description: User authentication and registration
+  - name: Comments
+    description: Operations related to comments

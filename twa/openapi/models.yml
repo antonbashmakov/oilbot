@@ -1,0 +1,249 @@
+openapi: 3.0.0
+info:
+  title: Posebestoimosti API
+  description: API for managing deliveries and users
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@posebestoimosti.com
+servers:
+  - url: http://prod.posebesto.ru:5001
+    description: Production server
+  - url: http://dev.posebesto.ru:5001
+    description: Development server    
+components:
+  schemas:
+    BaseOutboxEvent:
+      type: object
+      description: |
+        An event stored in the Firestore outbox that represents a domain change
+        requiring asynchronous processing (e.g., ORDER_RESOLVED → trigger payment).
+        Written atomically with the domain write using the Outbox Pattern.
+      properties:
+        id:
+          type: string
+          description: Unique event identifier (UUID or Firestore doc ID).
+          readOnly: true
+        idempotent_key:
+          type: string
+          description: Idempotency key, used if sibling events are idempotent
+          readOnly: true
+        type:
+          type: string
+          description: Type of event that occurred.
+          example: ORDER_RESOLVED
+
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the event was written to Firestore.
+
+        processed:
+          type: boolean
+          description: Indicates whether the event has been successfully processed.
+          default: false
+
+        processedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when processing completed successfully.
+
+        retries:
+          type: integer
+          description: How many times the event has failed processing.
+          minimum: 0
+          default: 0
+
+        lastError:
+          type: string
+          nullable: true
+          description: Error message from the last failed processing attempt.
+
+      required:
+        - id
+        - type
+        - created_at
+        - processed
+        - retries
+        
+    Payment:
+      type: object
+      properties:
+        total:
+          type: string
+          description: Total payment amount
+          example: "1668"
+        status:
+          type: string
+          description: Current payment status
+          example: "PENDING"
+        payer_id:
+          type: string
+          description: Identifier of the payer
+          example: "270053857"
+        order_id:
+          type: string
+          description: Identifier of the associated order
+          example: "FZcMTsLGnRHo87gZRS66"
+      required:
+        - total
+        - status
+        - payer_id
+        - order_id
+          
+    TinkoffPaymentItem:
+      type: object
+      properties:
+        Name:
+          type: string
+        Price:
+          type: integer
+        Quantity:
+          type: number
+        Amount:
+          type: integer
+        Tax:
+          type: string
+          enum: ["none", "vat0", "vat10", "vat20", "vat110", "vat120"]
+      required:
+        - Name
+        - Price
+        - Quantity
+        - Amount
+        - Tax
+
+    TinkoffReceipt:
+      type: object
+      properties:
+        Email:
+          type: string
+          format: email
+        Phone:
+          type: string
+          description: "Телефон покупателя"
+        Taxation:
+          type: string
+          enum: ["osn", "usn_income", "usn_income_outcome", "envd", "esn", "patent"]
+        Items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TinkoffPaymentItem'
+      required:
+        - Email
+        - Taxation
+        - Items
+
+    TinkoffPaymentData:
+        type: object
+        properties:
+          Phone:
+            type: string
+            description: "Телефон покупателя"
+          Email:
+            type: string
+            format: email
+            description: "Электронная почта покупателя"
+
+    TinkoffPaymentPayload:
+      type: object
+      properties:
+        TerminalKey:
+          type: string
+          description: "Ключ терминала"
+        Token:
+          type: string
+        Amount:
+          type: integer
+          description: "Сумма в копейках"
+        OrderId:
+          type: string
+          description: "Идентификатор заказа"
+        PaymentId:
+          type: string
+          description: "Идентификатор платежа"
+        Description:
+          type: string
+          description: "Описание заказа"
+        RedirectDueDate:  
+          type: string
+          format: date-time                
+        DATA:
+          $ref: '#/components/schemas/TinkoffPaymentData'
+        Receipt:
+          $ref: '#/components/schemas/TinkoffReceipt'
+      required:
+        - TerminalKey
+        - Token
+        - Amount    
+        - OrderId    
+        - RedirectDueDate
+        - Receipt
+
+    TinkoffPaymentCancelationRequest:
+      type: object
+      properties:
+        TerminalKey:
+          type: string
+          description: "Ключ терминала"
+        Token:
+          type: string
+        PaymentId:
+          type: string
+          description: "Идентификатор платежа"
+      required:
+        - TerminalKey
+        - Token
+        - Receipt
+
+
+    TinkoffResult:
+      type: object
+      properties:
+        TerminalKey:
+          type: string
+          example: "TBankTest"
+        OrderId:
+          type: string
+          example: "21057"
+        Success:
+          type: boolean
+          example: true
+        Status:
+          type: string
+          example: "REVERSED"
+        OriginalAmount:
+          type: number
+          example: 13000
+        NewAmount:
+          type: number
+          example: 5000
+        PaymentId:
+          type: string
+          example: "2304882"
+        ErrorCode:
+          type: string
+          example: "0"
+        Message:
+          type: string
+          example: "OK"
+        Details:
+          type: string
+          nullable: true
+          example: "None"
+        ExternalRequestId:
+          type: string
+          example: "756478567845678436"
+      required:
+        - TerminalKey
+        - OrderId
+        - Success
+        - Status
+        - OriginalAmount
+        - NewAmount
+        - PaymentId
+        - ErrorCode
+        - Message
+        - Details
+        - ExternalRequestId
+
