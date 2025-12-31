@@ -5,6 +5,8 @@ import { useGetItemsQuery } from '@/api';
 import { categories, navItems } from '@/data/products';
 import { format } from "date-fns";
 import { UserDisplay } from '@/components/UserDisplay';
+import { CartButton } from '@/components/CartButton';
+import { HeaderCartButton } from '@/components/HeaderCartButton';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -25,10 +27,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-3">
               <UserDisplay />
-              <button className="relative flex size-10 items-center justify-center rounded-full bg-background-light dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-colors">
-                <span className="material-symbols-outlined text-text-main-light dark:text-text-main-dark">shopping_cart</span>
-                <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-white dark:ring-surface-dark"></span>
-              </button>
+              <HeaderCartButton />
             </div>
           </div>
         </div>
@@ -57,10 +56,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-3">
               <UserDisplay />
-              <button className="relative flex size-10 items-center justify-center rounded-full bg-background-light dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-colors">
-                <span className="material-symbols-outlined text-text-main-light dark:text-text-main-dark">shopping_cart</span>
-                <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-white dark:ring-surface-dark"></span>
-              </button>
+              <HeaderCartButton />
             </div>
           </div>
         </div>
@@ -90,10 +86,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-3">
             <UserDisplay />
-            <button className="relative flex size-10 items-center justify-center rounded-full bg-background-light dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-colors">
-              <span className="material-symbols-outlined text-text-main-light dark:text-text-main-dark">shopping_cart</span>
-              <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-white dark:ring-surface-dark"></span>
-            </button>
+            <HeaderCartButton />
           </div>
         </div>
 
@@ -160,15 +153,24 @@ export default function Home() {
                   <div
                     className="w-full aspect-[4/3] bg-center bg-cover transition-transform duration-500 group-hover/card:scale-105"
                     style={{ 
-                      backgroundImage: `url(https://via.placeholder.com/300x200/cccccc/666666?text=${encodeURIComponent(item.name || 'Product')})`
+                      // backgroundImage: ``
                     }}
                     aria-label={item.name || 'Product image'}
                   />
 
                   {/* Quick Add FAB */}
-                  <button className="absolute bottom-2 right-2 flex size-10 items-center justify-center rounded-full bg-white dark:bg-surface-dark text-primary shadow-lg transition-transform active:scale-90 hover:bg-primary hover:text-white">
-                    <span className="material-symbols-outlined">add</span>
-                  </button>
+                  <CartButton 
+                    itemId={item.id || `item-${index}`}
+                    itemData={{
+                      name: item.name,
+                      price: item.fraction_price_out,
+                      fraction: item.fraction,
+                      group: item.group,
+                      price_for_unit: item.fraction_price_out,
+                      quantity: 1,
+                    }}
+                    className="absolute bottom-2 right-2"
+                  />
 
                   {/* Badge */}
                   {badge && (
