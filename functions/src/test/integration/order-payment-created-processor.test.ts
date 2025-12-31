@@ -58,6 +58,7 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
           price_for_unit: 150,
           group: "TEST_GROUP",
           owner: {id: "270053857"},
+          created_at: new Date(),
         },
       ],
       status: "PENDING",

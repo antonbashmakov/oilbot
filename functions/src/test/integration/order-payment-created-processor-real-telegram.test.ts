@@ -53,6 +53,7 @@ xdescribe("OrderPaymentCreatedProcessor Integration Test (Real Telegram)", () =>
           price_for_unit: 150,
           group: "TEST_GROUP",
           owner: {id: "270053857"},
+          created_at: new Date(),
         },
         {
           id: "test-item-2",
@@ -64,6 +65,7 @@ xdescribe("OrderPaymentCreatedProcessor Integration Test (Real Telegram)", () =>
           price_for_unit: 150,
           group: "TEST_GROUP",
           owner: {id: "270053857"},
+          created_at: new Date(),
         },
       ],
       status: "PENDING",

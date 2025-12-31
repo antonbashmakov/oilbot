@@ -1206,6 +1206,11 @@ components:
             example: 1          
         owner:
           $ref: '#/components/schemas/OwnerRef'
+        created_at:
+          type: string
+          format: date-time
+          description: Delivery end date and time
+          example: "2025-11-23T00:00:00.000Z"          
     PickingItem:
       allOf:
         - $ref: '#/components/schemas/CartItem'

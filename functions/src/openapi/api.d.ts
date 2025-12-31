@@ -567,6 +567,12 @@ export interface components {
              */
             quantity: number;
             owner: components["schemas"]["OwnerRef"];
+            /**
+             * Format: date-time
+             * @description Delivery end date and time
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            created_at?: string;
         };
         PickingItem: {
             /** @enum {string} */

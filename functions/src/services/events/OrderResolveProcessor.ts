@@ -84,6 +84,7 @@ class OrderResolveProcessor extends AbstractProcessor {
           price: diff,
           quantity: 1,
           price_for_unit: diff,
+          created_at: new Date(),
         }],
       };
 

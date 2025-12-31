@@ -101,7 +101,7 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
 
     const stats = allItems.reduce((s, i) => {
       if (!s[i.item_id]) {
-        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name, group: i.group, orders: []};
+        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name, group: i.group, orders: [] as Order[]};
       }
       s[i.item_id].total += i.price * i.quantity;
       s[i.item_id].fraction += i.fraction;

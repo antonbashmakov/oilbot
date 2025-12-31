@@ -16,6 +16,7 @@ class CartItemService extends AbstractService<CartItem> {
       owner: {
         id: customer.id,
       },
+      created_at: new Date(),
     };
     return this.add(cartItem);
   }

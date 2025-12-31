@@ -1,17 +1,19 @@
-import {components} from "../openapi/api";
-import {components as models} from "../openapi/models";
+import { components } from "../openapi/api";
+import { components as models } from "../openapi/models";
 
-export type DeliveryOverview = components["schemas"]["DeliveryOverview"];
-export type BaseDeliveryRef = components["schemas"]["DeliveryRef"];
-export type DeliveryAgentOverview = components["schemas"]["DeliveryAgentOverview"];
-export type Stats = components["schemas"]["Stats"];
-export type Order = components["schemas"]["Order"];
-export type BaseDelivery = components["schemas"]["Delivery"];
 export type Customer = components["schemas"]["Customer"];
 export type Item = components["schemas"]["Item"];
-export type BaseItemOverview = components["schemas"]["ItemOverview"];
-export type CartItem = components["schemas"]["CartItem"];
 export type PickingItem = components["schemas"]["PickingItem"];
+
+type BaseDeliveryOverviewItemStats = components["schemas"]["DeliveryOverviewItemStats"];
+type BaseStats = components["schemas"]["Stats"];
+type BaseDeliveryOverview = components["schemas"]["DeliveryOverview"];
+type BaseDeliveryAgentOverview = components["schemas"]["DeliveryAgentOverview"];
+type BaseOrder = components["schemas"]["Order"];
+type BaseItemOverview = components["schemas"]["ItemOverview"];
+type BaseDelivery = components["schemas"]["Delivery"];
+type BaseDeliveryRef = components["schemas"]["DeliveryRef"];
+type BaseCartItem = components["schemas"]["CartItem"];
 type BaseOrderPicking = components["schemas"]["OrderPicking"];
 type BasePayment = components["schemas"]["Payment"];
 type BaseCustomerBalance = components["schemas"]["CustomerBalance"];
@@ -28,19 +30,19 @@ export type TinkoffResult = models["schemas"]["TinkoffResult"];
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 export type BaseConversationMessage = components["schemas"]["ConversationMessage"];
 
-export type Payment = Omit<BasePayment, "created_at" | "updated_at" > & {
+export type Payment = Omit<BasePayment, "created_at" | "updated_at"> & {
   created_at: Date;
   updated_at: Date;
   confirmed_at?: Date;
 };
-export type CustomerBalance = Omit<BaseCustomerBalance, "created_at" | "updated_at" > & {
+export type CustomerBalance = Omit<BaseCustomerBalance, "created_at" | "updated_at"> & {
   created_at: Date;
   updated_at: Date;
 };
-export type CustomerOverview = Omit<BaseCustomerOverview, "balance" > & {
+export type CustomerOverview = Omit<BaseCustomerOverview, "balance"> & {
   balance: CustomerBalance;
 };
-export type OrderPicking = Omit<BaseOrderPicking, "created_at" > & {
+export type OrderPicking = Omit<BaseOrderPicking, "created_at"> & {
   created_at: Date;
 };
 export type OutboxEvent = Omit<BaseOutboxEvent, "created_at" | "processedAt"> & {
@@ -111,7 +113,30 @@ export type DeliveryRef = BaseDeliveryRef & {
   delivery_end: Date;
 };
 export type ItemOverview = BaseItemOverview & {
-  deliveries:  DeliveryRef[];
+  deliveries: DeliveryRef[];
+};
+export type CartItem = Omit<BaseCartItem, "created_at"> & {
+  created_at: Date;
+};
+export type Order = Omit<BaseOrder, "items"> & {
+  items: CartItem[];
+};
+export type DeliveryOverviewItemStats = Omit<BaseDeliveryOverviewItemStats, "orders"> & {
+  orders: Order[];
+};
+export type Stats = Omit<BaseStats, "items"> & {
+  items?: CartItem[];
+};
+export type DeliveryAgentOverview = Omit<BaseDeliveryAgentOverview, "pickups" | "deliveries"> & {
+  pickups: Order[];
+  deliveries: Order[];
+};
+export type DeliveryOverview = Omit<BaseDeliveryOverview, "stats" | "orders" | "activeOrders" | "cancelledOrders" | "removedOrders"> & {
+  orders: Order[];
+  activeOrders: Order[];
+  cancelledOrders: Order[];
+  removedOrders?: Order[];
+  stats?: DeliveryOverviewItemStats[];
 };
 
 export interface IdempotentObject<T = any> {
