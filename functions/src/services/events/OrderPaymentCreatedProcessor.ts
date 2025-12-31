@@ -34,7 +34,7 @@ class OrderPaymentCreatedProcessor extends AbstractProcessor {
     };
 
     const message = toMessage("ORDER_PAYMENT_CREATED", templateValues);
-    const ret = await telegramService.sendMessage(chatId, message);
+    const ret = await telegramService.sendMessage(chatId, message, order.id);
 
     if (ret) {
       ret.thread_id = order.id;

@@ -20,7 +20,7 @@ class OrderConciliatedProcessor extends AbstractProcessor {
 
     // Generate message using template
     const message = toMessage("ORDER_CONCILIATED", templateValues);
-    await telegramService.sendMessage(chatId, message);
+    await telegramService.sendMessage(chatId, message, order.id);
   }
 }
 

@@ -3,158 +3,150 @@
  * Do not make direct changes to the file.
  */
 
-
 export type paths = Record<string, never>;
-
 export type webhooks = Record<string, never>;
-
 export interface components {
-  schemas: {
-    /**
-     * @description An event stored in the Firestore outbox that represents a domain change
-     * requiring asynchronous processing (e.g., ORDER_RESOLVED → trigger payment).
-     * Written atomically with the domain write using the Outbox Pattern.
-     */
-    BaseOutboxEvent: {
-      /** @description Unique event identifier (UUID or Firestore doc ID). */
-      id: string;
-      /** @description Idempotency key, used if sibling events are idempotent */
-      idempotent_key?: string;
-      /**
-       * @description Type of event that occurred.
-       * @example ORDER_RESOLVED
-       */
-      type: string;
-      /**
-       * Format: date-time
-       * @description Timestamp when the event was written to Firestore.
-       */
-      created_at: string;
-      /**
-       * @description Indicates whether the event has been successfully processed.
-       * @default false
-       */
-      processed: boolean;
-      /**
-       * Format: date-time
-       * @description Timestamp when processing completed successfully.
-       */
-      processedAt?: string | null;
-      /**
-       * @description How many times the event has failed processing.
-       * @default 0
-       */
-      retries: number;
-      /** @description Error message from the last failed processing attempt. */
-      lastError?: string | null;
+    schemas: {
+        /**
+         * @description An event stored in the Firestore outbox that represents a domain change
+         *     requiring asynchronous processing (e.g., ORDER_RESOLVED → trigger payment).
+         *     Written atomically with the domain write using the Outbox Pattern.
+         */
+        BaseOutboxEvent: {
+            /** @description Unique event identifier (UUID or Firestore doc ID). */
+            readonly id: string;
+            /** @description Idempotency key, used if sibling events are idempotent */
+            readonly idempotent_key?: string;
+            /**
+             * @description Type of event that occurred.
+             * @example ORDER_RESOLVED
+             */
+            type: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the event was written to Firestore.
+             */
+            created_at: string;
+            /**
+             * @description Indicates whether the event has been successfully processed.
+             * @default false
+             */
+            processed: boolean;
+            /**
+             * Format: date-time
+             * @description Timestamp when processing completed successfully.
+             */
+            processedAt?: string | null;
+            /**
+             * @description How many times the event has failed processing.
+             * @default 0
+             */
+            retries: number;
+            /** @description Error message from the last failed processing attempt. */
+            lastError?: string | null;
+        };
+        Payment: {
+            /**
+             * @description Total payment amount
+             * @example 1668
+             */
+            total: string;
+            /**
+             * @description Current payment status
+             * @example PENDING
+             */
+            status: string;
+            /**
+             * @description Identifier of the payer
+             * @example 270053857
+             */
+            payer_id: string;
+            /**
+             * @description Identifier of the associated order
+             * @example FZcMTsLGnRHo87gZRS66
+             */
+            order_id: string;
+        };
+        TinkoffPaymentItem: {
+            Name: string;
+            Price: number;
+            Quantity: number;
+            Amount: number;
+            /** @enum {string} */
+            Tax: "none" | "vat0" | "vat10" | "vat20" | "vat110" | "vat120";
+        };
+        TinkoffReceipt: {
+            /** Format: email */
+            Email: string;
+            /** @description Телефон покупателя */
+            Phone?: string;
+            /** @enum {string} */
+            Taxation: "osn" | "usn_income" | "usn_income_outcome" | "envd" | "esn" | "patent";
+            Items: components["schemas"]["TinkoffPaymentItem"][];
+        };
+        TinkoffPaymentData: {
+            /** @description Телефон покупателя */
+            Phone?: string;
+            /**
+             * Format: email
+             * @description Электронная почта покупателя
+             */
+            Email?: string;
+        };
+        TinkoffPaymentPayload: {
+            /** @description Ключ терминала */
+            TerminalKey: string;
+            Token: string;
+            /** @description Сумма в копейках */
+            Amount: number;
+            /** @description Идентификатор заказа */
+            OrderId: string;
+            /** @description Идентификатор платежа */
+            PaymentId?: string;
+            /** @description Описание заказа */
+            Description?: string;
+            /** Format: date-time */
+            RedirectDueDate: string;
+            DATA?: components["schemas"]["TinkoffPaymentData"];
+            Receipt: components["schemas"]["TinkoffReceipt"];
+        };
+        TinkoffPaymentCancelationRequest: {
+            /** @description Ключ терминала */
+            TerminalKey: string;
+            Token: string;
+            /** @description Идентификатор платежа */
+            PaymentId?: string;
+        };
+        TinkoffResult: {
+            /** @example TBankTest */
+            TerminalKey: string;
+            /** @example 21057 */
+            OrderId: string;
+            /** @example true */
+            Success: boolean;
+            /** @example REVERSED */
+            Status: string;
+            /** @example 13000 */
+            OriginalAmount: number;
+            /** @example 5000 */
+            NewAmount: number;
+            /** @example 2304882 */
+            PaymentId: string;
+            /** @example 0 */
+            ErrorCode: string;
+            /** @example OK */
+            Message: string;
+            /** @example None */
+            Details: string | null;
+            /** @example 756478567845678436 */
+            ExternalRequestId: string;
+        };
     };
-    Payment: {
-      /**
-       * @description Total payment amount
-       * @example 1668
-       */
-      total?: string;
-      /**
-       * @description Current payment status
-       * @example PENDING
-       */
-      status?: string;
-      /**
-       * @description Identifier of the payer
-       * @example 270053857
-       */
-      payer_id?: string;
-      /**
-       * @description Identifier of the associated order
-       * @example FZcMTsLGnRHo87gZRS66
-       */
-      order_id?: string;
-      required?: [total, status, payer_id, order_id];
-    };
-    TinkoffPaymentItem: {
-      Name: string;
-      Price: number;
-      Quantity: number;
-      Amount: number;
-      /** @enum {string} */
-      Tax: "none" | "vat0" | "vat10" | "vat20" | "vat110" | "vat120";
-    };
-    TinkoffReceipt: {
-      /** Format: email */
-      Email: string;
-      /** @description Телефон покупателя */
-      Phone?: string;
-      /** @enum {string} */
-      Taxation: "osn" | "usn_income" | "usn_income_outcome" | "envd" | "esn" | "patent";
-      Items: components["schemas"]["TinkoffPaymentItem"][];
-    };
-    TinkoffPaymentData: {
-      /** @description Телефон покупателя */
-      Phone?: string;
-      /**
-       * Format: email
-       * @description Электронная почта покупателя
-       */
-      Email?: string;
-    };
-    TinkoffPaymentPayload: {
-      /** @description Ключ терминала */
-      TerminalKey: string;
-      Token: string;
-      /** @description Сумма в копейках */
-      Amount: number;
-      /** @description Идентификатор заказа */
-      OrderId: string;
-      /** @description Идентификатор платежа */
-      PaymentId?: string;
-      /** @description Описание заказа */
-      Description?: string;
-      /** Format: date-time */
-      RedirectDueDate: string;
-      DATA?: components["schemas"]["TinkoffPaymentData"];
-      Receipt: components["schemas"]["TinkoffReceipt"];
-    };
-    TinkoffPaymentCancelationRequest: {
-      /** @description Ключ терминала */
-      TerminalKey: string;
-      Token: string;
-      /** @description Идентификатор платежа */
-      PaymentId?: string;
-    };
-    TinkoffResult: {
-      /** @example TBankTest */
-      TerminalKey: string;
-      /** @example 21057 */
-      OrderId: string;
-      /** @example true */
-      Success: boolean;
-      /** @example REVERSED */
-      Status: string;
-      /** @example 13000 */
-      OriginalAmount: number;
-      /** @example 5000 */
-      NewAmount: number;
-      /** @example 2304882 */
-      PaymentId: string;
-      /** @example 0 */
-      ErrorCode: string;
-      /** @example OK */
-      Message: string;
-      /** @example None */
-      Details: string | null;
-      /** @example 756478567845678436 */
-      ExternalRequestId: string;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
-
 export type $defs = Record<string, never>;
-
-export type external = Record<string, never>;
-
 export type operations = Record<string, never>;

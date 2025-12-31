@@ -9,11 +9,11 @@ import {
   CustomerService,
   CartItemService,
   OrderService,
-  UserService,
+  //UserService,
 } from "./imports";
-import {authorize} from "../../services/utils";
+//import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
-import {logger} from "firebase-functions/v1";
+//import {logger} from "firebase-functions/v1";
 import {localeMiddleware} from "../../middleware/localeMiddleware";
 
 admin.initializeApp(functions.config().firebase, "private");
@@ -41,6 +41,7 @@ privateApi.use(cors(
 
 privateApi.use(localeMiddleware);
 
+/*
 privateApi.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const userService = new UserService(db);
   try {
@@ -50,6 +51,8 @@ privateApi.use(async (req: express.Request, res: express.Response, next: express
     return api.error(res, err.message);
   }
 });
+
+*/
 
 privateApi.get("/deliveries", async (req: express.Request, res: express.Response) => {
   try {
@@ -80,6 +83,12 @@ privateApi.get("/deliveries/:id", async (req: express.Request, res: express.Resp
 privateApi.get("/items/category/:category", async (req: express.Request, res: express.Response) => {
   try {
     const {category} = req.params;
+
+    if (category === "all" ) {
+      const items = await itemService.findAll();
+      return api.send(res, items);
+    }
+
     const items = await itemService.findByCategory(category);
     return api.send(res, items);
   } catch (err: any) {

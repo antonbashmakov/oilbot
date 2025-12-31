@@ -6,16 +6,23 @@ info:
   contact:
     name: API Support
     email: support@posebestoimosti.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT    
 
 servers:
-  - url: https://your-domain.com
+  - url: http://prod.posebesto.ru:5001
     description: Production server
-  - url: http://localhost:5001
+  - url: http://dev.posebesto.ru:5001
     description: Development server
+
+security:
+  - bearerAuth: []
 
 paths:
   /admin/deliveries:
     get:
+      operationId: getAllDeliveries
       summary: Get all deliveries
       description: Retrieve a list of all deliveries
       tags:
@@ -44,6 +51,7 @@ paths:
 
   /admin/deliveries/{id}:
     get:
+      operationId: getDeliveryById
       summary: Get delivery by ID
       description: Retrieve a specific delivery by its ID
       tags:
@@ -83,6 +91,7 @@ paths:
 
   /admin/deliveries/{id}/stats/{format}:
     get:
+      operationId: getDeliveryStats
       summary: Get delivery statistics in CSV format
       description: Retrieve delivery order statistics filtered by status and export as CSV
       tags:
@@ -144,6 +153,7 @@ paths:
 
   /admin/orders/{id}:
     get:
+      operationId: getOrderOverview
       summary: Get order overview by ID
       description: Retrieve a specific delivery by its ID
       tags:
@@ -181,6 +191,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     patch:
+      operationId: updateOrder
       summary: Update an order
       description: Update an order's name
       tags:
@@ -232,6 +243,7 @@ paths:
 
   /admin/order-pickings/{id}:
     patch:
+      operationId: updateOrderPicking
       summary: Update order picking items
       description: Update the items in an order picking
       tags:
@@ -277,6 +289,7 @@ paths:
 
   /admin/order-pickings/{pickingId}/items/{itemId}/collect:
     post:
+      operationId: collectOrderPickingItem
       summary: Collect an item in an order picking
       description: Mark an item in an order picking as collected.
       tags:
@@ -312,6 +325,7 @@ paths:
 
   /admin/orders/{id}/order-picking:
     post:
+      operationId: startOrderPicking
       summary: Start order picking process
       description: Check if order picking exists, return existing one or create new from order
       tags:
@@ -351,6 +365,7 @@ paths:
 
   /admin/orders/{id}/consolidate:
     post:
+      operationId: consolidateOrder
       summary: Resolve an order
       description: Marks an order as resolved.
       tags:
@@ -368,6 +383,7 @@ paths:
 
   /admin/orders/{id}/cancel:
     put:
+      operationId: cancelOrder
       summary: Cancel an order
       description: Cancel an order and emit OrderCancelledEvent. Order can only be cancelled if status is PENDING, PAYMENT_IN_PROGRESS, PAYMENT_FAILED, or PAID.
       tags:
@@ -403,6 +419,7 @@ paths:
 
   /admin/orders/{id}/conciliation:
     get:
+      operationId: getConciliationOrder
       summary: Get conciliation order
       description: Retrieve the conciliation order for a given order ID
       tags:
@@ -436,6 +453,7 @@ paths:
 
   /admin/orders/{orderId}/payments:
     get:
+      operationId: getPaymentsForOrder
       summary: Get all payments for an order
       description: Retrieve all payments for an order, including payments from conciliation orders
       tags:
@@ -475,6 +493,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
+      operationId: createPaymentForOrder
       summary: Create a new payment for an order
       description: Create a new payment for an order using idempotency key. Returns 400 if order already has a payment in status 'SENT' or 'CONFIRMED'
       tags:
@@ -532,6 +551,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /admin/customers/{customerId}/messages:
     get:
+      operationId: getMessagesForCustomer
       summary: Get all messages for a customer
       description: Retrieve all conversation messages for a specific customer
       tags:
@@ -571,6 +591,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
+      operationId: sendMessageToCustomer
       summary: Send a message to a customer
       description: Send a text message to a customer via Telegram and save it to CONVERSATION_MESSAGES
       tags:
@@ -623,6 +644,7 @@ paths:
 
   /admin/comments:
     get:
+      operationId: getComments
       summary: Get comments
       description: Retrieve comments with optional filtering by entity_id and class
       tags:
@@ -662,6 +684,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
+      operationId: createComment
       summary: Create a comment
       description: Create a new comment
       tags:
@@ -716,7 +739,9 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /private/items/category/{category}:
+    
     get:
+      operationId: getItemsByCategory
       summary: Get items by category
       description: Retrieve a list of items for a specific category
       tags:
@@ -752,6 +777,7 @@ paths:
 
   /private/customers/{customerId}/cart/items/{itemId}:
     post:
+      operationId: addItemToCart
       summary: Add item to cart
       description: Add an item to a customer's cart
       tags:
@@ -792,7 +818,9 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /private/customers/{customerId}/orders:
+    
     post:
+      operationId: createOrderFromCart
       summary: Create order from cart
       description: Create a new order from a customer's cart
       tags:
@@ -826,6 +854,7 @@ paths:
 
   /public/users/me:
     get:
+      operationId: getCurrentUser
       summary: Get current user information
       description: Retrieve the authenticated user's information
       tags:
@@ -864,6 +893,7 @@ paths:
 
   /public/signup:
     post:
+      operationId: signupUser
       summary: Register a new user
       description: Create a new user account
       tags:
@@ -902,6 +932,7 @@ paths:
 
   /public/login:
     post:
+      operationId: loginUser  
       summary: Login a user
       description: Authenticate a user with email and password
       tags:
@@ -945,7 +976,9 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /agent/deliveries/{id}:
+    
     get:
+      operationId: getDeliveryAgentOverview
       summary: Get delivery agent overview by ID
       description: Retrieve delivery agent overview including pickups and deliveries
       tags:
@@ -985,6 +1018,7 @@ paths:
 
   /agent/orders/{id}/deliver:
     put:
+      operationId: markOrderAsDelivered
       summary: Mark order as delivered
       description: Set order status to DELIVERED
       tags:
@@ -1018,6 +1052,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     Customer:
       type: object
@@ -1051,6 +1090,7 @@ components:
           description: Customer's username
           example: "getting_drunk"
     CustomerOverview: 
+      type: object
       required:
         - balance
       allOf:
@@ -1170,9 +1210,10 @@ components:
           $ref: '#/components/schemas/OwnerRef'
     PickingItem:
       allOf:
-        - $ref: '#/components/schemas/OrderItem'
+        - $ref: '#/components/schemas/CartItem'
       properties:
         status:
+          type: string
           enum:
             - PENDING
             - COLLECTED
@@ -1187,6 +1228,7 @@ components:
           description: Owner ID
           example: "270053857"
     DeliveryRef:
+      type: object
       required:
         - delivery_end
         - delivery_start
@@ -1386,6 +1428,7 @@ components:
           $ref: '#/components/schemas/OwnerRef'
 
     DeliveryOverview:
+      type: object
       allOf:
         - $ref: '#/components/schemas/Delivery'
       properties:
@@ -1418,7 +1461,6 @@ components:
         - owner
         - total
         - type
-        - total
       properties:
         id:
           type: string
@@ -1461,7 +1503,7 @@ components:
             - CONCILIATION
             - ORIGINAL
           description: Current status of the order
-          example: "PAID"
+          example: "CONCILIATION"
         owner:
           $ref: '#/components/schemas/OwnerRef'
         number_of_items:
@@ -1474,6 +1516,7 @@ components:
           description: Total value of the order
           example: 150.75
     OrderOverview:
+      type: object
       required:
         - customer
       allOf:
@@ -1516,6 +1559,7 @@ components:
           type: array
           description: User roles
           items:
+            type: string
             enum:
               - AGENT
               - ADMIN
@@ -1584,7 +1628,7 @@ components:
       required:
         - id
         - provider
-        - chat_id
+        - thread_id
         - text
         - role
         - created_at

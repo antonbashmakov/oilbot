@@ -10,7 +10,7 @@ class TelegramService {
     this.baseUrl = `https://api.telegram.org/bot${this.botToken}`;
   }
 
-  async sendMessage(chatId: string, text: string): Promise<ConversationMessage | undefined> {
+  async sendMessage(chatId: string, text: string, thread_id: string): Promise<ConversationMessage | undefined> {
     if (!this.botToken) {
       console.warn("TELEGRAM_BOT_TOKEN not configured, skipping Telegram message");
       return;
@@ -30,6 +30,7 @@ class TelegramService {
         recipient_id: chatId,
         text: ret.data.result.text,
         created_at: new Date(),
+        thread_id,
       };
     } catch (error) {
       console.error("Failed to send Telegram message:", error);

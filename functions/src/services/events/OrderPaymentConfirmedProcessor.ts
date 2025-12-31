@@ -43,7 +43,7 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
         originalOrderId: order.reconciliated_order_id,
       };
       const message = toMessage("ORDER_PAYMENT_CONFIRMED_CONCILIATION", templateValues);
-      telegramService.sendMessage(order.owner.id, message).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_CONCILIATION to ${order.owner.id}: ${e}`));
+      telegramService.sendMessage(order.owner.id, message, orderId).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_CONCILIATION to ${order.owner.id}: ${e}`));
       break;
     }
 
@@ -56,7 +56,7 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
         total: order.total,
       };
       const message = toMessage("ORDER_PAYMENT_CONFIRMED_ORIGINAL", templateValues);
-      telegramService.sendMessage(order.owner.id, message).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_ORIGINAL to ${order.owner.id}: ${e}`));
+      telegramService.sendMessage(order.owner.id, message, orderId).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_ORIGINAL to ${order.owner.id}: ${e}`));
       break;
     }
 
@@ -68,7 +68,7 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
       orderId: orderId,
     };
     const adminMessage = toMessage("ORDER_PAYMENT_CONFIRMED_ADMIN", adminTemplateValues);
-    telegramService.sendMessage("270053857", adminMessage).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_ADMIN to 270053857 : ${e}`));
+    telegramService.sendMessage("270053857", adminMessage, orderId).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_ADMIN to 270053857 : ${e}`));
   }
 }
 

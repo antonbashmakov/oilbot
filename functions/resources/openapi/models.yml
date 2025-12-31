@@ -6,6 +6,11 @@ info:
   contact:
     name: API Support
     email: support@posebestoimosti.com
+servers:
+  - url: http://prod.posebesto.ru:5001
+    description: Production server
+  - url: http://dev.posebesto.ru:5001
+    description: Development server    
 components:
   schemas:
     BaseOutboxEvent:
@@ -58,7 +63,6 @@ components:
       required:
         - id
         - type
-        - payload
         - created_at
         - processed
         - retries
@@ -82,11 +86,11 @@ components:
           type: string
           description: Identifier of the associated order
           example: "FZcMTsLGnRHo87gZRS66"
-        required:
-          - total
-          - status
-          - payer_id
-          - order_id
+      required:
+        - total
+        - status
+        - payer_id
+        - order_id
           
     TinkoffPaymentItem:
       type: object

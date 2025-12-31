@@ -193,7 +193,7 @@ describe("Payment Creation with Telegram Notification", () => {
 
       const messageText = "Test message content";
 
-      await telegramService.sendMessage(testCustomer.id, messageText);
+      await telegramService.sendMessage(testCustomer.id, messageText, "thread-1");
 
       expect(mockSendMessage).toHaveBeenCalledTimes(1);
       expect(mockSendMessage).toHaveBeenCalledWith(
@@ -209,7 +209,7 @@ describe("Payment Creation with Telegram Notification", () => {
 
       telegramService.sendMessage = mockSendMessage;
 
-      await expect(telegramService.sendMessage(testCustomer.id, "test"))
+      await expect(telegramService.sendMessage(testCustomer.id, "test", "thread-1"))
         .rejects.toThrow("Telegram API error");
     });
   });
