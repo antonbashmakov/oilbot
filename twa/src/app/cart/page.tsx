@@ -19,6 +19,7 @@ export default function CartPage() {
   const cartTotal = getCartTotal();
 
   useEffect(() => {
+    if(!user?.id) return;
     const itemGroups = _.groupBy(cartItems, 'item_id');
 
     const representatives = Object.keys(itemGroups).map(itemId => {
@@ -32,7 +33,7 @@ export default function CartPage() {
     setItems(_.sortBy(representatives, 'name'));
     setItemGroups(itemGroups);
 
-  }, [cartItems]);
+  }, [cartItems, user?.id]);
 
   const handleQuantityChange = async (itemId: string, delta: number) => {
 
@@ -54,7 +55,6 @@ export default function CartPage() {
   const handleCheckout = () => {
     // In a real app, you would navigate to checkout page
     console.log('Proceeding to checkout with items:', cartItems);
-    alert(`Proceeding to checkout with ${cartItems.length} items. Total: $${totalAmount.toFixed(2)}`);
   };
 
   // Mock images for demonstration
