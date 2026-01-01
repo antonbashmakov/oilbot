@@ -53,6 +53,7 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
           name: "Test Item 1",
           price: 150,
           quantity: 1,
+          category: "MEAT",
           item_id: "item-1",
           fraction: 1,
           price_for_unit: 150,

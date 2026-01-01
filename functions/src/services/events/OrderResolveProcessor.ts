@@ -79,6 +79,7 @@ class OrderResolveProcessor extends AbstractProcessor {
           group: order.items[0].group,
           id: "",
           item_id: "",
+          category: "RECONCILIATION",
           name: "Финальный расчёт заказа",
           owner: order.items[0].owner,
           price: diff,

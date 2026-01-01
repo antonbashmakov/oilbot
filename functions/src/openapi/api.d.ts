@@ -300,14 +300,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/private/customers/{customerId}/cart/items/{itemId}": {
+    "/private/customers/{customerId}/cart/items": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Get cart items for a customer
+         * @description Retrieve all items in a customer's cart
+         */
+        get: operations["getCartItems"];
         put?: never;
         /**
          * Add item to cart
@@ -523,6 +527,11 @@ export interface components {
             type: string;
         };
         CartItem: {
+            /**
+             * @description Item category
+             * @example MEAT
+             */
+            category: string;
             /**
              * Format: float
              * @description Fraction value
@@ -1078,6 +1087,13 @@ export interface components {
              * @example password123
              */
             password: string;
+        };
+        AddToCartItem: {
+            /**
+             * @description Item ID to add to cart
+             * @example 06088197-f7ef-4bf2-8b3f-2f4a05c6c104
+             */
+            itemId: string;
         };
         Comment: {
             /**
@@ -1948,21 +1964,19 @@ export interface operations {
             };
         };
     };
-    addItemToCart: {
+    getCartItems: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 /** @description Customer ID */
-                customerId: number;
-                /** @description Item ID */
-                itemId: string;
+                customerId: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Successful response */
+            /** @description Successful response with cart items */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1971,8 +1985,66 @@ export interface operations {
                     "application/json": {
                         /** @example OK */
                         code?: string;
-                        data?: components["schemas"]["Item"][];
+                        data?: components["schemas"]["CartItem"][];
                     };
+                };
+            };
+            /** @description Customer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    addItemToCart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddToCartItem"];
+            };
+        };
+        responses: {
+            /** @description Item successfully added to cart */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: components["schemas"]["CartItem"];
+                    };
+                };
+            };
+            /** @description Customer or item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             /** @description Internal server error */
@@ -1992,13 +2064,13 @@ export interface operations {
             header?: never;
             path: {
                 /** @description Customer ID */
-                customerId: number;
+                customerId: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Successful response */
+            /** @description Order successfully created from cart */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2009,6 +2081,15 @@ export interface operations {
                         code?: string;
                         data?: components["schemas"]["Order"];
                     };
+                };
+            };
+            /** @description Customer not found or cart is empty */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             /** @description Internal server error */

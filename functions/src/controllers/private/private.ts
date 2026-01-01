@@ -90,10 +90,14 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
 
     let items;
 
-    if (category === "all") {
+    if (category === "ALL") {
       items = await itemService.findAll();
     } else {
       items = await itemService.findByCategory(category);
+    }
+
+    if (!items || items.length === 0) {
+      return api.send(res, []);
     }
 
     const groups = [...new Set(items.map(item => item.group))];
@@ -123,9 +127,27 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
   }
 });
 
-privateApi.post("/customers/:customerId/cart/items/:itemId", async (req: express.Request, res: express.Response) => {
+privateApi.get("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId, itemId } = req.params;
+    const { customerId } = req.params;
+
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+    return api.send(res, cartItems || []);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+privateApi.post("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
+  try {
+    const { customerId } = req.params;
+    const { itemId } = req.body;
 
     const customer = await customerService.find(customerId);
     if (!customer) {

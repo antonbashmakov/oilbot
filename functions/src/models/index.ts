@@ -4,6 +4,7 @@ import { components as models } from "../openapi/models";
 export type Customer = components["schemas"]["Customer"];
 export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
+export type AddToCartItem = components["schemas"]["AddToCartItem"];
 
 type BaseDeliveryOverviewItemStats = components["schemas"]["DeliveryOverviewItemStats"];
 type BaseStats = components["schemas"]["Stats"];
@@ -26,6 +27,8 @@ export type TinkoffPaymentCancelationRequest = models["schemas"]["TinkoffPayment
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
 export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 export type TinkoffResult = models["schemas"]["TinkoffResult"];
+
+
 
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 export type BaseConversationMessage = components["schemas"]["ConversationMessage"];

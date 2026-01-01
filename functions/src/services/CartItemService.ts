@@ -12,9 +12,10 @@ class CartItemService extends AbstractService<CartItem> {
       quantity: 1,
       fraction: item.fraction,
       price_for_unit: item.price_out,
+      category: item.category,
       group: item.group,
       owner: {
-        id: customer.id,
+        id: `${customer.id}`,
       },
       created_at: new Date(),
     };
