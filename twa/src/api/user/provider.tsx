@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { useGetCartItemsQuery } from '..';
 
 // Mock user object as provided in the task
 const MOCK_USER = {
@@ -172,6 +173,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setIsError(false);
     // Re-initialization will happen in useEffect
   };
+
+  useGetCartItemsQuery(appUser?.id);
 
   const value: UserContextType = {
     user: appUser,

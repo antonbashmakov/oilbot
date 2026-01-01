@@ -775,7 +775,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /private/customers/{customerId}/cart/items/{itemId}:
+  /private/customers/{customerId}/cart/items:
+    get:
+      operationId: getCartItems
+      summary: Get cart items for a customer
+      description: Retrieve all items in a customer's cart
+      tags:
+        - Cart
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with cart items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CartItem'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     post:
       operationId: addItemToCart
       summary: Add item to cart
@@ -788,16 +828,16 @@ paths:
           required: true
           description: Customer ID
           schema:
-            type: number
-        - name: itemId
-          in: path
-          required: true
-          description: Item ID
-          schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartItem'
       responses:
         '200':
-          description: Successful response
+          description: Item successfully added to cart
           content:
             application/json:
               schema:
@@ -807,9 +847,13 @@ paths:
                     type: string
                     example: "OK"
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Item'
+                    $ref: '#/components/schemas/CartItem'
+        '404':
+          description: Customer or item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error
           content:
@@ -831,10 +875,10 @@ paths:
           required: true
           description: Customer ID
           schema:
-            type: number
+            type: string
       responses:
         '200':
-          description: Successful response
+          description: Order successfully created from cart
           content:
             application/json:
               schema:
@@ -845,6 +889,12 @@ paths:
                     example: "OK"
                   data:
                     $ref: '#/components/schemas/Order'
+        '404':
+          description: Customer not found or cart is empty
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error
           content:
@@ -1167,8 +1217,13 @@ components:
         - owner
         - price
         - quantity
+        - category
         - price_for_unit
       properties:
+        category:
+          type: string
+          description: Item category
+          example: "MEAT"      
         fraction:
           type: number
           format: float
@@ -1841,6 +1896,16 @@ components:
           type: string
           description: User's password
           example: "password123"
+
+    AddToCartItem:
+      type: object
+      required:
+        - itemId
+      properties:
+        itemId:
+          type: string
+          description: Item ID to add to cart
+          example: "06088197-f7ef-4bf2-8b3f-2f4a05c6c104"
 
     Comment:
       type: object

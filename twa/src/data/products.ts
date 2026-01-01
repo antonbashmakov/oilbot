@@ -16,11 +16,11 @@ export interface Product {
 }
 
 export const categories = [
-  { id: 1, name: 'All', icon: 'restaurant' },
-  { id: 2, name: 'Steaks', icon: 'cooking' },
-  { id: 3, name: 'Seafood', icon: 'set_meal' },
-  { id: 4, name: 'Cheese', icon: 'local_pizza' },
-  { id: 5, name: 'Caviar', icon: 'egg' },
+  { id: 'ALL', name: 'All', icon: 'restaurant' },
+  { id: 'MEAT', name: 'Meat', icon: 'cooking' },
+  { id: 'SEA', name: 'Seafood', icon: 'set_meal' },
+  { id: 'CHEESE', name: 'Cheese', icon: 'local_pizza' },
+  // { id: 'CAVIAR', name: 'Caviar', icon: 'egg' },
 ];
 
 export const navItems = [

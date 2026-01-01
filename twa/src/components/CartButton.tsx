@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useCartStore } from '@/api';
+import { useCartStore, useGetCartItemsQuery } from '@/api';
 import { useUser } from '@/api/user/provider';
 
 interface CartButtonProps {
@@ -23,14 +23,12 @@ export const CartButton: React.FC<CartButtonProps> = ({
   className = '' 
 }) => {
   const { user } = useUser();
-  const { addToCart, getCartCount, isLoading } = useCartStore(
-    user?.id ? parseInt(user.id) : undefined
-  );
+  const { addToCart, getItemCountInCart, isLoading } = useCartStore(user?.id);
   
   const [isAnimating, setIsAnimating] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const cartCount = getCartCount();
-
+  const cartCount = getItemCountInCart(itemId);
+  
   const handleAddToCart = async () => {
     if (!user?.id) {
       console.error('No user ID available for cart');

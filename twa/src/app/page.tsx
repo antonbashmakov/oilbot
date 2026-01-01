@@ -1,16 +1,27 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGetItemsQuery } from '@/api';
 import { categories, navItems } from '@/data/products';
 import { format } from "date-fns";
 import { UserDisplay } from '@/components/UserDisplay';
 import { CartButton } from '@/components/CartButton';
 import { HeaderCartButton } from '@/components/HeaderCartButton';
+import { ItemOverview } from '@/api/models';
+
+import _ from 'lodash';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const { data: items, isLoading, error } = useGetItemsQuery(selectedCategory);
+  const { data, isLoading, error } = useGetItemsQuery(selectedCategory);
+
+  const [items, setItems] = useState<ItemOverview[]>([]);
+
+  useEffect(() => {
+    if(!data) return;
+    const items = _.sortBy(data, ['category', 'name']);
+    setItems(items);
+  }, [data, selectedCategory]);
 
   // Handle loading state
   if (isLoading) {
@@ -95,23 +106,23 @@ export default function Home() {
           {categories.map((category) => (
             <button
               key={category.id}
-              onClick={() => setSelectedCategory(category.name.toLowerCase())}
+              onClick={() => setSelectedCategory(category.id)}
               className={`group flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 shadow-sm transition-all active:scale-95 ${
-                selectedCategory === category.name.toLowerCase()
+                selectedCategory === category.id
                   ? 'bg-primary shadow-primary/30'
                   : 'bg-white dark:bg-white/10 border border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/20'
               }`}
             >
               <span
                 className={`material-symbols-outlined text-[20px] ${
-                  selectedCategory === category.name.toLowerCase() ? 'text-white' : 'text-text-main-light dark:text-text-main-dark'
+                  selectedCategory === category.id ? 'text-white' : 'text-text-main-light dark:text-text-main-dark'
                 }`}
               >
                 {category.icon}
               </span>
               <p
                 className={`text-sm ${
-                  selectedCategory === category.name.toLowerCase()
+                  selectedCategory === category.id
                     ? 'text-white font-bold'
                     : 'text-text-main-light dark:text-text-main-dark font-medium'
                 }`}
@@ -137,14 +148,6 @@ export default function Home() {
               { time: 'Today, 5 PM', icon: 'bolt' as const },
             ];
             const delivery = item.deliveries[0];
-            
-            // Determine badge based on index
-            let badge = undefined;
-            if (index === 0) {
-              badge = { text: 'Best Seller', type: 'best-seller' as const };
-            } else if (index === 4) {
-              badge = { text: 'New Arrival', type: 'new-arrival' as const };
-            }
             
             return (
               <div key={item.id || `item-${index}`} className="flex flex-col group/card">
@@ -172,20 +175,6 @@ export default function Home() {
                     className="absolute bottom-2 right-2"
                   />
 
-                  {/* Badge */}
-                  {badge && (
-                    <div
-                      className={`absolute top-2 left-2 rounded-lg backdrop-blur-sm px-2 py-1 ${
-                        badge.type === 'best-seller'
-                          ? 'bg-black/60'
-                          : 'bg-primary/90'
-                      }`}
-                    >
-                      <span className="text-[10px] font-bold text-white tracking-wide uppercase">
-                        {badge.text}
-                      </span>
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex flex-col gap-1">

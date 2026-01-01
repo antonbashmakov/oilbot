@@ -15,7 +15,7 @@ export function getApiQueryParams<P extends PathsWithMethod<ApiPaths, 'get'>>(p:
     return [p, init.params];
 }
 
-export async function handleResult<D, E, T extends { data?: D, error?: E, response: { status: number} }>(result: Promise<T>): Promise<D | undefined | null> {
+export async function handleResult<D, E, T extends { data?: D, error?: E, response: { status: number} }>(result: Promise<T>, dataInterceptor?: (data: D) => D): Promise<D | undefined | null> {
 
     const { data, error, response } = await result;
 
@@ -25,18 +25,22 @@ export async function handleResult<D, E, T extends { data?: D, error?: E, respon
 
     if(response.status === 204) return null;
 
+    if (dataInterceptor && data) {
+        return dataInterceptor(data);
+    }
+
     return data
 }
 
 // @ts-ignore
-export function useApiQuery<P extends PathsWithMethod<ApiPaths, 'get'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<ApiPaths[P], 'get'>>, options: UseQueryOptions<any> = {}) {
+export function useApiQuery<P extends PathsWithMethod<ApiPaths, 'get'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<ApiPaths[P], 'get'>>, options: UseQueryOptions<any> = {}, dataInterceptor?: (data: D) => D) {
     const { GET } = useClient();
     
     // @ts-ignore
     return useQuery({ 
         ...options,
         queryKey: getApiQueryParams(p, init),
-        queryFn: () => handleResult(GET(p as P, init)),
+        queryFn: () => (handleResult(GET(p as P, init), dataInterceptor)),
         enabled: !!p && options.enabled,
     });
 }

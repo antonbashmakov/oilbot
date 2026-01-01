@@ -6,9 +6,7 @@ import { useState, useEffect } from 'react';
 
 export const HeaderCartButton: React.FC = () => {
   const { user } = useUser();
-  const { getCartCount } = useCartStore(
-    user?.id ? parseInt(user.id) : undefined
-  );
+  const { getCartCount } = useCartStore(user?.id);
   
   const cartCount = getCartCount();
   const [badgeScale, setBadgeScale] = useState(1);
