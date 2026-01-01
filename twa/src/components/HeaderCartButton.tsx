@@ -3,6 +3,7 @@
 import { useCartStore } from '@/api';
 import { useUser } from '@/api/user/provider';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export const HeaderCartButton: React.FC = () => {
   const { user } = useUser();
@@ -20,16 +21,9 @@ export const HeaderCartButton: React.FC = () => {
     }
   }, [cartCount]);
 
-  const handleCartClick = () => {
-    // Navigate to cart page or open cart drawer
-    console.log('Cart clicked, count:', cartCount);
-    // In a real app, you would navigate to cart page or open a cart drawer
-    alert(`Cart has ${cartCount} item${cartCount !== 1 ? 's' : ''}`);
-  };
-
   return (
-    <button 
-      onClick={handleCartClick}
+    <Link 
+      href="/cart"
       className="relative flex size-10 items-center justify-center rounded-full bg-background-light dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-colors"
       aria-label="Shopping cart"
     >
@@ -47,6 +41,6 @@ export const HeaderCartButton: React.FC = () => {
           {cartCount > 9 ? '9+' : cartCount}
         </div>
       )}
-    </button>
+    </Link>
   );
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useCartStore, useGetCartItemsQuery } from '@/api';
+import { useCartStore } from '@/api';
 import { useUser } from '@/api/user/provider';
 
 interface CartButtonProps {
@@ -27,7 +27,7 @@ export const CartButton: React.FC<CartButtonProps> = ({
   
   const [isAnimating, setIsAnimating] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const cartCount = getItemCountInCart(itemId);
+  const cartCount = (getItemCountInCart(itemId));
   
   const handleAddToCart = async () => {
     if (!user?.id) {
@@ -38,10 +38,7 @@ export const CartButton: React.FC<CartButtonProps> = ({
     setIsAnimating(true);
     
     try {
-      await addToCart(itemId, {
-        ...itemData,
-        owner: { id: user.id },
-      });
+      await addToCart(itemId);
       
       // Show success animation
       setShowSuccess(true);
@@ -54,7 +51,7 @@ export const CartButton: React.FC<CartButtonProps> = ({
     }
   };
 
-  // Cart badge animation
+  // Cart bage animation
   const [badgeScale, setBadgeScale] = useState(1);
   
   useEffect(() => {

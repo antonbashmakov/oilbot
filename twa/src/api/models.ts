@@ -5,6 +5,7 @@ export type Customer = components["schemas"]["Customer"];
 export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type AddToCartItem = components["schemas"]["AddToCartItem"];
+export type RemoveFromCartItem = components["schemas"]["RemoveFromCartItem"];
 
 type BaseDeliveryOverviewItemStats = components["schemas"]["DeliveryOverviewItemStats"];
 type BaseStats = components["schemas"]["Stats"];

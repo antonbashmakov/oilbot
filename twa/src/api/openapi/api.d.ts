@@ -318,7 +318,11 @@ export interface paths {
          * @description Add an item to a customer's cart
          */
         post: operations["addItemToCart"];
-        delete?: never;
+        /**
+         * Remove item from cart
+         * @description Remove an item from a customer's cart
+         */
+        delete: operations["removeItemFromCart"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1094,6 +1098,18 @@ export interface components {
              * @example 06088197-f7ef-4bf2-8b3f-2f4a05c6c104
              */
             itemId: string;
+        };
+        RemoveFromCartItem: {
+            /**
+             * @description Cart item ID to remove from cart
+             * @example db13bdf1-cd12-4650-82be-f55af1e79bf7
+             */
+            cartItemId?: string;
+            /**
+             * @description item ID to remove from cart. All the cart items of this item will be removed
+             * @example db13bdf1-cd12-4650-82be-f55af1e79bf7
+             */
+            itemId?: string;
         };
         Comment: {
             /**
@@ -2039,6 +2055,49 @@ export interface operations {
                 };
             };
             /** @description Customer or item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    removeItemFromCart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RemoveFromCartItem"];
+            };
+        };
+        responses: {
+            /** @description Item successfully removed from cart */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Customer or cart item not found */
             404: {
                 headers: {
                     [name: string]: unknown;

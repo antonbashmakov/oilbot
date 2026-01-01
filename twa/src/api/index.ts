@@ -1,4 +1,4 @@
-import { useApiQuery, usePatchApi, usePostApi, usePutApi } from "@/api/rq";
+import { useApiQuery, useDeleteApi, usePatchApi, usePostApi, usePutApi } from "@/api/rq";
 import {
     DeliveryOverview,
     Delivery,
@@ -12,6 +12,7 @@ import {
     CartItem,
     Item,
     AddToCartItem,
+    RemoveFromCartItem,
 } from "@/api/models";
 import { UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import useClient from "@/api/useClient";
@@ -36,7 +37,6 @@ export const useGetCartItemsQuery = (customerId?: string): UseQueryResult<CartIt
 
     const dataInterceptor = (data: CartItem[]) => {
         const items = data;
-
         const itemsToCartItems = _.groupBy(items, 'item_id');
         queryClient.setQueryData(['itemsToCartItems', customerId], itemsToCartItems) || {};
         queryClient.setQueryData(['cart', customerId], items);
@@ -54,7 +54,6 @@ export const useGetCartItemsQuery = (customerId?: string): UseQueryResult<CartIt
 
 // Cart hooks
 export const useAddItemToCart = (customerId?: string) => {
-    const queryClient = useQueryClient();
     return usePostApi<
         "/api/private/customers/{customerId}/cart/items",
         { customerId: string },
@@ -66,36 +65,33 @@ export const useAddItemToCart = (customerId?: string) => {
         ],
         { customerId: customerId || '' },
     );
-
-
 };
-
-// Hook to get cart items (if we had an endpoint for it)
-// Since we don't have a GET endpoint for cart, we'll manage cart state locally
-/*
-export const useCartItems = (customerId?: number): CartItem[] => {
-    const queryClient = useQueryClient();
-    
-    if (!customerId) return [];
-    
-    // In a real app, we would fetch cart items from an API
-    // For now, we'll use React Query cache as a local store
-    return queryClient.getQueryData<CartItem[]>(['cart', customerId]) || [];
+export const useRemoveItemFromCart = (customerId?: string) => {
+    return useDeleteApi<
+        "/api/private/customers/{customerId}/cart/items",
+        { customerId: string },
+        RemoveFromCartItem
+    >(
+        "/api/private/customers/{customerId}/cart/items",
+        [
+            "/api/private/customers/{customerId}/cart/items"
+        ],
+        { customerId: customerId || '' },
+    );
 };
-
-*/
 
 // Cart store using React Query for local state management
 export const useCartStore = (customerId?: string) => {
     const queryClient = useQueryClient();
     const addItemMutation = useAddItemToCart(customerId);
+    const removeItemMutation = useRemoveItemFromCart(customerId);
 
     const getCartItems = (): CartItem[] => {
         if (!customerId) return [];
         return queryClient.getQueryData<CartItem[]>(['cart', customerId]) || [];
     };
 
-    const addToCart = async (itemId: string, itemData?: Partial<CartItem>) => {
+    const addToCart: (itemId: string) => Promise<CartItem | undefined> = async (itemId: string) => {
         if (!customerId) {
             console.error('No customer ID available');
             return;
@@ -103,21 +99,28 @@ export const useCartStore = (customerId?: string) => {
 
         try {
             const currentItems = getCartItems();
-            const { data: item } = await addItemMutation.mutateAsync({ itemId });
+            const item = await addItemMutation.mutateAsync({ itemId });
             queryClient.setQueryData(['cart', customerId], [...currentItems, item]);
+            // @ts-ignore ecause of the created_at problem
+            return item as CartItem;
 
         } catch (error) {
             console.error('Failed to add item to cart:', error);
             // Revert optimistic update on error
             queryClient.invalidateQueries({ queryKey: ['cart', customerId] });
         }
+
+        return;
     };
 
-    const removeFromCart = (itemId: string) => {
-        if (!customerId) return;
-        const currentItems = getCartItems();
-        const updatedItems = currentItems.filter(item => item.item_id !== itemId);
-        queryClient.setQueryData(['cart', customerId], updatedItems);
+    const removeFromCart = async (removeFromCart: { cartItemId?: string, itemId?: string }) => {
+        if (!customerId) return;        
+
+        await removeItemMutation.mutate(removeFromCart);
+
+        //const currentItems = getCartItems();
+        //const updatedItems = currentItems.filter(item => item.item_id !== itemId);
+        //queryClient.setQueryData(['cart', customerId], updatedItems);
     };
 
     const clearCart = () => {
@@ -145,7 +148,7 @@ export const useCartStore = (customerId?: string) => {
         getItemCountInCart,
         getCartCount,
         getCartTotal,
-        isLoading: addItemMutation.isPending,
+        isLoading: addItemMutation.isPending || removeItemMutation.isPending,
         isError: addItemMutation.isError,
         error: addItemMutation.error,
     };

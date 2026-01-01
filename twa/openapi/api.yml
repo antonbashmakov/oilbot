@@ -860,6 +860,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    delete:
+      operationId: removeItemFromCart
+      summary: Remove item from cart
+      description: Remove an item from a customer's cart
+      tags:
+        - Cart
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveFromCartItem'
+      responses:
+        '204':
+          description: Item successfully removed from cart
+        '404':
+          description: Customer or cart item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /private/customers/{customerId}/orders:
     
@@ -1906,6 +1940,18 @@ components:
           type: string
           description: Item ID to add to cart
           example: "06088197-f7ef-4bf2-8b3f-2f4a05c6c104"
+
+    RemoveFromCartItem:
+      type: object
+      properties:
+        cartItemId:
+          type: string
+          description: Cart item ID to remove from cart
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"
+        itemId:
+          type: string
+          description:  item ID to remove from cart. All the cart items of this item will be removed
+          example: "db13bdf1-cd12-4650-82be-f55af1e79bf7"
 
     Comment:
       type: object

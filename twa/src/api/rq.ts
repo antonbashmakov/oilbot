@@ -120,6 +120,43 @@ export function usePostApi<
         ...options,
     });
 }
+export function useDeleteApi<
+    K extends keyof ApiPaths,
+    P extends PathParameters<ApiPaths, K, 'delete'>,
+    Body = RequestBody<ApiPaths, K, 'delete'>
+>(
+    path: K,
+    invalidates: string[],
+    fixedParams: P,
+    options?: Parameters<typeof useMutation>[1]
+) {
+    const { DELETE } = useClient();
+    const queryClient = useQueryClient();
+
+    return useMutation<
+        ResponseType<ApiPaths, K, 'delete'>, 
+        Error,
+        Body
+    >({
+        mutationFn: async (request) => {
+            // @ts-ignore
+            const response = await DELETE(path, {
+                params: {
+                    path: fixedParams, 
+                },
+                body: request,
+            });
+
+            const data = response.data as ResponseType<ApiPaths, K, 'delete'>;
+            return data; 
+        },
+        onSuccess: () => {
+            // Invalidate related queries
+            queryClient.invalidateQueries({ queryKey: invalidates });
+        },
+        ...options,
+    });
+}
 
 export function usePutApi<
     K extends keyof ApiPaths,
