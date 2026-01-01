@@ -52,7 +52,6 @@ export default function Home() {
 
       {/* Sticky Header Group  */}
       <div className="sticky top-0 z-30 bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
-
         <div className="flex gap-3 overflow-x-auto px-4 pb-4 pt-1 no-scrollbar">
           {categories.map((category) => (
             <button
@@ -80,7 +79,6 @@ export default function Home() {
             </button>
           ))}
         </div>
-
       </div>
 
 

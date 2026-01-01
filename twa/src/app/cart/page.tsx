@@ -1,61 +1,61 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useCartStore } from '@/api';
 import { useUser } from '@/api/user/provider';
 
 import _ from 'lodash';
-import { CartItem } from '@/api/models';
 
 export default function CartPage() {
   const { user } = useUser();
   const { getCartItems, removeFromCart, getCartTotal, addToCart, isLoading } = useCartStore(user?.id);
 
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [itemGroups, setItemGroups] = useState<Record<string, typeof cartItems>>({});
+  const cartItems = useMemo(() => {
+    if (!user?.id) return [];
+    return getCartItems();
+  }, [getCartItems, user?.id]);
 
-  const cartItems = getCartItems();
   const cartTotal = getCartTotal();
 
-  useEffect(() => {
-    if(!user?.id) return;
-    const itemGroups = _.groupBy(cartItems, 'item_id');
+  const itemGroups = useMemo(() => {
+    return _.groupBy(cartItems, 'item_id');
+  }, [cartItems]);
 
+    const items = useMemo(() => {
     const representatives = Object.keys(itemGroups).map(itemId => {
       const group = itemGroups[itemId];
-      // If there are multiple entries for the same item, consolidate them
-      const representativeItem = group[0];
-      representativeItem.quantity = group.length;
-      return representativeItem;
+      const baseItem = group[0];
+
+      return {
+        ...baseItem,
+        quantity: group.length
+      };
     });
 
-    setItems(_.sortBy(representatives, 'name'));
-    setItemGroups(itemGroups);
+    return _.sortBy(representatives, 'name');
+  }, [itemGroups]);
 
-  }, [cartItems, user?.id]);
 
-  const handleQuantityChange = async (itemId: string, delta: number) => {
+  const handleQuantityChange = useCallback(async (itemId: string, delta: number) => {
 
     if (delta < 0) {
-      console.log('Removing item from cart:', itemGroups);
-
       await removeFromCart({ cartItemId: itemGroups[itemId][0].id });
 
       return;
     }
 
     await addToCart(itemId);
-  };
+  }, [addToCart, itemGroups, removeFromCart]);
 
-  const handleRemoveItem = (itemId: string) => {
+  const handleRemoveItem = useCallback((itemId: string) => {
     removeFromCart({ itemId });
-  };
+  }, [removeFromCart]);
 
-  const handleCheckout = () => {
+  const handleCheckout = useCallback(() => {
     // In a real app, you would navigate to checkout page
     console.log('Proceeding to checkout with items:', cartItems);
-  };
+  }, [cartItems]);
 
   // Mock images for demonstration
   const mockImages = [
