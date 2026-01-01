@@ -121,6 +121,14 @@ abstract class AbstractService<T extends Entity> {
       transaction.update(docRef, object);
     });
   }
+  deleteTransactionally(entities: T[]): Promise<any> {
+    return this.runTransactionally(async (transaction: any) => {
+      entities.forEach((entity) => {
+        const docRef = this.getCollection().doc(`${entity.id}`);
+        transaction.delete(docRef);
+      });
+    });
+  }
 
   runTransactionally(method: (transaction: any) => Promise<any>) {
     return this.db.runTransaction(method);

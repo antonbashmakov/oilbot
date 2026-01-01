@@ -167,6 +167,52 @@ privateApi.post("/customers/:customerId/cart/items", async (req: express.Request
   }
 });
 
+privateApi.delete("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
+  try {
+    const { customerId } = req.params;
+    const { cartItemId, itemId } = req.body;
+
+    if(!cartItemId && !itemId) {
+      return api.badRequest(res, "Either cartItemId or itemId must be provided");
+    }
+
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    if (itemId) {
+      const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+      const itemsToRemove = cartItems?.filter(item => item.item_id === itemId);
+      cartItemService.deleteTransactionally(itemsToRemove);
+
+      return api.send(res, {});
+    }
+
+
+    // Assuming there's a method to remove cart item by ID
+    // We need to check if the cart item belongs to this customer
+    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+    const cartItem = cartItems?.find(item => item.id === cartItemId);
+
+    if (!cartItem) {
+      return api.notFound(res, "Cart item not found");
+    }
+
+    await cartItemService.delete(cartItem);
+
+    // Assuming there's a removeFromCart or delete method in CartItemService
+    // For now, we'll return success since we found the item
+    // In a real implementation, we would call something like:
+    // await cartItemService.removeFromCart(cartItemId);
+
+    return res.status(204).send();
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
 privateApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
     const { customerId } = req.params;
