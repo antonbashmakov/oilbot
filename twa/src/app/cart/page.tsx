@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { useCartStore } from '@/api';
+import { useCartStore, useCheckout } from '@/api';
 import { useUser } from '@/api/user/provider';
 
 import _ from 'lodash';
@@ -10,6 +10,7 @@ import _ from 'lodash';
 export default function CartPage() {
   const { user } = useUser();
   const { getCartItems, removeFromCart, getCartTotal, addToCart, isLoading } = useCartStore(user?.id);
+  const checkoutMutation = useCheckout(user?.id);
 
   const cartItems = useMemo(() => {
     if (!user?.id) return [];
@@ -52,10 +53,25 @@ export default function CartPage() {
     removeFromCart({ itemId });
   }, [removeFromCart]);
 
-  const handleCheckout = useCallback(() => {
-    // In a real app, you would navigate to checkout page
-    console.log('Proceeding to checkout with items:', cartItems);
-  }, [cartItems]);
+  const handleCheckout = useCallback(async () => {
+    if (!user?.id || cartItems.length === 0) {
+      return;
+    }
+
+    try {
+      // Generate a unique idempotency key
+      const idempotencyKey = `checkout-${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const res : any = await checkoutMutation.mutateAsync({ idempotencyKey });
+      if (res.paymentUrl && typeof window !== 'undefined') {
+        window.location.href = res.paymentUrl;
+      }
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      // In a real app, you would show an error message to the user
+      alert('Checkout failed. Please try again.');
+    }
+  }, [user?.id, cartItems, checkoutMutation]);
 
   // Mock images for demonstration
   const mockImages = [
@@ -181,9 +197,12 @@ export default function CartPage() {
         <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto p-4 z-40">
           <button
             onClick={handleCheckout}
-            className="w-full bg-primary hover:bg-red-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-between active:scale-[0.98] transition-all"
+            disabled={isLoading || checkoutMutation.isPending}
+            className="w-full bg-primary hover:bg-red-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-between active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>Checkout</span>
+            <span>
+              {checkoutMutation.isPending ? 'Processing...' : 'Checkout'}
+            </span>
             <span>${cartTotal.toFixed(2)}</span>
           </button>
         </div>

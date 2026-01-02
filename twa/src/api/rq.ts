@@ -10,6 +10,10 @@ type ApiPaths = {
   [G in keyof paths as `/api${G & string}`]: paths[G];
 };
 
+export type IdempotentSupport = {
+  idempotencyKey?: string;
+};
+
 // @ts-ignore
 export function getApiQueryParams<P extends PathsWithMethod<ApiPaths, 'get'>>(p: P | undefined | '', init: FetchOptions<FilterKeys<ApiPaths[P], 'get'>>) {
     return [p, init.params];
@@ -86,7 +90,7 @@ export function usePatchApi<
 export function usePostApi<
     K extends keyof ApiPaths,
     P extends PathParameters<ApiPaths, K, 'post'>,
-    Body = RequestBody<ApiPaths, K, 'post'>
+    Body = RequestBody<ApiPaths, K, 'post'>,
 >(
     path: K,
     invalidates: string[],
@@ -99,17 +103,22 @@ export function usePostApi<
     return useMutation<
         ResponseType<ApiPaths, K, 'post'>, 
         Error,
-        Body
+        Body & IdempotentSupport
     >({
         mutationFn: async (request) => {
+            const idempotencyKey = request.idempotencyKey || '';
+            delete request.idempotencyKey;
             // @ts-ignore
             const response = await POST(path, {
                 params: {
                     path: fixedParams, 
                 },
                 body: request,
+                headers: {
+                    'idempotency_key': idempotencyKey,
+                },
             });
-
+            console.log('POST response:', response);
             const data = response.data as ResponseType<ApiPaths, K, 'post'>;
             return data; 
         },

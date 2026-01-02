@@ -1,4 +1,4 @@
-import { useApiQuery, useDeleteApi, usePatchApi, usePostApi, usePutApi } from "@/api/rq";
+import { IdempotentSupport, useApiQuery, useDeleteApi, usePatchApi, usePostApi, usePutApi } from "@/api/rq";
 import {
     DeliveryOverview,
     Delivery,
@@ -73,6 +73,20 @@ export const useRemoveItemFromCart = (customerId?: string) => {
         RemoveFromCartItem
     >(
         "/api/private/customers/{customerId}/cart/items",
+        [
+            "/api/private/customers/{customerId}/cart/items"
+        ],
+        { customerId: customerId || '' },
+    );
+};
+
+export const useCheckout = (customerId?: string) => {
+    return usePostApi<
+        "/api/private/customers/{customerId}/cart/order",
+        { customerId: string },
+        IdempotentSupport
+    >(
+        "/api/private/customers/{customerId}/cart/order",
         [
             "/api/private/customers/{customerId}/cart/items"
         ],

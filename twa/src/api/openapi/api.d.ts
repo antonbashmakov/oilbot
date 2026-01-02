@@ -328,6 +328,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/private/customers/{customerId}/cart/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create order from cart and initialize payment
+         * @description Transactionally and idempotently fetch all cart items for the customer, create an order from it, initialize a payment on Tinkoff bank and return payment URL
+         */
+        post: operations["createOrderAndPaymentFromCart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/private/customers/{customerId}/orders": {
         parameters: {
             query?: never;
@@ -2099,6 +2119,78 @@ export interface operations {
             };
             /** @description Customer or cart item not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createOrderAndPaymentFromCart: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Idempotency key to prevent duplicate order creation */
+                idempotency_key: string;
+            };
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Order created and payment initialized successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: {
+                            /**
+                             * @description URL for payment processing
+                             * @example https://securepay.tinkoff.ru/payment/init?PaymentId=123456
+                             */
+                            paymentUrl?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Bad request (e.g., cart is empty, invalid idempotency key) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Customer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict (e.g., duplicate request with same idempotency key) */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
