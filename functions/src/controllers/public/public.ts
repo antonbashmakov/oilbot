@@ -7,6 +7,7 @@ import {
   express,
   api,
   UserService,
+  verifyTelegramInitData,
 } from "./imports";
 import * as bcrypt from "bcrypt";
 import {generateToken, who} from "../../services/utils";
@@ -134,6 +135,36 @@ publicApi.get("/users/me", async (req: express.Request, res: express.Response) =
     }
 
     return api.send(res, user);
+  } catch (err: any) {
+    functions.logger.error(err);
+    // The authorize function already sends error responses, so we just need to return
+    // If error wasn't handled by authorize, handle it here
+    if (!res.headersSent) {
+      return api.error(res, err.message || "Internal server error");
+    }
+    return;
+  }
+});
+publicApi.post("/auth/telegram", async (req: express.Request, res: express.Response) => {
+  try {
+    functions.logger.info("Verifying Telegram init data:", req.body.initData);
+
+    if (!req.body.initData) {
+      return api.badRequest(res, "Missing initData query parameter");
+    }
+
+    const jwt = verifyTelegramInitData(req.body.initData as string, process.env.TELEGRAM_BOT_TOKEN as string);
+    if (!jwt) {
+      return api.forbidden(res, "Invalid Telegram init data");
+    }
+
+    res.cookie("jwt", jwt, {
+      httpOnly: true,
+      secure: true, // HTTPS only
+      sameSite: "strict",
+    });
+
+    return api.ok(res);
   } catch (err: any) {
     functions.logger.error(err);
     // The authorize function already sends error responses, so we just need to return

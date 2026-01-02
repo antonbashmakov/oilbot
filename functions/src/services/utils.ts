@@ -1,9 +1,13 @@
 import * as moment from "moment";
 import * as jwt from "jsonwebtoken";
+import * as crypto from "crypto";
+
 import {User} from "../models";
 import UserService from "./UserService";
 import {express} from "../controllers/private/imports";
 import {intersection} from "lodash";
+import {logger} from "firebase-functions/v1";
+import {validate, parse, type InitData} from "@tma.js/init-data-node";
 
 
 // Constants
@@ -139,5 +143,26 @@ export const who = async (req: express.Request, userService: UserService) => {
     return user;
   } catch (err) {
     return undefined;
+  }
+};
+
+
+export const verifyTelegramInitData = (initData: string, botToken: string) => {
+  logger.info("Verifying Telegram init data:", initData);
+  logger.info("Bot token:", botToken);
+  try {
+    // Validate init data.
+    validate(initData, botToken, {
+      // We consider init data sign valid for 1 hour from their creation moment.
+      expiresIn: 3600,
+    });
+
+    const data = parse(initData);
+
+    logger.info("User data:", data.user);
+
+    return generateToken({id: data.user?.id + ""} as User);
+  } catch (e) {
+    return;
   }
 };
