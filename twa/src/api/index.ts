@@ -93,6 +93,21 @@ export const useCheckout = (customerId?: string) => {
         { customerId: customerId || '' },
     );
 };
+export const validateTelegramUser = async (initData: string) => {
+    return fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL || ""}/api/public/auth/telegram` , {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ initData }),
+    }).then(async res => {
+        const json = await res.json() as any;
+        if(json.error) {
+            return Promise.reject(json.error);
+        }
+        return json;
+    });
+};
 
 // Cart store using React Query for local state management
 export const useCartStore = (customerId?: string) => {
@@ -128,7 +143,7 @@ export const useCartStore = (customerId?: string) => {
     };
 
     const removeFromCart = async (removeFromCart: { cartItemId?: string, itemId?: string }) => {
-        if (!customerId) return;        
+        if (!customerId) return;
 
         await removeItemMutation.mutate(removeFromCart);
 
@@ -146,7 +161,7 @@ export const useCartStore = (customerId?: string) => {
         return getCartItems().length;
     };
     const getItemCountInCart = (itemId: string): number => {
-        const cache = (queryClient.getQueryData<{[key: string]: CartItem[]}>(['itemsToCartItems', customerId]) || {});
+        const cache = (queryClient.getQueryData<{ [key: string]: CartItem[] }>(['itemsToCartItems', customerId]) || {});
         return cache[itemId]?.length || 0;
     };
 
