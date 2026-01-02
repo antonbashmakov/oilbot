@@ -8,6 +8,9 @@ import CustomerService from "../../services/CustomerService";
 import CartItemService from "../../services/CartItemService";
 import OrderService from "../../services/OrderService";
 import UserService from "../../services/UserService";
+import PaymentService from "../../services/PaymentService";
+import IdempotencyGuardService from "../../services/IdempotencyGuardService";
+import TBankService from "../../services/payments/TBankService";
 
 import {api} from "../../services/utils";
 
@@ -24,4 +27,7 @@ export {
   CartItemService,
   OrderService,
   UserService,
+  PaymentService,
+  IdempotencyGuardService,
+  TBankService,
 };

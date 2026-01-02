@@ -9,7 +9,7 @@ class IdempotencyGuardService extends AbstractService<IdempotentObject> {
   }
 
   async runIdempotentRequest<T>(key: string, method: () => Promise<T>) {
-    return this.runTransactionally(async (t) => {
+    return this.runTransactionally<T>(async (t) => {
       const docRef = this.getCollection().doc(key);
 
       const snapshot = await docRef.get();

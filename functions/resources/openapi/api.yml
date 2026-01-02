@@ -895,6 +895,70 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /private/customers/{customerId}/cart/order:
+    post:
+      operationId: createOrderAndPaymentFromCart
+      summary: Create order from cart and initialize payment
+      description: Transactionally and idempotently fetch all cart items for the customer, create an order from it, initialize a payment on Tinkoff bank and return payment URL
+      tags:
+        - Cart
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+        - name: idempotency_key
+          in: header
+          required: true
+          description: Idempotency key to prevent duplicate order creation
+          schema:
+            type: string
+            example: "unique-key-123"
+      responses:
+        '200':
+          description: Order created and payment initialized successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: object
+                    properties:
+                      paymentUrl:
+                        type: string
+                        description: URL for payment processing
+                        example: "https://securepay.tinkoff.ru/payment/init?PaymentId=123456"
+        '400':
+          description: Bad request (e.g., cart is empty, invalid idempotency key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict (e.g., duplicate request with same idempotency key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /private/customers/{customerId}/orders:
     
     post:

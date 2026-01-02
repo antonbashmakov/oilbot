@@ -130,7 +130,7 @@ abstract class AbstractService<T extends Entity> {
     });
   }
 
-  runTransactionally(method: (transaction: any) => Promise<any>) {
+  runTransactionally<T>(method: (transaction: any) => Promise<T>): Promise<T> {
     return this.db.runTransaction(method);
   }
   getCollection() {

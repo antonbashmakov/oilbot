@@ -9,13 +9,15 @@ import {
   CustomerService,
   CartItemService,
   OrderService,
-  //UserService,
+  PaymentService,
+  IdempotencyGuardService,
+  TBankService,
 } from "./imports";
-//import {authorize} from "../../services/utils";
+// import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
-//import {logger} from "firebase-functions/v1";
+// import {logger} from "firebase-functions/v1";
 import { localeMiddleware } from "../../middleware/localeMiddleware";
-import { DeliveryRef, ItemOverview } from "../../models";
+import { DeliveryRef, ItemOverview, Order, Payment } from "../../models";
 import _ = require("lodash");
 
 admin.initializeApp(functions.config().firebase, "private");
@@ -35,6 +37,11 @@ const customerService = new CustomerService(db);
 const cartItemService = new CartItemService(db);
 const orderService = new OrderService(db);
 
+const paymentService = new PaymentService(db);
+const idempotencyGuardService = new IdempotencyGuardService(db);
+const tbankService = new TBankService();
+
+
 const privateApi = express();
 
 privateApi.use(cors(
@@ -42,19 +49,6 @@ privateApi.use(cors(
 ));
 
 privateApi.use(localeMiddleware);
-
-/*
-privateApi.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const userService = new UserService(db);
-  try {
-    return await authorize(req, res, next, userService);
-  } catch (err: any) {
-    logger.error(err);
-    return api.error(res, err.message);
-  }
-});
-
-*/
 
 privateApi.get("/deliveries", async (req: express.Request, res: express.Response) => {
   try {
@@ -100,7 +94,7 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
       return api.send(res, []);
     }
 
-    const groups = [...new Set(items.map(item => item.group))];
+    const groups = [...new Set(items.map((item) => item.group))];
 
     const groupDeliveries = await deliveryService.findClosestByGroups(groups);
     const deliveryMap: { [key: string]: DeliveryRef[] } = _.groupBy(groupDeliveries, "group");
@@ -117,7 +111,7 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
       description: item.description,
       fraction_price_out: item.fraction_price_out,
       id: item.id, link: item.link,
-      deliveries: deliveryMap[item.group] || []
+      deliveries: deliveryMap[item.group] || [],
     } as ItemOverview));
 
     return api.send(res, itemOverviews);
@@ -172,7 +166,7 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
     const { customerId } = req.params;
     const { cartItemId, itemId } = req.body;
 
-    if(!cartItemId && !itemId) {
+    if (!cartItemId && !itemId) {
       return api.badRequest(res, "Either cartItemId or itemId must be provided");
     }
 
@@ -183,7 +177,7 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
 
     if (itemId) {
       const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
-      const itemsToRemove = cartItems?.filter(item => item.item_id === itemId);
+      const itemsToRemove = cartItems?.filter((item) => item.item_id === itemId);
       cartItemService.deleteTransactionally(itemsToRemove);
 
       return api.send(res, {});
@@ -193,7 +187,7 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
     // Assuming there's a method to remove cart item by ID
     // We need to check if the cart item belongs to this customer
     const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
-    const cartItem = cartItems?.find(item => item.id === cartItemId);
+    const cartItem = cartItems?.find((item) => item.id === cartItemId);
 
     if (!cartItem) {
       return api.notFound(res, "Cart item not found");
@@ -231,6 +225,84 @@ privateApi.post("/customers/:customerId/orders", async (req: express.Request, re
     return api.send(res, order);
   } catch (err: any) {
     functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+privateApi.post("/customers/:customerId/cart/order", async (req: express.Request, res: express.Response) => {
+  try {
+    const { customerId } = req.params;
+    const idempotencyKey = req.headers["idempotency_key"] as string;
+
+    if (!idempotencyKey) {
+      return api.badRequest(res, "idempotency_key header is required");
+    }
+
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      throw new Error("Customer not found");
+    }
+
+    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+    if (!cartItems || cartItems.length === 0) {
+      throw new Error("Cart is empty");
+    }
+
+
+    // Use idempotency guard to ensure transactional and idempotent operation
+    const result = await idempotencyGuardService.runIdempotentRequest<{order: Order, payment: Payment,  paymentUrl: string }>(
+      `cart-order-${customerId}-${idempotencyKey}`,
+      async () => {
+
+        // Create order from cart (transactionally removes cart items)
+        const order = await orderService.createOrderFromCart(customer, cartItems);
+
+        const paymentRequest = tbankService.orderToPaymentRequest(order);
+        const paymentResponse = await tbankService.initPayment(paymentRequest);
+
+        if (!paymentResponse.Success) {
+          throw new Error(`Payment initialization failed: ${paymentResponse.Message}`);
+        }
+
+        const payment: Payment = {
+          id: '',
+          external_id: paymentResponse.PaymentId,
+          terminal_key: paymentRequest.TerminalKey,
+          payment_url: paymentResponse.PaymentURL,
+          order_id: order.id,
+          amount: order.total * 100,
+          total: order.total * 100,
+          status: "SENT",
+          success: false,
+          created_at: new Date(),
+          updated_at: new Date(),
+          error_code: paymentResponse.ErrorCode || 0,
+        };
+
+        const p = await paymentService.add(payment);
+
+        return {
+          order,
+          payment: p,
+          paymentUrl: p.payment_url,
+        };
+      }
+    );
+    return api.send(res, { paymentUrl: result.paymentUrl });
+  } catch (err: any) {
+    functions.logger.error(err);
+
+    // Handle specific error cases
+    if (err.message === "Customer not found") {
+      return api.notFound(res, "Customer not found");
+    }
+    if (err.message === "Cart is empty") {
+      return api.badRequest(res, "Cart is empty");
+    }
+    if (err.message.includes("Payment initialization failed")) {
+      return api.error(res, err.message);
+    }
+
     return api.error(res, err.message || "Internal server error");
   }
 });
