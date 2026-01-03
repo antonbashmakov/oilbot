@@ -52,6 +52,17 @@ export const useGetCartItemsQuery = (customerId?: string): UseQueryResult<CartIt
     }, { retry: 1, enabled: !!customerId } as any, dataInterceptor);
 };
 
+// Orders hooks
+export const useGetOrdersQuery = (customerId?: string): UseQueryResult<Order[]> => {
+    return useApiQuery("/api/private/customers/{customerId}/orders", {
+        params: {
+            path: {
+                customerId: customerId || ''
+            }
+        }
+    }, { retry: 1, enabled: !!customerId } as any);
+};
+
 // Cart hooks
 export const useAddItemToCart = (customerId?: string) => {
     return usePostApi<
@@ -93,6 +104,8 @@ export const useCheckout = (customerId?: string) => {
         { customerId: customerId || '' },
     );
 };
+
+
 export const validateTelegramUser = async (initData: string) => {
     return fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL || ""}/api/public/auth/telegram` , {
         method: 'POST',
