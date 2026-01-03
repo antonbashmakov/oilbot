@@ -68,7 +68,7 @@ abstract class AbstractService<T extends Entity> {
   }
 
   fetchForOwner(owner: { id: string }): Promise<T[]> {
-    return this.getCollection().where("owner.id", "==", owner.id)
+    return this.getCollection().where("owner.id", "in", [owner.id, Number(owner.id)]) // have to do this because owner.id was numeric in some older records
       .get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.id, doc.data())));
   }
 

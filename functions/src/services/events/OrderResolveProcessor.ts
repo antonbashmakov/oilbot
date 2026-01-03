@@ -73,6 +73,8 @@ class OrderResolveProcessor extends AbstractProcessor {
         status: "PAYMENT_IN_PROGRESS",
         total: diff,
         reconciliated_order_id: order.id,
+        created_at: new Date(),
+        updated_at: new Date(),
         name: `Order ${order.id} reconciliation`,
         items: [{
           fraction: 1,

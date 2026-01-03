@@ -47,6 +47,7 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
       id: "test-order-id-payment",
       name: "Test Order Payment",
       created_at: new Date(),
+      updated_at: new Date(),
       items: [
         {
           id: "test-item-1",

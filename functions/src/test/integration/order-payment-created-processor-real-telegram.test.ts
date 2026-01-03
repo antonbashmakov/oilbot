@@ -42,6 +42,7 @@ xdescribe("OrderPaymentCreatedProcessor Integration Test (Real Telegram)", () =>
       id: "test-order-id-payment-real",
       name: "Test Order Payment Real",
       created_at: new Date(),
+      updated_at: new Date(),
       items: [
         {
           id: "test-item-1",

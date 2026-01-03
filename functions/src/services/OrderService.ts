@@ -20,8 +20,10 @@ class OrderService extends AbstractService<Order> {
       number_of_items: cartItems.length,
       total: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
       owner: {
-        id: customer.id,
+        id: `${customer.id}`,
       },
+      created_at: new Date(),
+      updated_at: new Date(),
     };
 
     const batch = this.db.batch();

@@ -121,8 +121,10 @@ export type ItemOverview = BaseItemOverview & {
 export type CartItem = Omit<BaseCartItem, "created_at"> & {
   created_at: Date;
 };
-export type Order = Omit<BaseOrder, "items"> & {
+export type Order = Omit<BaseOrder, "items" | "created_at" | "updated_at"> & {
   items: CartItem[];
+  created_at: Date;
+  updated_at: Date;
 };
 export type DeliveryOverviewItemStats = Omit<BaseDeliveryOverviewItemStats, "orders"> & {
   orders: Order[];

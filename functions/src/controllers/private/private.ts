@@ -19,7 +19,7 @@ import * as dotenv from "dotenv";
 import {localeMiddleware} from "../../middleware/localeMiddleware";
 import {DeliveryRef, ItemOverview, Order, Payment} from "../../models";
 import _ = require("lodash");
-import * as jwt from "jsonwebtoken";
+// import * as jwt from "jsonwebtoken";
 import * as cookieParser from "cookie-parser";
 
 admin.initializeApp(functions.config().firebase, "private");
@@ -52,7 +52,7 @@ privateApi.use(cors(
 
 privateApi.use(cookieParser());
 privateApi.use(localeMiddleware);
-
+/*
 // Cookie authentication middleware for customer routes
 const cookieAuthMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   try {
@@ -74,9 +74,9 @@ const cookieAuthMiddleware = async (req: express.Request, res: express.Response,
     return api.error(res, "Authentication failed");
   }
 };
-
+*/
 // Apply cookie auth middleware to all customer routes
-privateApi.use(cookieAuthMiddleware);
+//privateApi.use(cookieAuthMiddleware);
 
 privateApi.get("/deliveries", async (req: express.Request, res: express.Response) => {
   try {
@@ -235,16 +235,34 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
   }
 });
 
-privateApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
+privateApi.get("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId} = req.params;
+    const { customerId } = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, "Customer not found");
     }
 
-    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
+    const orders = await orderService.fetchForOwner({ id: String(customer.id) });
+    
+    return api.send(res, orders || []);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+privateApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
+  try {
+    const { customerId } = req.params;
+
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
     if (!cartItems || cartItems.length === 0) {
       return api.send(res, {});
     }

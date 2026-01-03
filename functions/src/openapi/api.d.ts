@@ -355,7 +355,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Get all orders for a customer
+         * @description Retrieve a list of all orders for a specific customer
+         */
+        get: operations["getCustomerOrders"];
         put?: never;
         /**
          * Create order from cart
@@ -906,6 +910,18 @@ export interface components {
              * @example 150.75
              */
             total: number;
+            /**
+             * Format: date-time
+             * @description Delivery end date and time
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Delivery end date and time
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            updated_at: string;
         };
         OrderOverview: {
             picking?: components["schemas"]["OrderPicking"];
@@ -2191,6 +2207,51 @@ export interface operations {
             };
             /** @description Conflict (e.g., duplicate request with same idempotency key) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getCustomerOrders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response with customer orders */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: components["schemas"]["Order"][];
+                    };
+                };
+            };
+            /** @description Customer not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
