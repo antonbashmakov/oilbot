@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "posebesto-busines"
-  }
+  },
+  "targets": {
+    "posebesto-business": {
+      "hosting": {
+        "crm": [
+          "posebesto-business"
+        ],
+        "twa": [
+          "posebesto-twa"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

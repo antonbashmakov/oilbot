@@ -31,39 +31,78 @@
     },
     "singleProjectMode": true
   },
-  "hosting": {
-    "source": "crm",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "/api/public/**",
-        "function": "public",
-        "region": "us-central1"
-      },
-      {
-        "source": "/api/private/**",
-        "function": "private"
-      },
-      {
-        "source": "/api/admin/**",
-        "function": "admin"
-      },
-      {
-        "source": "/api/agent/**",
-        "function": "agent"
-      },
-      {
-        "source": "**",
-        "function": "ssrposebestobusiness",
+  "hosting": [
+    {
+      "target": "crm",
+      "source": "crm",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "/api/public/**",
+          "function": "public",
+          "region": "us-central1"
+        },
+        {
+          "source": "/api/private/**",
+          "function": "private"
+        },
+        {
+          "source": "/api/admin/**",
+          "function": "admin"
+        },
+        {
+          "source": "/api/agent/**",
+          "function": "agent"
+        },
+        {
+          "source": "**",
+          "function": "ssrposebestobusiness",
+          "region": "europe-west1"
+        }
+      ],
+      "frameworksBackend": {
         "region": "europe-west1"
       }
-    ],
-    "frameworksBackend": {
-      "region": "europe-west1"
+    },
+    {
+      "target": "twa",
+      "source": "twa",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "/api/public/**",
+          "function": "public",
+          "region": "us-central1"
+        },
+        {
+          "source": "/api/private/**",
+          "function": "private"
+        },
+        {
+          "source": "/api/admin/**",
+          "function": "admin"
+        },
+        {
+          "source": "/api/agent/**",
+          "function": "agent"
+        },
+        {
+          "source": "**",
+          "function": "ssrposebestotwa",
+          "region": "europe-west1"
+        }
+      ],
+      "frameworksBackend": {
+        "region": "europe-west1"
+      }
     }
-  }
+  ]
 }
