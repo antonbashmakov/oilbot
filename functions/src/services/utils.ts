@@ -1,13 +1,12 @@
 import * as moment from "moment";
 import * as jwt from "jsonwebtoken";
-import * as crypto from "crypto";
 
 import {User} from "../models";
 import UserService from "./UserService";
 import {express} from "../controllers/private/imports";
 import {intersection} from "lodash";
 import {logger} from "firebase-functions/v1";
-import {validate, parse, type InitData} from "@tma.js/init-data-node";
+import {validate, parse} from "@tma.js/init-data-node";
 
 
 // Constants
@@ -161,7 +160,9 @@ export const verifyTelegramInitData = (initData: string, botToken: string) => {
 
     logger.info("User data:", data.user);
 
-    return generateToken({id: data.user?.id + ""} as User);
+    const jwt = generateToken({id: data.user?.id + ""} as User);
+
+    return {jwt, user: data.user};
   } catch (e) {
     return;
   }

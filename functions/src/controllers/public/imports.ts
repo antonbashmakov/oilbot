@@ -3,6 +3,7 @@ import * as express from "express";
 import * as admin from "firebase-admin";
 import * as cors from "cors";
 import UserService from "../../services/UserService";
+import CustomerService from "../../services/CustomerService";
 
 import {api, verifyTelegramInitData} from "../../services/utils";
 
@@ -15,4 +16,5 @@ export {
   api,
   verifyTelegramInitData,
   UserService,
+  CustomerService,
 };

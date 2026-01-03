@@ -1210,7 +1210,6 @@ components:
       type: object
       required:
         - id
-        - language_code
       properties:
         first_name:
           type: string

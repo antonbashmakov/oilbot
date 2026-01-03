@@ -497,7 +497,7 @@ export interface components {
              * @description Customer's language code
              * @example ru
              */
-            language_code: string;
+            language_code?: string;
             /**
              * @description Customer's username
              * @example getting_drunk

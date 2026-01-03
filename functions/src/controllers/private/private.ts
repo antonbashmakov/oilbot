@@ -19,6 +19,8 @@ import * as dotenv from "dotenv";
 import {localeMiddleware} from "../../middleware/localeMiddleware";
 import {DeliveryRef, ItemOverview, Order, Payment} from "../../models";
 import _ = require("lodash");
+import * as jwt from "jsonwebtoken";
+import * as cookieParser from "cookie-parser";
 
 admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
@@ -48,7 +50,33 @@ privateApi.use(cors(
   {origin: true} // allows all cross origin xhr requests
 ));
 
+privateApi.use(cookieParser());
 privateApi.use(localeMiddleware);
+
+// Cookie authentication middleware for customer routes
+const cookieAuthMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  try {
+    // Get JWT from cookie
+    const token = req.cookies?.__session;
+
+    if (!token) {
+      return api.unauthorized(res, "Authentication required");
+    }
+
+    // Verify JWT
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+    await customerService.require(decoded.id);
+    return next();
+  } catch (error: any) {
+    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+      return api.unauthorized(res, "Invalid or expired token");
+    }
+    return api.error(res, "Authentication failed");
+  }
+};
+
+// Apply cookie auth middleware to all customer routes
+privateApi.use(cookieAuthMiddleware);
 
 privateApi.get("/deliveries", async (req: express.Request, res: express.Response) => {
   try {
@@ -250,7 +278,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
 
 
     // Use idempotency guard to ensure transactional and idempotent operation
-    const result = await idempotencyGuardService.runIdempotentRequest<{order: Order, payment: Payment, paymentUrl: string }>(
+    const result = await idempotencyGuardService.runIdempotentRequest<{ order: Order, payment: Payment, paymentUrl: string }>(
       `cart-order-${customerId}-${idempotencyKey}`,
       async () => {
         // Create order from cart (transactionally removes cart items)

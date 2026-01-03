@@ -8,6 +8,7 @@ import {
   api,
   UserService,
   verifyTelegramInitData,
+  CustomerService,
 } from "./imports";
 import * as bcrypt from "bcrypt";
 import {generateToken, who} from "../../services/utils";
@@ -28,6 +29,7 @@ if (process.env.GCLOUD_PROJECT !== "test-project" && db.databaseId !== process.e
 }
 
 const userService = new UserService(db);
+const customerService = new CustomerService(db);
 
 const publicApi = express();
 
@@ -153,18 +155,22 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
       return api.badRequest(res, "Missing initData query parameter");
     }
 
-    const jwt = verifyTelegramInitData(req.body.initData as string, process.env.TELEGRAM_BOT_TOKEN as string);
-    if (!jwt) {
+    const verification = verifyTelegramInitData(req.body.initData as string, process.env.TELEGRAM_BOT_TOKEN as string);
+    if (!verification) {
       return api.forbidden(res, "Invalid Telegram init data");
     }
 
-    res.cookie("jwt", jwt, {
+    res.cookie("__session", verification.jwt, {
       httpOnly: true,
       secure: true, // HTTPS only
       sameSite: "strict",
     });
 
-    return api.ok(res);
+    const systemUser = {...verification.user, id: `${verification.user?.id}`};
+
+    await customerService.set(systemUser);
+
+    return api.send(res, verification.user);
   } catch (err: any) {
     functions.logger.error(err);
     // The authorize function already sends error responses, so we just need to return
