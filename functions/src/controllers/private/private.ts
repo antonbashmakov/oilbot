@@ -309,7 +309,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       async () => {
         // Create order from cart (transactionally removes cart items)
         const order = await orderService.createOrderFromCart(customer, cartItems);
-        await customerService.incrementStatistics(customerId, {number_of_orders: 1});
+        await customerService.incrementStatistics(customerId, {number_of_orders: 1, number_of_active_orders: 1});
         
         const paymentRequest = tbankService.orderToPaymentRequest(order);
         const paymentResponse = await tbankService.initPayment(paymentRequest);

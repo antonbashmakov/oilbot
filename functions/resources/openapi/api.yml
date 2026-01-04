@@ -2103,6 +2103,7 @@ components:
       required:
         - id
         - number_of_orders
+        - number_of_active_orders
         - number_of_canceled_orders
         - number_of_fulfilled_orders
         - number_of_paid_months
@@ -2113,6 +2114,10 @@ components:
           description: Unique identifier for the customer
           example: "1019705782"      
         number_of_orders:
+          type: integer
+          description: Total number of orders for the customer
+          example: 10
+        number_of_active_orders:
           type: integer
           description: Total number of orders for the customer
           example: 10

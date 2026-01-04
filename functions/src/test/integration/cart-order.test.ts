@@ -1,39 +1,44 @@
 import db from "../setup";
-import {Customer, Item, CartItem, Order, Payment} from "../../models";
+import * as request from "supertest";
+import * as jwt from "jsonwebtoken";
+import {Customer, Item, CartItem} from "../../models";
 import CustomerService from "../../services/CustomerService";
 import ItemService from "../../services/ItemService";
 import CartItemService from "../../services/CartItemService";
-import OrderService from "../../services/OrderService";
-import PaymentService from "../../services/PaymentService";
-import SubscriptionService from "../../services/SubscriptionService";
-import TBankService from "../../services/payments/TBankService";
+// import SubscriptionService from "../../services/SubscriptionService";
 
-// Mock the TBankService
-jest.mock("../../services/payments/TBankService");
+const JWT_SECRET = "secter";
+
+const createCustomerToken = () => {
+  const payload = {
+    id: "test-customer-id",
+    email: "admin@test.com",
+    roles: ["ADMIN"],
+  };
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: "1h",
+  });
+};
+
+
 
 describe("Cart Order Endpoint Integration Test", () => {
   let customerService: CustomerService;
   let itemService: ItemService;
   let cartItemService: CartItemService;
-  let orderService: OrderService;
-  let paymentService: PaymentService;
-  let subscriptionService: SubscriptionService;
-  let tbankService: jest.Mocked<TBankService>;
   let testCustomer: Customer;
   let testItem: Item;
   let testCartItem: CartItem;
+  //let subscriptionService: SubscriptionService;
+
 
   beforeEach(async () => {
     customerService = new CustomerService(db as any);
     itemService = new ItemService(db as any);
     cartItemService = new CartItemService(db as any);
-    orderService = new OrderService(db as any);
-    paymentService = new PaymentService(db as any);
-    subscriptionService = new SubscriptionService(db as any);
-    
-    // Get mocked instance
-    tbankService = new TBankService() as jest.Mocked<TBankService>;
 
+   // subscriptionService = new SubscriptionService(db as any);
+    
     // Create test customer
     testCustomer = {
       id: "test-customer-id",
@@ -81,208 +86,119 @@ describe("Cart Order Endpoint Integration Test", () => {
     await itemService.set(testItem);
     await cartItemService.set(testCartItem);
 
-    // Mock TBankService methods
-    tbankService.orderToPaymentRequest.mockReturnValue({
-      TerminalKey: "TEST_TERMINAL",
-      Amount: 10000,
-      OrderId: "test-order-id",
-      Description: "Test order",
-      RedirectDueDate: "2025-12-31T23:59:59Z",
-      Token: "mock-token",
-      Receipt: {
-        Email: "test@example.com",
-        Phone: "+79999999999",
-        Taxation: "osn",
-        Items: [
-          {
-            Name: "Test Item",
-            Price: 10000,
-            Quantity: 1,
-            Amount: 10000,
-            Tax: "vat10",
-          }
-        ]
-      },
-      DATA: {
-        Phone: "+79999999999",
-        Email: "test@example.com",
-      }
-    });
-
-    tbankService.initPayment.mockResolvedValue({
-      Success: true,
-      PaymentId: "test-payment-id",
-      PaymentURL: "https://securepay.tinkoff.ru/payment/init?PaymentId=test-payment-id",
-      Message: "OK",
-      ErrorCode: 0,
-    });
-  });
-
-  afterEach(async () => {
-    // Clean up test data
-    try {
-      await customerService.getCollection().doc(testCustomer.id).delete();
-    } catch (e) {}
-    try {
-      await itemService.getCollection().doc(testItem.id).delete();
-    } catch (e) {}
-    try {
-      await cartItemService.getCollection().doc(testCartItem.id).delete();
-    } catch (e) {}
   });
 
   it("should create order and payment when cart has items", async () => {
-    const idempotencyKey = "test-idempotency-key-1";
+    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', 'test-idempotency-key-1')
+      .expect(200);
 
-    // Mock subscription check - no active subscription
-    jest.spyOn(subscriptionService, "hasActiveSubscription").mockImplementation((customerId, date) => Promise.resolve(false));
+    // Verify response contains paymentUrl
+    expect(response.body).toHaveProperty('paymentUrl');
+    expect(response.body.paymentUrl).toBe("https://securepay.tinkoff.ru/p/MOCK_PAYMENT");
     
-    // Mock customer statistics - less than 2 fulfilled orders
-    jest.spyOn(customerService, "obtainStatistics").mockResolvedValue({
-      id: 'test-customer-stats-id',
-      number_of_orders: 0,
-      number_of_canceled_orders: 0,
-      number_of_fulfilled_orders: 1, // Only 1 fulfilled order
-      number_of_paid_months: 0,
-      paid_in_total: 0,
-    });
+    // Verify mocks were called
 
-    // Mock increment statistics
-    jest.spyOn(customerService, "incrementStatistics").mockImplementation((customerId, updates) => 
-      Promise.resolve({
-        id: 'test-customer-stats-id',
-        number_of_orders: updates.number_of_orders || 0,
-        number_of_canceled_orders: updates.number_of_canceled_orders || 0,
-        number_of_fulfilled_orders: updates.number_of_fulfilled_orders || 0,
-        number_of_paid_months: updates.number_of_paid_months || 0,
-        paid_in_total: updates.paid_in_total || 0,
-      })
-    );
+    const cartItems = await cartItemService.fetchForOwner({ id : testCustomer.id });
+    expect(cartItems.length).toBe(0);
+
+    const stats = await customerService.obtainStatistics(testCustomer.id);
+    
+    expect(stats.number_of_orders).toBe(1);
+    expect(stats.number_of_active_orders).toBe(1);
+
   });
 
-  it("should return idempotent result for duplicate requests", async () => {
-    const idempotencyKey = "test-idempotency-key-2";
+  xit("should return idempotent result for duplicate requests", async () => {
 
+
+    const idempotencyKey = 'test-idempotency-key-2';
+
+    // First call
+    const response1 = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', idempotencyKey)
+      .expect(200);
+
+    // Second call with same idempotency key
+    const response2 = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', idempotencyKey)
+      .expect(200);
+
+    // Should return same result
+    expect(response1.body.paymentUrl).toBe(response2.body.paymentUrl);
+    
   });
 
   xit("should require subscription when customer has more than 1 fulfilled order", async () => {
-    // Mock subscription check - no active subscription
-    jest.spyOn(subscriptionService, "hasActiveSubscription").mockImplementation((customerId, date) => Promise.resolve(false));
-    
-    // Mock customer statistics - more than 1 fulfilled order
-    jest.spyOn(customerService, "obtainStatistics").mockResolvedValue({
-      id: 'test-customer-stats-id',
-      number_of_orders: 5,
-      number_of_canceled_orders: 1,
-      number_of_fulfilled_orders: 3, // More than 1 fulfilled order
-      number_of_paid_months: 0,
-      paid_in_total: 0,
-    });
 
-    // Test that subscription is required
-    const hasActiveSubscription = await subscriptionService.hasActiveSubscription(testCustomer.id, new Date());
-    const stats = await customerService.obtainStatistics(testCustomer.id);
-    
-    expect(stats.number_of_fulfilled_orders).toBeGreaterThan(1);
-    expect(hasActiveSubscription).toBe(false);
-    
-    // The endpoint should return payment required error
-    // This is tested by checking the condition in the endpoint logic
-    const needsSubscription = stats.number_of_fulfilled_orders > 1 && !hasActiveSubscription;
-    expect(needsSubscription).toBe(true);
+
+    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', 'test-idempotency-key-3')
+      .expect(402); // Payment Required
+
+    expect(response.body.error.code).toBe("PAYMENT_REQUIRED");
+    expect(response.body.error.message).toBe("Customer needs an active subscription to place orders");
   });
 
   xit("should allow order creation when customer has active subscription", async () => {
-    // Mock subscription check - has active subscription
-    jest.spyOn(subscriptionService, "hasActiveSubscription").mockImplementation((customerId, date) => Promise.resolve(true));
-    
-    // Mock customer statistics - more than 1 fulfilled order
-    jest.spyOn(customerService, "obtainStatistics").mockResolvedValue({
-      id: 'test-customer-stats-id',
-      number_of_orders: 5,
-      number_of_canceled_orders: 1,
-      number_of_fulfilled_orders: 3, // More than 1 fulfilled order
-      number_of_paid_months: 2,
-      paid_in_total: 600,
-    });
 
-    // Test that subscription check passes
-    const hasActiveSubscription = await subscriptionService.hasActiveSubscription(testCustomer.id, new Date());
-    const stats = await customerService.obtainStatistics(testCustomer.id);
-    
-    expect(stats.number_of_fulfilled_orders).toBeGreaterThan(1);
-    expect(hasActiveSubscription).toBe(true);
-    
-    // The endpoint should allow order creation
-    const needsSubscription = stats.number_of_fulfilled_orders > 1 && !hasActiveSubscription;
-    expect(needsSubscription).toBe(false);
+
+    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', 'test-idempotency-key-4')
+      .expect(200);
+
+    expect(response.body).toHaveProperty('paymentUrl');
+    expect(response.body.paymentUrl).toBe("https://securepay.tinkoff.ru/payment/init?PaymentId=test-payment-id");
   });
 
   xit("should return error when cart is empty", async () => {
-    const idempotencyKey = "test-idempotency-key-5";
 
-    // Mock subscription check - no active subscription
-    jest.spyOn(subscriptionService, "hasActiveSubscription").mockImplementation((customerId, date) => Promise.resolve(false));
-    
-    // Mock customer statistics - less than 2 fulfilled orders
-    jest.spyOn(customerService, "obtainStatistics").mockResolvedValue({
-      id: 'test-customer-stats-id',
-      number_of_orders: 0,
-      number_of_canceled_orders: 0,
-      number_of_fulfilled_orders: 0,
-      number_of_paid_months: 0,
-      paid_in_total: 0,
-    });
 
     // Remove cart item to simulate empty cart
     await cartItemService.delete(testCartItem);
 
+    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', 'test-idempotency-key-5')
+      .expect(400); // Bad Request
 
+    expect(response.body.error.message).toBe("Cart is empty");
   });
 
   xit("should return error when customer not found", async () => {
-    const idempotencyKey = "test-idempotency-key-6";
 
 
+    // Delete customer to simulate not found
+    await customerService.getCollection().doc(testCustomer.id).delete();
 
-  xit("should handle payment initialization failure", async () => {
-    const idempotencyKey = "test-idempotency-key-7";
+    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', 'test-idempotency-key-6')
+      .expect(404); // Not Found
 
-    // Mock subscription check - no active subscription
-    jest.spyOn(subscriptionService, "hasActiveSubscription").mockImplementation((customerId, date) => Promise.resolve(false));
-    
-    // Mock customer statistics - less than 2 fulfilled orders
-    jest.spyOn(customerService, "obtainStatistics").mockResolvedValue({
-      id: 'test-customer-stats-id',
-      number_of_orders: 0,
-      number_of_canceled_orders: 0,
-      number_of_fulfilled_orders: 1,
-      number_of_paid_months: 0,
-      paid_in_total: 0,
-    });
-
-    // Mock increment statistics
-    jest.spyOn(customerService, "incrementStatistics").mockImplementation((customerId, updates) => 
-      Promise.resolve({
-        id: 'test-customer-stats-id',
-        number_of_orders: updates.number_of_orders || 0,
-        number_of_canceled_orders: updates.number_of_canceled_orders || 0,
-        number_of_fulfilled_orders: updates.number_of_fulfilled_orders || 0,
-        number_of_paid_months: updates.number_of_paid_months || 0,
-        paid_in_total: updates.paid_in_total || 0,
-      })
-    );
-
-    // Mock TBankService to return failure
-    tbankService.initPayment.mockResolvedValueOnce({
-      Success: false,
-      PaymentId: "",
-      PaymentURL: "",
-      Message: "Insufficient funds",
-      ErrorCode: 1001,
-    });
-
+    expect(response.body.error.message).toBe("Customer not found");
   });
 
+  xit("should handle payment initialization failure", async () => {
 
-})});
+    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', 'test-idempotency-key-7')
+      .expect(500); // Internal Server Error
+
+    expect(response.body.error.message).toBe("Payment initialization failed: Insufficient funds");
+  });
+});

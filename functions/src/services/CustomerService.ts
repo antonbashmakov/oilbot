@@ -19,6 +19,7 @@ class CustomerService extends AbstractService<Customer> {
       const initialStats: CustomerStats = {
         id: customerId,
         number_of_orders: 0,
+        number_of_active_orders: 0,
         number_of_canceled_orders: 0,
         number_of_fulfilled_orders: 0,
         number_of_paid_months: 0,
@@ -34,19 +35,22 @@ class CustomerService extends AbstractService<Customer> {
 
       let increment = {};
       if (updates.number_of_orders !== undefined) {
-        increment = { ...increment, [updates.number_of_orders]: FieldValue.increment(updates.number_of_orders) };
+        increment = { ...increment, number_of_orders: FieldValue.increment(updates.number_of_orders) };
       }
       if (updates.number_of_canceled_orders !== undefined) {
-        increment = { ...increment, [updates.number_of_canceled_orders]: FieldValue.increment(updates.number_of_canceled_orders) };
+        increment = { ...increment, number_of_canceled_orders: FieldValue.increment(updates.number_of_canceled_orders) };
       }
       if (updates.number_of_fulfilled_orders !== undefined) {
-        increment = { ...increment, [updates.number_of_fulfilled_orders]: FieldValue.increment(updates.number_of_fulfilled_orders) };
+        increment = { ...increment, number_of_fulfilled_orders: FieldValue.increment(updates.number_of_fulfilled_orders) };
       }
       if (updates.number_of_paid_months !== undefined) {
-        increment = { ...increment, [updates.number_of_paid_months]: FieldValue.increment(updates.number_of_paid_months) };
+        increment = { ...increment, number_of_paid_months: FieldValue.increment(updates.number_of_paid_months) };
+      }
+      if (updates.number_of_active_orders !== undefined) {
+        increment = { ...increment, number_of_active_orders: FieldValue.increment(updates.number_of_active_orders) };
       }
       if (updates.paid_in_total !== undefined) {
-        increment = { ...increment, [updates.paid_in_total]: FieldValue.increment(updates.paid_in_total) };
+        increment = { ...increment, paid_in_total: FieldValue.increment(updates.paid_in_total) };
       }
       return ref.update(increment).then(() => this.obtainStatistics(customerId));
     })

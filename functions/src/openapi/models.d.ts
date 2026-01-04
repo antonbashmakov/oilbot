@@ -140,6 +140,8 @@ export interface components {
             Details: string | null;
             /** @example 756478567845678436 */
             ExternalRequestId: string;
+            /** @example https://pay.tbank.ru/new/fU1ppgqa */
+            PaymentURL?: string;
         };
     };
     responses: never;

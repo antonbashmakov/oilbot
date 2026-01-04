@@ -14,6 +14,7 @@ import TBankService from "../../services/payments/TBankService";
 import SubscriptionService from "../../services/SubscriptionService";
 
 import {api} from "../../services/utils";
+import MockTBankService from "../../services/payments/MockTBankService";
 
 
 export {
@@ -33,3 +34,9 @@ export {
   TBankService,
   SubscriptionService,
 };
+
+if (process.env.GCLOUD_PROJECT === "test-project") {
+  exports.TBankService = MockTBankService;
+}
+
+

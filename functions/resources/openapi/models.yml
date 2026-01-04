@@ -234,6 +234,9 @@ components:
         ExternalRequestId:
           type: string
           example: "756478567845678436"
+        PaymentURL:
+          type: string
+          example: "https://pay.tbank.ru/new/fU1ppgqa"
       required:
         - TerminalKey
         - OrderId

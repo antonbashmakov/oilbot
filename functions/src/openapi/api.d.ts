@@ -1168,6 +1168,11 @@ export interface components {
              */
             number_of_orders: number;
             /**
+             * @description Total number of orders for the customer
+             * @example 10
+             */
+            number_of_active_orders: number;
+            /**
              * @description Number of canceled orders for the customer
              * @example 2
              */
