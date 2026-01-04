@@ -32,7 +32,8 @@ export default function RootLayout({
   const pathname = usePathname();
 
   const Header = useCallback(() => {
-    const HeaderComponent = PATH_TO_HEADER_MAP[pathname || "/"] || MainHeader;
+    const HeaderComponent = PATH_TO_HEADER_MAP[pathname || "/"];
+    if(!HeaderComponent) return null;
     return <HeaderComponent />;
   }, [pathname]);
 

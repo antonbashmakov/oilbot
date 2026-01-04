@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useGetCartItemsQuery, validateTelegramUser } from '..';
+import { CustomerOverview } from '../models';
 
 // Mock user object as provided in the task
 const MOCK_USER = {
@@ -11,7 +12,24 @@ const MOCK_USER = {
   language_code: "en",
   last_name: "Öldenberg",
   username: "antonoldenberg",
-  first_name: "Anton" // Added for consistency
+  first_name: "Anton",// Added for consistency
+  balance: {
+    id: "270053857",
+    owner: {
+      id: "270053857"
+    },
+    value: 1000,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  stats: {
+    id: "270053857",
+    number_of_orders: 0,
+    number_of_canceled_orders: 0,
+    number_of_fulfilled_orders: 1,
+    number_of_paid_months: 0,
+    paid_in_total: 0,
+  }
 };
 
 // Type for Telegram Web App user
@@ -38,8 +56,12 @@ interface AppUser {
   is_mock?: boolean;
 }
 
+interface AppCustomer extends CustomerOverview {
+  is_mock: boolean
+}
+
 interface UserContextType {
-  user: AppUser | null;
+  user: CustomerOverview | null;
   telegramUser: TelegramUser | null;
   isLoading: boolean;
   isError: boolean;
@@ -54,7 +76,7 @@ interface UserProviderProps {
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
-  const [appUser, setAppUser] = useState<AppUser | null>(null);
+  const [appUser, setAppUser] = useState<AppCustomer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
@@ -66,45 +88,17 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
           const tg = (window as any).Telegram.WebApp;
           const initData = tg.initData;
-          validateTelegramUser(initData).then(r => {
+          validateTelegramUser(initData).then(customer => {
             // Expand the app to full height
             tg.expand();
 
-            // Get Telegram user data
-            const tgUser = tg.initDataUnsafe?.user;
-            if (tgUser) {
-              const user: TelegramUser = {
-                id: tgUser.id,
-                first_name: tgUser.first_name,
-                last_name: tgUser.last_name,
-                username: tgUser.username,
-                language_code: tgUser.language_code,
-                is_premium: tgUser.is_premium,
-                is_bot: tgUser.is_bot,
-              };
-              setTelegramUser(user);
+            setTelegramUser(customer);
 
-              // Convert Telegram user to AppUser
-              setAppUser({
-                id: user.id.toString(),
-                first_name: user.first_name,
-                last_name: user.last_name,
-                username: user.username,
-                language_code: user.language_code,
-                is_premium: user.is_premium,
-                is_bot: user.is_bot,
-                is_mock: false,
-              });
-
-              console.log('Telegram user detected:', user);
-            } else {
-              // No Telegram user found, use mock
-              console.warn('No Telegram user found, using mock user');
-              setAppUser({
-                ...MOCK_USER,
-                is_mock: true,
-              });
-            }
+            // Convert Telegram user to AppUser
+            setAppUser({
+              ...customer,
+              is_mock: false,
+            });
 
             // Set Telegram theme parameters as CSS variables
             if (tg.themeParams) {

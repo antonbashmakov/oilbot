@@ -959,6 +959,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /private/customers/{customerId}/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Create a subscription for a customer
+      description: Create a new subscription for a customer. If customer already has an active subscription which is not passed due (current date is before next_payment_date) throw bad request. If there is no active subscription for user create one and set next_payment_date month ahead.
+      tags:
+        - Subscriptions
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Subscription created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Bad request (e.g., customer already has an active subscription)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /private/customers/{customerId}/orders:
     get:
       operationId: getCustomerOrders
@@ -1275,6 +1321,44 @@ components:
           type: string
           description: Customer's username
           example: "getting_drunk"
+    Subscription:
+      type: object
+      required:
+        - id
+        - fee
+        - next_payment_at
+        - status
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the customer
+          example: "1019705782"
+        created_at:
+          type: string
+          format: date-time
+          description: When subscription was created
+          example: "2025-11-23T00:00:00.000Z"  
+        canceled_at:
+          type: string
+          format: date-time
+          description: When subscription was canceled
+          example: "2025-11-23T00:00:00.000Z"  
+        next_payment_at:
+          type: string
+          format: date-time
+          description: When to charge next payment
+          example: "2025-11-23T00:00:00.000Z" 
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACTIVE
+            - CANCELED
+        fee:
+            type: number
+            format: float
+            description: Cost of the subscription
+            example: 609
     CustomerOverview: 
       type: object
       required:
@@ -1284,6 +1368,8 @@ components:
       properties:
         balance: 
           $ref: '#/components/schemas/CustomerBalance'
+        stats:
+          $ref: '#/components/schemas/CustomerStats'
     OrderPickingPatch:
       type: object
       required:
@@ -2011,6 +2097,42 @@ components:
           format: date-time
           description: Balance last update timestamp
           example: "2025-01-10T14:30:00Z"
+
+    CustomerStats:
+      type: object
+      required:
+        - id
+        - number_of_orders
+        - number_of_canceled_orders
+        - number_of_fulfilled_orders
+        - number_of_paid_months
+        - paid_in_total
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the customer
+          example: "1019705782"      
+        number_of_orders:
+          type: integer
+          description: Total number of orders for the customer
+          example: 10
+        number_of_canceled_orders:
+          type: integer
+          description: Number of canceled orders for the customer
+          example: 2
+        number_of_fulfilled_orders:
+          type: integer
+          description: Number of fulfilled orders for the customer
+          example: 7
+        number_of_paid_months:
+          type: integer
+          description: Number of paid subscription months for the customer
+          example: 3
+        paid_in_total:
+          type: number
+          format: float
+          description: Total amount paid by the customer
+          example: 4500.75
 
     SignupRequest:
       type: object

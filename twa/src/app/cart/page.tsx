@@ -23,7 +23,7 @@ export default function CartPage() {
     return _.groupBy(cartItems, 'item_id');
   }, [cartItems]);
 
-    const items = useMemo(() => {
+  const items = useMemo(() => {
     const representatives = Object.keys(itemGroups).map(itemId => {
       const group = itemGroups[itemId];
       const baseItem = group[0];
@@ -61,8 +61,8 @@ export default function CartPage() {
     try {
       // Generate a unique idempotency key
       const idempotencyKey = `checkout-${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
-      const res : any = await checkoutMutation.mutateAsync({ idempotencyKey });
+
+      const res: any = await checkoutMutation.mutateAsync({ idempotencyKey });
       if (res.paymentUrl && typeof window !== 'undefined') {
         window.location.href = res.paymentUrl;
       }

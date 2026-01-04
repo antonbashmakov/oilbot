@@ -1,0 +1,134 @@
+"use client";
+
+export default function SubscriptionPage() {
+  const handleClose = () => {
+    window.location.href = "/";
+  };
+
+  const handleSubscribe = () => {
+    // Handle subscription button click
+    alert("Subscription feature would be implemented here!");
+    // In a real implementation, this would redirect to a payment page
+    // or open a subscription modal
+  };
+
+  return (
+    <>
+      {/* Close button */}
+      <div className="absolute top-0 right-0 z-20 p-6">
+        <button
+          onClick={handleClose}
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200/50 dark:bg-white/10 backdrop-blur-md text-gray-900 dark:text-white transition-colors hover:bg-gray-300/50 dark:hover:bg-white/20"
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+            close
+          </span>
+        </button>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-8 pt-8 pb-6 text-center">
+        {/* Premium icon */}
+        <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-8 text-primary shadow-sm">
+          <span className="material-symbols-outlined" style={{ fontSize: "48px" }}>
+            workspace_premium
+          </span>
+        </div>
+
+        {/* Title */}
+        <h2 className="text-gray-900 dark:text-white text-3xl font-extrabold leading-tight tracking-tight mb-4">
+          Subscription Required
+        </h2>
+
+        {/* Description */}
+        <p className="text-gray-500 dark:text-gray-400 text-base font-medium leading-relaxed mb-10 max-w-xs mx-auto">
+          You need to buy a subscription to access our finest steaks, wild salmon, and artisan cheese.
+        </p>
+
+        {/* Features list */}
+        <div className="w-full max-w-xs space-y-5 mb-8 text-left">
+          {/* Feature 1: Free Priority Delivery */}
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0 text-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                local_shipping
+              </span>
+            </div>
+            <div>
+              <span className="block text-gray-900 dark:text-white font-bold text-sm">
+                Free Priority Delivery
+              </span>
+              <span className="block text-gray-500 dark:text-gray-400 text-xs">
+                On all orders over $50
+              </span>
+            </div>
+          </div>
+
+          {/* Feature 2: Exclusive Cuts */}
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0 text-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                restaurant_menu
+              </span>
+            </div>
+            <div>
+              <span className="block text-gray-900 dark:text-white font-bold text-sm">
+                Exclusive Cuts
+              </span>
+              <span className="block text-gray-500 dark:text-gray-400 text-xs">
+                Access to rare & aged meats
+              </span>
+            </div>
+          </div>
+
+          {/* Feature 3: Member-Only Prices */}
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0 text-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                sell
+              </span>
+            </div>
+            <div>
+              <span className="block text-gray-900 dark:text-white font-bold text-sm">
+                Member-Only Prices
+              </span>
+              <span className="block text-gray-500 dark:text-gray-400 text-xs">
+                Save up to 20% on every order
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer with subscribe button */}
+      <div className="w-full px-8 pb-10 mt-auto">
+        <button
+          onClick={handleSubscribe}
+          className="w-full bg-primary hover:bg-red-600 active:scale-[0.98] transition-all text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group mb-4"
+        >
+          <span className="text-lg">Subscribe</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+          <span className="text-lg">300/month</span>
+          <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform" style={{ fontSize: "20px" }}>
+            arrow_forward
+          </span>
+        </button>
+
+        <p className="text-center text-xs text-gray-400 dark:text-gray-500 leading-normal">
+          By subscribing, you agree to our{" "}
+          <a
+            className="text-gray-800 dark:text-gray-300 underline decoration-gray-300 dark:decoration-gray-600 underline-offset-2 hover:text-primary transition-colors"
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              alert("Terms and conditions would be shown here.");
+            }}
+          >
+            Agreement
+          </a>{" "}
+          and acknowledge that your subscription will auto-renew.
+        </p>
+      </div>
+    </>
+  );
+}
