@@ -27,6 +27,9 @@ export const api = {
   badRequest: (response: ExpressResponse, message = "", code = "BAD_REQUEST"): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
     .status(400).send({error: {code, message}}),
+  paymentRequired: (response: ExpressResponse, message = "", code = "PAYMENT_REQUIRED"): ExpressResponse => response
+    .header(CONTENT_TYPE, APPLICATION_JSON)
+    .status(402).send({error: {code, message}}),
 
   notFound: (response: ExpressResponse, message = ""): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)

@@ -348,6 +348,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/private/customers/{customerId}/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a subscription for a customer
+         * @description Create a new subscription for a customer. If customer already has an active subscription which is not passed due (current date is before next_payment_date) throw bad request. If there is no active subscription for user create one and set next_payment_date month ahead.
+         */
+        post: operations["createSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/private/customers/{customerId}/orders": {
         parameters: {
             query?: never;
@@ -508,8 +528,42 @@ export interface components {
              */
             username?: string;
         };
+        Subscription: {
+            /**
+             * @description Unique identifier for the customer
+             * @example 1019705782
+             */
+            id: string;
+            /**
+             * Format: date-time
+             * @description When subscription was created
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            created_at?: string;
+            /**
+             * Format: date-time
+             * @description When subscription was canceled
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            canceled_at?: string;
+            /**
+             * Format: date-time
+             * @description When to charge next payment
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            next_payment_at: string;
+            /** @enum {string} */
+            status: "PENDING" | "ACTIVE" | "CANCELED";
+            /**
+             * Format: float
+             * @description Cost of the subscription
+             * @example 609
+             */
+            fee: number;
+        };
         CustomerOverview: {
             balance: components["schemas"]["CustomerBalance"];
+            stats?: components["schemas"]["CustomerStats"];
         } & components["schemas"]["Customer"];
         OrderPickingPatch: {
             /** @description Items to update in this order picking */
@@ -1101,6 +1155,39 @@ export interface components {
              * @example 2025-01-10T14:30:00Z
              */
             updated_at?: string;
+        };
+        CustomerStats: {
+            /**
+             * @description Unique identifier for the customer
+             * @example 1019705782
+             */
+            id: string;
+            /**
+             * @description Total number of orders for the customer
+             * @example 10
+             */
+            number_of_orders: number;
+            /**
+             * @description Number of canceled orders for the customer
+             * @example 2
+             */
+            number_of_canceled_orders: number;
+            /**
+             * @description Number of fulfilled orders for the customer
+             * @example 7
+             */
+            number_of_fulfilled_orders: number;
+            /**
+             * @description Number of paid subscription months for the customer
+             * @example 3
+             */
+            number_of_paid_months: number;
+            /**
+             * Format: float
+             * @description Total amount paid by the customer
+             * @example 4500.75
+             */
+            paid_in_total: number;
         };
         SignupRequest: {
             /**
@@ -2207,6 +2294,60 @@ export interface operations {
             };
             /** @description Conflict (e.g., duplicate request with same idempotency key) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscription created successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: components["schemas"]["Subscription"];
+                    };
+                };
+            };
+            /** @description Bad request (e.g., customer already has an active subscription) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Customer not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -54,7 +54,6 @@ abstract class AbstractService<T extends Entity> {
 
     const ref = this.getCollection().doc(object.id);
 
-    // Atomically increment the population of the city by 50.
     return ref.update({[field]: FieldValue.increment(value)});
   }
 
@@ -62,7 +61,7 @@ abstract class AbstractService<T extends Entity> {
     objects.forEach((object) => this.set(object));
   }
 
-  addForOwner(user: { id: string }, object: Omit<T, "owner">): Promise<T> {
+  addForOwner(user: { id: string }, object: T): Promise<T> {
     const objectWithOwner = {...object, owner: {id: user.id}} as T;
     return this.add(objectWithOwner);
   }

@@ -114,13 +114,15 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
     // Verify the message was sent to the correct chat ID
     expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
       "270053857",
-      expect.stringContaining("Ваш заказ")
+      expect.stringContaining("Ваш заказ"),
+      "test-order-id-payment"
     );
 
     // Verify the message contains the payment URL
     expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
       "270053857",
-      expect.stringContaining(createdPayment.payment_url!)
+      expect.stringContaining(createdPayment.payment_url!),
+      "test-order-id-payment"
     );
   });
 

@@ -111,7 +111,7 @@ export default function Home() {
                   >
                     {item.id && (
                       <img
-                        src={IMAGE_TO_UUIDS[item.id] ? `https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.id]}/-/preview/400x400/` : null}
+                        src={IMAGE_TO_UUIDS[item.id] ? `https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.id]}/-/preview/400x400/` : undefined}
                         alt={item.name || 'Product image'}
                         className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300"
                         loading="lazy"

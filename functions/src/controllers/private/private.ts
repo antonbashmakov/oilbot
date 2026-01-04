@@ -12,6 +12,7 @@ import {
   PaymentService,
   IdempotencyGuardService,
   TBankService,
+  SubscriptionService,
 } from "./imports";
 // import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
@@ -42,6 +43,7 @@ const orderService = new OrderService(db);
 const paymentService = new PaymentService(db);
 const idempotencyGuardService = new IdempotencyGuardService(db);
 const tbankService = new TBankService();
+const subscriptionService = new SubscriptionService(db);
 
 
 const privateApi = express();
@@ -76,7 +78,7 @@ const cookieAuthMiddleware = async (req: express.Request, res: express.Response,
 };
 */
 // Apply cookie auth middleware to all customer routes
-//privateApi.use(cookieAuthMiddleware);
+// privateApi.use(cookieAuthMiddleware);
 
 privateApi.get("/deliveries", async (req: express.Request, res: express.Response) => {
   try {
@@ -237,15 +239,15 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
 
 privateApi.get("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
+    const {customerId} = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, "Customer not found");
     }
 
-    const orders = await orderService.fetchForOwner({ id: String(customer.id) });
-    
+    const orders = await orderService.fetchForOwner({id: String(customer.id)});
+
     return api.send(res, orders || []);
   } catch (err: any) {
     functions.logger.error(err);
@@ -255,14 +257,14 @@ privateApi.get("/customers/:customerId/orders", async (req: express.Request, res
 
 privateApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
+    const {customerId} = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, "Customer not found");
     }
 
-    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
     if (!cartItems || cartItems.length === 0) {
       return api.send(res, {});
     }
@@ -289,6 +291,12 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       throw new Error("Customer not found");
     }
 
+    const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
+    const stats = await customerService.obtainStatistics(customerId);
+    if (stats.number_of_fulfilled_orders > 1 && !hasActiveSubscription) {
+      return api.paymentRequired(res, "Customer needs an active subscription to place orders");
+    }
+
     const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
     if (!cartItems || cartItems.length === 0) {
       throw new Error("Cart is empty");
@@ -301,7 +309,8 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       async () => {
         // Create order from cart (transactionally removes cart items)
         const order = await orderService.createOrderFromCart(customer, cartItems);
-
+        await customerService.incrementStatistics(customerId, {number_of_orders: 1});
+        
         const paymentRequest = tbankService.orderToPaymentRequest(order);
         const paymentResponse = await tbankService.initPayment(paymentRequest);
 
@@ -348,6 +357,31 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       return api.error(res, err.message);
     }
 
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+privateApi.post("/customers/:customerId/subscriptions", async (req: express.Request, res: express.Response) => {
+  try {
+    const {customerId} = req.params;
+
+    // Check if customer exists
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    // Check if customer already has an active subscription that is not passed due
+    const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
+    if (hasActiveSubscription) {
+      return api.badRequest(res, "Customer already has an active subscription");
+    }
+
+    const subscription = await subscriptionService.createSubscription(customerId, 300, new Date());
+
+    return api.send(res, subscription);
+  } catch (err: any) {
+    functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
   }
 });

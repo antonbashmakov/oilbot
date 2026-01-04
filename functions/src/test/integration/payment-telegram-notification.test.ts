@@ -198,7 +198,8 @@ describe("Payment Creation with Telegram Notification", () => {
       expect(mockSendMessage).toHaveBeenCalledTimes(1);
       expect(mockSendMessage).toHaveBeenCalledWith(
         testCustomer.id,
-        messageText
+        messageText,
+        "thread-1"
       );
     });
 

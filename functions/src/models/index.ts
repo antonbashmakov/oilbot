@@ -2,11 +2,13 @@ import {components} from "../openapi/api";
 import {components as models} from "../openapi/models";
 
 export type Customer = components["schemas"]["Customer"];
+export type CustomerStats = components["schemas"]["CustomerStats"];
 export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type AddToCartItem = components["schemas"]["AddToCartItem"];
 export type RemoveFromCartItem = components["schemas"]["RemoveFromCartItem"];
 
+export type BaseSubscription = components["schemas"]["Subscription"];
 type BaseDeliveryOverviewItemStats = components["schemas"]["DeliveryOverviewItemStats"];
 type BaseStats = components["schemas"]["Stats"];
 type BaseDeliveryOverview = components["schemas"]["DeliveryOverview"];
@@ -108,6 +110,10 @@ export type Delivery = BaseDelivery & {
   order_deadline: Date;
   delivery_start: Date;
   delivery_end: Date;
+};
+export type Subscription = Omit<BaseSubscription, "created_at" | "next_payment_at"> & {
+  created_at: Date;
+  next_payment_at: Date;
 };
 
 export type DeliveryRef = BaseDeliveryRef & {

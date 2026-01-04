@@ -1,5 +1,8 @@
+import { TinkoffReceipt } from "./models";
+
 export const COLLECTIONS = {
   CUSTOMERS: "CUSTOMERS",
+  CUSTOMER_STATS: "CUSTOMER_STATS",
   USERS: "USERS",
   DELIVERIES: "DELIVERIES",
   ORDERS: "ORDERS",
@@ -28,3 +31,10 @@ export const HTTP_ERRORS = {
   UNAUTHORIZED: "UNAUTHORIZED",
   NOT_FOUND: "NOT_FOUND",
 };
+export const TINKOFF_SUPPORT = {
+  Email: process.env.SUPPORT_EMAIL || "",
+  Phone: process.env.SUPPORT_PHONE,
+  Taxation: "osn" as TinkoffReceipt["Taxation"],
+};
+
+

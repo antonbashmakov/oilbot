@@ -4,7 +4,9 @@ import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import * as moment from "moment";
 
-import {Order, Payment, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
+import { TINKOFF_SUPPORT } from "../../constants";
+
+import {Order, Payment, Subscription, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
 dotenv.config();
 
 const terminal = process.env.TINKOFF_TERMINAL_ID || functions.config().tinkoff.TINKOFF_TERMINAL_ID;
@@ -21,20 +23,11 @@ class TBankService {
     }));
 
     const Receipt: TinkoffReceipt = {
-      Email: "info@posebestoimosti.ru",
-      Phone: "+79022394130",
-      Taxation: "osn",
+      ...TINKOFF_SUPPORT,
       Items,
     };
 
-    // Calculate RedirectDueDate: one month ahead from current date
-    // Format: YYYY-MM-DDTHH24:MI:SS+GMT
-    // Using moment.js to handle date manipulation and formatting
     const redirectDueDate = moment().add(1, "month");
-
-    // Format according to Tinkoff API requirements
-    // The format should be like: 2025-12-02T14:30:00+03:00
-    // Using format() with specific pattern
     const RedirectDueDate = redirectDueDate.format("YYYY-MM-DDTHH:mm:ssZ");
 
     const body = {
@@ -43,6 +36,52 @@ class TBankService {
       Amount: order.total * 100,
       OrderId: order.id,
       Description: "Оплата заказа в магазине По Себестоимости",
+      DATA: {
+        Phone: process.env.SUPPORT_PHONE,
+        Email: process.env.SUPPORT_EMAIL,
+      },
+      Receipt,
+      RedirectDueDate,
+    };
+
+    const rootFields = {...body, Password: password} as any;
+
+    delete rootFields.DATA;
+    delete rootFields.Receipt;
+
+    body.Token = this.generateToken(rootFields);
+
+    return body;
+  }
+  subscriptionToPaymentRequest(subscription: Subscription): TinkoffPaymentPayload {
+
+    const to = moment(subscription.next_payment_at);
+    const from = to.add(-1, "month");
+    
+    const Items: TinkoffPaymentItem[] = [{
+      Name: `Подписка По Себестоимости за период ${from.format("DD.MM.YYYY")} - ${to.format("DD.MM.YYYY")}`,
+      Price: subscription.fee * 100,
+      Quantity: 1,
+      Amount: subscription.fee * 100,
+      Tax: "vat0",
+    }];
+
+    const Receipt: TinkoffReceipt = {
+      ...TINKOFF_SUPPORT,
+      Items,
+    };
+
+    const redirectDueDate = moment().add(1, "month");
+    const RedirectDueDate = redirectDueDate.format("YYYY-MM-DDTHH:mm:ssZ");
+
+    const body = {
+      Token: "",
+      Recurrent: "Y", 
+      CustomerKey: subscription.id,
+      TerminalKey: terminal,
+      Amount: subscription.fee * 100,
+      OrderId: subscription.id,
+      Description: "Оплата подписки в магазине По Себестоимости",
       DATA: {
         Phone: process.env.SUPPORT_PHONE,
         Email: process.env.SUPPORT_EMAIL,

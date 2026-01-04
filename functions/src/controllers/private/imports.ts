@@ -11,6 +11,7 @@ import UserService from "../../services/UserService";
 import PaymentService from "../../services/PaymentService";
 import IdempotencyGuardService from "../../services/IdempotencyGuardService";
 import TBankService from "../../services/payments/TBankService";
+import SubscriptionService from "../../services/SubscriptionService";
 
 import {api} from "../../services/utils";
 
@@ -30,4 +31,5 @@ export {
   PaymentService,
   IdempotencyGuardService,
   TBankService,
+  SubscriptionService,
 };
