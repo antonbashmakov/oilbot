@@ -105,6 +105,20 @@ export const useCheckout = (customerId?: string) => {
     );
 };
 
+export const useCreateSubscription = (customerId?: string) => {
+    return usePostApi<
+        "/api/private/customers/{customerId}/subscriptions",
+        { customerId: string },
+        IdempotentSupport
+    >(
+        "/api/private/customers/{customerId}/subscriptions",
+        [
+            "/api/private/customers/{customerId}/subscriptions"
+        ],
+        { customerId: customerId || '' },
+    );
+};
+
 
 export const validateTelegramUser = async (initData: string) => {
     return fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL || ""}/api/public/auth/telegram` , {

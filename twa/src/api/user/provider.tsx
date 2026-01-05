@@ -26,7 +26,8 @@ const MOCK_USER = {
     id: "270053857",
     number_of_orders: 0,
     number_of_canceled_orders: 0,
-    number_of_fulfilled_orders: 1,
+    number_of_fulfilled_orders: 0,
+    number_of_active_orders: 0,
     number_of_paid_months: 0,
     paid_in_total: 0,
   }
@@ -61,7 +62,7 @@ interface AppCustomer extends CustomerOverview {
 }
 
 interface UserContextType {
-  user: CustomerOverview | null;
+  user: AppCustomer | null;
   telegramUser: TelegramUser | null;
   isLoading: boolean;
   isError: boolean;

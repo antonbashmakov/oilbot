@@ -1,15 +1,45 @@
 "use client";
 
+import { useCreateSubscription } from "@/api";
+import { useUser } from "@/api/user/provider";
+import { useState } from "react";
+
 export default function SubscriptionPage() {
+  const { user } = useUser();
+  const createSubscriptionMutation = useCreateSubscription(user?.id);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const handleClose = () => {
     window.location.href = "/";
   };
 
-  const handleSubscribe = () => {
-    // Handle subscription button click
-    alert("Subscription feature would be implemented here!");
-    // In a real implementation, this would redirect to a payment page
-    // or open a subscription modal
+  const handleSubscribe = async () => {
+    if (!user?.id) {
+      alert("Please log in to subscribe.");
+      return;
+    }
+
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+    try {
+      // Generate a unique idempotency key
+      const idempotencyKey = `subscription-${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      const res: any = await createSubscriptionMutation.mutateAsync({ idempotencyKey });
+      
+      // Check if response has paymentUrl (similar to checkout flow)
+      if (res.paymentUrl && typeof window !== 'undefined') {
+        window.location.href = res.paymentUrl;
+      } 
+    } catch (error: any) {
+      console.error('Subscription failed:', error);
+      // Show error message
+      const errorMessage = error?.error?.message || error?.message || 'Subscription failed. Please try again.';
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -104,14 +134,26 @@ export default function SubscriptionPage() {
       <div className="w-full px-8 pb-10 mt-auto">
         <button
           onClick={handleSubscribe}
-          className="w-full bg-primary hover:bg-red-600 active:scale-[0.98] transition-all text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group mb-4"
+          disabled={isProcessing || createSubscriptionMutation.isPending || !user?.id}
+          className="w-full bg-primary hover:bg-red-600 active:scale-[0.98] transition-all text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span className="text-lg">Subscribe</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-          <span className="text-lg">300/month</span>
-          <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform" style={{ fontSize: "20px" }}>
-            arrow_forward
-          </span>
+          {isProcessing || createSubscriptionMutation.isPending ? (
+            <>
+              <span className="text-lg">Processing...</span>
+              <span className="material-symbols-outlined animate-spin" style={{ fontSize: "20px" }}>
+                refresh
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="text-lg">Subscribe</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+              <span className="text-lg">300/month</span>
+              <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform" style={{ fontSize: "20px" }}>
+                arrow_forward
+              </span>
+            </>
+          )}
         </button>
 
         <p className="text-center text-xs text-gray-400 dark:text-gray-500 leading-normal">

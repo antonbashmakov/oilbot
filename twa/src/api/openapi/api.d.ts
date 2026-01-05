@@ -564,6 +564,7 @@ export interface components {
         CustomerOverview: {
             balance: components["schemas"]["CustomerBalance"];
             stats?: components["schemas"]["CustomerStats"];
+            subscription?: components["schemas"]["Subscription"];
         } & components["schemas"]["Customer"];
         OrderPickingPatch: {
             /** @description Items to update in this order picking */
@@ -1073,7 +1074,7 @@ export interface components {
              * @description Error code from payment provider
              * @example 0
              */
-            error_code?: number | null;
+            error_code?: string | null;
             /** @enum {string} */
             status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT" | "CANCELED" | "REJECTED";
             /**
@@ -1156,6 +1157,18 @@ export interface components {
              */
             updated_at?: string;
         };
+        CustomerAccounting: {
+            /**
+             * @description Internal payment ID
+             * @example payment-123456
+             */
+            id: string;
+            /**
+             * @description Id at bank to charge recursive payments
+             * @example some-id-here
+             */
+            rebill_id: string;
+        };
         CustomerStats: {
             /**
              * @description Unique identifier for the customer
@@ -1167,6 +1180,11 @@ export interface components {
              * @example 10
              */
             number_of_orders: number;
+            /**
+             * @description Total number of orders for the customer
+             * @example 10
+             */
+            number_of_active_orders: number;
             /**
              * @description Number of canceled orders for the customer
              * @example 2
@@ -2333,7 +2351,13 @@ export interface operations {
                     "application/json": {
                         /** @example OK */
                         code?: string;
-                        data?: components["schemas"]["Subscription"];
+                        data?: {
+                            /**
+                             * @description URL for payment processing
+                             * @example https://securepay.tinkoff.ru/payment/init?PaymentId=123456
+                             */
+                            paymentUrl?: string;
+                        };
                     };
                 };
             };
