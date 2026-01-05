@@ -22,13 +22,16 @@ class SubscriptionPaymentConfirmedProcessor extends AbstractProcessor {
     if (!payment) {
       throw new Error(`Payment not found  ${event.payload.external_id}`);
     }
+    if (!subscription) {
+      throw new Error(`Subscription not found  ${subscriptionId}`);
+    }
 
     await subscriptionService.runTransactionally(async (t) => {
       /**
-       *  Subscription, Accounting, Balance abd Stats all storred bty customer's id
+       *  Subscription, Accounting, Balance and Stats all stored by customer's id
        */
       const subscriptionDocRef = subscriptionService.getCollection().doc(subscription.id);
-      t.update(subscriptionDocRef, {status: "ACTIVE", rebill_id: event.payload.external_id});
+      t.update(subscriptionDocRef, { status: "ACTIVE" });
 
       const paymentDocRef = paymentService.getCollection().doc(payment.id);
       t.update(paymentDocRef, {success: true, status: "CONFIRMED"});
