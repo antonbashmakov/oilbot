@@ -111,9 +111,10 @@ export type Delivery = BaseDelivery & {
   delivery_start: Date;
   delivery_end: Date;
 };
-export type Subscription = Omit<BaseSubscription, "created_at" | "next_payment_at"> & {
+export type Subscription = Omit<BaseSubscription, "created_at" | "next_payment_at" | "canceled_at"> & {
   created_at: Date;
   next_payment_at: Date;
+  canceled_at?: Date;
 };
 
 export type DeliveryRef = BaseDeliveryRef & {

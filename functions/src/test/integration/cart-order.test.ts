@@ -1,13 +1,17 @@
 import db from "../setup";
 import * as request from "supertest";
 import * as jwt from "jsonwebtoken";
-import {Customer, Item, CartItem} from "../../models";
+import { Customer, Item, CartItem, Subscription } from "../../models";
 import CustomerService from "../../services/CustomerService";
 import ItemService from "../../services/ItemService";
 import CartItemService from "../../services/CartItemService";
+import SubscriptionService from "../../services/SubscriptionService";
+import moment = require("moment");
 // import SubscriptionService from "../../services/SubscriptionService";
 
 const JWT_SECRET = "secter";
+
+const URL = "http://127.0.0.1:5001/test-project/us-central1/private";
 
 const createCustomerToken = () => {
   const payload = {
@@ -29,7 +33,7 @@ describe("Cart Order Endpoint Integration Test", () => {
   let testCustomer: Customer;
   let testItem: Item;
   let testCartItem: CartItem;
-  //let subscriptionService: SubscriptionService;
+  let subscriptionService: SubscriptionService;
 
 
   beforeEach(async () => {
@@ -37,8 +41,8 @@ describe("Cart Order Endpoint Integration Test", () => {
     itemService = new ItemService(db as any);
     cartItemService = new CartItemService(db as any);
 
-   // subscriptionService = new SubscriptionService(db as any);
-    
+    subscriptionService = new SubscriptionService(db as any);
+
     // Create test customer
     testCustomer = {
       id: "test-customer-id",
@@ -77,7 +81,7 @@ describe("Cart Order Endpoint Integration Test", () => {
       price_for_unit: testItem.price_out,
       category: testItem.category,
       group: testItem.group,
-      owner: {id: testCustomer.id},
+      owner: { id: testCustomer.id },
       created_at: new Date(),
     } as any;
 
@@ -89,7 +93,7 @@ describe("Cart Order Endpoint Integration Test", () => {
   });
 
   it("should create order and payment when cart has items", async () => {
-    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+    const response = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
       .set('idempotency_key', 'test-idempotency-key-1')
@@ -98,33 +102,31 @@ describe("Cart Order Endpoint Integration Test", () => {
     // Verify response contains paymentUrl
     expect(response.body).toHaveProperty('paymentUrl');
     expect(response.body.paymentUrl).toBe("https://securepay.tinkoff.ru/p/MOCK_PAYMENT");
-    
+
     // Verify mocks were called
 
-    const cartItems = await cartItemService.fetchForOwner({ id : testCustomer.id });
+    const cartItems = await cartItemService.fetchForOwner({ id: testCustomer.id });
     expect(cartItems.length).toBe(0);
 
     const stats = await customerService.obtainStatistics(testCustomer.id);
-    
+
     expect(stats.number_of_orders).toBe(1);
     expect(stats.number_of_active_orders).toBe(1);
 
   });
 
-  xit("should return idempotent result for duplicate requests", async () => {
-
-
+  it("should return idempotent result for duplicate requests", async () => {
     const idempotencyKey = 'test-idempotency-key-2';
 
     // First call
-    const response1 = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+    const response1 = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
       .set('idempotency_key', idempotencyKey)
       .expect(200);
 
     // Second call with same idempotency key
-    const response2 = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+    const response2 = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
       .set('idempotency_key', idempotencyKey)
@@ -132,13 +134,14 @@ describe("Cart Order Endpoint Integration Test", () => {
 
     // Should return same result
     expect(response1.body.paymentUrl).toBe(response2.body.paymentUrl);
-    
+
   });
 
-  xit("should require subscription when customer has more than 1 fulfilled order", async () => {
+  it("should require subscription when customer has more than 1 fulfilled order", async () => {
 
+    await customerService.incrementStatistics(testCustomer.id, { number_of_fulfilled_orders: 1 });
 
-    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+    let response = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
       .set('idempotency_key', 'test-idempotency-key-3')
@@ -146,28 +149,45 @@ describe("Cart Order Endpoint Integration Test", () => {
 
     expect(response.body.error.code).toBe("PAYMENT_REQUIRED");
     expect(response.body.error.message).toBe("Customer needs an active subscription to place orders");
-  });
 
-  xit("should allow order creation when customer has active subscription", async () => {
+    await customerService.incrementStatistics(testCustomer.id, { number_of_fulfilled_orders: -1, number_of_active_orders: 1 });
 
-
-    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+    response = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
-      .set('idempotency_key', 'test-idempotency-key-4')
-      .expect(200);
+      .set('idempotency_key', 'test-idempotency-key-3')
+      .expect(402); // Payment Required
 
-    expect(response.body).toHaveProperty('paymentUrl');
-    expect(response.body.paymentUrl).toBe("https://securepay.tinkoff.ru/payment/init?PaymentId=test-payment-id");
+    expect(response.body.error.code).toBe("PAYMENT_REQUIRED");
+    expect(response.body.error.message).toBe("Customer needs an active subscription to place orders");
+
+    const s: Subscription = {
+      id: testCustomer.id,
+      created_at: new Date(),
+      canceled_at: new Date(),
+      next_payment_at: moment(new Date()).add(1, "month").toDate(),
+      status: "ACTIVE",
+      fee: 300,
+    };
+    await subscriptionService.set(s);
+
+    response = await request(URL)
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', 'test-idempotency-key-3')
+      .expect(402); 
+
+
   });
 
-  xit("should return error when cart is empty", async () => {
+
+  it("should return error when cart is empty", async () => {
 
 
     // Remove cart item to simulate empty cart
     await cartItemService.delete(testCartItem);
 
-    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+    const response = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
       .set('idempotency_key', 'test-idempotency-key-5')
@@ -176,29 +196,16 @@ describe("Cart Order Endpoint Integration Test", () => {
     expect(response.body.error.message).toBe("Cart is empty");
   });
 
-  xit("should return error when customer not found", async () => {
-
-
+  it("should return error when customer not found", async () => {
     // Delete customer to simulate not found
     await customerService.getCollection().doc(testCustomer.id).delete();
 
-    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
+    const response = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
       .set('idempotency_key', 'test-idempotency-key-6')
       .expect(404); // Not Found
 
     expect(response.body.error.message).toBe("Customer not found");
-  });
-
-  xit("should handle payment initialization failure", async () => {
-
-    const response = await request("http://127.0.0.1:5001/test-project/us-central1/private")
-      .post(`/customers/${testCustomer.id}/cart/order`)
-      .set('Authorization', `Bearer ${createCustomerToken()}`)
-      .set('idempotency_key', 'test-idempotency-key-7')
-      .expect(500); // Internal Server Error
-
-    expect(response.body.error.message).toBe("Payment initialization failed: Insufficient funds");
   });
 });
