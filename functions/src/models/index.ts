@@ -3,6 +3,7 @@ import {components as models} from "../openapi/models";
 
 export type Customer = components["schemas"]["Customer"];
 export type CustomerStats = components["schemas"]["CustomerStats"];
+export type CustomerAccounting = components["schemas"]["CustomerAccounting"];
 export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type AddToCartItem = components["schemas"]["AddToCartItem"];
@@ -96,6 +97,7 @@ export type OrderPaymentConfirmedEvent = OutboxEvent & {
   payload: {
     order_id: string;
     external_id: string;
+    rebill_id: string;
   }
 };
 

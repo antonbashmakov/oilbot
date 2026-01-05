@@ -1156,6 +1156,18 @@ export interface components {
              */
             updated_at?: string;
         };
+        CustomerAccounting: {
+            /**
+             * @description Internal payment ID
+             * @example payment-123456
+             */
+            id: string;
+            /**
+             * @description Id at bank to charge recursive payments
+             * @example some-id-here
+             */
+            rebill_id: string;
+        };
         CustomerStats: {
             /**
              * @description Unique identifier for the customer

@@ -39,6 +39,7 @@ class TBankService {
       DATA: {
         Phone: process.env.SUPPORT_PHONE,
         Email: process.env.SUPPORT_EMAIL,
+        OrderType: "ORDER"
       },
       Receipt,
       RedirectDueDate,
@@ -78,6 +79,7 @@ class TBankService {
       Token: "",
       Recurrent: "Y", 
       CustomerKey: subscription.id,
+      OperationInitiatorType: "1", // initial recurrent payment
       TerminalKey: terminal,
       Amount: subscription.fee * 100,
       OrderId: subscription.id,
@@ -85,6 +87,7 @@ class TBankService {
       DATA: {
         Phone: process.env.SUPPORT_PHONE,
         Email: process.env.SUPPORT_EMAIL,
+        OrderType: "SUBSCRIPTION"
       },
       Receipt,
       RedirectDueDate,

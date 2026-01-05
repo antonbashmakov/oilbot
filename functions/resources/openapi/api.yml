@@ -2097,6 +2097,20 @@ components:
           format: date-time
           description: Balance last update timestamp
           example: "2025-01-10T14:30:00Z"
+    CustomerAccounting:
+      type: object
+      required:
+        - id
+        - rebill_id
+      properties:
+        id:
+          type: string
+          description: Internal payment ID
+          example: "payment-123456"      
+        rebill_id:
+          type: string          
+          description: Id at bank to charge recursive payments
+          example: "some-id-here"
 
     CustomerStats:
       type: object

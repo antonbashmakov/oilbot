@@ -36,6 +36,7 @@ c *{{deliveryStart}}* по *{{deliveryEnd}}*
 
 Благодарим за покупку. При каждом важном изменении заказа, мы будем присылать обновление в чат. По всем вопросам просим писать @antonoldenberg`,
   ORDER_PAYMENT_CONFIRMED_ADMIN: "✅ Ордер оплачен!: {{orderId}}",
+  SUBSCRIPTION_PAYMENT_CONFIRMED_ADMIN: "✅ Подписка оплачена!: {{subscriptionId}}",
 };
 
 /**

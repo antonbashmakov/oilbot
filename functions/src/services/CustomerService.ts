@@ -1,6 +1,6 @@
 import AbstractService from "./AbstractService";
 import { COLLECTIONS } from "../constants";
-import { Customer, CustomerStats } from "../models";
+import { Customer, CustomerAccounting, CustomerStats } from "../models";
 import { FieldValue } from "firebase-admin/firestore";
 
 
@@ -27,6 +27,31 @@ class CustomerService extends AbstractService<Customer> {
       };
       return this.db.collection(COLLECTIONS.CUSTOMER_STATS).doc(customerId).set(initialStats).then(() => initialStats);
     });
+  }
+  obtainAccounting(customerId: string): Promise<CustomerAccounting> {
+    const p = this.db.collection(COLLECTIONS.CUSTOMER_ACCOUNTING).doc(customerId).get().then((doc) => {
+      if (!doc.exists) {
+        return null;
+      }
+      return doc.data() as CustomerAccounting;
+    });
+
+    return p.then((stats) => {
+      if (stats) return stats;
+      const accounting: CustomerAccounting = {
+        id: customerId,
+        rebill_id: "",
+      };
+      return this.db.collection(COLLECTIONS.CUSTOMER_ACCOUNTING).doc(customerId).set(accounting).then(() => accounting);
+    });
+  }
+
+  updateAccounting(accounting: CustomerAccounting): Promise<CustomerAccounting> {
+    return this.db.collection(COLLECTIONS.CUSTOMER_ACCOUNTING).doc(accounting.id).update(accounting).then(() => accounting);
+  }
+
+  getAccountingRef(accountingId: string) {
+    return this.db.collection(COLLECTIONS.CUSTOMER_ACCOUNTING).doc(accountingId);
   }
 
   incrementStatistics(customerId: string, updates: Partial<CustomerStats>): Promise<CustomerStats> {
