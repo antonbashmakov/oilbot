@@ -403,7 +403,7 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
         const paymentResponse = await tbankService.initPayment(paymentRequest);
 
         if (!paymentResponse.Success) {
-          throw new Error(`Payment initialization failed: ${paymentResponse.Message}`);
+          throw new Error(`Payment initialization failed: ${paymentResponse.Message}; ${paymentResponse.Details}`);
         }
 
         const payment: Payment = {

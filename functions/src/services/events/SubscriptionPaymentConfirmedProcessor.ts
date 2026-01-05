@@ -38,7 +38,7 @@ class SubscriptionPaymentConfirmedProcessor extends AbstractProcessor {
 
       if (event.payload.rebill_id) {
         const accountingRef = customerService.getAccountingRef(subscriptionId);
-        t.update(accountingRef, {rebill_id: event.payload.rebill_id});
+        t.set(accountingRef, {id: subscriptionId, rebill_id: event.payload.rebill_id});
       }
     });
 

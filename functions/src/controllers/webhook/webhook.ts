@@ -57,7 +57,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
     if (body.Success && body.Status === "CONFIRMED" ) {
       const eventPublisher = new EventPublisher<OrderPaymentConfirmedEvent>(db);
 
-      const type = (body.DATA?.OrderType || "ORDER") === "ORDER" ? CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED : CONSTANTS.EVENTS.SUBSCRIPTION_PAYMENT_CONFIRMED;
+      const type = (body.DATA?.OrderType || body.RebillId || "ORDER") === "ORDER" ? CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED : CONSTANTS.EVENTS.SUBSCRIPTION_PAYMENT_CONFIRMED;
 
       const event: OrderPaymentConfirmedEvent = {
         id: "", // will be set by OutboxEventService
