@@ -2012,10 +2012,10 @@ components:
           description: URL for payment processing
           example: "https://securepay.tinkoff.ru/payment/init"
         error_code:
-          type: number
+          type: string
           nullable: true
           description: Error code from payment provider
-          example: 0
+          example: "0"
         status:
           type: string
           enum:

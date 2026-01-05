@@ -90,7 +90,8 @@ xdescribe("OrderPaymentCreatedProcessor Integration Test (Real Telegram)", () =>
       success: true,
       status: "SENT",
       payment_url: `https://securepay.tinkoff.ru/${createdOrder.id}`,
-      error_code: 0,
+      error_code: "0",
+      total: 0,
       created_at: new Date(),
     } as Payment;
 

@@ -1073,7 +1073,7 @@ export interface components {
              * @description Error code from payment provider
              * @example 0
              */
-            error_code?: number | null;
+            error_code?: string | null;
             /** @enum {string} */
             status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT" | "CANCELED" | "REJECTED";
             /**

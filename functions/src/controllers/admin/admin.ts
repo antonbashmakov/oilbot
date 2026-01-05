@@ -535,7 +535,7 @@ adminApi.post("/orders/:orderId/payments", async (req: express.Request, res: exp
           id: "",
           external_id: paymentResponse.PaymentId,
           terminal_key: paymentResponse.TerminalKey,
-          payment_url: paymentResponse.PaymentURL,
+          payment_url: paymentResponse.PaymentURL!,
           order_id: orderId,
           amount: order.total * 100, // Convert to kopecks
           total: order.total * 100,

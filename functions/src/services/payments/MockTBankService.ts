@@ -20,6 +20,7 @@ class MockTBankService extends TBankService{
       PaymentURL: "https://securepay.tinkoff.ru/p/MOCK_PAYMENT",
       OriginalAmount: paymentRequest.Amount,
       NewAmount: paymentRequest.Amount,
+      Amount: paymentRequest.Amount,
       PaymentId: mockPaymentId,
       Message: "Mock payment initialized successfully",
       Details: "This is a mock response from MockTBankService",
@@ -37,6 +38,7 @@ class MockTBankService extends TBankService{
       Status: "CANCELED",
       OriginalAmount: 0, // Not available in cancel request
       NewAmount: 0, // Not available in cancel request
+      Amount: 0,
       PaymentId: paymentRequest.PaymentId || "",
       Message: "Mock payment cancelled successfully",
       Details: "This is a mock response from MockTBankService",

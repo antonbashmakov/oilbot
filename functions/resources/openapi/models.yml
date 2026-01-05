@@ -215,6 +215,9 @@ components:
         OriginalAmount:
           type: number
           example: 13000
+        Amount:
+          type: number
+          example: 13000
         NewAmount:
           type: number
           example: 5000
@@ -247,6 +250,7 @@ components:
         - PaymentId
         - ErrorCode
         - Message
+        - Amount
         - Details
         - ExternalRequestId
 

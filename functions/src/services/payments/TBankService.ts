@@ -113,7 +113,7 @@ class TBankService {
     return body;
   }
 
-  async initPayment(paymentRequest: TinkoffPaymentPayload) {
+  async initPayment(paymentRequest: TinkoffPaymentPayload): Promise<TinkoffResult> {
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Init", paymentRequest, {
       headers: {
         "Content-Type": "application/json",

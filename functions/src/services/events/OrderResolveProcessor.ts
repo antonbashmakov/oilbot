@@ -98,7 +98,7 @@ class OrderResolveProcessor extends AbstractProcessor {
       const paymentResponse = await tbankService.initPayment(paymentRequest);
 
       const paymentData: Payment = {
-        payment_url: paymentResponse.PaymentURL,
+        payment_url: paymentResponse.PaymentURL!,
         error_code: paymentResponse.ErrorCode,
         id: "",
         status: "SENT",

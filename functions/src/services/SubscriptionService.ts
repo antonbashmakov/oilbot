@@ -1,5 +1,5 @@
 import AbstractService from "./AbstractService";
-import {Subscription} from "../models";
+import { Subscription } from "../models";
 import * as moment from "moment";
 
 
@@ -36,7 +36,7 @@ class SubscriptionService extends AbstractService<Subscription> {
   async createSubscription(customerId: string, fee = 0, date: Date): Promise<Subscription> {
 
     const d = moment(date, 'YYYY-MM-DD');
-    
+
     const nextPaymentDate = d.add(1, 'M').toDate();
 
     const subscription: Subscription = {
@@ -48,6 +48,11 @@ class SubscriptionService extends AbstractService<Subscription> {
     };
 
     return this.set(subscription);
+  }
+
+  toPOJO(id: any, o: any): Subscription | undefined {
+    if (!o) return undefined;
+    return { ...o, id, created_at: o.created_at.toDate(), next_payment_at: o.next_payment_at.toDate(), canceled_at: o.next_payment_at?.toDate() };
   }
 }
 

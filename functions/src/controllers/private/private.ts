@@ -18,10 +18,11 @@ import {
 import * as dotenv from "dotenv";
 // import {logger} from "firebase-functions/v1";
 import { localeMiddleware } from "../../middleware/localeMiddleware";
-import { DeliveryRef, ItemOverview, Order, Payment } from "../../models";
+import { DeliveryRef, ItemOverview, Order, Payment, Subscription } from "../../models";
 import _ = require("lodash");
 // import * as jwt from "jsonwebtoken";
 import * as cookieParser from "cookie-parser";
+import moment = require("moment");
 
 admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
@@ -291,9 +292,6 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       throw new Error("Customer not found");
     }
 
-
-
-
     // Use idempotency guard to ensure transactional and idempotent operation
     const result = await idempotencyGuardService.runIdempotentRequest<{ order: Order, payment: Payment, paymentUrl: string }>(
       `cart-order-${customerId}-${idempotencyKey}`,
@@ -324,7 +322,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
           id: "",
           external_id: paymentResponse.PaymentId,
           terminal_key: paymentRequest.TerminalKey,
-          payment_url: paymentResponse.PaymentURL,
+          payment_url: paymentResponse.PaymentURL!,
           order_id: order.id,
           amount: order.total * 100,
           total: order.total * 100,
@@ -332,7 +330,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
           success: false,
           created_at: new Date(),
           updated_at: new Date(),
-          error_code: paymentResponse.ErrorCode || 0,
+          error_code: paymentResponse.ErrorCode || "0",
         };
 
         const p = await paymentService.add(payment);
@@ -359,7 +357,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       return api.error(res, err.message);
     }
     if (err.message === "Active subscription is missing") {
-        return api.paymentRequired(res, "Customer needs an active subscription to place orders");
+      return api.paymentRequired(res, "Customer needs an active subscription to place orders");
 
     }
 
@@ -368,26 +366,86 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
 });
 
 privateApi.post("/customers/:customerId/subscriptions", async (req: express.Request, res: express.Response) => {
+
+  const idempotencyKey = req.headers["idempotency_key"] as string;
+
+  if (!idempotencyKey) {
+    return api.badRequest(res, "idempotency_key header is required");
+  }
+  const { customerId } = req.params;
+
+  // Check if customer exists
+  const customer = await customerService.find(customerId);
+  if (!customer) {
+    return api.notFound(res, "Customer not found");
+  }
+
   try {
-    const { customerId } = req.params;
 
-    // Check if customer exists
-    const customer = await customerService.find(customerId);
-    if (!customer) {
-      return api.notFound(res, "Customer not found");
+    const result = await idempotencyGuardService.runIdempotentRequest<{ payment: Payment, subscription: Subscription }>(
+      `cart-order-${customerId}-${idempotencyKey}`,
+      async () => {        
+        const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());    
+
+        if (hasActiveSubscription) {
+          throw new Error("Active subscription exists");
+        }
+
+
+        const d = moment(new Date(), 'YYYY-MM-DD');
+        const nextPaymentDate = d.add(1, 'M').toDate();
+        const subscription: Subscription = {
+          id: customerId,
+          created_at: new Date(),
+          next_payment_at: nextPaymentDate,
+          status: "PENDING",
+          fee: 300,
+        };
+
+        const paymentRequest = tbankService.subscriptionToPaymentRequest(subscription);
+        const paymentResponse = await tbankService.initPayment(paymentRequest);
+
+        if (!paymentResponse.Success) {
+          throw new Error(`Payment initialization failed: ${paymentResponse.Message}`);
+        }
+
+        const payment: Payment = {
+          id: "",
+          external_id: paymentResponse.PaymentId,
+          terminal_key: paymentRequest.TerminalKey,
+          payment_url: paymentResponse.PaymentURL!,
+          order_id: customerId,
+          amount: subscription.fee * 100,
+          total: subscription.fee * 100,
+          status: "SENT",
+          success: false,
+          created_at: new Date(),
+          updated_at: new Date(),
+          error_code: paymentResponse.ErrorCode || "0",
+        };
+
+        const p = await paymentService.add(payment);
+        await subscriptionService.set(subscription);
+
+        return {
+          payment: p,
+          subscription,
+        }
+
+      });
+
+    return api.send(res, { paymentUrl: result.payment.payment_url });
+  } catch (err: any) {
+    functions.logger.error(err);
+
+
+    if (err.message.includes("Payment initialization failed")) {
+      return api.error(res, err.message);
     }
-
-    // Check if customer already has an active subscription that is not passed due
-    const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
-    if (hasActiveSubscription) {
+    if (err.message === "Active subscription exists") {
       return api.badRequest(res, "Customer already has an active subscription");
     }
 
-    const subscription = await subscriptionService.createSubscription(customerId, 300, new Date());
-
-    return api.send(res, subscription);
-  } catch (err: any) {
-    functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
   }
 });

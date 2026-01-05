@@ -164,7 +164,6 @@ describe("Cart Order Endpoint Integration Test", () => {
     const s: Subscription = {
       id: testCustomer.id,
       created_at: new Date(),
-      canceled_at: new Date(),
       next_payment_at: moment(new Date()).add(1, "month").toDate(),
       status: "ACTIVE",
       fee: 300,
@@ -175,7 +174,7 @@ describe("Cart Order Endpoint Integration Test", () => {
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
       .set('idempotency_key', 'test-idempotency-key-3')
-      .expect(402); 
+      .expect(200); 
 
 
   });

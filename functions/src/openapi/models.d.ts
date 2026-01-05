@@ -128,6 +128,8 @@ export interface components {
             Status: string;
             /** @example 13000 */
             OriginalAmount: number;
+            /** @example 13000 */
+            Amount: number;
             /** @example 5000 */
             NewAmount: number;
             /** @example 2304882 */
