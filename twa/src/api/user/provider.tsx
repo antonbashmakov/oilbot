@@ -5,10 +5,10 @@ import { useGetCartItemsQuery, validateTelegramUser } from '..';
 import { CustomerOverview } from '../models';
 
 // Mock user object as provided in the task
-const MOCK_USER = {
+const MOCK_USER: AppCustomer = {
   id: "270053857",
+  is_mock: true,
   is_bot: null,
-  is_premium: true,
   language_code: "en",
   last_name: "Öldenberg",
   username: "antonoldenberg",
@@ -30,6 +30,12 @@ const MOCK_USER = {
     number_of_active_orders: 0,
     number_of_paid_months: 0,
     paid_in_total: 0,
+  },
+  subscription: {
+    status: "ACTIVE",
+    next_payment_at: "2025-11-23T00:00:00.000Z",
+    fee: 300,
+    id: "270053857",
   }
 };
 

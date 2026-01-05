@@ -4,20 +4,22 @@ import { useRouter } from "next/navigation";
 import { UserDisplay } from "./UserDisplay";
 import { HeaderCartButton } from "./HeaderCartButton";
 import { useCallback } from "react";
+import { format, formatDate } from "date-fns";
+import { useUser } from "@/api/user/provider";
 
 const MainHeader = () => {
+  const { user } = useUser();
   return (
     <div className="sticky top-0 z-30 bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
       <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2 overflow-hidden">
-          <span className="material-symbols-outlined text-primary">location_on</span>
+        { user?.subscription?.next_payment_at && <div className="flex items-center gap-2 overflow-hidden">
+          <span className="material-symbols-outlined text-green-600 dark:text-green-400 filled">verified</span>
           <div className="flex flex-col">
-            <span className="text-xs font-medium text-text-sub-light dark:text-text-sub-dark uppercase tracking-wide">
-              Delivering to
-            </span>
-            <h2 className="text-base font-bold leading-tight truncate">Downtown, Market St.</h2>
+            <span className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-wide">Subscription
+              Active</span>
+            <h2 className="text-base font-bold leading-tight truncate">Next payment: {format(new Date(user?.subscription?.next_payment_at), "dd MMM yyyy")}</h2>
           </div>
-        </div>
+        </div>}
         <div className="flex items-center gap-3">
           <UserDisplay />
           <HeaderCartButton />
