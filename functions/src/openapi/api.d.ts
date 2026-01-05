@@ -564,6 +564,7 @@ export interface components {
         CustomerOverview: {
             balance: components["schemas"]["CustomerBalance"];
             stats?: components["schemas"]["CustomerStats"];
+            subscription?: components["schemas"]["Subscription"];
         } & components["schemas"]["Customer"];
         OrderPickingPatch: {
             /** @description Items to update in this order picking */
@@ -2350,7 +2351,13 @@ export interface operations {
                     "application/json": {
                         /** @example OK */
                         code?: string;
-                        data?: components["schemas"]["Subscription"];
+                        data?: {
+                            /**
+                             * @description URL for payment processing
+                             * @example https://securepay.tinkoff.ru/payment/init?PaymentId=123456
+                             */
+                            paymentUrl?: string;
+                        };
                     };
                 };
             };

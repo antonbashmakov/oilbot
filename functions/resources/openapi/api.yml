@@ -985,7 +985,12 @@ paths:
                     type: string
                     example: "OK"
                   data:
-                    $ref: '#/components/schemas/Subscription'
+                    type: object
+                    properties:
+                      paymentUrl:
+                        type: string
+                        description: URL for payment processing
+                        example: "https://securepay.tinkoff.ru/payment/init?PaymentId=123456"        
         '400':
           description: Bad request (e.g., customer already has an active subscription)
           content:
@@ -1370,6 +1375,8 @@ components:
           $ref: '#/components/schemas/CustomerBalance'
         stats:
           $ref: '#/components/schemas/CustomerStats'
+        subscription:
+          $ref: '#/components/schemas/Subscription'
     OrderPickingPatch:
       type: object
       required:

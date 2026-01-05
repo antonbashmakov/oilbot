@@ -4,7 +4,7 @@ import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import * as moment from "moment";
 
-import { TINKOFF_SUPPORT } from "../../constants";
+import {TINKOFF_SUPPORT} from "../../constants";
 
 import {Order, Payment, Subscription, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
 dotenv.config();
@@ -39,7 +39,7 @@ class TBankService {
       DATA: {
         Phone: process.env.SUPPORT_PHONE,
         Email: process.env.SUPPORT_EMAIL,
-        OrderType: "ORDER"
+        OrderType: "ORDER",
       },
       Receipt,
       RedirectDueDate,
@@ -55,10 +55,9 @@ class TBankService {
     return body;
   }
   subscriptionToPaymentRequest(subscription: Subscription): TinkoffPaymentPayload {
-
     const to = moment(subscription.next_payment_at);
     const from = to.add(-1, "month");
-    
+
     const Items: TinkoffPaymentItem[] = [{
       Name: `Подписка По Себестоимости за период ${from.format("DD.MM.YYYY")} - ${to.format("DD.MM.YYYY")}`,
       Price: subscription.fee * 100,
@@ -77,7 +76,7 @@ class TBankService {
 
     const body = {
       Token: "",
-      Recurrent: "Y", 
+      Recurrent: "Y",
       CustomerKey: subscription.id,
       OperationInitiatorType: "1", // initial recurrent payment
       TerminalKey: terminal,
@@ -87,7 +86,7 @@ class TBankService {
       DATA: {
         Phone: process.env.SUPPORT_PHONE,
         Email: process.env.SUPPORT_EMAIL,
-        OrderType: "SUBSCRIPTION"
+        OrderType: "SUBSCRIPTION",
       },
       Receipt,
       RedirectDueDate,

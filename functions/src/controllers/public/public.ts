@@ -16,6 +16,7 @@ import {User} from "../../models";
 import {localeMiddleware} from "../../middleware/localeMiddleware";
 
 import CustomerBalanceService from "../../services/CustomerBalanceService";
+import {SubscriptionService} from "../private/imports";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -33,6 +34,7 @@ if (process.env.GCLOUD_PROJECT !== "test-project" && db.databaseId !== process.e
 const userService = new UserService(db);
 const customerService = new CustomerService(db);
 const customerBalanceService = new CustomerBalanceService(db);
+const subscriptionService = new SubscriptionService(db);
 
 const publicApi = express();
 
@@ -173,7 +175,7 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
 
     let customer = await customerService.find(`${verification.user?.id}`);
 
-    if(!customer) {
+    if (!customer) {
       await customerService.set(systemUser);
 
       customer = systemUser;
@@ -181,8 +183,9 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
 
     const balance = await customerBalanceService.obtainForCustomer(customer.id);
     const stats = await customerService.obtainStatistics(customer.id);
+    const subscription = await subscriptionService.find(customer.id);
 
-    return api.send(res, {...customer, balance, stats});
+    return api.send(res, {...customer, balance, stats, subscription});
   } catch (err: any) {
     functions.logger.error(err);
     // The authorize function already sends error responses, so we just need to return

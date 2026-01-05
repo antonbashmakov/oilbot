@@ -51,7 +51,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
   try {
     const body: PaymentWebhookBody = req.body;
 
-    debug("Payment id : " + `${body.PaymentId}`);
+    debug("Payment  : ", body);
 
     // Process successful confirmed payments
     if (body.Success && body.Status === "CONFIRMED" ) {
@@ -63,7 +63,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
         id: "", // will be set by OutboxEventService
         created_at: new Date(),
         processed_at: new Date(),
-        
+
         processed: false,
         retries: 0,
         type,

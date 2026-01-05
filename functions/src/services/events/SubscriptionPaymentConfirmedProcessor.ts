@@ -31,16 +31,15 @@ class SubscriptionPaymentConfirmedProcessor extends AbstractProcessor {
        *  Subscription, Accounting, Balance and Stats all stored by customer's id
        */
       const subscriptionDocRef = subscriptionService.getCollection().doc(subscription.id);
-      t.update(subscriptionDocRef, { status: "ACTIVE" });
+      t.update(subscriptionDocRef, {status: "ACTIVE"});
 
       const paymentDocRef = paymentService.getCollection().doc(payment.id);
       t.update(paymentDocRef, {success: true, status: "CONFIRMED"});
 
-      if(event.payload.rebill_id) {
-        const accountingRef = customerService.getAccountingRef(subscriptionId); 
+      if (event.payload.rebill_id) {
+        const accountingRef = customerService.getAccountingRef(subscriptionId);
         t.update(accountingRef, {rebill_id: event.payload.rebill_id});
       }
-
     });
 
     // Send notification to hardcoded chat ID

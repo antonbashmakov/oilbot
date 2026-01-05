@@ -5,12 +5,11 @@ import TBankService from "./TBankService";
 dotenv.config();
 
 
-class MockTBankService extends TBankService{
-
+class MockTBankService extends TBankService {
   async initPayment(paymentRequest: TinkoffPaymentPayload): Promise<TinkoffResult> {
     // Mock successful payment initialization
     const mockPaymentId = `mock-payment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     return {
       Success: true,
       ErrorCode: "0",
@@ -27,7 +26,7 @@ class MockTBankService extends TBankService{
       ExternalRequestId: `ext-req-${Date.now()}`,
     };
   }
-  
+
   async cancelPayment(paymentRequest: TinkoffPaymentCancelationRequest): Promise<TinkoffResult> {
     // Mock successful payment cancellation
     return {
@@ -45,7 +44,6 @@ class MockTBankService extends TBankService{
       ExternalRequestId: `ext-req-${Date.now()}`,
     };
   }
-
 }
 
 export default MockTBankService;

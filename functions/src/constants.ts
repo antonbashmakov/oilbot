@@ -1,4 +1,4 @@
-import { TinkoffReceipt } from "./models";
+import {TinkoffReceipt} from "./models";
 
 export const COLLECTIONS = {
   CUSTOMERS: "CUSTOMERS",
