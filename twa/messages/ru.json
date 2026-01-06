@@ -128,7 +128,9 @@
     "nextPayment": "Следующий платеж",
     "canceledAt": "Отменено",
     "freePlan": "Бесплатный план",
-    "oneFreeOrderLeft": "Остался один бесплатный заказ",
-    "myCart": "Моя корзина"
+    "oneFreeOrderLeft": "Один бесплатный заказ",
+    "noFreeOrderLeft": "Нет бесплатных заказов",
+    "myCart": "Моя корзина",
+    "myOrders": "Мои заказы"
   }
 }

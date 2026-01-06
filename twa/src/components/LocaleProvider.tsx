@@ -13,7 +13,7 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
   const [messages, setMessages] = useState<Record<string, any> | null>(null);
   
   // Determine locale from user's language_code
-  const locale = user?.language_code === 'ru' ? 'ru' : 'en';
+  const locale = user?.language_code || "ru";
   
   useEffect(() => {
     // Dynamically load messages based on locale

@@ -7,6 +7,7 @@ import { useUser } from '@/api/user/provider';
 import { useTranslations } from 'next-intl';
 
 import _ from 'lodash';
+import { IMAGE_TO_UUIDS } from '@/data/products';
 
 export default function CartPage() {
   const { user } = useUser();
@@ -75,13 +76,6 @@ export default function CartPage() {
     }
   }, [user?.id, cartItems, checkoutMutation, t]);
 
-  // Mock images for demonstration
-  const mockImages = [
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuAIow-8ESJRqmDF46HALfhPsB08ajJ0PgZj8Ysw6nSMKI1PEkD-owCwV-PkBFeGKtRYAgMcXrmpDT7SdiZOuY5w-D80dT0U8VfYBLrlvbSwkby0PuEtYWu4acHCBorpYRCIBnpy3h1d28xdheV192qzUCm0sQ6yK0UeSD4nNVJj-4qBc19OlTL43Lm_cIpshUYVMgKT2s17PSJmeY2QsWoAMcw0U_uLI7psPBOmkTHMFW46c-c4lWnIdLxf-cduxI7DPEEKJ9iWwr0n',
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuDnxTwvFfBfY71tmkKm_b7wbJtVhb2iRexHer3ihnb_rokTq3JgYTeZdU7-oSq4yogu3tCAy8Yv2vtwMaU0lYQ-8vXCm51yddsP4hzpgXdnoX4yqgl_WquAGbUNKvGPHVVveu0EoalownrGwioNUQDOmNsyiZXl0GPJ07wWbi3lhH8DsJiEYMERP44ah9q4cw-I8agrWMlWScKCBxqXFGcZDjclh9gm-zTjUlIImMkTkmTfaALiVBcZ6Q1bTqPDBHSzyTLESYRvJnZ5',
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuCOog6N7Cy9UA1m4epH86bBgydklkZmuTCk4gg7G7WKKst-i9bd-PNLiwy8bGIN0uV9-ApLdvSlkmnpwrx-KwRTpBLWbI3tDm0C0pZxZ9xYV-yCuFG0WZvrQ6f79bBru3eotrInsBt0zwQhzyMBsr4q6I-6gGinaOT53ukT2j2AVBoqd3lqCQQ1rl6wuMNGHg8kAd0WsQ7onsIL0lTry-lDKEWc3PT48Nr0GNDrHj1jFG_Y5st73SntmFyuLxUgaI3P4A_FMGfC6SOq'
-  ];
-
   return (
     <>
       {/* Custom Cart Header - This replaces the default page header */}
@@ -95,20 +89,36 @@ export default function CartPage() {
             items.map((item, index) => {
               const quantity = item.quantity;
               const itemTotal = (item.price || 0) * quantity;
-              const imageIndex = index % mockImages.length;
 
               return (
                 <div
                   key={item.id || item.item_id}
                   className="group relative flex gap-4 bg-white dark:bg-white/5 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 transition-transform active:scale-[0.99]"
                 >
-                  {/* Image */}
-                  <div className="relative shrink-0 overflow-hidden rounded-lg w-24 h-24 bg-gray-100">
-                    <div
-                      className="w-full h-full bg-center bg-cover"
-                      style={{ backgroundImage: `url(${mockImages[imageIndex]})` }}
-                      aria-label={item.name || 'Product image'}
-                    />
+                  <div
+                    className="relative shrink-0 overflow-hidden rounded-lg w-24 h-24 bg-gray-100"
+                    style={{
+                      backgroundImage: item.item_id && IMAGE_TO_UUIDS[item.item_id] ? `url(https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.item_id]}/-/preview/100x100/)` : 'none',
+                      backgroundColor: 'transparent',
+                    }}
+                    aria-label={item.name || 'Product image'}
+                  >
+                    {item.id && (
+                      <img
+                        src={IMAGE_TO_UUIDS[item.item_id] ? `https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.item_id]}/-/preview/400x400/` : undefined}
+                        alt={item.name || 'Product image'}
+                        className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300"
+                        loading="lazy"
+                        onLoad={(e) => {
+                          e.currentTarget.classList.remove('opacity-0');
+                          e.currentTarget.classList.add('opacity-100');
+                        }}
+                        onError={(e) => {
+                          // If high-res fails, keep showing thumbnail
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    )}
                   </div>
 
                   {/* Content */}
@@ -126,12 +136,12 @@ export default function CartPage() {
                         </button>
                       </div>
                       <p className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium mt-1">
-                        ${(item.price_for_unit || 0).toFixed(2)} / {item.group || 'unit'}
+                        {(item.price_for_unit || 0).toFixed(2)} ₽ / {item.group || 'unit'}
                       </p>
                     </div>
 
                     <div className="flex items-end justify-between mt-2">
-                      <p className="text-primary font-bold text-lg">${itemTotal.toFixed(2)}</p>
+                      <p className="text-primary font-bold text-lg">{itemTotal.toFixed(2)} ₽</p>
 
                       {/* Stepper */}
                       <div className="flex items-center bg-gray-50 dark:bg-white/10 rounded-lg p-1 gap-1 border border-gray-100 dark:border-transparent">
@@ -180,7 +190,7 @@ export default function CartPage() {
           )}
         </div>
 
-        {/* Price Breakdown */}
+        {/* Price Breakdown 
         {cartItems.length > 0 && (
           <div className="px-4 py-4 mt-2">
             <div
@@ -192,7 +202,9 @@ export default function CartPage() {
             </div>
           </div>
         )}
+          */}
       </div>
+      
 
       {/* Sticky Footer for Checkout - Only shown when cart has items */}
       {cartItems.length > 0 && (
@@ -205,7 +217,7 @@ export default function CartPage() {
             <span>
               {checkoutMutation.isPending ? t('processing') : t('checkout')}
             </span>
-            <span>${cartTotal.toFixed(2)}</span>
+            <span>{cartTotal.toFixed(2)} ₽</span>
           </button>
         </div>
       )}

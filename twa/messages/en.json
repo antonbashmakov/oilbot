@@ -135,6 +135,8 @@
     "canceledAt": "Canceled at",
     "freePlan": "Free Plan",
     "oneFreeOrderLeft": "One free order left",
-    "myCart": "My Cart"
+    "noFreeOrderLeft": "No free order left",
+    "myCart": "My Cart",
+    "myOrders": "My Orders"
   }
 }

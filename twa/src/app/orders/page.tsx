@@ -298,7 +298,7 @@ export default function OrdersPage() {
                   <div className="flex flex-col">
                     <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{t('totalAmount')}</span>
                     <span className="text-lg font-bold text-slate-900 dark:text-white">
-                      ${order.total?.toFixed(2) || '0.00'}
+                      {order.total?.toFixed(2) || '0.00'}₽
                     </span>
                   </div>
                   <button className={`flex cursor-pointer items-center justify-center rounded-lg h-9 px-5 transition-colors text-sm font-bold leading-normal tracking-wide ${actionButton.className}`}>

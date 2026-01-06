@@ -2,7 +2,7 @@
 
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Providers } from "./providers";
-import { MainHeader, CartHeader } from "@/components/Header";
+import { MainHeader, CartHeader, OrdersHeader } from "@/components/Header";
 
 import "./globals.css";
 
@@ -12,6 +12,7 @@ import { Navigation } from "@/components/Navigation";
 
 const PATH_TO_HEADER_MAP: Record<string, React.FC> = {
   "/cart": CartHeader,
+  "/orders": OrdersHeader,
   "/": MainHeader,
 };
 
