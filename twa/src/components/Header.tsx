@@ -6,20 +6,52 @@ import { HeaderCartButton } from "./HeaderCartButton";
 import { useCallback } from "react";
 import { format, formatDate } from "date-fns";
 import { useUser } from "@/api/user/provider";
+import { useTranslations } from 'next-intl';
 
 const MainHeader = () => {
   const { user } = useUser();
+  const t = useTranslations('header');
+
   return (
     <div className="sticky top-0 z-30 bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
       <div className="flex items-center justify-between px-4 py-3">
-        { user?.subscription?.next_payment_at && <div className="flex items-center gap-2 overflow-hidden">
+        {user?.subscription?.status === "ACTIVE" && user?.subscription?.next_payment_at && <div className="flex items-center gap-2 overflow-hidden">
           <span className="material-symbols-outlined text-green-600 dark:text-green-400 filled">verified</span>
           <div className="flex flex-col">
-            <span className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-wide">Subscription
-              Active</span>
-            <h2 className="text-base font-bold leading-tight truncate">Next payment: {format(new Date(user?.subscription?.next_payment_at), "dd MMM yyyy")}</h2>
+            <span className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-wide">
+              {t('subscription.active')}
+            </span>
+            <h2 className="text-base font-bold leading-tight truncate">
+              {t('nextPayment')}: {format(new Date(user?.subscription?.next_payment_at), "dd MMM yyyy")}
+            </h2>
           </div>
-        </div>}
+        </div>
+        }
+        {user?.subscription?.status === "CANCELED" && user?.subscription?.canceled_at && <div className="flex items-center gap-2 overflow-hidden">
+          <span className="material-symbols-outlined text-primary">stars</span>
+          <div className="flex flex-col">
+            <span
+              className="text-xs font-medium text-text-sub-light dark:text-text-sub-dark uppercase tracking-wide">
+              {t('subscription.label')}
+            </span>
+            <h2 className="text-base font-bold leading-tight truncate">
+              {t('canceledAt')}: {format(new Date(user?.subscription?.canceled_at), "dd MMM yyyy")}
+            </h2>
+          </div>
+        </div>
+        }
+        {(!user?.subscription || (!!(user?.stats?.number_of_active_orders || 0) || !!(user?.stats?.number_of_fulfilled_orders || 0))) && <div className="flex items-center gap-2 overflow-hidden">
+          <span className="material-symbols-outlined text-primary">card_giftcard</span>
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-text-sub-light dark:text-text-sub-dark uppercase tracking-wide">
+              {t('freePlan')}
+            </span>
+            <h2 className="text-base font-bold leading-tight truncate">
+              {t('oneFreeOrderLeft')}
+            </h2>
+          </div>
+        </div>
+        }
         <div className="flex items-center gap-3">
           <UserDisplay />
           <HeaderCartButton />
@@ -28,8 +60,10 @@ const MainHeader = () => {
     </div>
   );
 };
+
 const CartHeader = () => {
   const router = useRouter();
+  const t = useTranslations('header');
 
   const handleBack = useCallback(() => {
     router.push("/");
@@ -47,12 +81,12 @@ const CartHeader = () => {
         </button>
         <h2
           className="text-text-light dark:text-text-dark text-lg font-bold leading-tight tracking-tight text-center">
-          My Cart (3)</h2>
+          {t('myCart')} (3)
+        </h2>
         <div className="w-10"></div>
       </div>
     </div>
   );
 };
-
 
 export { MainHeader, CartHeader };

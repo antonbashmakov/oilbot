@@ -6,12 +6,14 @@ import { format } from "date-fns";
 import { CartButton } from '@/components/CartButton';
 import { ItemOverview } from '@/api/models';
 import { categories, IMAGE_TO_UUIDS } from '@/data/products';
+import { useTranslations } from 'next-intl';
 
 import _ from 'lodash';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const { data, isLoading, error } = useGetItemsQuery(selectedCategory);
+  const t = useTranslations('common');
 
   const [items, setItems] = useState<ItemOverview[]>([]);
 
@@ -28,7 +30,7 @@ export default function Home() {
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-          <p className="mt-4 text-text-sub-light dark:text-text-sub-dark">Loading products...</p>
+          <p className="mt-4 text-text-sub-light dark:text-text-sub-dark">{t('loading')}</p>
         </div>
       </div>
     );
@@ -40,7 +42,7 @@ export default function Home() {
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center text-red-500">
           <span className="material-symbols-outlined text-4xl">error</span>
-          <p className="mt-4">Failed to load products. Please try again.</p>
+          <p className="mt-4">{t('error')}. {t('retry')}.</p>
         </div>
       </div>
     );
@@ -74,7 +76,7 @@ export default function Home() {
                   : 'text-text-main-light dark:text-text-main-dark font-medium'
                   }`}
               >
-                {category.name}
+                {t(`category.${category.id.toLowerCase()}` as any) || category.name}
               </p>
             </button>
           ))}
@@ -172,7 +174,7 @@ export default function Home() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <span className="material-symbols-outlined text-4xl text-text-sub-light dark:text-text-sub-dark">inventory_2</span>
-            <p className="mt-4 text-text-sub-light dark:text-text-sub-dark">No products found in this category.</p>
+            <p className="mt-4 text-text-sub-light dark:text-text-sub-dark">{t('noProducts')}</p>
           </div>
         </div>
       )}

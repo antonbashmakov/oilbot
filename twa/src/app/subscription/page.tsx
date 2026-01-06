@@ -3,11 +3,13 @@
 import { useCreateSubscription } from "@/api";
 import { useUser } from "@/api/user/provider";
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 
 export default function SubscriptionPage() {
   const { user } = useUser();
   const createSubscriptionMutation = useCreateSubscription(user?.id);
   const [isProcessing, setIsProcessing] = useState(false);
+  const t = useTranslations('subscription');
 
   const handleClose = () => {
     window.location.href = "/";
@@ -15,7 +17,7 @@ export default function SubscriptionPage() {
 
   const handleSubscribe = async () => {
     if (!user?.id) {
-      alert("Please log in to subscribe.");
+      alert(t('loginRequired'));
       return;
     }
 
@@ -35,8 +37,8 @@ export default function SubscriptionPage() {
     } catch (error: any) {
       console.error('Subscription failed:', error);
       // Show error message
-      const errorMessage = error?.error?.message || error?.message || 'Subscription failed. Please try again.';
-      alert(`Error: ${errorMessage}`);
+      const errorMessage = error?.error?.message || error?.message || t('subscriptionFailed');
+      alert(`${t('error')}: ${errorMessage}`);
     } finally {
       setIsProcessing(false);
     }
@@ -67,12 +69,12 @@ export default function SubscriptionPage() {
 
         {/* Title */}
         <h2 className="text-gray-900 dark:text-white text-3xl font-extrabold leading-tight tracking-tight mb-4">
-          Subscription Required
+          {t('title')}
         </h2>
 
         {/* Description */}
         <p className="text-gray-500 dark:text-gray-400 text-base font-medium leading-relaxed mb-10 max-w-xs mx-auto">
-          You need to buy a subscription to access our finest steaks, wild salmon, and artisan cheese.
+          {t('description')}
         </p>
 
         {/* Features list */}
@@ -86,10 +88,10 @@ export default function SubscriptionPage() {
             </div>
             <div>
               <span className="block text-gray-900 dark:text-white font-bold text-sm">
-                Free Priority Delivery
+                {t('features.freeDelivery.title')}
               </span>
               <span className="block text-gray-500 dark:text-gray-400 text-xs">
-                On all orders over $50
+                {t('features.freeDelivery.description')}
               </span>
             </div>
           </div>
@@ -103,10 +105,10 @@ export default function SubscriptionPage() {
             </div>
             <div>
               <span className="block text-gray-900 dark:text-white font-bold text-sm">
-                Exclusive Cuts
+                {t('features.exclusiveCuts.title')}
               </span>
               <span className="block text-gray-500 dark:text-gray-400 text-xs">
-                Access to rare & aged meats
+                {t('features.exclusiveCuts.description')}
               </span>
             </div>
           </div>
@@ -120,10 +122,10 @@ export default function SubscriptionPage() {
             </div>
             <div>
               <span className="block text-gray-900 dark:text-white font-bold text-sm">
-                Member-Only Prices
+                {t('features.memberPrices.title')}
               </span>
               <span className="block text-gray-500 dark:text-gray-400 text-xs">
-                Save up to 20% on every order
+                {t('features.memberPrices.description')}
               </span>
             </div>
           </div>
@@ -139,16 +141,16 @@ export default function SubscriptionPage() {
         >
           {isProcessing || createSubscriptionMutation.isPending ? (
             <>
-              <span className="text-lg">Processing...</span>
+              <span className="text-lg">{t('processing')}</span>
               <span className="material-symbols-outlined animate-spin" style={{ fontSize: "20px" }}>
                 refresh
               </span>
             </>
           ) : (
             <>
-              <span className="text-lg">Subscribe</span>
+              <span className="text-lg">{t('subscribe')}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-              <span className="text-lg">300/month</span>
+              <span className="text-lg">300/{t('month')}</span>
               <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform" style={{ fontSize: "20px" }}>
                 arrow_forward
               </span>
@@ -157,18 +159,18 @@ export default function SubscriptionPage() {
         </button>
 
         <p className="text-center text-xs text-gray-400 dark:text-gray-500 leading-normal">
-          By subscribing, you agree to our{" "}
+          {t('agreement.prefix')}{" "}
           <a
             className="text-gray-800 dark:text-gray-300 underline decoration-gray-300 dark:decoration-gray-600 underline-offset-2 hover:text-primary transition-colors"
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              alert("Terms and conditions would be shown here.");
+              alert(t('agreement.alert'));
             }}
           >
-            Agreement
+            {t('agreement.link')}
           </a>{" "}
-          and acknowledge that your subscription will auto-renew.
+          {t('agreement.suffix')}
         </p>
       </div>
     </>

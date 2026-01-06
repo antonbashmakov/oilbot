@@ -6,6 +6,7 @@ import { useUser } from '@/api/user/provider';
 import { useGetOrdersQuery } from '@/api';
 import { useState, useMemo, useEffect } from 'react';
 import { Order } from '@/api/models';
+import { useTranslations } from 'next-intl';
 import _ from 'lodash';
 
 export default function OrdersPage() {
@@ -13,6 +14,7 @@ export default function OrdersPage() {
   const { user } = useUser();
   const { data: orders = [], isLoading, error } = useGetOrdersQuery(user?.id);
   const [activeFilter, setActiveFilter] = useState<'all' | 'processing' | 'delivered' | 'cancelled'>('all');
+  const t = useTranslations('orders');
 
   const [orderedOrders, setOrderedOrders] = useState<Order[]>([]);
 
@@ -44,7 +46,7 @@ export default function OrdersPage() {
   }, [orderedOrders, activeFilter]);
   // Format date from order (assuming order has a created_at field)
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Date not available';
+    if (!dateString) return t('dateNotAvailable');
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString('en-US', { 
@@ -53,7 +55,7 @@ export default function OrdersPage() {
         year: 'numeric' 
       });
     } catch {
-      return 'Invalid date';
+      return t('invalidDate');
     }
   };
 
@@ -71,7 +73,7 @@ export default function OrdersPage() {
           icon: 'package_2',
           iconColor: 'text-orange-600 dark:text-orange-400',
           text: 'text-orange-700 dark:text-orange-400',
-          label: 'Processing'
+          label: t('status.processing')
         };
       case 'DELIVERED':
         return {
@@ -80,7 +82,7 @@ export default function OrdersPage() {
           icon: 'check_circle',
           iconColor: 'text-green-600 dark:text-green-400',
           text: 'text-green-700 dark:text-green-400',
-          label: 'Delivered'
+          label: t('status.delivered')
         };
       case 'CANCELED':
         return {
@@ -89,7 +91,7 @@ export default function OrdersPage() {
           icon: 'cancel',
           iconColor: 'text-slate-500 dark:text-slate-400',
           text: 'text-slate-600 dark:text-slate-400',
-          label: 'Cancelled'
+          label: t('status.cancelled')
         };
       case 'CONCILIATED':
         return {
@@ -98,7 +100,7 @@ export default function OrdersPage() {
           icon: 'check_circle',
           iconColor: 'text-blue-600 dark:text-blue-400',
           text: 'text-blue-700 dark:text-blue-400',
-          label: 'Conciliated'
+          label: t('status.conciliated')
         };
       case 'PAYMENT_FAILED':
         return {
@@ -107,7 +109,7 @@ export default function OrdersPage() {
           icon: 'error',
           iconColor: 'text-red-600 dark:text-red-400',
           text: 'text-red-700 dark:text-red-400',
-          label: 'Payment Failed'
+          label: t('status.paymentFailed')
         };
       default:
         return {
@@ -130,18 +132,18 @@ export default function OrdersPage() {
       case 'RESOLVING':
       case 'CONCILIATION_PAYMENT_IN_PROGRESS':
         return {
-          text: 'Track Order',
+          text: t('actions.trackOrder'),
           className: 'bg-white dark:bg-[#2a171a] border border-primary text-primary hover:bg-primary/5 active:bg-primary/10'
         };
       case 'DELIVERED':
       case 'CONCILIATED':
         return {
-          text: 'Reorder',
+          text: t('actions.reorder'),
           className: 'bg-primary text-white hover:bg-red-600 active:scale-95 shadow-md shadow-red-200 dark:shadow-none'
         };
       default:
         return {
-          text: 'Details',
+          text: t('actions.details'),
           className: 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
         };
     }
@@ -150,21 +152,21 @@ export default function OrdersPage() {
   // Get items summary text
   const getItemsSummary = (order: any) => {
     if (!order.items || order.items.length === 0) {
-      return 'No items';
+      return t('noItems');
     }
     
     const itemCount = order.items.length;
     const itemNames = order.items.slice(0, 3).map((item: any) => item.name).join(', ');
-    const moreText = itemCount > 3 ? ` and ${itemCount - 3} more` : '';
+    const moreText = itemCount > 3 ? ` ${t('and')} ${itemCount - 3} ${t('more')}` : '';
     
-    return `${itemCount} item${itemCount !== 1 ? 's' : ''}: ${itemNames}${moreText}`;
+    return `${itemCount} ${itemCount !== 1 ? t('items') : t('item')}: ${itemNames}${moreText}`;
   };
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <p className="mt-4 text-text-sub-light dark:text-text-sub-dark">Loading orders...</p>
+        <p className="mt-4 text-text-sub-light dark:text-text-sub-dark">{t('loading')}</p>
       </div>
     );
   }
@@ -173,15 +175,15 @@ export default function OrdersPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <span className="material-symbols-outlined text-6xl text-red-500 mb-4">error</span>
-        <h3 className="text-text-main-light dark:text-text-main-dark text-lg font-bold mb-2">Error loading orders</h3>
+        <h3 className="text-text-main-light dark:text-text-main-dark text-lg font-bold mb-2">{t('errorLoading')}</h3>
         <p className="text-text-sub-light dark:text-text-sub-dark text-sm text-center mb-6">
-          {error instanceof Error ? error.message : 'Failed to load orders'}
+          {error instanceof Error ? error.message : t('failedToLoad')}
         </p>
         <button
           onClick={() => window.location.reload()}
           className="bg-primary hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-primary/30 transition-all"
         >
-          Try Again
+          {t('tryAgain')}
         </button>
       </div>
     );
@@ -200,7 +202,7 @@ export default function OrdersPage() {
                 : 'bg-white dark:bg-[#352023] border border-slate-100 dark:border-[#4a2e32] text-slate-700 dark:text-slate-300'
             }`}
           >
-            <p className="text-sm font-medium leading-normal">All Orders</p>
+            <p className="text-sm font-medium leading-normal">{t('filters.all')}</p>
           </button>
           <button 
             onClick={() => setActiveFilter('processing')}
@@ -210,7 +212,7 @@ export default function OrdersPage() {
                 : 'bg-white dark:bg-[#352023] border border-slate-100 dark:border-[#4a2e32] text-slate-700 dark:text-slate-300'
             }`}
           >
-            <p className="text-sm font-medium leading-normal">Processing</p>
+            <p className="text-sm font-medium leading-normal">{t('filters.processing')}</p>
           </button>
           <button 
             onClick={() => setActiveFilter('delivered')}
@@ -220,7 +222,7 @@ export default function OrdersPage() {
                 : 'bg-white dark:bg-[#352023] border border-slate-100 dark:border-[#4a2e32] text-slate-700 dark:text-slate-300'
             }`}
           >
-            <p className="text-sm font-medium leading-normal">Delivered</p>
+            <p className="text-sm font-medium leading-normal">{t('filters.delivered')}</p>
           </button>
           <button 
             onClick={() => setActiveFilter('cancelled')}
@@ -230,7 +232,7 @@ export default function OrdersPage() {
                 : 'bg-white dark:bg-[#352023] border border-slate-100 dark:border-[#4a2e32] text-slate-700 dark:text-slate-300'
             }`}
           >
-            <p className="text-sm font-medium leading-normal">Cancelled</p>
+            <p className="text-sm font-medium leading-normal">{t('filters.cancelled')}</p>
           </button>
         </div>
       </div>
@@ -242,17 +244,17 @@ export default function OrdersPage() {
             <span className="material-symbols-outlined text-6xl text-text-sub-light dark:text-text-sub-dark mb-4">
               receipt_long
             </span>
-            <h3 className="text-text-main-light dark:text-text-main-dark text-lg font-bold mb-2">No orders found</h3>
+            <h3 className="text-text-main-light dark:text-text-main-dark text-lg font-bold mb-2">{t('noOrders')}</h3>
             <p className="text-text-sub-light dark:text-text-sub-dark text-sm text-center mb-6">
               {activeFilter === 'all' 
-                ? "You haven't placed any orders yet" 
-                : `No ${activeFilter} orders found`}
+                ? t('noOrdersYet') 
+                : t('noFilteredOrders', { filter: t(`filters.${activeFilter}`) })}
             </p>
             <Link
               href="/"
               className="bg-primary hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-primary/30 transition-all"
             >
-              Browse Products
+              {t('browseProducts')}
             </Link>
           </div>
         ) : (
@@ -260,7 +262,7 @@ export default function OrdersPage() {
             const statusBadge = getStatusBadge(order.status);
             const actionButton = getActionButton(order.status);
             const orderDate = formatDate(order.created_at);
-            const orderNumber = order.id ? `Order #${order.id.slice(-6)}` : 'Order';
+            const orderNumber = order.id ? `${t('order')} #${order.id.slice(-6)}` : t('order');
             const itemsSummary = getItemsSummary(order);
             const opacityClass = order.status === 'CANCELED' ? 'opacity-80' : '';
 
@@ -294,7 +296,7 @@ export default function OrdersPage() {
                 </div>
                 <div className="flex items-center justify-between pt-3 border-t border-slate-50 dark:border-slate-800/50">
                   <div className="flex flex-col">
-                    <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Total Amount</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{t('totalAmount')}</span>
                     <span className="text-lg font-bold text-slate-900 dark:text-white">
                       ${order.total?.toFixed(2) || '0.00'}
                     </span>

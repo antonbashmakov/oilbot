@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useCartStore, useCheckout } from '@/api';
 import { useUser } from '@/api/user/provider';
+import { useTranslations } from 'next-intl';
 
 import _ from 'lodash';
 
@@ -11,6 +12,7 @@ export default function CartPage() {
   const { user } = useUser();
   const { getCartItems, removeFromCart, getCartTotal, addToCart, isLoading } = useCartStore(user?.id);
   const checkoutMutation = useCheckout(user?.id);
+  const t = useTranslations('cart');
 
   const cartItems = useMemo(() => {
     if (!user?.id) return [];
@@ -69,9 +71,9 @@ export default function CartPage() {
     } catch (error) {
       console.error('Checkout failed:', error);
       // In a real app, you would show an error message to the user
-      alert('Checkout failed. Please try again.');
+      alert(t('checkoutFailed'));
     }
-  }, [user?.id, cartItems, checkoutMutation]);
+  }, [user?.id, cartItems, checkoutMutation, t]);
 
   // Mock images for demonstration
   const mockImages = [
@@ -164,15 +166,15 @@ export default function CartPage() {
               <span className="material-symbols-outlined text-6xl text-text-sub-light dark:text-text-sub-dark mb-4">
                 shopping_cart
               </span>
-              <h3 className="text-text-main-light dark:text-text-main-dark text-lg font-bold mb-2">Your cart is empty</h3>
+              <h3 className="text-text-main-light dark:text-text-main-dark text-lg font-bold mb-2">{t('emptyCart')}</h3>
               <p className="text-text-sub-light dark:text-text-sub-dark text-sm text-center mb-6">
-                Add some delicious items to get started
+                {t('addItemsPrompt')}
               </p>
               <Link
                 href="/"
                 className="bg-primary hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-primary/30 transition-all"
               >
-                Browse Products
+                {t('browseProducts')}
               </Link>
             </div>
           )}
@@ -185,7 +187,7 @@ export default function CartPage() {
               className="flex gap-3 bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl border border-amber-100 dark:border-amber-900/20">
               <span className="material-symbols-outlined text-amber-600 dark:text-amber-500 shrink-0">info</span>
               <p className="text-sm font-medium text-amber-900 dark:text-amber-100 leading-relaxed">
-                This is your last purchase without subscription and next time you will have to subscribe.
+                {t('subscriptionWarning')}
               </p>
             </div>
           </div>
@@ -201,7 +203,7 @@ export default function CartPage() {
             className="w-full bg-primary hover:bg-red-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-between active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span>
-              {checkoutMutation.isPending ? 'Processing...' : 'Checkout'}
+              {checkoutMutation.isPending ? t('processing') : t('checkout')}
             </span>
             <span>${cartTotal.toFixed(2)}</span>
           </button>

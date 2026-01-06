@@ -37,8 +37,12 @@ export default function RootLayout({
     return <HeaderComponent />;
   }, [pathname]);
 
+  // Default locale is 'ru' as per requirements
+  // The actual locale based on user's language_code will be handled by LocaleProvider
+  const locale = 'ru';
+
   return (
-    <html lang="en" className="light">
+    <html lang={locale} className="light">
       <head>
         {/* Material Symbols */}
         <link
@@ -57,7 +61,6 @@ export default function RootLayout({
             {children}
             <Navigation />
           </div>
-
         </Providers>
       </body>
     </html>

@@ -9,7 +9,7 @@ const MOCK_USER: AppCustomer = {
   id: "270053857",
   is_mock: true,
   is_bot: null,
-  language_code: "en",
+  language_code: "ru",
   last_name: "Öldenberg",
   username: "antonoldenberg",
   first_name: "Anton",// Added for consistency
@@ -26,17 +26,12 @@ const MOCK_USER: AppCustomer = {
     id: "270053857",
     number_of_orders: 0,
     number_of_canceled_orders: 0,
-    number_of_fulfilled_orders: 0,
-    number_of_active_orders: 0,
+    number_of_fulfilled_orders: 1,
+    number_of_active_orders: 1,
     number_of_paid_months: 0,
     paid_in_total: 0,
   },
-  subscription: {
-    status: "ACTIVE",
-    next_payment_at: "2025-11-23T00:00:00.000Z",
-    fee: 300,
-    id: "270053857",
-  }
+
 };
 
 // Type for Telegram Web App user
