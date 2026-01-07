@@ -392,6 +392,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/private/customers/{customerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get customer overview
+         * @description Retrieve customer overview including balance, stats, and subscription
+         */
+        get: operations["getCustomerOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/users/me": {
         parameters: {
             query?: never;
@@ -2461,6 +2481,51 @@ export interface operations {
                 };
             };
             /** @description Customer not found or cart is empty */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getCustomerOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response with customer overview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: components["schemas"]["CustomerOverview"];
+                    };
+                };
+            };
+            /** @description Customer not found */
             404: {
                 headers: {
                     [name: string]: unknown;

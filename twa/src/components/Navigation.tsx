@@ -20,6 +20,8 @@ export function Navigation() {
         return '/';
       case 'Orders':
         return '/orders';
+      case 'Profile':
+        return '/profile';
       default:
         return '#';
     }

@@ -139,6 +139,26 @@
     "oneFreeOrderLeft": "Один бесплатный заказ",
     "noFreeOrderLeft": "Нет бесплатных заказов",
     "myCart": "Моя корзина",
-    "myOrders": "Мои заказы"
+    "myOrders": "Мои заказы",
+    "profile": "Профиль"
+  },
+  "profile": {
+    "storeCredit": "Баланс",
+    "gourmetClub": "Клуб гурманов",
+    "subscriptionStatus": {
+      "noSubscription": "Нет подписки",
+      "active": "Активна",
+      "pending": "Ожидает",
+      "canceled": "Отменена"
+    },
+    "nextBilling": "Следующий платеж",
+    "noActiveSubscription": "Нет активной подписки",
+    "memberSince": "Участник с {year}",
+    "portraitOf": "Портрет {name}",
+    "accountSettings": "Настройки аккаунта",
+    "personalDetails": "Личные данные",
+    "addressBook": "Адресная книга",
+    "paymentMethods": "Способы оплаты",
+    "orderHistory": "История заказов"
   }
 }

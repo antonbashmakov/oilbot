@@ -20,7 +20,6 @@ export const categories = [
   { id: 'MEAT', name: 'Meat', icon: 'cooking' },
   { id: 'SEA', name: 'Seafood', icon: 'set_meal' },
   { id: 'CHEESE', name: 'Cheese', icon: 'local_pizza' },
-  { id: 'CAVIAR', name: 'Caviar', icon: 'egg' },
 ];
 
 export const navItems = [

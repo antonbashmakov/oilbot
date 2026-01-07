@@ -127,4 +127,32 @@ const OrdersHeader = () => {
   );
 };
 
-export { MainHeader, CartHeader, OrdersHeader };
+const ProfileHeader = () => {
+  const router = useRouter();
+  const t = useTranslations('header');
+
+  const handleBack = useCallback(() => {
+    router.push("/");
+  }, [router]);
+
+  return (
+    <div
+      className="sticky top-0 z-50 bg-white/95 dark:bg-[#2a171a]/95 backdrop-blur-sm border-b border-gray-100 dark:border-white/10">
+      <div className="flex items-center px-4 py-4 justify-between">
+        <button
+          onClick={handleBack}
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-text-light dark:text-text-dark transition-colors"
+        >
+          <span className="material-symbols-outlined">arrow_back_ios_new</span>
+        </button>
+        <h2
+          className="text-text-light dark:text-text-dark text-lg font-bold leading-tight tracking-tight text-center">
+          {t('profile')}
+        </h2>
+        <div className="w-10"></div>
+      </div>
+    </div>
+  );
+};
+
+export { MainHeader, CartHeader, OrdersHeader, ProfileHeader };

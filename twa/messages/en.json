@@ -146,6 +146,26 @@
     "oneFreeOrderLeft": "One free order left",
     "noFreeOrderLeft": "No free order left",
     "myCart": "My Cart",
-    "myOrders": "My Orders"
+    "myOrders": "My Orders",
+    "profile": "Profile"
+  },
+  "profile": {
+    "storeCredit": "Store Credit",
+    "gourmetClub": "Gourmet Club",
+    "subscriptionStatus": {
+      "noSubscription": "No Subscription",
+      "active": "Active",
+      "pending": "Pending",
+      "canceled": "Canceled"
+    },
+    "nextBilling": "Next billing on",
+    "noActiveSubscription": "No active subscription",
+    "memberSince": "Member since {year}",
+    "portraitOf": "Portrait of {name}",
+    "accountSettings": "Account Settings",
+    "personalDetails": "Personal Details",
+    "addressBook": "Address Book",
+    "paymentMethods": "Payment Methods",
+    "orderHistory": "Order History"
   }
 }
