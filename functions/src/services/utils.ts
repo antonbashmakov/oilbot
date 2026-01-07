@@ -1,9 +1,12 @@
 import * as moment from "moment";
 import * as jwt from "jsonwebtoken";
+
 import {User} from "../models";
 import UserService from "./UserService";
 import {express} from "../controllers/private/imports";
 import {intersection} from "lodash";
+import {logger} from "firebase-functions/v1";
+import {validate, parse} from "@tma.js/init-data-node";
 
 
 // Constants
@@ -24,6 +27,9 @@ export const api = {
   badRequest: (response: ExpressResponse, message = "", code = "BAD_REQUEST"): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
     .status(400).send({error: {code, message}}),
+  paymentRequired: (response: ExpressResponse, message = "", code = "PAYMENT_REQUIRED"): ExpressResponse => response
+    .header(CONTENT_TYPE, APPLICATION_JSON)
+    .status(402).send({error: {code, message}}),
 
   notFound: (response: ExpressResponse, message = ""): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -139,5 +145,28 @@ export const who = async (req: express.Request, userService: UserService) => {
     return user;
   } catch (err) {
     return undefined;
+  }
+};
+
+
+export const verifyTelegramInitData = (initData: string, botToken: string) => {
+  logger.info("Verifying Telegram init data:", initData);
+  logger.info("Bot token:", botToken);
+  try {
+    // Validate init data.
+    validate(initData, botToken, {
+      // We consider init data sign valid for 1 hour from their creation moment.
+      expiresIn: 3600,
+    });
+
+    const data = parse(initData);
+
+    logger.info("User data:", data.user);
+
+    const jwt = generateToken({id: data.user?.id + ""} as User);
+
+    return {jwt, user: data.user};
+  } catch (e) {
+    return;
   }
 };

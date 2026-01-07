@@ -215,6 +215,9 @@ components:
         OriginalAmount:
           type: number
           example: 13000
+        Amount:
+          type: number
+          example: 13000
         NewAmount:
           type: number
           example: 5000
@@ -234,6 +237,9 @@ components:
         ExternalRequestId:
           type: string
           example: "756478567845678436"
+        PaymentURL:
+          type: string
+          example: "https://pay.tbank.ru/new/fU1ppgqa"
       required:
         - TerminalKey
         - OrderId
@@ -244,6 +250,7 @@ components:
         - PaymentId
         - ErrorCode
         - Message
+        - Amount
         - Details
         - ExternalRequestId
 

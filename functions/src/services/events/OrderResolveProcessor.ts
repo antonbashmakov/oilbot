@@ -73,6 +73,8 @@ class OrderResolveProcessor extends AbstractProcessor {
         status: "PAYMENT_IN_PROGRESS",
         total: diff,
         reconciliated_order_id: order.id,
+        created_at: new Date(),
+        updated_at: new Date(),
         name: `Order ${order.id} reconciliation`,
         items: [{
           fraction: 1,
@@ -96,7 +98,7 @@ class OrderResolveProcessor extends AbstractProcessor {
       const paymentResponse = await tbankService.initPayment(paymentRequest);
 
       const paymentData: Payment = {
-        payment_url: paymentResponse.PaymentURL,
+        payment_url: paymentResponse.PaymentURL!,
         error_code: paymentResponse.ErrorCode,
         id: "",
         status: "SENT",

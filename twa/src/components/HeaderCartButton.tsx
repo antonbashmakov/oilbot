@@ -2,7 +2,7 @@
 
 import { useCartStore } from '@/api';
 import { useUser } from '@/api/user/provider';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
 export const HeaderCartButton: React.FC = () => {
@@ -21,9 +21,18 @@ export const HeaderCartButton: React.FC = () => {
     }
   }, [cartCount]);
 
+  const getCartHref = useCallback(() => {
+    if (!user || !user.stats) {
+      return "/";
+    }
+    return (user.stats.number_of_fulfilled_orders >= 1 || user.stats.number_of_active_orders >= 1) && (!user.subscription || user.subscription?.status !== "ACTIVE") ? "/subscription" : "/cart";
+  }, [user?.stats?.number_of_fulfilled_orders, user?.stats?.number_of_active_orders]);
+
+  const cartHref = getCartHref();
+
   return (
     <Link 
-      href="/cart"
+      href={cartHref}
       className="relative flex size-10 items-center justify-center rounded-full bg-background-light dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-colors"
       aria-label="Shopping cart"
     >

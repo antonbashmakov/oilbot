@@ -12,13 +12,20 @@ import {
   PaymentService,
   IdempotencyGuardService,
   TBankService,
+  SubscriptionService,
+  CustomerBalanceService,
 } from "./imports";
 // import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
 // import {logger} from "firebase-functions/v1";
-import { localeMiddleware } from "../../middleware/localeMiddleware";
-import { DeliveryRef, ItemOverview, Order, Payment } from "../../models";
+import {localeMiddleware} from "../../middleware/localeMiddleware";
+import {DeliveryRef, ItemOverview, Order, OrderCreatedEvent, Payment, Subscription} from "../../models";
 import _ = require("lodash");
+// import * as jwt from "jsonwebtoken";
+import * as cookieParser from "cookie-parser";
+import moment = require("moment");
+import {CONSTANTS} from "../admin/imports";
+import EventPublisher from "../webhook/imports";
 
 admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
@@ -40,15 +47,43 @@ const orderService = new OrderService(db);
 const paymentService = new PaymentService(db);
 const idempotencyGuardService = new IdempotencyGuardService(db);
 const tbankService = new TBankService();
+const subscriptionService = new SubscriptionService(db);
+const customerBalanceService = new CustomerBalanceService(db);
 
 
 const privateApi = express();
 
 privateApi.use(cors(
-  { origin: true } // allows all cross origin xhr requests
+  {origin: true} // allows all cross origin xhr requests
 ));
 
+privateApi.use(cookieParser());
 privateApi.use(localeMiddleware);
+/*
+// Cookie authentication middleware for customer routes
+const cookieAuthMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  try {
+    // Get JWT from cookie
+    const token = req.cookies?.__session;
+
+    if (!token) {
+      return api.unauthorized(res, "Authentication required");
+    }
+
+    // Verify JWT
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+    await customerService.require(decoded.id);
+    return next();
+  } catch (error: any) {
+    if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+      return api.unauthorized(res, "Invalid or expired token");
+    }
+    return api.error(res, "Authentication failed");
+  }
+};
+*/
+// Apply cookie auth middleware to all customer routes
+// privateApi.use(cookieAuthMiddleware);
 
 privateApi.get("/deliveries", async (req: express.Request, res: express.Response) => {
   try {
@@ -62,7 +97,7 @@ privateApi.get("/deliveries", async (req: express.Request, res: express.Response
 
 privateApi.get("/deliveries/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const delivery = await deliveryService.find(id);
 
     if (!delivery) {
@@ -78,7 +113,7 @@ privateApi.get("/deliveries/:id", async (req: express.Request, res: express.Resp
 
 privateApi.get("/items/category/:category", async (req: express.Request, res: express.Response) => {
   try {
-    const { category } = req.params;
+    const {category} = req.params;
 
     const deliveryService = new DeliveryService(db);
 
@@ -123,14 +158,14 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
 
 privateApi.get("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
+    const {customerId} = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, "Customer not found");
     }
 
-    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
     return api.send(res, cartItems || []);
   } catch (err: any) {
     functions.logger.error(err);
@@ -140,8 +175,8 @@ privateApi.get("/customers/:customerId/cart/items", async (req: express.Request,
 
 privateApi.post("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
-    const { itemId } = req.body;
+    const {customerId} = req.params;
+    const {itemId} = req.body;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
@@ -163,8 +198,8 @@ privateApi.post("/customers/:customerId/cart/items", async (req: express.Request
 
 privateApi.delete("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
-    const { cartItemId, itemId } = req.body;
+    const {customerId} = req.params;
+    const {cartItemId, itemId} = req.body;
 
     if (!cartItemId && !itemId) {
       return api.badRequest(res, "Either cartItemId or itemId must be provided");
@@ -176,7 +211,7 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
     }
 
     if (itemId) {
-      const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+      const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
       const itemsToRemove = cartItems?.filter((item) => item.item_id === itemId);
       cartItemService.deleteTransactionally(itemsToRemove);
 
@@ -186,7 +221,7 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
 
     // Assuming there's a method to remove cart item by ID
     // We need to check if the cart item belongs to this customer
-    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
     const cartItem = cartItems?.find((item) => item.id === cartItemId);
 
     if (!cartItem) {
@@ -207,16 +242,34 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
   }
 });
 
-privateApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
+privateApi.get("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
+    const {customerId} = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, "Customer not found");
     }
 
-    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+    const orders = await orderService.fetchForOwner({id: String(customer.id)});
+
+    return api.send(res, orders || []);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+privateApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
+  try {
+    const {customerId} = req.params;
+
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
     if (!cartItems || cartItems.length === 0) {
       return api.send(res, {});
     }
@@ -229,9 +282,42 @@ privateApi.post("/customers/:customerId/orders", async (req: express.Request, re
   }
 });
 
+privateApi.get("/customers/:customerId", async (req: express.Request, res: express.Response) => {
+  try {
+    const {customerId} = req.params;
+
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    // Get customer balance
+    const balance = await customerBalanceService.obtainForCustomer(customerId);
+
+    // Get customer statistics
+    const stats = await customerService.obtainStatistics(customerId);
+
+    // Get subscription
+    const subscription = await subscriptionService.find(customerId);
+
+    // Construct customer overview
+    const customerOverview = {
+      ...customer,
+      balance,
+      stats,
+      subscription: subscription || null,
+    };
+
+    return api.send(res, customerOverview);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
 privateApi.post("/customers/:customerId/cart/order", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
+    const {customerId} = req.params;
     const idempotencyKey = req.headers["idempotency_key"] as string;
 
     if (!idempotencyKey) {
@@ -243,19 +329,24 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       throw new Error("Customer not found");
     }
 
-    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
-    if (!cartItems || cartItems.length === 0) {
-      throw new Error("Cart is empty");
-    }
-
-
     // Use idempotency guard to ensure transactional and idempotent operation
-    const result = await idempotencyGuardService.runIdempotentRequest<{order: Order, payment: Payment,  paymentUrl: string }>(
+    const result = await idempotencyGuardService.runIdempotentRequest<{ order: Order, payment: Payment, paymentUrl: string }>(
       `cart-order-${customerId}-${idempotencyKey}`,
       async () => {
+        const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
+        const stats = await customerService.obtainStatistics(customerId);
 
+        if ((stats.number_of_fulfilled_orders >= 1 || stats.number_of_active_orders >= 1) && !hasActiveSubscription) {
+          throw new Error("Active subscription is missing");
+        }
+
+        const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
+        if (!cartItems || cartItems.length === 0) {
+          throw new Error("Cart is empty");
+        }
         // Create order from cart (transactionally removes cart items)
         const order = await orderService.createOrderFromCart(customer, cartItems);
+        await customerService.incrementStatistics(customerId, {number_of_orders: 1, number_of_active_orders: 1});
 
         const paymentRequest = tbankService.orderToPaymentRequest(order);
         const paymentResponse = await tbankService.initPayment(paymentRequest);
@@ -265,10 +356,10 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         }
 
         const payment: Payment = {
-          id: '',
+          id: "",
           external_id: paymentResponse.PaymentId,
           terminal_key: paymentRequest.TerminalKey,
-          payment_url: paymentResponse.PaymentURL,
+          payment_url: paymentResponse.PaymentURL!,
           order_id: order.id,
           amount: order.total * 100,
           total: order.total * 100,
@@ -276,10 +367,28 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
           success: false,
           created_at: new Date(),
           updated_at: new Date(),
-          error_code: paymentResponse.ErrorCode || 0,
+          error_code: paymentResponse.ErrorCode || "0",
         };
 
         const p = await paymentService.add(payment);
+
+        await orderService.update(order, {status: "PAYMENT_IN_PROGRESS"});
+
+        const event: OrderCreatedEvent = {
+          id: "", // will be set by OutboxEventService
+          idempotent_key: order.id,
+          created_at: new Date(),
+          processed_at: new Date(),
+          processed: false,
+          retries: 0,
+          type: CONSTANTS.EVENTS.ORDER_CREATED,
+          payload: {order_id: order.id},
+
+        };
+
+        const eventPublisher = new EventPublisher<OrderCreatedEvent>(db);
+
+        await eventPublisher.publish(event);
 
         return {
           order,
@@ -288,7 +397,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         };
       }
     );
-    return api.send(res, { paymentUrl: result.paymentUrl });
+    return api.send(res, {paymentUrl: result.paymentUrl});
   } catch (err: any) {
     functions.logger.error(err);
 
@@ -301,6 +410,91 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
     }
     if (err.message.includes("Payment initialization failed")) {
       return api.error(res, err.message);
+    }
+    if (err.message === "Active subscription is missing") {
+      return api.paymentRequired(res, "Customer needs an active subscription to place orders");
+    }
+
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+privateApi.post("/customers/:customerId/subscriptions", async (req: express.Request, res: express.Response) => {
+  const idempotencyKey = req.headers["idempotency_key"] as string;
+
+  if (!idempotencyKey) {
+    return api.badRequest(res, "idempotency_key header is required");
+  }
+  const {customerId} = req.params;
+
+  // Check if customer exists
+  const customer = await customerService.find(customerId);
+  if (!customer) {
+    return api.notFound(res, "Customer not found");
+  }
+
+  try {
+    const result = await idempotencyGuardService.runIdempotentRequest<{ payment: Payment, subscription: Subscription }>(
+      `cart-order-${customerId}-${idempotencyKey}`,
+      async () => {
+        const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
+
+        if (hasActiveSubscription) {
+          throw new Error("Active subscription exists");
+        }
+
+
+        const d = moment(new Date(), "YYYY-MM-DD");
+        const nextPaymentDate = d.add(1, "M").toDate();
+        const subscription: Subscription = {
+          id: customerId,
+          created_at: new Date(),
+          next_payment_at: nextPaymentDate,
+          status: "PENDING",
+          fee: 300,
+        };
+
+        const paymentRequest = tbankService.subscriptionToPaymentRequest(subscription);
+        const paymentResponse = await tbankService.initPayment(paymentRequest);
+
+        if (!paymentResponse.Success) {
+          throw new Error(`Payment initialization failed: ${paymentResponse.Message}; ${paymentResponse.Details}`);
+        }
+
+        const payment: Payment = {
+          id: "",
+          external_id: paymentResponse.PaymentId,
+          terminal_key: paymentRequest.TerminalKey,
+          payment_url: paymentResponse.PaymentURL!,
+          order_id: customerId,
+          amount: subscription.fee * 100,
+          total: subscription.fee * 100,
+          status: "SENT",
+          success: false,
+          created_at: new Date(),
+          updated_at: new Date(),
+          error_code: paymentResponse.ErrorCode || "0",
+        };
+
+        const p = await paymentService.add(payment);
+        await subscriptionService.set(subscription);
+
+        return {
+          payment: p,
+          subscription,
+        };
+      });
+
+    return api.send(res, {paymentUrl: result.payment.payment_url});
+  } catch (err: any) {
+    functions.logger.error(err);
+
+
+    if (err.message.includes("Payment initialization failed")) {
+      return api.error(res, err.message);
+    }
+    if (err.message === "Active subscription exists") {
+      return api.badRequest(res, "Customer already has an active subscription");
     }
 
     return api.error(res, err.message || "Internal server error");

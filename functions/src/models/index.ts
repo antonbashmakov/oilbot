@@ -2,11 +2,14 @@ import {components} from "../openapi/api";
 import {components as models} from "../openapi/models";
 
 export type Customer = components["schemas"]["Customer"];
+export type CustomerStats = components["schemas"]["CustomerStats"];
+export type CustomerAccounting = components["schemas"]["CustomerAccounting"];
 export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type AddToCartItem = components["schemas"]["AddToCartItem"];
 export type RemoveFromCartItem = components["schemas"]["RemoveFromCartItem"];
 
+export type BaseSubscription = components["schemas"]["Subscription"];
 type BaseDeliveryOverviewItemStats = components["schemas"]["DeliveryOverviewItemStats"];
 type BaseStats = components["schemas"]["Stats"];
 type BaseDeliveryOverview = components["schemas"]["DeliveryOverview"];
@@ -94,6 +97,12 @@ export type OrderPaymentConfirmedEvent = OutboxEvent & {
   payload: {
     order_id: string;
     external_id: string;
+    rebill_id?: string;
+  }
+};
+export type OrderCreatedEvent = OutboxEvent & {
+  payload: {
+    order_id: string;
   }
 };
 
@@ -109,6 +118,11 @@ export type Delivery = BaseDelivery & {
   delivery_start: Date;
   delivery_end: Date;
 };
+export type Subscription = Omit<BaseSubscription, "created_at" | "next_payment_at" | "canceled_at"> & {
+  created_at: Date;
+  next_payment_at: Date;
+  canceled_at?: Date;
+};
 
 export type DeliveryRef = BaseDeliveryRef & {
   order_deadline: Date;
@@ -121,8 +135,10 @@ export type ItemOverview = BaseItemOverview & {
 export type CartItem = Omit<BaseCartItem, "created_at"> & {
   created_at: Date;
 };
-export type Order = Omit<BaseOrder, "items"> & {
+export type Order = Omit<BaseOrder, "items" | "created_at" | "updated_at"> & {
   items: CartItem[];
+  created_at: Date;
+  updated_at: Date;
 };
 export type DeliveryOverviewItemStats = Omit<BaseDeliveryOverviewItemStats, "orders"> & {
   orders: Order[];

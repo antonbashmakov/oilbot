@@ -1,17 +1,43 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { useGetCartItemsQuery } from '..';
+import { useGetCartItemsQuery, validateTelegramUser } from '..';
+import { CustomerOverview } from '../models';
 
 // Mock user object as provided in the task
-const MOCK_USER = {
+const MOCK_USER: AppCustomer = {
   id: "270053857",
+  is_mock: true,
   is_bot: null,
-  is_premium: true,
-  language_code: "en",
+  language_code: "ru",
   last_name: "Öldenberg",
   username: "antonoldenberg",
-  first_name: "Anton" // Added for consistency
+  first_name: "Anton",// Added for consistency
+  balance: {
+    id: "270053857",
+    owner: {
+      id: "270053857"
+    },
+    value: 1000,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  stats: {
+    id: "270053857",
+    number_of_orders: 0,
+    number_of_canceled_orders: 0,
+    number_of_fulfilled_orders: 0,
+    number_of_active_orders: 0,
+    number_of_paid_months: 0,
+    paid_in_total: 0,
+  },
+  subscription: {
+    status: "ACTIVE",
+    next_payment_at: "2025-11-23T00:00:00.000Z",
+    // canceled_at: "2025-11-23T00:00:00.000Z",
+    fee: 300,
+    id: "270053857",
+  }
 };
 
 // Type for Telegram Web App user
@@ -38,8 +64,12 @@ interface AppUser {
   is_mock?: boolean;
 }
 
+interface AppCustomer extends CustomerOverview {
+  is_mock: boolean
+}
+
 interface UserContextType {
-  user: AppUser | null;
+  user: AppCustomer | null;
   telegramUser: TelegramUser | null;
   isLoading: boolean;
   isError: boolean;
@@ -54,7 +84,7 @@ interface UserProviderProps {
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
-  const [appUser, setAppUser] = useState<AppUser | null>(null);
+  const [appUser, setAppUser] = useState<AppCustomer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
@@ -65,59 +95,39 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         // Check if we're in a Telegram Web App
         if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
           const tg = (window as any).Telegram.WebApp;
-          
-          // Expand the app to full height
-          tg.expand();
-          
-          // Get Telegram user data
-          const tgUser = tg.initDataUnsafe?.user;
-          if (tgUser) {
-            const user: TelegramUser = {
-              id: tgUser.id,
-              first_name: tgUser.first_name,
-              last_name: tgUser.last_name,
-              username: tgUser.username,
-              language_code: tgUser.language_code,
-              is_premium: tgUser.is_premium,
-              is_bot: tgUser.is_bot,
-            };
-            setTelegramUser(user);
-            
+          const initData = tg.initData;
+          validateTelegramUser(initData).then(customer => {
+            // Expand the app to full height
+            tg.expand();
+
+            setTelegramUser(customer);
+
             // Convert Telegram user to AppUser
             setAppUser({
-              id: user.id.toString(),
-              first_name: user.first_name,
-              last_name: user.last_name,
-              username: user.username,
-              language_code: user.language_code,
-              is_premium: user.is_premium,
-              is_bot: user.is_bot,
+              ...customer,
               is_mock: false,
             });
-            
-            console.log('Telegram user detected:', user);
-          } else {
-            // No Telegram user found, use mock
-            console.log('No Telegram user found, using mock user');
+
+            // Set Telegram theme parameters as CSS variables
+            if (tg.themeParams) {
+              document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
+              document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
+              document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#999999');
+              document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color || '#2481cc');
+              document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#2481cc');
+              document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
+            }
+
+            // Set viewport to prevent zoom on mobile
+            tg.enableClosingConfirmation();
+            tg.disableVerticalSwipes();
+          }).catch(err => {
+            console.warn('User vas now validated properly', err);
             setAppUser({
               ...MOCK_USER,
               is_mock: true,
             });
-          }
-          
-          // Set Telegram theme parameters as CSS variables
-          if (tg.themeParams) {
-            document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
-            document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
-            document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#999999');
-            document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color || '#2481cc');
-            document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#2481cc');
-            document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
-          }
-          
-          // Set viewport to prevent zoom on mobile
-          tg.enableClosingConfirmation();
-          tg.disableVerticalSwipes();
+          });
         } else {
           // Not in Telegram Web App, use mock user
           console.log('Not in Telegram Web App, using mock user');
@@ -126,13 +136,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             is_mock: true,
           });
         }
-        
+
         setIsLoading(false);
       } catch (error) {
         console.error('Error initializing Telegram Web App:', error);
         setIsError(true);
         setIsLoading(false);
-        
+
         // Fallback to mock user on error
         setAppUser({
           ...MOCK_USER,

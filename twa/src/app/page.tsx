@@ -5,13 +5,15 @@ import { useGetItemsQuery } from '@/api';
 import { format } from "date-fns";
 import { CartButton } from '@/components/CartButton';
 import { ItemOverview } from '@/api/models';
-import { categories } from '@/data/products';
+import { categories, IMAGE_TO_UUIDS } from '@/data/products';
+import { useTranslations } from 'next-intl';
 
 import _ from 'lodash';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const { data, isLoading, error } = useGetItemsQuery(selectedCategory);
+  const t = useTranslations('common');
 
   const [items, setItems] = useState<ItemOverview[]>([]);
 
@@ -28,7 +30,7 @@ export default function Home() {
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-          <p className="mt-4 text-text-sub-light dark:text-text-sub-dark">Loading products...</p>
+          <p className="mt-4 text-text-sub-light dark:text-text-sub-dark">{t('loading')}</p>
         </div>
       </div>
     );
@@ -40,7 +42,7 @@ export default function Home() {
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center text-red-500">
           <span className="material-symbols-outlined text-4xl">error</span>
-          <p className="mt-4">Failed to load products. Please try again.</p>
+          <p className="mt-4">{t('error')}. {t('retry')}.</p>
         </div>
       </div>
     );
@@ -74,7 +76,7 @@ export default function Home() {
                   : 'text-text-main-light dark:text-text-main-dark font-medium'
                   }`}
               >
-                {category.name}
+                {t(`category.${category.id.toLowerCase()}` as any) || category.name}
               </p>
             </button>
           ))}
@@ -99,17 +101,36 @@ export default function Home() {
 
             return (
               <div key={item.id || `item-${index}`} className="flex flex-col group/card">
-                <div className="relative mb-3 overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
-                  {/* Image - using placeholder since API doesn't provide images */}
+                <div className="relative  mb-3 overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
+                  {/* Image - using CDN with progressive loading (thumbnail first, then high-res) */}
                   <div
-                    className="w-full aspect-[4/3] bg-center bg-cover transition-transform duration-500 group-hover/card:scale-105"
+                    className="w-full aspect-square bg-center bg-cover transition-transform duration-500 group-hover/card:scale-105 relative"
                     style={{
-                      // backgroundImage: ``
+                      backgroundImage: item.id && IMAGE_TO_UUIDS[item.id] ?  `url(https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.id]}/-/preview/100x100/)` : 'none',
+                      backgroundColor: 'transparent',
                     }}
                     aria-label={item.name || 'Product image'}
-                  />
+                  >
+                    {item.id && (
+                      <img
+                        src={IMAGE_TO_UUIDS[item.id] ? `https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.id]}/-/preview/400x400/` : undefined}
+                        alt={item.name || 'Product image'}
+                        className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300"
+                        loading="lazy"
+                        onLoad={(e) => {
+                          e.currentTarget.classList.remove('opacity-0');
+                          e.currentTarget.classList.add('opacity-100');
+                        }}
+                        onError={(e) => {
+                          // If high-res fails, keep showing thumbnail
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    )}
+                  </div>
 
                   {/* Quick Add FAB */}
+                  <div className="absolute bottom-2 right-2">
                   <CartButton
                     itemId={item.id || `item-${index}`}
                     itemData={{
@@ -120,8 +141,9 @@ export default function Home() {
                       price_for_unit: item.fraction_price_out,
                       quantity: 1,
                     }}
-                    className="absolute bottom-2 right-2"
+                    
                   />
+                  </div>
 
                 </div>
 
@@ -152,7 +174,7 @@ export default function Home() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <span className="material-symbols-outlined text-4xl text-text-sub-light dark:text-text-sub-dark">inventory_2</span>
-            <p className="mt-4 text-text-sub-light dark:text-text-sub-dark">No products found in this category.</p>
+            <p className="mt-4 text-text-sub-light dark:text-text-sub-dark">{t('noProducts')}</p>
           </div>
         </div>
       )}

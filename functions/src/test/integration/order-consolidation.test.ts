@@ -1,14 +1,32 @@
 import * as request from "supertest";
+import * as jwt from "jsonwebtoken";
 import db from "../setup";
-import {Order, OrderResolvedEvent} from "../../models";
+import {Order, OrderResolvedEvent, User} from "../../models";
 import OrderService from "../../services/OrderService";
 import CustomerService from "../../services/CustomerService";
 import PaymentService from "../../services/PaymentService";
 import OutboxEventService from "../../services/OutboxEventService";
 import TBankService from "../../services/payments/TBankService";
+import UserService from "../../services/UserService";
 
 // Mock TBankService
 jest.mock("../../services/payments/TBankService");
+
+// Use the same JWT_SECRET as in .env file for tests
+// The .env file has JWT_SECRET=secter
+const JWT_SECRET = "secter";
+
+// Create a JWT token for test admin user
+const createAdminToken = () => {
+  const payload = {
+    id: "test-admin-user-id",
+    email: "admin@test.com",
+    roles: ["ADMIN"],
+  };
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: "1h",
+  });
+};
 
 const mockTBankService = {
   initPayment: jest.fn().mockImplementation((paymentRequest) => {
@@ -58,6 +76,7 @@ describe("Order Consolidation Integration Test", () => {
   let customerService: CustomerService;
   let paymentService: PaymentService;
   let outboxEventService: OutboxEventService<OrderResolvedEvent>;
+  let userService: UserService;
 
   let createdOrder: Order;
   let createdCustomer: any;
@@ -68,6 +87,16 @@ describe("Order Consolidation Integration Test", () => {
     customerService = new CustomerService(db as any);
     paymentService = new PaymentService(db as any);
     outboxEventService = new OutboxEventService(db as any);
+    userService = new UserService(db as any);
+
+    // Create test admin user
+    const adminUser: User = {
+      id: "test-admin-user-id",
+      email: "admin@test.com",
+      roles: ["ADMIN"],
+      created_at: new Date(),
+    } as any;
+    await userService.set(adminUser);
 
     createdCustomer = {
       created_at: new Date(),
@@ -115,7 +144,8 @@ describe("Order Consolidation Integration Test", () => {
   });
 
   it("order flow", async () => {
-    // Call the consolidate endpoint
+    // Create JWT token for admin user
+    const adminToken = createAdminToken();
 
     const payments = await paymentService.findAll();
     expect(payments.length).toBe(0);
@@ -123,13 +153,15 @@ describe("Order Consolidation Integration Test", () => {
     let events = await outboxEventService.findAll();
     expect(events.length).toBe(0);
 
-
+    // Make API calls with Authorization header
     let response = await request("http://127.0.0.1:5001/test-project/us-central1/admin")
       .get(`/orders/${createdOrder.id}`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
     response = await request("http://127.0.0.1:5001/test-project/us-central1/admin")
       .post(`/orders/${createdOrder.id}/consolidate`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(400);
 
     // Verify the error response
@@ -137,18 +169,22 @@ describe("Order Consolidation Integration Test", () => {
 
     response = await request("http://127.0.0.1:5001/test-project/us-central1/admin")
       .post(`/orders/${createdOrder.id}/order-picking`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
     response = await request("http://127.0.0.1:5001/test-project/us-central1/admin")
       .post(`/orders/${createdOrder.id}/order-picking`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
     expect(response.body.total).toBe(0);
 
     response = await request("http://127.0.0.1:5001/test-project/us-central1/admin")
       .post(`/order-pickings/${createdOrder.id}/items/test-item-1/collect`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(204);
     response = await request("http://127.0.0.1:5001/test-project/us-central1/admin")
       .post(`/orders/${createdOrder.id}/consolidate`)
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
 
     const order = await orderService.find(createdOrder.id);

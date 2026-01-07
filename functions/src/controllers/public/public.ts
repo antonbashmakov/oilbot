@@ -7,11 +7,17 @@ import {
   express,
   api,
   UserService,
+  verifyTelegramInitData,
+  CustomerService,
 } from "./imports";
 import * as bcrypt from "bcrypt";
 import {generateToken, who} from "../../services/utils";
 import {User} from "../../models";
 import {localeMiddleware} from "../../middleware/localeMiddleware";
+
+import CustomerBalanceService from "../../services/CustomerBalanceService";
+import {SubscriptionService} from "../private/imports";
+import {logger} from "firebase-functions/v1";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -27,6 +33,9 @@ if (process.env.GCLOUD_PROJECT !== "test-project" && db.databaseId !== process.e
 }
 
 const userService = new UserService(db);
+const customerService = new CustomerService(db);
+const customerBalanceService = new CustomerBalanceService(db);
+const subscriptionService = new SubscriptionService(db);
 
 const publicApi = express();
 
@@ -134,6 +143,61 @@ publicApi.get("/users/me", async (req: express.Request, res: express.Response) =
     }
 
     return api.send(res, user);
+  } catch (err: any) {
+    functions.logger.error(err);
+    // The authorize function already sends error responses, so we just need to return
+    // If error wasn't handled by authorize, handle it here
+    if (!res.headersSent) {
+      return api.error(res, err.message || "Internal server error");
+    }
+    return;
+  }
+});
+publicApi.post("/auth/telegram", async (req: express.Request, res: express.Response) => {
+  try {
+    functions.logger.info("Verifying Telegram init data:", req.body.initData);
+
+    if (!req.body.initData) {
+      /*
+      const id = "270053857";
+      let customer = await customerService.find(id);
+      const balance = await customerBalanceService.obtainForCustomer(id);
+      const stats = await customerService.obtainStatistics(id);
+      const subscription = await subscriptionService.find(id);
+
+      return api.send(res, { ...customer, balance, stats, subscription });
+      */
+      return api.badRequest(res, "Missing initData query parameter");
+    }
+
+    const verification = verifyTelegramInitData(req.body.initData as string, process.env.TELEGRAM_BOT_TOKEN as string);
+    if (!verification) {
+      return api.forbidden(res, "Invalid Telegram init data");
+    }
+
+    res.cookie("__session", verification.jwt, {
+      httpOnly: true,
+      secure: true, // HTTPS only
+      sameSite: "strict",
+    });
+
+    const systemUser = {...verification.user, id: `${verification.user?.id}`};
+
+    let customer = await customerService.find(`${verification.user?.id}`);
+
+    if (!customer) {
+      await customerService.set(systemUser);
+
+      customer = systemUser;
+    }
+
+    logger.debug("Current customer : ", customer);
+
+    const balance = await customerBalanceService.obtainForCustomer(customer.id);
+    const stats = await customerService.obtainStatistics(customer.id);
+    const subscription = await subscriptionService.find(customer.id);
+
+    return api.send(res, {...customer, balance, stats, subscription});
   } catch (err: any) {
     functions.logger.error(err);
     // The authorize function already sends error responses, so we just need to return

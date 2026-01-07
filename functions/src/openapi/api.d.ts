@@ -348,7 +348,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/private/customers/{customerId}/orders": {
+    "/private/customers/{customerId}/subscriptions": {
         parameters: {
             query?: never;
             header?: never;
@@ -358,10 +358,54 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Create a subscription for a customer
+         * @description Create a new subscription for a customer. If customer already has an active subscription which is not passed due (current date is before next_payment_date) throw bad request. If there is no active subscription for user create one and set next_payment_date month ahead.
+         */
+        post: operations["createSubscription"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/private/customers/{customerId}/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all orders for a customer
+         * @description Retrieve a list of all orders for a specific customer
+         */
+        get: operations["getCustomerOrders"];
+        put?: never;
+        /**
          * Create order from cart
          * @description Create a new order from a customer's cart
          */
         post: operations["createOrderFromCart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/private/customers/{customerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get customer overview
+         * @description Retrieve customer overview including balance, stats, and subscription
+         */
+        get: operations["getCustomerOverview"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -497,15 +541,50 @@ export interface components {
              * @description Customer's language code
              * @example ru
              */
-            language_code: string;
+            language_code?: string;
             /**
              * @description Customer's username
              * @example getting_drunk
              */
             username?: string;
         };
+        Subscription: {
+            /**
+             * @description Unique identifier for the customer
+             * @example 1019705782
+             */
+            id: string;
+            /**
+             * Format: date-time
+             * @description When subscription was created
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            created_at?: string;
+            /**
+             * Format: date-time
+             * @description When subscription was canceled
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            canceled_at?: string;
+            /**
+             * Format: date-time
+             * @description When to charge next payment
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            next_payment_at: string;
+            /** @enum {string} */
+            status: "PENDING" | "ACTIVE" | "CANCELED";
+            /**
+             * Format: float
+             * @description Cost of the subscription
+             * @example 609
+             */
+            fee: number;
+        };
         CustomerOverview: {
             balance: components["schemas"]["CustomerBalance"];
+            stats?: components["schemas"]["CustomerStats"];
+            subscription?: components["schemas"]["Subscription"];
         } & components["schemas"]["Customer"];
         OrderPickingPatch: {
             /** @description Items to update in this order picking */
@@ -887,7 +966,7 @@ export interface components {
             /** @description Items in this order */
             items: components["schemas"]["CartItem"][];
             /** @enum {string} */
-            status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED" | "CANCELED" | "DELIVERED";
+            status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONSOLIDATION_SUCCESSFUL" | "CONCILIATED" | "CANCELED" | "DELIVERED";
             /**
              * @description Current status of the order
              * @example CONCILIATION
@@ -906,6 +985,18 @@ export interface components {
              * @example 150.75
              */
             total: number;
+            /**
+             * Format: date-time
+             * @description Delivery end date and time
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description Delivery end date and time
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            updated_at: string;
         };
         OrderOverview: {
             picking?: components["schemas"]["OrderPicking"];
@@ -1003,7 +1094,7 @@ export interface components {
              * @description Error code from payment provider
              * @example 0
              */
-            error_code?: number | null;
+            error_code?: string | null;
             /** @enum {string} */
             status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT" | "CANCELED" | "REJECTED";
             /**
@@ -1085,6 +1176,56 @@ export interface components {
              * @example 2025-01-10T14:30:00Z
              */
             updated_at?: string;
+        };
+        CustomerAccounting: {
+            /**
+             * @description Internal payment ID
+             * @example payment-123456
+             */
+            id: string;
+            /**
+             * @description Id at bank to charge recursive payments
+             * @example some-id-here
+             */
+            rebill_id: string;
+        };
+        CustomerStats: {
+            /**
+             * @description Unique identifier for the customer
+             * @example 1019705782
+             */
+            id: string;
+            /**
+             * @description Total number of orders for the customer
+             * @example 10
+             */
+            number_of_orders: number;
+            /**
+             * @description Total number of orders for the customer
+             * @example 10
+             */
+            number_of_active_orders: number;
+            /**
+             * @description Number of canceled orders for the customer
+             * @example 2
+             */
+            number_of_canceled_orders: number;
+            /**
+             * @description Number of fulfilled orders for the customer
+             * @example 7
+             */
+            number_of_fulfilled_orders: number;
+            /**
+             * @description Number of paid subscription months for the customer
+             * @example 3
+             */
+            number_of_paid_months: number;
+            /**
+             * Format: float
+             * @description Total amount paid by the customer
+             * @example 4500.75
+             */
+            paid_in_total: number;
         };
         SignupRequest: {
             /**
@@ -2209,6 +2350,111 @@ export interface operations {
             };
         };
     };
+    createSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Subscription created successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: {
+                            /**
+                             * @description URL for payment processing
+                             * @example https://securepay.tinkoff.ru/payment/init?PaymentId=123456
+                             */
+                            paymentUrl?: string;
+                        };
+                    };
+                };
+            };
+            /** @description Bad request (e.g., customer already has an active subscription) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Customer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getCustomerOrders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response with customer orders */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: components["schemas"]["Order"][];
+                    };
+                };
+            };
+            /** @description Customer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     createOrderFromCart: {
         parameters: {
             query?: never;
@@ -2235,6 +2481,51 @@ export interface operations {
                 };
             };
             /** @description Customer not found or cart is empty */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getCustomerOverview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response with customer overview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: components["schemas"]["CustomerOverview"];
+                    };
+                };
+            };
+            /** @description Customer not found */
             404: {
                 headers: {
                     [name: string]: unknown;

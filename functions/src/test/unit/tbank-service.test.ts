@@ -172,8 +172,6 @@ describe("TBankService Unit Tests", () => {
         .update(sortedValues)
         .digest("hex");
 
-        console.log('>>>>>>>>>>> ', expectedHash)
-      
       expect(cancelRequest.Token).toBe(expectedHash);
     });
 

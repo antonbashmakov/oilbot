@@ -1,5 +1,28 @@
 {
   "projects": {
     "default": "posebestoimosti-473916"
-  }
+  },
+  "targets": {
+    "posebesto-business": {
+      "hosting": {
+        "crm": [
+          "posebesto-business"
+        ],
+        "twa": [
+          "posebesto-twa"
+        ]
+      }
+    },
+    "posebestoimosti-473916": {
+      "hosting": {
+        "twa": [
+          "twa-prod"
+        ],
+        "crm": [
+          "posebestoimosti-473916"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

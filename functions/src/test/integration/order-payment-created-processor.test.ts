@@ -47,6 +47,7 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
       id: "test-order-id-payment",
       name: "Test Order Payment",
       created_at: new Date(),
+      updated_at: new Date(),
       items: [
         {
           id: "test-item-1",
@@ -81,7 +82,7 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
       success: true,
       status: "SENT",
       payment_url: `https://securepay.tinkoff.ru/${createdOrder.id}`,
-      error_code: 0,
+      error_code: "0",
       created_at: new Date(),
     } as Payment;
 
@@ -113,13 +114,15 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
     // Verify the message was sent to the correct chat ID
     expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
       "270053857",
-      expect.stringContaining("Ваш заказ")
+      expect.stringContaining("Ваш заказ"),
+      "test-order-id-payment"
     );
 
     // Verify the message contains the payment URL
     expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
       "270053857",
-      expect.stringContaining(createdPayment.payment_url!)
+      expect.stringContaining(createdPayment.payment_url!),
+      "test-order-id-payment"
     );
   });
 

@@ -54,7 +54,6 @@ abstract class AbstractService<T extends Entity> {
 
     const ref = this.getCollection().doc(object.id);
 
-    // Atomically increment the population of the city by 50.
     return ref.update({[field]: FieldValue.increment(value)});
   }
 
@@ -62,13 +61,13 @@ abstract class AbstractService<T extends Entity> {
     objects.forEach((object) => this.set(object));
   }
 
-  addForOwner(user: { id: string }, object: Omit<T, "owner">): Promise<T> {
+  addForOwner(user: { id: string }, object: T): Promise<T> {
     const objectWithOwner = {...object, owner: {id: user.id}} as T;
     return this.add(objectWithOwner);
   }
 
   fetchForOwner(owner: { id: string }): Promise<T[]> {
-    return this.getCollection().where("owner.id", "==", owner.id)
+    return this.getCollection().where("owner.id", "in", [owner.id, Number(owner.id)]) // have to do this because owner.id was numeric in some older records
       .get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.id, doc.data())));
   }
 
@@ -144,7 +143,7 @@ abstract class AbstractService<T extends Entity> {
   toPOJO(id: any, o: any): T | undefined {
     if (!o) return;
 
-    const ret = {id, ...o} as T;
+    const ret = {...o, id: `${id}`} as T; // convert all ids to string
 
     if (o.created_at) {
       ret.created_at = o.created_at.toDate();

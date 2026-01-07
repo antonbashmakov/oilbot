@@ -2,15 +2,18 @@
 
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Providers } from "./providers";
-import { MainHeader, CartHeader } from "@/components/Header";
+import { MainHeader, CartHeader, OrdersHeader, ProfileHeader } from "@/components/Header";
 
 import "./globals.css";
 
 import { usePathname } from "next/navigation";
 import { useCallback } from "react";
+import { Navigation } from "@/components/Navigation";
 
 const PATH_TO_HEADER_MAP: Record<string, React.FC> = {
   "/cart": CartHeader,
+  "/orders": OrdersHeader,
+  "/profile": ProfileHeader,
   "/": MainHeader,
 };
 
@@ -31,12 +34,17 @@ export default function RootLayout({
   const pathname = usePathname();
 
   const Header = useCallback(() => {
-    const HeaderComponent = PATH_TO_HEADER_MAP[pathname || "/"] || MainHeader;
+    const HeaderComponent = PATH_TO_HEADER_MAP[pathname || "/"];
+    if(!HeaderComponent) return null;
     return <HeaderComponent />;
   }, [pathname]);
 
+  // Default locale is 'ru' as per requirements
+  // The actual locale based on user's language_code will be handled by LocaleProvider
+  const locale = 'ru';
+
   return (
-    <html lang="en" className="light">
+    <html lang={locale} className="light">
       <head>
         {/* Material Symbols */}
         <link
@@ -53,8 +61,8 @@ export default function RootLayout({
           <div className="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden pb-24 bg-background-light dark:bg-background-dark font-display text-text-main-light dark:text-text-main-dark selection:bg-primary/20">
             <Header />
             {children}
+            <Navigation />
           </div>
-
         </Providers>
       </body>
     </html>

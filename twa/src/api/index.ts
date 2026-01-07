@@ -13,6 +13,7 @@ import {
     Item,
     AddToCartItem,
     RemoveFromCartItem,
+    CustomerOverview,
 } from "@/api/models";
 import { UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import useClient from "@/api/useClient";
@@ -50,6 +51,28 @@ export const useGetCartItemsQuery = (customerId?: string): UseQueryResult<CartIt
             }
         }
     }, { retry: 1, enabled: !!customerId } as any, dataInterceptor);
+};
+
+// Orders hooks
+export const useGetOrdersQuery = (customerId?: string): UseQueryResult<Order[]> => {
+    return useApiQuery("/api/private/customers/{customerId}/orders", {
+        params: {
+            path: {
+                customerId: customerId || ''
+            }
+        }
+    }, { retry: 1, enabled: !!customerId } as any);
+};
+
+// Customer hooks
+export const useGetCustomerOverviewQuery = (customerId?: string): UseQueryResult<CustomerOverview> => {
+    return useApiQuery("/api/private/customers/{customerId}", {
+        params: {
+            path: {
+                customerId: customerId || ''
+            }
+        }
+    }, { retry: 1, enabled: !!customerId } as any);
 };
 
 // Cart hooks
@@ -94,6 +117,37 @@ export const useCheckout = (customerId?: string) => {
     );
 };
 
+export const useCreateSubscription = (customerId?: string) => {
+    return usePostApi<
+        "/api/private/customers/{customerId}/subscriptions",
+        { customerId: string },
+        IdempotentSupport
+    >(
+        "/api/private/customers/{customerId}/subscriptions",
+        [
+            "/api/private/customers/{customerId}/subscriptions"
+        ],
+        { customerId: customerId || '' },
+    );
+};
+
+
+export const validateTelegramUser = async (initData: string) => {
+    return fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL || ""}/api/public/auth/telegram` , {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ initData }),
+    }).then(async res => {
+        const json = await res.json() as any;
+        if(json.error) {
+            return Promise.reject(json.error);
+        }
+        return json;
+    });
+};
+
 // Cart store using React Query for local state management
 export const useCartStore = (customerId?: string) => {
     const queryClient = useQueryClient();
@@ -128,7 +182,7 @@ export const useCartStore = (customerId?: string) => {
     };
 
     const removeFromCart = async (removeFromCart: { cartItemId?: string, itemId?: string }) => {
-        if (!customerId) return;        
+        if (!customerId) return;
 
         await removeItemMutation.mutate(removeFromCart);
 
@@ -146,7 +200,7 @@ export const useCartStore = (customerId?: string) => {
         return getCartItems().length;
     };
     const getItemCountInCart = (itemId: string): number => {
-        const cache = (queryClient.getQueryData<{[key: string]: CartItem[]}>(['itemsToCartItems', customerId]) || {});
+        const cache = (queryClient.getQueryData<{ [key: string]: CartItem[] }>(['itemsToCartItems', customerId]) || {});
         return cache[itemId]?.length || 0;
     };
 

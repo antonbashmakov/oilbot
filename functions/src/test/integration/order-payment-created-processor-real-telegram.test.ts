@@ -42,6 +42,7 @@ xdescribe("OrderPaymentCreatedProcessor Integration Test (Real Telegram)", () =>
       id: "test-order-id-payment-real",
       name: "Test Order Payment Real",
       created_at: new Date(),
+      updated_at: new Date(),
       items: [
         {
           id: "test-item-1",
@@ -89,7 +90,8 @@ xdescribe("OrderPaymentCreatedProcessor Integration Test (Real Telegram)", () =>
       success: true,
       status: "SENT",
       payment_url: `https://securepay.tinkoff.ru/${createdOrder.id}`,
-      error_code: 0,
+      error_code: "0",
+      total: 0,
       created_at: new Date(),
     } as Payment;
 

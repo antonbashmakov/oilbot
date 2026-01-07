@@ -128,6 +128,8 @@ export interface components {
             Status: string;
             /** @example 13000 */
             OriginalAmount: number;
+            /** @example 13000 */
+            Amount: number;
             /** @example 5000 */
             NewAmount: number;
             /** @example 2304882 */
@@ -140,6 +142,8 @@ export interface components {
             Details: string | null;
             /** @example 756478567845678436 */
             ExternalRequestId: string;
+            /** @example https://pay.tbank.ru/new/fU1ppgqa */
+            PaymentURL?: string;
         };
     };
     responses: never;

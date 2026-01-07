@@ -138,11 +138,13 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
     expect(mockTelegramService.sendMessage).toHaveBeenCalledTimes(2);
     expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
       "test-customer-id",
-      expect.stringContaining("✅ Мы приняли оплату за ваш заказ")
+      expect.stringContaining("✅ Мы приняли оплату за ваш заказ"),
+      "test-order-id"
     );
     expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
       "270053857",
       "✅ Ордер оплачен!: test-order-id"
+      ,"test-order-id"
     );
   });
 
@@ -180,11 +182,13 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
     expect(mockTelegramService.sendMessage).toHaveBeenCalledTimes(2);
     expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
       "test-customer-id",
-      expect.stringContaining("✅ Разница по заказу успешно оплачена")
+      expect.stringContaining("✅ Разница по заказу успешно оплачена"),
+      "test-conciliation-order-id"
     );
     expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
       "270053857",
-      "✅ Ордер оплачен!: test-conciliation-order-id"
+      "✅ Ордер оплачен!: test-conciliation-order-id",
+      "test-conciliation-order-id"
     );
   });
 

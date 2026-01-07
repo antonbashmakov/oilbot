@@ -11,6 +11,7 @@ jest.mock("../../services/payments/TBankService");
 const mockTBankService = {
   orderToPaymentRequest: jest.fn(),
   cancelPayment: jest.fn(),
+  paymentToCancelRequest: jest.fn(),
 };
 
 (TBankService as jest.MockedClass<typeof TBankService>).mockImplementation(() => mockTBankService as any);
@@ -199,6 +200,7 @@ describe("OrderCancelledProcessor Integration Test", () => {
     };
 
     mockTBankService.orderToPaymentRequest.mockReturnValue(mockPaymentRequest);
+    mockTBankService.paymentToCancelRequest.mockReturnValue({});
 
     // Mock successful cancellation responses
     const r1 = { Success: true, PaymentId: "123456", OrderId: "123456" };
@@ -214,7 +216,7 @@ describe("OrderCancelledProcessor Integration Test", () => {
     expect(result).toEqual({ cancelations: [r1, r2]});
 
     // Verify orderToPaymentRequest was called with the order
-    expect(mockTBankService.orderToPaymentRequest).toHaveBeenCalledWith(createdOrder);
+    expect(mockTBankService.paymentToCancelRequest).toHaveBeenCalledWith(createdPaymentConfirmed);
 
     // Verify cancelPayment was called twice (for SENT and CONFIRMED payments)
     expect(mockTBankService.cancelPayment).toHaveBeenCalledTimes(2);
