@@ -9,6 +9,7 @@ import AbstractProcessor from "./AbstractProcessor";
 import {Firestore} from "firebase-admin/firestore";
 import {CONSTANTS} from "../../controllers/admin/imports";
 import SubscriptionPaymentConfirmedProcessor from "./SubscriptionPaymentConfirmedProcessor";
+import OrderCreatedProcessor from "./OrderCreatedProcessor";
 
 
 type ProcessorConstructor = new (firebase: Firestore) => AbstractProcessor;
@@ -22,6 +23,7 @@ const EVENT_PROCESSORS: { [key: string]: ProcessorConstructor } = {
   [CONSTANTS.EVENTS.ORDER_PAYMENT_FAILED]: OrderPaymentFailedProcessor,
   [CONSTANTS.EVENTS.ORDER_CANCELED]: OrderCancelledProcessor,
   [CONSTANTS.EVENTS.ORDER_CONCILIATED]: OrderConciliatedProcessor,
+  [CONSTANTS.EVENTS.ORDER_CREATED]: OrderCreatedProcessor,
 };
 
 export const toProcessor: (event: string) => ProcessorConstructor = (event: string) => {

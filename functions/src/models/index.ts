@@ -100,6 +100,11 @@ export type OrderPaymentConfirmedEvent = OutboxEvent & {
     rebill_id?: string;
   }
 };
+export type OrderCreatedEvent = OutboxEvent & {
+  payload: {
+    order_id: string;
+  }
+};
 
 export type OrderPaymentFailedEvent = OutboxEvent & {
   payload: {

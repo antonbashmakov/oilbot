@@ -18,11 +18,13 @@ import {
 import * as dotenv from "dotenv";
 // import {logger} from "firebase-functions/v1";
 import {localeMiddleware} from "../../middleware/localeMiddleware";
-import {DeliveryRef, ItemOverview, Order, Payment, Subscription} from "../../models";
+import {DeliveryRef, ItemOverview, Order, OrderCreatedEvent, Payment, Subscription} from "../../models";
 import _ = require("lodash");
 // import * as jwt from "jsonwebtoken";
 import * as cookieParser from "cookie-parser";
 import moment = require("moment");
+import {CONSTANTS} from "../admin/imports";
+import EventPublisher from "../webhook/imports";
 
 admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
@@ -334,6 +336,24 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         };
 
         const p = await paymentService.add(payment);
+
+        await orderService.update(order, {status: "PAYMENT_IN_PROGRESS"});
+
+        const event: OrderCreatedEvent = {
+          id: "", // will be set by OutboxEventService
+          idempotent_key: order.id,
+          created_at: new Date(),
+          processed_at: new Date(),
+          processed: false,
+          retries: 0,
+          type: CONSTANTS.EVENTS.ORDER_CREATED,
+          payload: {order_id: order.id},
+
+        };
+
+        const eventPublisher = new EventPublisher<OrderCreatedEvent>(db);
+
+        await eventPublisher.publish(event);
 
         return {
           order,

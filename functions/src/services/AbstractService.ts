@@ -143,7 +143,7 @@ abstract class AbstractService<T extends Entity> {
   toPOJO(id: any, o: any): T | undefined {
     if (!o) return;
 
-    const ret = {id, ...o} as T;
+    const ret = {id: `${id}`, ...o} as T;
 
     if (o.created_at) {
       ret.created_at = o.created_at.toDate();
