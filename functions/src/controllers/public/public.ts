@@ -11,12 +11,12 @@ import {
   CustomerService,
 } from "./imports";
 import * as bcrypt from "bcrypt";
-import {generateToken, who} from "../../services/utils";
-import {User} from "../../models";
-import {localeMiddleware} from "../../middleware/localeMiddleware";
+import { generateToken, who } from "../../services/utils";
+import { User } from "../../models";
+import { localeMiddleware } from "../../middleware/localeMiddleware";
 
 import CustomerBalanceService from "../../services/CustomerBalanceService";
-import {SubscriptionService} from "../private/imports";
+import { SubscriptionService } from "../private/imports";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -52,7 +52,7 @@ publicApi.use(express.json());
 
 publicApi.post("/signup", async (req: express.Request, res: express.Response) => {
   try {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     // Validate required fields
     if (!email || !password) {
@@ -99,7 +99,7 @@ publicApi.post("/signup", async (req: express.Request, res: express.Response) =>
 
 publicApi.post("/login", async (req: express.Request, res: express.Response) => {
   try {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     // Validate required fields
     if (!email || !password) {
@@ -157,6 +157,15 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
     functions.logger.info("Verifying Telegram init data:", req.body.initData);
 
     if (!req.body.initData) {
+      /*
+      const id = "270053857";
+      let customer = await customerService.find(id);
+      const balance = await customerBalanceService.obtainForCustomer(id);
+      const stats = await customerService.obtainStatistics(id);
+      const subscription = await subscriptionService.find(id);
+
+      return api.send(res, { ...customer, balance, stats, subscription });
+      */
       return api.badRequest(res, "Missing initData query parameter");
     }
 
@@ -171,7 +180,7 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
       sameSite: "strict",
     });
 
-    const systemUser = {...verification.user, id: `${verification.user?.id}`};
+    const systemUser = { ...verification.user, id: `${verification.user?.id}` };
 
     let customer = await customerService.find(`${verification.user?.id}`);
 
@@ -185,7 +194,7 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
     const stats = await customerService.obtainStatistics(customer.id);
     const subscription = await subscriptionService.find(customer.id);
 
-    return api.send(res, {...customer, balance, stats, subscription});
+    return api.send(res, { ...customer, balance, stats, subscription });
   } catch (err: any) {
     functions.logger.error(err);
     // The authorize function already sends error responses, so we just need to return
