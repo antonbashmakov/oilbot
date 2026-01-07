@@ -88,9 +88,16 @@
       "processing": "Processing",
       "delivered": "Delivered",
       "paid": "Paid",
-      "cancelled": "Cancelled",
+      "pending": "Pending",
+      "resolving": "Resolving",
+      "payment_failed": "Payment failed",
+      "canceled": "Canceled",
       "conciliated": "Conciliated",
-      "paymentFailed": "Payment Failed"
+      "payment_in_progress": "Payment in progress",
+      "paymentFailed": "Payment Failed",
+      "conciliation_payment_in_progress": "Conciliation payment",
+      "consolidation_successful": "Conciliation succesful"
+
     },
     "actions": {
       "trackOrder": "Track Order",

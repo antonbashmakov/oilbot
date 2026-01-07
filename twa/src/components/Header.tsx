@@ -39,7 +39,7 @@ const MainHeader = () => {
           </div>
         </div>
         }
-        {(!user?.subscription && ((user?.stats?.number_of_active_orders || 0) == 0 || (user?.stats?.number_of_fulfilled_orders || 0) == 0)) && <div className="flex items-center gap-2 overflow-hidden">
+        {(!user?.subscription && ((user?.stats?.number_of_active_orders || 0) == 0 && (user?.stats?.number_of_fulfilled_orders || 0) == 0)) && <div className="flex items-center gap-2 overflow-hidden">
           <span className="material-symbols-outlined text-primary">card_giftcard</span>
           <div className="flex flex-col">
             <span className="text-xs font-medium text-text-sub-light dark:text-text-sub-dark uppercase tracking-wide">

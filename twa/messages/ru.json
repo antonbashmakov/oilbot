@@ -82,14 +82,14 @@
       "processing": "В обработке",
       "paid": "Оплачено",
       "delivered": "Доставлено",
-      "cancelled": "Отменено",
+      "canceled": "Отменено",
       "conciliated": "Сверено",
-      "paymentFailed": "Ошибка оплаты",
-      "pending": "Ошибка оплаты",
-      "payment_in_progress": "Ошибка оплаты",
-      "resolving": "Ошибка оплаты",
-      "conciliation_payment_in_progress": "Ошибка оплаты",
-      "consolidation_successfull": "Ошибка оплаты"
+      "pending": "В обработке",      
+      "payment_failed": "Ошибка оплаты",
+      "payment_in_progress": "Ожидает оплаты",
+      "resolving": "В обработке",
+      "conciliation_payment_in_progress": "Оплата финального рассчёта",
+      "consolidation_successfull": "Финализирован"
       
     },
     "actions": {

@@ -9,7 +9,7 @@ const MOCK_USER: AppCustomer = {
   id: "270053857",
   is_mock: true,
   is_bot: null,
-  language_code: "ru",
+  language_code: "en",
   last_name: "Öldenberg",
   username: "antonoldenberg",
   first_name: "Anton",// Added for consistency

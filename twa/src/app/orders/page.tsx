@@ -10,7 +10,7 @@ import { useTranslations } from 'next-intl';
 import _ from 'lodash';
 
 export default function OrdersPage() {
-  const router = useRouter();
+ //  const router = useRouter();
   const { user } = useUser();
   const { data: orders = [], isLoading, error } = useGetOrdersQuery(user?.id);
   const [activeFilter, setActiveFilter] = useState<'all' | 'processing' | 'delivered' | 'cancelled'>('all');
@@ -49,10 +49,12 @@ export default function OrdersPage() {
     if (!dateString) return t('dateNotAvailable');
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', { 
+      return date.toLocaleDateString('ru-RU', { 
         month: 'short', 
         day: 'numeric', 
-        year: 'numeric' 
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
       });
     } catch {
       return t('invalidDate');
@@ -269,7 +271,7 @@ export default function OrdersPage() {
         ) : (
           filteredOrders.map((order) => {
             const statusBadge = getStatusBadge(order.status);
-            const actionButton = getActionButton(order.status);
+            // const actionButton = getActionButton(order.status);
             const orderDate = formatDate(order.created_at);
             const orderNumber = order.id ? `${t('order')} #${order.id.slice(-6)}` : t('order');
             const itemsSummary = getItemsSummary(order);
@@ -310,9 +312,9 @@ export default function OrdersPage() {
                       {order.total?.toFixed(2) || '0.00'}₽
                     </span>
                   </div>
-                  <button className={`flex cursor-pointer items-center justify-center rounded-lg h-9 px-5 transition-colors text-sm font-bold leading-normal tracking-wide ${actionButton.className}`}>
+                  {/*<button className={`flex cursor-pointer items-center justify-center rounded-lg h-9 px-5 transition-colors text-sm font-bold leading-normal tracking-wide ${actionButton.className}`}>
                     {actionButton.text}
-                  </button>
+                  </button>*/}
                 </div>
               </div>
             );
