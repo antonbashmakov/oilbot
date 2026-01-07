@@ -12,6 +12,7 @@ import PaymentService from "../../services/PaymentService";
 import IdempotencyGuardService from "../../services/IdempotencyGuardService";
 import TBankService from "../../services/payments/TBankService";
 import SubscriptionService from "../../services/SubscriptionService";
+import CustomerBalanceService from "../../services/CustomerBalanceService";
 
 import {api} from "../../services/utils";
 import MockTBankService from "../../services/payments/MockTBankService";
@@ -33,6 +34,7 @@ export {
   IdempotencyGuardService,
   TBankService,
   SubscriptionService,
+  CustomerBalanceService,
 };
 
 if (process.env.GCLOUD_PROJECT === "test-project") {

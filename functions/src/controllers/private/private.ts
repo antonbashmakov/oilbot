@@ -13,6 +13,7 @@ import {
   IdempotencyGuardService,
   TBankService,
   SubscriptionService,
+  CustomerBalanceService,
 } from "./imports";
 // import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
@@ -47,6 +48,7 @@ const paymentService = new PaymentService(db);
 const idempotencyGuardService = new IdempotencyGuardService(db);
 const tbankService = new TBankService();
 const subscriptionService = new SubscriptionService(db);
+const customerBalanceService = new CustomerBalanceService(db);
 
 
 const privateApi = express();
@@ -274,6 +276,39 @@ privateApi.post("/customers/:customerId/orders", async (req: express.Request, re
 
     const order = await orderService.createOrderFromCart(customer, cartItems);
     return api.send(res, order);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+privateApi.get("/customers/:customerId", async (req: express.Request, res: express.Response) => {
+  try {
+    const {customerId} = req.params;
+
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    // Get customer balance
+    const balance = await customerBalanceService.obtainForCustomer(customerId);
+
+    // Get customer statistics
+    const stats = await customerService.obtainStatistics(customerId);
+
+    // Get subscription
+    const subscription = await subscriptionService.find(customerId);
+
+    // Construct customer overview
+    const customerOverview = {
+      ...customer,
+      balance,
+      stats,
+      subscription: subscription || null,
+    };
+
+    return api.send(res, customerOverview);
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
