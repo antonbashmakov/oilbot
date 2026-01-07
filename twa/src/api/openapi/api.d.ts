@@ -946,7 +946,7 @@ export interface components {
             /** @description Items in this order */
             items: components["schemas"]["CartItem"][];
             /** @enum {string} */
-            status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED" | "CANCELED" | "DELIVERED";
+            status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONSOLIDATION_SUCCESSFUL" | "CONCILIATED" | "CANCELED" | "DELIVERED";
             /**
              * @description Current status of the order
              * @example CONCILIATION

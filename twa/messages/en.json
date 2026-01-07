@@ -28,7 +28,8 @@
       "all": "All",
       "meat": "Meat",
       "sea": "Seafood",
-      "cheese": "Cheese"
+      "cheese": "Cheese",
+      "caviar": "Caviar"
     }
   },
   "category": {
@@ -86,6 +87,7 @@
     "status": {
       "processing": "Processing",
       "delivered": "Delivered",
+      "paid": "Paid",
       "cancelled": "Cancelled",
       "conciliated": "Conciliated",
       "paymentFailed": "Payment Failed"

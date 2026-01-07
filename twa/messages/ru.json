@@ -28,7 +28,8 @@
       "all": "Все",
       "meat": "Мясо",
       "sea": "Морепродукты",
-      "cheese": "Сыр"
+      "cheese": "Сыр",
+      "caviar": "Икра"
     }
   },
   "navigation": {
@@ -79,10 +80,17 @@
     },
     "status": {
       "processing": "В обработке",
+      "paid": "Оплачено",
       "delivered": "Доставлено",
       "cancelled": "Отменено",
       "conciliated": "Сверено",
-      "paymentFailed": "Ошибка оплаты"
+      "paymentFailed": "Ошибка оплаты",
+      "pending": "Ошибка оплаты",
+      "payment_in_progress": "Ошибка оплаты",
+      "resolving": "Ошибка оплаты",
+      "conciliation_payment_in_progress": "Ошибка оплаты",
+      "consolidation_successfull": "Ошибка оплаты"
+      
     },
     "actions": {
       "trackOrder": "Отследить заказ",

@@ -1850,6 +1850,7 @@ components:
             - PAID
             - RESOLVING
             - CONCILIATION_PAYMENT_IN_PROGRESS
+            - CONSOLIDATION_SUCCESSFUL
             - CONCILIATED
             - CANCELED
             - DELIVERED

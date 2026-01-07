@@ -64,7 +64,6 @@ export default function OrdersPage() {
     switch (status) {
       case 'PENDING':
       case 'PAYMENT_IN_PROGRESS':
-      case 'PAID':
       case 'RESOLVING':
       case 'CONCILIATION_PAYMENT_IN_PROGRESS':
         return {
@@ -73,7 +72,7 @@ export default function OrdersPage() {
           icon: 'package_2',
           iconColor: 'text-orange-600 dark:text-orange-400',
           text: 'text-orange-700 dark:text-orange-400',
-          label: t('status.processing')
+          label: t(`status.${status.toLocaleLowerCase()}`)
         };
       case 'DELIVERED':
         return {
@@ -82,7 +81,17 @@ export default function OrdersPage() {
           icon: 'check_circle',
           iconColor: 'text-green-600 dark:text-green-400',
           text: 'text-green-700 dark:text-green-400',
-          label: t('status.delivered')
+          label: t(`status.${status.toLocaleLowerCase()}`)
+        };
+      case 'PAID':
+      case 'CONSOLIDATION_SUCCESSFUL':
+        return {
+          bg: 'bg-green-50 dark:bg-green-900/20',
+          border: 'border-green-100 dark:border-green-900/30',
+          icon: 'check_circle',
+          iconColor: 'text-green-600 dark:text-green-400',
+          text: 'text-green-700 dark:text-green-400',
+          label: t(`status.${status.toLocaleLowerCase()}`)
         };
       case 'CANCELED':
         return {
@@ -91,7 +100,7 @@ export default function OrdersPage() {
           icon: 'cancel',
           iconColor: 'text-slate-500 dark:text-slate-400',
           text: 'text-slate-600 dark:text-slate-400',
-          label: t('status.cancelled')
+          label: t(`status.${status.toLocaleLowerCase()}`)
         };
       case 'CONCILIATED':
         return {
@@ -100,7 +109,7 @@ export default function OrdersPage() {
           icon: 'check_circle',
           iconColor: 'text-blue-600 dark:text-blue-400',
           text: 'text-blue-700 dark:text-blue-400',
-          label: t('status.conciliated')
+          label: t(`status.${status.toLocaleLowerCase()}`)
         };
       case 'PAYMENT_FAILED':
         return {
@@ -109,7 +118,7 @@ export default function OrdersPage() {
           icon: 'error',
           iconColor: 'text-red-600 dark:text-red-400',
           text: 'text-red-700 dark:text-red-400',
-          label: t('status.paymentFailed')
+          label: t(`status.${status.toLocaleLowerCase()}`)
         };
       default:
         return {
