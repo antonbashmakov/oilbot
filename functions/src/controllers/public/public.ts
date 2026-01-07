@@ -17,6 +17,7 @@ import {localeMiddleware} from "../../middleware/localeMiddleware";
 
 import CustomerBalanceService from "../../services/CustomerBalanceService";
 import {SubscriptionService} from "../private/imports";
+import {logger} from "firebase-functions/v1";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -189,6 +190,8 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
 
       customer = systemUser;
     }
+
+    logger.debug("Current customer : ", customer);
 
     const balance = await customerBalanceService.obtainForCustomer(customer.id);
     const stats = await customerService.obtainStatistics(customer.id);

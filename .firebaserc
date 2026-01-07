@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "posebesto-busines"
+    "default": "posebestoimosti-473916"
   },
   "targets": {
     "posebesto-business": {
@@ -10,6 +10,16 @@
         ],
         "twa": [
           "posebesto-twa"
+        ]
+      }
+    },
+    "posebestoimosti-473916": {
+      "hosting": {
+        "twa": [
+          "twa-prod"
+        ],
+        "crm": [
+          "posebestoimosti-473916"
         ]
       }
     }
