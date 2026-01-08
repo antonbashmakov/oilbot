@@ -155,7 +155,7 @@ export default function Home() {
                     <span className="text-primary text-lg font-bold">{(item.fraction_price_out || 0).toFixed(0)} ₽</span>
                     <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">/ {item.unit_description}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 mt-1">
+                  {delivery?.delivery_end && <div className="flex items-center gap-1.5 mt-1">
                     <span
                       className={`material-symbols-outlined text-[14px] text-green-600 dark:text-green-400`}
                     >
@@ -164,7 +164,7 @@ export default function Home() {
                     <p className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">
                       {format(new Date(delivery.delivery_end), "dd MMM yyyy")}
                     </p>
-                  </div>
+                  </div>}
                 </div>
               </div>
             );
