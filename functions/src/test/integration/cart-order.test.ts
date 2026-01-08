@@ -139,7 +139,7 @@ describe("Cart Order Endpoint Integration Test", () => {
 
   it("should require subscription when customer has more than 1 fulfilled order", async () => {
 
-    await customerService.incrementStatistics(testCustomer.id, { number_of_fulfilled_orders: 1 });
+    await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: -1 });
 
     let response = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)

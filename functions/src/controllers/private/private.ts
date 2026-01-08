@@ -336,7 +336,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
         const stats = await customerService.obtainStatistics(customerId);
 
-        if ((stats.number_of_fulfilled_orders >= 1 || stats.number_of_active_orders >= 1) && !hasActiveSubscription) {
+        if ((stats.number_of_free_orders <= 0) && !hasActiveSubscription) {
           throw new Error("Active subscription is missing");
         }
 
@@ -346,7 +346,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         }
         // Create order from cart (transactionally removes cart items)
         const order = await orderService.createOrderFromCart(customer, cartItems);
-        await customerService.incrementStatistics(customerId, {number_of_orders: 1, number_of_active_orders: 1});
+        await customerService.incrementStatistics(customerId, {number_of_orders: 1, number_of_active_orders: 1, number_of_free_orders: -1});
 
         const paymentRequest = tbankService.orderToPaymentRequest(order);
         const paymentResponse = await tbankService.initPayment(paymentRequest);

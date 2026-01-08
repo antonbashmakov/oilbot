@@ -19,6 +19,7 @@ class CustomerService extends AbstractService<Customer> {
         id: customerId,
         number_of_orders: 0,
         number_of_active_orders: 0,
+        number_of_free_orders: 1,
         number_of_canceled_orders: 0,
         number_of_fulfilled_orders: 0,
         number_of_paid_months: 0,
@@ -54,8 +55,9 @@ class CustomerService extends AbstractService<Customer> {
   }
 
   incrementStatistics(customerId: string, updates: Partial<CustomerStats>): Promise<CustomerStats> {
-    return this.obtainStatistics(customerId).then((s) => {
+    return this.obtainStatistics(customerId).then(async (s) => {
       const ref = this.db.collection(COLLECTIONS.CUSTOMER_STATS).doc(customerId);
+
 
       let increment = {};
       if (updates.number_of_orders !== undefined) {
@@ -66,6 +68,13 @@ class CustomerService extends AbstractService<Customer> {
       }
       if (updates.number_of_fulfilled_orders !== undefined) {
         increment = {...increment, number_of_fulfilled_orders: FieldValue.increment(updates.number_of_fulfilled_orders)};
+      }
+      if (updates.number_of_free_orders !== undefined) {
+        const stats = (await ref.get()).data();
+        if ((updates.number_of_free_orders >= 0 || // update only if increase
+          (updates.number_of_free_orders < 0 && (stats!.number_of_free_orders + updates.number_of_free_orders >= 0)))) { //  or if the update is correct
+          increment = {...increment, number_of_free_orders: FieldValue.increment(updates.number_of_free_orders)};
+        }
       }
       if (updates.number_of_paid_months !== undefined) {
         increment = {...increment, number_of_paid_months: FieldValue.increment(updates.number_of_paid_months)};

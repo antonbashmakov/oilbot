@@ -24,6 +24,7 @@ const MOCK_USER: AppCustomer = {
   },
   stats: {
     id: "270053857",
+    number_of_free_orders: 0,
     number_of_orders: 0,
     number_of_canceled_orders: 0,
     number_of_fulfilled_orders: 0,

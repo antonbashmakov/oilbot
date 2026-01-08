@@ -8,9 +8,6 @@ describe("TBankService Unit Tests", () => {
   let testPayment: Payment;
 
   beforeEach(() => {
-    // Mock environment variables
-    process.env.TINKOFF_TERMINAL_ID = "1754681033595DEMO";
-    process.env.TINKOFF_TERMINAL_PASSWORD = "Z48jVsFhs!cISDgo";
     
     tbankService = new TBankService();
 
@@ -55,11 +52,6 @@ describe("TBankService Unit Tests", () => {
     } as any;
   });
 
-  afterEach(() => {
-    // Clean up environment variables
-    delete process.env.TINKOFF_TERMINAL_ID;
-    delete process.env.TINKOFF_TERMINAL_PASSWORD;
-  });
 
   describe("orderToPaymentRequest", () => {
     it("should include RedirectDueDate field in payment request", () => {
@@ -142,10 +134,11 @@ describe("TBankService Unit Tests", () => {
 
   describe("paymentToCancelRequest", () => {
     it("should create cancellation request with correct PaymentId", () => {
+
       const cancelRequest = tbankService.paymentToCancelRequest(testPayment);
 
       expect(cancelRequest).toHaveProperty("PaymentId", "7503417791");
-      expect(cancelRequest).toHaveProperty("TerminalKey", "1754681033595DEMO");
+      expect(cancelRequest).toHaveProperty("TerminalKey", process.env.TINKOFF_TERMINAL_ID);
       expect(cancelRequest).toHaveProperty("Token");
       expect(typeof cancelRequest.Token).toBe("string");
     });
@@ -156,9 +149,9 @@ describe("TBankService Unit Tests", () => {
       // The token should be generated from: TerminalKey + PaymentId + Password
       // Sorted alphabetically: Password, PaymentId, TerminalKey
       const expectedTokenInput = {
-        TerminalKey: "1754681033595DEMO",
+        TerminalKey: process.env.TINKOFF_TERMINAL_ID,
         PaymentId: "7503417791",
-        Password: "Z48jVsFhs!cISDgo"
+        Password: process.env.TINKOFF_TERMINAL_PASSWORD
       };
       
       // Calculate expected token
