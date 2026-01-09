@@ -1,6 +1,7 @@
 import AbstractService from "./AbstractService";
-import {COLLECTIONS} from "../constants";
-import {CustomerBalance} from "../models";
+import { COLLECTIONS } from "../constants";
+import { BalanceChangeEvent, CustomerBalance } from "../models";
+import { CONSTANTS } from "../controllers/admin/imports";
 
 class CustomerBalanceService extends AbstractService<CustomerBalance> {
   async obtainForCustomer(customerId: string): Promise<CustomerBalance> {
@@ -25,18 +26,33 @@ class CustomerBalanceService extends AbstractService<CustomerBalance> {
   }
 
 
-  async updateBalance(customerId: string, change: number): Promise<CustomerBalance> {
-    const balance = await this.obtainForCustomer(customerId);
+  async updateBalance(customerId: string, change: number, reason: BalanceChangeEvent["reason"]): Promise<CustomerBalance> {
 
-    await this.incrementField(balance, "value", change);
-    await this.update(balance, {updated_at: new Date()});
+      const eventsCollectionRef = this.getCollectionByName(CONSTANTS.COLLECTIONS.CUSTOMER_BALANCES_CHANGE_EVENTS);
+      
+      const balance = await this.obtainForCustomer(customerId);
 
-    return balance;
+      await this.incrementField(balance, "value", change);
+      await this.update(balance, { updated_at: new Date() });
+
+      const changeEvent: BalanceChangeEvent = {
+        id: "",
+        created_at : new Date(),
+        change,
+        reason,
+      }
+
+      await eventsCollectionRef.add(changeEvent);
+
+      balance.value += change; 
+
+      return balance;
+
   }
 
   toPOJO(id: any, o: any): CustomerBalance | undefined {
     if (!o) return undefined;
-    return {...o, id, created_at: o.created_at.toDate(), updated_at: o.updated_at.toDate()};
+    return { ...o, id, created_at: o.created_at.toDate(), updated_at: o.updated_at.toDate() };
   }
 
   getCollectionName(): string {

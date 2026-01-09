@@ -45,6 +45,7 @@ describe("BalanceChangedProcessor Integration Test", () => {
       payload: {
         customer_id: createdCustomer.id,
         change: -50, // Negative change (refund)
+        reason: "ORDER_RESOLVED"
       },
     };
 
@@ -81,6 +82,7 @@ describe("BalanceChangedProcessor Integration Test", () => {
       payload: {
         customer_id: createdCustomer.id,
         change: 100, // Positive change (credit)
+        reason: "ORDER_RESOLVED"
       },
     };
 
@@ -106,6 +108,7 @@ describe("BalanceChangedProcessor Integration Test", () => {
       payload: {
         customer_id: createdCustomer.id,
         change: 50,
+        reason: "ORDER_RESOLVED"
       },
     };
 
@@ -131,6 +134,7 @@ describe("BalanceChangedProcessor Integration Test", () => {
       payload: {
         customer_id: createdCustomer.id,
         change: 100,
+        reason: "ORDER_RESOLVED"
       },
     };
 
@@ -145,6 +149,7 @@ describe("BalanceChangedProcessor Integration Test", () => {
       payload: {
         customer_id: createdCustomer.id,
         change: -30,
+        reason: "ORDER_RESOLVED"
       },
     };
 

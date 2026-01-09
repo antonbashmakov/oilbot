@@ -59,6 +59,7 @@ class OrderResolveProcessor extends AbstractProcessor {
           payload: {
             customer_id: `${order.owner.id}`,
             change: diff,
+            reason: "ORDER_RESOLVED"
           },
         };
         await publisher.publish(event);

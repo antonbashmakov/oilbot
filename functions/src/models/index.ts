@@ -34,8 +34,13 @@ export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 export type TinkoffResult = models["schemas"]["TinkoffResult"];
 
 
+type BaseBalanceChangeEvent = models["schemas"]["BalanceChangeEvent"];
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 export type BaseConversationMessage = components["schemas"]["ConversationMessage"];
+
+export type BalanceChangeEvent = Omit<BaseBalanceChangeEvent, "created_at" > & {
+  created_at: Date;
+}
 
 export type Payment = Omit<BasePayment, "created_at" | "updated_at"> & {
   created_at: Date;
@@ -86,6 +91,7 @@ export type BalanceChangedEvent = OutboxEvent & {
   payload: {
     customer_id: string;
     change: number;
+    reason: BaseBalanceChangeEvent["reason"]
   }
 };
 export type PaymentCreatedEvent = OutboxEvent & {
@@ -98,7 +104,7 @@ export type OrderPaymentConfirmedEvent = OutboxEvent & {
   payload: {
     order_id: string;
     external_id: string;
-    subscription_id: string;
+    subscription_id?: string;
     rebill_id?: string;
   }
 };

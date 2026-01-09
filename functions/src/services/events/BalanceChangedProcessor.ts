@@ -16,7 +16,8 @@ class BalanceChangedProcessor extends AbstractProcessor {
       // Update customer balance
       await customerBalanceService.updateBalance(
         event.payload.customer_id,
-        event.payload.change
+        event.payload.change,
+        event.payload.reason,
       );
 
       return {};

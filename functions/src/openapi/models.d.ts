@@ -45,6 +45,22 @@ export interface components {
             /** @description Error message from the last failed processing attempt. */
             lastError?: string | null;
         };
+        BalanceChangeEvent: {
+            /** @description Unique event identifier (UUID or Firestore doc ID). */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the event was written to Firestore.
+             */
+            created_at: string;
+            /**
+             * @description How balance has changed
+             * @default 0
+             */
+            change: number;
+            /** @enum {string} */
+            reason: "ORDER_RESOLVED" | "SUBSCRIPTION_CHARGE";
+        };
         Payment: {
             /**
              * @description Total payment amount
