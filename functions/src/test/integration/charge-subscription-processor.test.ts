@@ -180,6 +180,59 @@ describe("ChargeSubscriptionProcessor Integration Test", () => {
     expect(mockTBankService.charge).toHaveBeenCalled();
   });
 
+  it("should process subscription charge successfully partly from balance", async () => {
+    await customerBalanceService.updateBalance(createdSubscription.id, -101, "SUBSCRIPTION_CHARGE");
+    // Create test event
+    const testEvent: ChargeSubscriptionEvent = {
+      id: "test-event-id",
+      idempotent_key: "idempotent-key-test",
+      type: "CHARGE_SUBSCRIPTION",
+      created_at: new Date(),
+      processed: false,
+      retries: 0,
+      payload: {
+        subscription_id: createdSubscription.id,
+      },
+    };
+
+    // Process the event
+    await chargeSubscriptionProcessor.process(testEvent);
+
+    const updatedSubscription = await subscriptionService.find(createdSubscription.id);
+    expect(updatedSubscription).toBeDefined();
+    expect(updatedSubscription!.next_payment_at).toBeDefined();
+
+    const expectedNextPayment = new Date(createdSubscription.next_payment_at);
+    expectedNextPayment.setMonth(expectedNextPayment.getMonth() + 1);
+    expect(updatedSubscription!.next_payment_at.getTime()).toBeCloseTo(expectedNextPayment.getTime(), -1000); // within 1 second
+
+    const createdPayment = await paymentService.findByExternalId("mock-payment-id");
+
+    expect(createdPayment).toBeDefined();
+    expect(createdPayment!.status).toBe("CONFIRMED");
+    expect(createdPayment!.success).toBe(true);
+
+    // Verify Telegram messages were sent
+    expect(mockTelegramService.sendMessage).toHaveBeenCalledTimes(1);
+    expect(mockTelegramService.sendMessage).toHaveBeenCalledWith(
+      "270053857",
+      "✅ Подписка оплачена!: test-customer-id",
+      createdSubscription.id
+    );
+
+    const updatedBalance = await customerBalanceService.obtainForCustomer(createdSubscription.id);
+    expect(updatedBalance.value).toBe(0);
+
+    // Verify TBankService methods were called
+    expect(mockTBankService.subscriptionToPaymentRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ fee: 199 }),
+      true
+    );
+    expect(mockTBankService.initPayment).toHaveBeenCalled();
+    expect(mockTBankService.paymentToChargeRequest).toHaveBeenCalled();
+    expect(mockTBankService.charge).toHaveBeenCalled();
+  });
+
   it("should throw error when no rebill_id found", async () => {
     // Remove accounting rebill_id
     await customerService.getAccountingRef(createdSubscription.id).update({ rebill_id: null });
@@ -203,7 +256,7 @@ describe("ChargeSubscriptionProcessor Integration Test", () => {
 
   it("should charge from balance when balance covers full fee", async () => {
     // Set balance to cover full fee
-    await customerBalanceService.updateBalance(createdSubscription.id, -300, "SUBSCRIPTION_CHARGE");
+    await customerBalanceService.updateBalance(createdSubscription.id, -301, "SUBSCRIPTION_CHARGE");
 
     const testEvent: ChargeSubscriptionEvent = {
       id: "test-event-id",
@@ -231,7 +284,7 @@ describe("ChargeSubscriptionProcessor Integration Test", () => {
 
     // Verify balance was deducted
     const updatedBalance = await customerBalanceService.obtainForCustomer(createdSubscription.id);
-    expect(updatedBalance.value).toBe(0); // -300 + 300 = 0
+    expect(updatedBalance.value).toBe(-1); // -300 + 300 = 0
 
     // Verify a payment record with external_id "charged-from-balance" was created
     const balancePayment = await paymentService.findByExternalId(`${createdSubscription.id}-charged-from-balance`);
