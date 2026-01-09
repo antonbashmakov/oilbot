@@ -72,7 +72,7 @@ describe("SubscriptionPaymentConfirmedProcessor Integration Test", () => {
       processed: false,
       retries: 0,
       payload: {
-        order_id: createdSubscription.id,
+        subscription_id: createdSubscription.id,
         external_id: "123456",
       },
     };
@@ -120,7 +120,7 @@ describe("SubscriptionPaymentConfirmedProcessor Integration Test", () => {
       processed: false,
       retries: 0,
       payload: {
-        order_id: createdSubscription.id,
+        subscription_id: createdSubscription.id,
         external_id: "123456",
         rebill_id: "rebill-12345",
       },
@@ -164,7 +164,7 @@ describe("SubscriptionPaymentConfirmedProcessor Integration Test", () => {
       processed: false,
       retries: 0,
       payload: {
-        order_id: testSubscription.id,
+        subscription_id: testSubscription.id,
         external_id: "999999", // Non-existent external payment ID
       },
     };
@@ -201,7 +201,7 @@ describe("SubscriptionPaymentConfirmedProcessor Integration Test", () => {
       processed: false,
       retries: 0,
       payload: {
-        order_id: "non-existent-subscription-id",
+        subscription_id: "non-existent-subscription-id",
         external_id: "777777",
       },
     };
@@ -241,7 +241,7 @@ describe("SubscriptionPaymentConfirmedProcessor Integration Test", () => {
       processed: false,
       retries: 0,
       payload: {
-        order_id: createdSubscription.id,
+        subscription_id: createdSubscription.id,
         external_id: "123456", // string external_id
       },
     };

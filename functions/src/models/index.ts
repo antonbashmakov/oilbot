@@ -102,7 +102,7 @@ export type PaymentCreatedEvent = OutboxEvent & {
 
 export type OrderPaymentConfirmedEvent = OutboxEvent & {
   payload: {
-    order_id: string;
+    order_id?: string;
     external_id: string;
     subscription_id?: string;
     rebill_id?: string;
