@@ -28,6 +28,7 @@ type BaseComment = components["schemas"]["Comment"];
 
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffPaymentCancelationRequest = models["schemas"]["TinkoffPaymentCancelationRequest"];
+export type TinkoffChargeRequest = models["schemas"]["TinkoffChargeRequest"];
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
 export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 export type TinkoffResult = models["schemas"]["TinkoffResult"];
@@ -97,7 +98,13 @@ export type OrderPaymentConfirmedEvent = OutboxEvent & {
   payload: {
     order_id: string;
     external_id: string;
+    subscription_id: string;
     rebill_id?: string;
+  }
+};
+export type ChargeSubscriptionEvent = OutboxEvent & {
+  payload: {
+    subscription_id: string;
   }
 };
 export type OrderCreatedEvent = OutboxEvent & {

@@ -117,6 +117,15 @@ export interface components {
             /** @description Идентификатор платежа */
             PaymentId?: string;
         };
+        TinkoffChargeRequest: {
+            /** @description Ключ терминала */
+            TerminalKey: string;
+            Token: string;
+            /** @description Идентификатор платежа */
+            PaymentId?: string;
+            /** @description Уникальный идентификатор сохраненных реквизитов карты покупателя. */
+            RebillId?: string;
+        };
         TinkoffResult: {
             /** @example TBankTest */
             TerminalKey: string;

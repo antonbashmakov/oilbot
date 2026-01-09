@@ -1,13 +1,17 @@
 
 import * as dotenv from "dotenv";
+import * as moment from "moment";
+import "moment-timezone";
 
 import {
   functions,
   admin,
 } from "./imports";
-import {toProcessor} from "../../services/events/factory";
-import {OutboxEvent} from "../../models";
-import {logger} from "../../services/logger";
+import { toProcessor } from "../../services/events/factory";
+import { ChargeSubscriptionEvent, OutboxEvent, Subscription } from "../../models";
+import { logger } from "../../services/logger";
+import SubscriptionService from "../../services/SubscriptionService";
+import EventPublisher, { CONSTANTS } from "../webhook/imports";
 
 admin.initializeApp({}, "db");
 
@@ -56,6 +60,73 @@ const retryOutbox = functions.pubsub
   .onRun( processOutboxEvent);
 */
 
+// Scheduled function to process subscriptions daily at 00:00 UTC+3 (Moscow time)
+const processSubscriptionsDaily = functions.pubsub
+  .schedule("0 0 * * *") // midnight every day
+  .timeZone("Europe/Moscow") // UTC+3
+  .onRun(async (context) => {
+    logger.info("Starting daily subscription processing");
+
+    // Initialize services
+    const subscriptionService = new SubscriptionService(db);
+
+    // Use UTC for date calculations (Firestore stores dates in UTC)
+    const now = moment.utc();
+    const todayStart = now.clone().startOf("day");
+    const fourDaysAgo = todayStart.clone().subtract(4, "days");
+
+    const subscriptions = await subscriptionService.findActiveSubscriptionsNotOlderThen(fourDaysAgo.toDate());
+
+    const subscriptionsToCancel: Subscription[] = [];
+    const subscriptionsToCharge: Subscription[] = [];
+
+    subscriptions.forEach((subscription) => {
+      const nextPayment = moment.utc(subscription.next_payment_at).startOf("day");
+      if (nextPayment.isSame(fourDaysAgo, "day")) {
+        subscriptionsToCancel.push(subscription);
+      } else if (nextPayment.isSameOrBefore(todayStart, "day")) {
+        subscriptionsToCharge.push(subscription);
+      }
+      // If next_payment_at is in the future, skip
+    });
+
+    logger.info(`Subscriptions to cancel (4 days overdue): ${subscriptionsToCancel.length}`);
+    logger.info(`Subscriptions to charge (due or overdue <4 days): ${subscriptionsToCharge.length}`);
+
+
+
+    if (subscriptionsToCancel.length > 0) {
+      subscriptionService.runTransactionally(async t => {
+        subscriptionsToCancel.forEach(s => {
+          t.update(subscriptionService.getObjectRef(s.id), {
+            status: "CANCELED_PAYMENT_OVERDUE",
+            canceled_at: new Date(),
+          })
+        });
+      })
+    }
+    const eventPublisher = new EventPublisher<ChargeSubscriptionEvent>(db);
+
+    subscriptionsToCharge.forEach(s => {
+      const event: ChargeSubscriptionEvent = {
+        id: "", // will be set by OutboxEventService
+        created_at: new Date(),
+        processed_at: new Date(),
+        processed: false,
+        retries: 0,
+        type: CONSTANTS.EVENTS.CHARGE_SUBSCRIPTION,
+        payload: {
+          subscription_id: s.id,
+        }
+      };
+
+      eventPublisher.publish(event);
+    });
+
+    return null;
+  });
+
 export default {
   processOutboxEvent,
+  processSubscriptionsDaily,
 };

@@ -14,7 +14,12 @@ class SubscriptionPaymentConfirmedProcessor extends AbstractProcessor {
     const paymentService = new PaymentService(this.db);
     const telegramService = new TelegramService();
 
-    const subscriptionId = event.payload.order_id;
+    const subscriptionId = event.payload.subscription_id;
+
+    if (!subscriptionId) {
+      throw new Error("Subscription id is missing!");
+    }
+
 
     const subscription = await subscriptionService.require(subscriptionId);
     const payment = await paymentService.findByExternalId(event.payload.external_id);

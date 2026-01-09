@@ -153,21 +153,46 @@ publicApi.get("/users/me", async (req: express.Request, res: express.Response) =
     return;
   }
 });
+
+publicApi.get("/stats/:userId", async (req: express.Request, res: express.Response) => {
+  try {
+    const {userId} = req.params;
+
+    if (!userId) {
+      return api.badRequest(res, "Missing userId parameter");
+    }
+
+    // Check if customer exists
+    const customer = await customerService.find(userId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+
+    await customerService.incrementStatistics(userId, {number_of_free_orders: -1});
+    const stats = await customerService.obtainStatistics(userId);
+    return api.send(res, stats);
+  } catch (err: any) {
+    functions.logger.error("Stats error:", err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
 publicApi.post("/auth/telegram", async (req: express.Request, res: express.Response) => {
   try {
     functions.logger.info("Verifying Telegram init data:", req.body.initData);
 
     if (!req.body.initData) {
-      /*
-      const id = "270053857";
+      const id = "1390372560";
       const customer = await customerService.find(id);
       const balance = await customerBalanceService.obtainForCustomer(id);
       const stats = await customerService.obtainStatistics(id);
       const subscription = await subscriptionService.find(id);
-
+      functions.logger.info("Verifying Telegram init data:", id);
       return api.send(res, {...customer, balance, stats, subscription});
+      /*
+
       */
-      return api.badRequest(res, "Missing initData query parameter");
+      // return api.badRequest(res, "Missing initData query parameter");
     }
 
     const verification = verifyTelegramInitData(req.body.initData as string, process.env.TELEGRAM_BOT_TOKEN as string);

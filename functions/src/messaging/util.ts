@@ -38,6 +38,7 @@ c *{{deliveryStart}}* по *{{deliveryEnd}}*
   ORDER_PAYMENT_CONFIRMED_ADMIN: "✅ Ордер оплачен!: {{orderId}}",
   ORDER_CREATED_ADMIN: "✅ Создан ордер: {{orderId}}",
   SUBSCRIPTION_PAYMENT_CONFIRMED_ADMIN: "✅ Подписка оплачена!: {{subscriptionId}}",
+  SUBSCRIPTION_PAYMENT_FAILED_ADMIN: "❗️ Ошибка оплаты подписки!: {{subscriptionId}}",
 };
 
 /**

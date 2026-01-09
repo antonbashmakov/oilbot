@@ -129,6 +129,10 @@ abstract class AbstractService<T extends Entity> {
     });
   }
 
+  getObjectRef(id: string) {
+    return this.getCollection().doc(id);
+  }
+
   runTransactionally<T>(method: (transaction: any) => Promise<T>): Promise<T> {
     return this.db.runTransaction(method);
   }

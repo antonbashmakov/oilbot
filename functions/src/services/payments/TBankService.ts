@@ -4,9 +4,9 @@ import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import * as moment from "moment";
 
-import {TINKOFF_SUPPORT} from "../../constants";
+import { TINKOFF_SUPPORT } from "../../constants";
 
-import {Order, Payment, Subscription, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
+import { Order, Payment, Subscription, TinkoffChargeRequest, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult } from "../../models";
 dotenv.config();
 
 const terminal = process.env.TINKOFF_TERMINAL_ID || functions.config().tinkoff.TINKOFF_TERMINAL_ID;
@@ -45,7 +45,7 @@ class TBankService {
       RedirectDueDate,
     };
 
-    const rootFields = {...body, Password: password} as any;
+    const rootFields = { ...body, Password: password } as any;
 
     delete rootFields.DATA;
     delete rootFields.Receipt;
@@ -54,7 +54,7 @@ class TBankService {
 
     return body;
   }
-  subscriptionToPaymentRequest(subscription: Subscription): TinkoffPaymentPayload {
+  subscriptionToPaymentRequest(subscription: Subscription, isRecurrentPayment = false): TinkoffPaymentPayload {
     const to = moment(subscription.next_payment_at);
     const from = to.add(-1, "month");
 
@@ -74,25 +74,28 @@ class TBankService {
     const redirectDueDate = moment().add(1, "month");
     const RedirectDueDate = redirectDueDate.format("YYYY-MM-DDTHH:mm:ssZ");
 
+    const now = new Date();
+
     const body = {
       Token: "",
       Recurrent: "Y",
       CustomerKey: subscription.id,
-      OperationInitiatorType: "1", // initial recurrent payment
+      OperationInitiatorType: !isRecurrentPayment ? "1" : "R",
       TerminalKey: terminal,
       Amount: subscription.fee * 100,
-      OrderId: subscription.id,
+      OrderId: `${subscription.id}-${now.getFullYear()}-${now.getMonth()}-${now.getDay()}-${crypto.randomUUID().substring(0, 5)}`,
       Description: "Оплата подписки в магазине По Себестоимости",
       DATA: {
         Phone: process.env.SUPPORT_PHONE,
         Email: process.env.SUPPORT_EMAIL,
         OrderType: "SUBSCRIPTION",
+        SubscriptionId: subscription.id,
       },
       Receipt,
       RedirectDueDate,
     };
 
-    const rootFields = {...body, Password: password} as any;
+    const rootFields = { ...body, Password: password } as any;
 
     delete rootFields.DATA;
     delete rootFields.Receipt;
@@ -108,7 +111,21 @@ class TBankService {
       PaymentId: payment.external_id,
     };
 
-    const rootFields = {...body, Password: password} as any;
+    const rootFields = { ...body, Password: password } as any;
+
+    body.Token = this.generateToken(rootFields);
+
+    return body;
+  }
+  paymentToChargeRequest(payment: Payment, rebillId: string): TinkoffChargeRequest {
+    const body = {
+      Token: "",
+      TerminalKey: payment.terminal_key,
+      PaymentId: payment.external_id,
+      RebillId: rebillId,
+    };
+
+    const rootFields = { ...body, Password: password } as any;
 
     body.Token = this.generateToken(rootFields);
 
@@ -125,6 +142,14 @@ class TBankService {
   }
   async cancelPayment(paymentRequest: TinkoffPaymentCancelationRequest): Promise<TinkoffResult> {
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Cancel", paymentRequest, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  }
+  async charge(chargeRequest: TinkoffChargeRequest): Promise<TinkoffResult> {
+    const response = await axios.post("https://securepay.tinkoff.ru/v2/Charge", chargeRequest, {
       headers: {
         "Content-Type": "application/json",
       },

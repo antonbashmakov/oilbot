@@ -573,7 +573,7 @@ export interface components {
              */
             next_payment_at: string;
             /** @enum {string} */
-            status: "PENDING" | "ACTIVE" | "CANCELED";
+            status: "PENDING" | "ACTIVE" | "CANCELED" | "CANCELED_PAYMENT_OVERDUE";
             /**
              * Format: float
              * @description Cost of the subscription
@@ -1095,6 +1095,11 @@ export interface components {
              * @example 0
              */
             error_code?: string | null;
+            /**
+             * @description Message from payment provider
+             * @example 0
+             */
+            message?: string | null;
             /** @enum {string} */
             status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT" | "CANCELED" | "REJECTED";
             /**
