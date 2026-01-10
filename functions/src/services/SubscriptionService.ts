@@ -1,5 +1,5 @@
 import AbstractService from "./AbstractService";
-import { Subscription } from "../models";
+import {Subscription} from "../models";
 import * as moment from "moment";
 
 
@@ -31,14 +31,13 @@ class SubscriptionService extends AbstractService<Subscription> {
 
   findActiveSubscriptionsNotOlderThen(date: Date): Promise<Subscription[]> {
     return this.getCollection().where("status", "==", "ACTIVE")
-      .where("next_payment_at", ">=", date).get().then(result => {
+      .where("next_payment_at", ">=", date).get().then((result) => {
         if (result.empty) {
           return [];
         }
 
         return result.docs.map((doc) => this.toPOJO(doc.id, doc.data()) as Subscription);
       });
-
   }
 
   /**
@@ -63,7 +62,7 @@ class SubscriptionService extends AbstractService<Subscription> {
 
   toPOJO(id: any, o: any): Subscription | undefined {
     if (!o) return undefined;
-    return { ...o, id, created_at: o.created_at.toDate(), next_payment_at: o.next_payment_at.toDate(), canceled_at: o.next_payment_at?.toDate() };
+    return {...o, id, created_at: o.created_at.toDate(), next_payment_at: o.next_payment_at.toDate(), canceled_at: o.next_payment_at?.toDate()};
   }
 }
 

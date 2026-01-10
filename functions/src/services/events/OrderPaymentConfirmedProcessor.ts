@@ -14,7 +14,7 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
 
     const orderId = event.payload.order_id;
 
-    if(!orderId) {
+    if (!orderId) {
       throw Error("Order id is missing");
     }
 

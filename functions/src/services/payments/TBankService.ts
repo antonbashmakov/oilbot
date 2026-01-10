@@ -4,9 +4,9 @@ import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import * as moment from "moment";
 
-import { TINKOFF_SUPPORT } from "../../constants";
+import {TINKOFF_SUPPORT} from "../../constants";
 
-import { Order, Payment, Subscription, TinkoffChargeRequest, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult } from "../../models";
+import {Order, Payment, Subscription, TinkoffChargeRequest, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
 dotenv.config();
 
 const terminal = process.env.TINKOFF_TERMINAL_ID || functions.config().tinkoff.TINKOFF_TERMINAL_ID;
@@ -45,7 +45,7 @@ class TBankService {
       RedirectDueDate,
     };
 
-    const rootFields = { ...body, Password: password } as any;
+    const rootFields = {...body, Password: password} as any;
 
     delete rootFields.DATA;
     delete rootFields.Receipt;
@@ -95,7 +95,7 @@ class TBankService {
       RedirectDueDate,
     };
 
-    const rootFields = { ...body, Password: password } as any;
+    const rootFields = {...body, Password: password} as any;
 
     delete rootFields.DATA;
     delete rootFields.Receipt;
@@ -111,7 +111,7 @@ class TBankService {
       PaymentId: payment.external_id,
     };
 
-    const rootFields = { ...body, Password: password } as any;
+    const rootFields = {...body, Password: password} as any;
 
     body.Token = this.generateToken(rootFields);
 
@@ -125,7 +125,7 @@ class TBankService {
       RebillId: rebillId,
     };
 
-    const rootFields = { ...body, Password: password } as any;
+    const rootFields = {...body, Password: password} as any;
 
     body.Token = this.generateToken(rootFields);
 
