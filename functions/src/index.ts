@@ -11,6 +11,7 @@ import {publicApi} from "./controllers/public";
 import {db} from "./controllers/db";
 
 export const processOutboxEvent = db.processOutboxEvent;
+export const processSubscriptionsDaily = db.processSubscriptionsDaily;
 
 const webhooks = functions.https.onRequest(webhookApi);
 

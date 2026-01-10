@@ -15,7 +15,7 @@ class OrderCreatedProcessor extends AbstractProcessor {
       orderId,
     };
     const adminMessage = toMessage("ORDER_CREATED_ADMIN", adminTemplateValues);
-    telegramService.sendMessage("270053857", adminMessage, orderId).catch((e) => error(`Failed to send ORDER_CREATED_ADMIN to 270053857 : ${e}`));
+    telegramService.sendMessage("270053857", adminMessage, orderId!).catch((e) => error(`Failed to send ORDER_CREATED_ADMIN to 270053857 : ${e}`));
   }
 }
 

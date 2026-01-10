@@ -1,7 +1,6 @@
 
 import * as dotenv from "dotenv";
-import * as moment from "moment";
-import "moment-timezone";
+import * as  moment from "moment-timezone";
 
 import {
   functions,
@@ -60,12 +59,8 @@ const retryOutbox = functions.pubsub
   .onRun( processOutboxEvent);
 */
 
-// Scheduled function to process subscriptions daily at 00:00 UTC+3 (Moscow time)
-const processSubscriptionsDaily = functions.pubsub
-  .schedule("0 0 * * *") // midnight every day
-  .timeZone("Europe/Moscow") // UTC+3
-  .onRun(async (context) => {
-    logger.info("Starting daily subscription processing");
+const dailySubscriptionCheck = async (_context: any) => 
+    {
 
     // Initialize services
     const subscriptionService = new SubscriptionService(db);
@@ -90,11 +85,6 @@ const processSubscriptionsDaily = functions.pubsub
       // If next_payment_at is in the future, skip
     });
 
-    logger.info(`Subscriptions to cancel (4 days overdue): ${subscriptionsToCancel.length}`);
-    logger.info(`Subscriptions to charge (due or overdue <4 days): ${subscriptionsToCharge.length}`);
-
-
-
     if (subscriptionsToCancel.length > 0) {
       subscriptionService.runTransactionally(async t => {
         subscriptionsToCancel.forEach(s => {
@@ -107,7 +97,7 @@ const processSubscriptionsDaily = functions.pubsub
     }
     const eventPublisher = new EventPublisher<ChargeSubscriptionEvent>(db);
 
-    subscriptionsToCharge.forEach(s => {
+    const promises = subscriptionsToCharge.map(s => {
       const event: ChargeSubscriptionEvent = {
         id: "", // will be set by OutboxEventService
         created_at: new Date(),
@@ -120,13 +110,24 @@ const processSubscriptionsDaily = functions.pubsub
         }
       };
 
-      eventPublisher.publish(event);
+      return eventPublisher.publish(event);
     });
 
+    await Promise.all(promises);
+
     return null;
-  });
+  };
+
+// Scheduled function to process subscriptions daily at 00:00 UTC+3 (Moscow time)
+const processSubscriptionsDaily = functions.pubsub
+  .schedule("0 0 * * *") // midnight every day
+  .timeZone("Europe/Moscow") // UTC+3
+  .onRun(
+    dailySubscriptionCheck
+);
 
 export default {
   processOutboxEvent,
   processSubscriptionsDaily,
+  dailySubscriptionCheck,
 };
