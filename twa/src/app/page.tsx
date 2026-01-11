@@ -100,7 +100,11 @@ export default function Home() {
             const delivery = item.deliveries[0];
 
             return (
-              <div key={item.id || `item-${index}`} className="flex flex-col group/card">
+              <a 
+                key={item.id || `item-${index}`} 
+                href={`/items/${item.id}`}
+                className="flex flex-col group/card"
+              >
                 <div className="relative  mb-3 overflow-hidden rounded-xl bg-gray-100 dark:bg-white/5">
                   {/* Image - using CDN with progressive loading (thumbnail first, then high-res) */}
                   <div
@@ -130,7 +134,7 @@ export default function Home() {
                   </div>
 
                   {/* Quick Add FAB */}
-                  <div className="absolute bottom-2 right-2">
+                  <div className="absolute bottom-2 right-2" onClick={(e) => e.preventDefault()}>
                   <CartButton
                     itemId={item.id || `item-${index}`}
                     itemData={{
@@ -166,7 +170,7 @@ export default function Home() {
                     </p>
                   </div>}
                 </div>
-              </div>
+              </a>
             );
           })}
         </div>

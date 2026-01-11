@@ -33,6 +33,17 @@ export const useGetItemsQuery = (category?: string): UseQueryResult<ItemOverview
         }
     }, { retry: 1 } as any)
 };
+
+export const useGetItemQuery = (customerId?: string, itemId?: string): UseQueryResult<ItemOverview> => {
+    return useApiQuery("/api/private/customers/{customerId}/items/{itemId}", {
+        params: {
+            path: {
+                customerId: customerId || '',
+                itemId: itemId || ''
+            }
+        }
+    }, { retry: 1, enabled: !!customerId && !!itemId } as any);
+};
 export const useGetCartItemsQuery = (customerId?: string): UseQueryResult<CartItem[]> => {
     const queryClient = useQueryClient();
 

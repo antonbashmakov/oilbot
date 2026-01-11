@@ -300,6 +300,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/private/customers/{customerId}/items/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get item overview for a customer
+         * @description Retrieve item overview for a specific customer and item
+         */
+        get: operations["getCustomerItem"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/private/customers/{customerId}/cart/items": {
         parameters: {
             query?: never;
@@ -751,6 +771,8 @@ export interface components {
              * @example Отруб
              */
             unit_description: string;
+            /** @description Statistics for the item including likes and share enters */
+            stats?: components["schemas"]["ItemStats"];
         };
         OwnerRef: {
             /**
@@ -878,6 +900,18 @@ export interface components {
              * @example Сёмга филе Филе на коже 1.8 Кг
              */
             name: string;
+        };
+        ItemStats: {
+            /**
+             * @description Number of likes for the item
+             * @example 42
+             */
+            number_of_likes?: number;
+            /**
+             * @description Number of share enters for the item
+             * @example 15
+             */
+            number_of_share_enters?: number;
         };
         DeliveryOverviewItemStats: {
             orders?: components["schemas"]["Order"][];
@@ -2138,6 +2172,53 @@ export interface operations {
                         code?: string;
                         data?: components["schemas"]["ItemOverview"][];
                     };
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getCustomerItem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+                /** @description Item ID */
+                itemId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: components["schemas"]["ItemOverview"];
+                    };
+                };
+            };
+            /** @description Customer or item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             /** @description Internal server error */
