@@ -3,6 +3,7 @@ import {components as models} from "../openapi/models";
 
 export type Customer = components["schemas"]["Customer"];
 export type CustomerStats = components["schemas"]["CustomerStats"];
+export type ItemStats = components["schemas"]["ItemStats"];
 export type CustomerAccounting = components["schemas"]["CustomerAccounting"];
 export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];

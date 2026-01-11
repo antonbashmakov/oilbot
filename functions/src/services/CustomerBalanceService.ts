@@ -34,14 +34,17 @@ class CustomerBalanceService extends AbstractService<CustomerBalance> {
     await this.incrementField(balance, "value", change);
     await this.update(balance, {updated_at: new Date()});
 
+    const docRef = eventsCollectionRef.doc();
+
     const changeEvent: BalanceChangeEvent = {
-      id: "",
+      id: docRef.id,
+      balance_id: customerId,
       created_at: new Date(),
       change,
       reason,
     };
 
-    await eventsCollectionRef.add(changeEvent);
+    await docRef.set(changeEvent);
 
     balance.value += change;
 

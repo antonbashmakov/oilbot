@@ -313,6 +313,54 @@ privateApi.get("/customers/:customerId", async (req: express.Request, res: expre
   }
 });
 
+privateApi.get("/customers/:customerId/items/:itemId", async (req: express.Request, res: express.Response) => {
+  try {
+    const {customerId, itemId} = req.params;
+
+    // Check if customer exists
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    // Get item
+    const item = await itemService.find(itemId);
+    if (!item) {
+      return api.notFound(res, "Item not found");
+    }
+
+    // Get item statistics
+    const stats = await itemService.obtainStatistics(itemId);
+
+    // Get deliveries for the item's group (similar to category endpoint)
+    const deliveryService = new DeliveryService(db);
+    const groupDeliveries = await deliveryService.findClosestByGroups([item.group]);
+    const deliveries = groupDeliveries.filter(d => d.group === item.group);
+
+    // Construct item overview
+    const itemOverview: ItemOverview = {
+      name: item.name,
+      category: item.category,
+      group: item.group,
+      unit: item.unit,
+      unit_description: item.unit_description,
+      fraction: item.fraction,
+      price_out: item.price_out,
+      description: item.description,
+      fraction_price_out: item.fraction_price_out,
+      id: item.id,
+      link: item.link,
+      deliveries: deliveries,
+      stats: stats,
+    };
+
+    return api.send(res, itemOverview);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
 privateApi.post("/customers/:customerId/cart/order", async (req: express.Request, res: express.Response) => {
   try {
     const {customerId} = req.params;

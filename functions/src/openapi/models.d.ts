@@ -48,6 +48,8 @@ export interface components {
         BalanceChangeEvent: {
             /** @description Unique event identifier (UUID or Firestore doc ID). */
             readonly id: string;
+            /** @description Id of the balance to change */
+            readonly balance_id?: string;
             /**
              * Format: date-time
              * @description Timestamp when the event was written to Firestore.

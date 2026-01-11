@@ -775,6 +775,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /private/customers/{customerId}/items/{itemId}:
+    get:
+      operationId: getCustomerItem
+      summary: Get item overview for a customer
+      description: Retrieve item overview for a specific customer and item
+      tags:
+        - Items
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+        - name: itemId
+          in: path
+          required: true
+          description: Item ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/ItemOverview'
+        '404':
+          description: Customer or item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /private/customers/{customerId}/cart/items:
     get:
       operationId: getCartItems
@@ -1613,6 +1659,9 @@ components:
           type: string
           description: Unit description
           example: "Отруб"
+        stats:
+          $ref: '#/components/schemas/ItemStats'
+          description: Statistics for the item including likes and share enters
 
     OwnerRef:
       type: object
@@ -1749,6 +1798,18 @@ components:
           type: string
           description: Name of the stats item
           example: "Сёмга филе Филе на коже 1.8 Кг"
+          
+    ItemStats:
+      type: object
+      properties:
+        number_of_likes:
+          type: integer
+          description: Number of likes for the item
+          example: 42
+        number_of_share_enters:
+          type: integer
+          description: Number of share enters for the item
+          example: 15
           
     DeliveryOverviewItemStats:
       type: object

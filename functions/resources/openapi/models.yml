@@ -78,6 +78,10 @@ components:
           type: string
           description: Unique event identifier (UUID or Firestore doc ID).
           readOnly: true
+        balance_id:
+          type: string
+          description: Id of the balance to change
+          readOnly: true
         created_at:
           type: string
           format: date-time

@@ -183,6 +183,7 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
 
     if (!req.body.initData) {
       /*
+
       const id = "270053857";
       const customer = await customerService.find(id);
       const balance = await customerBalanceService.obtainForCustomer(id);
@@ -190,6 +191,7 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
       const subscription = await subscriptionService.find(id);
       functions.logger.info("Verifying Telegram init data:", id);
       return api.send(res, {...customer, balance, stats, subscription});
+
       */
       return api.badRequest(res, "Missing initData query parameter");
     }
