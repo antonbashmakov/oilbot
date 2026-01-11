@@ -26,7 +26,7 @@ const MainHeader = () => {
           </div>
         </div>
         }
-        {user?.subscription?.status === "CANCELED" && user?.subscription?.canceled_at && <div className="flex items-center gap-2 overflow-hidden">
+        {(user?.subscription?.status === "CANCELED" || user?.subscription?.status === "CANCELED_PAYMENT_OVERDUE") && user?.subscription?.canceled_at && <div className="flex items-center gap-2 overflow-hidden">
           <span className="material-symbols-outlined text-primary">stars</span>
           <div className="flex flex-col">
             <span

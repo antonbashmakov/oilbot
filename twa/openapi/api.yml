@@ -1399,6 +1399,7 @@ components:
             - PENDING
             - ACTIVE
             - CANCELED
+            - CANCELED_PAYMENT_OVERDUE
         fee:
             type: number
             format: float
@@ -2063,6 +2064,11 @@ components:
           type: string
           nullable: true
           description: Error code from payment provider
+          example: "0"
+        message:
+          type: string
+          nullable: true
+          description: Message from payment provider
           example: "0"
         status:
           type: string
