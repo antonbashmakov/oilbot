@@ -14,18 +14,17 @@ import {
   TBankService,
   SubscriptionService,
   CustomerBalanceService,
+  EventPublisher,
+  CONSTANTS,
 } from "./imports";
 // import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
 // import {logger} from "firebase-functions/v1";
-import {localeMiddleware} from "../../middleware/localeMiddleware";
 import {DeliveryRef, ItemOverview, Order, OrderCreatedEvent, Payment, Subscription} from "../../models";
 import _ = require("lodash");
 // import * as jwt from "jsonwebtoken";
 import * as cookieParser from "cookie-parser";
 import moment = require("moment");
-import {CONSTANTS} from "../admin/imports";
-import EventPublisher from "../webhook/imports";
 
 admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
@@ -58,7 +57,6 @@ privateApi.use(cors(
 ));
 
 privateApi.use(cookieParser());
-privateApi.use(localeMiddleware);
 /*
 // Cookie authentication middleware for customer routes
 const cookieAuthMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -335,9 +333,16 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       async () => {
         const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
         const stats = await customerService.obtainStatistics(customerId);
+        const balance = await customerBalanceService.obtainForCustomer(customerId);
+        let subscriptionToCreate;
 
-        if ((stats.number_of_free_orders <= 0) && !hasActiveSubscription) {
+        if ((stats.number_of_free_orders || 0 <= 0) && !hasActiveSubscription && balance.value < 300) {
           throw new Error("Active subscription is missing");
+        }
+
+        if ((stats.number_of_free_orders || 0 <= 0) && !hasActiveSubscription && balance.value >= 300) {
+          subscriptionToCreate = subscriptionService.buildSubscription(customerId, 300, new Date());
+          subscriptionToCreate.status = "ACTIVE";
         }
 
         const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
@@ -373,6 +378,11 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         const p = await paymentService.add(payment);
 
         await orderService.update(order, {status: "PAYMENT_IN_PROGRESS"});
+
+        if (subscriptionToCreate) {
+          await subscriptionService.set(subscriptionToCreate);
+          await customerBalanceService.updateBalance(customerId, -300, "SUBSCRIPTION_CHARGE");
+        }
 
         const event: OrderCreatedEvent = {
           id: "", // will be set by OutboxEventService
@@ -442,7 +452,6 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
         if (hasActiveSubscription) {
           throw new Error("Active subscription exists");
         }
-
 
         const d = moment(new Date(), "YYYY-MM-DD");
         const nextPaymentDate = d.add(1, "M").toDate();

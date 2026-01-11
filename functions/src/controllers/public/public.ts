@@ -183,7 +183,7 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
 
     if (!req.body.initData) {
       /*
-      const id = "";
+      const id = "270053857";
       const customer = await customerService.find(id);
       const balance = await customerBalanceService.obtainForCustomer(id);
       const stats = await customerService.obtainStatistics(id);

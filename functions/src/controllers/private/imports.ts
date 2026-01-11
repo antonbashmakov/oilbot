@@ -16,6 +16,8 @@ import CustomerBalanceService from "../../services/CustomerBalanceService";
 
 import {api} from "../../services/utils";
 import MockTBankService from "../../services/payments/MockTBankService";
+import EventPublisher, {CONSTANTS} from "../webhook/imports";
+import MockEventPublisher from "../../services/MockEventPublisher";
 
 
 export {
@@ -35,10 +37,13 @@ export {
   TBankService,
   SubscriptionService,
   CustomerBalanceService,
+  EventPublisher,
+  CONSTANTS,
 };
 
 if (process.env.GCLOUD_PROJECT === "test-project") {
   exports.TBankService = MockTBankService;
+  exports.EventPublisher = MockEventPublisher;
 }
 
 

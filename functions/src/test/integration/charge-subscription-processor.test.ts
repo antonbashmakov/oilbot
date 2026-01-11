@@ -181,7 +181,7 @@ describe("ChargeSubscriptionProcessor Integration Test", () => {
   });
 
   it("should process subscription charge successfully partly from balance", async () => {
-    await customerBalanceService.updateBalance(createdSubscription.id, -101, "SUBSCRIPTION_CHARGE");
+    await customerBalanceService.updateBalance(createdSubscription.id, 101, "SUBSCRIPTION_CHARGE");
     // Create test event
     const testEvent: ChargeSubscriptionEvent = {
       id: "test-event-id",
@@ -256,7 +256,7 @@ describe("ChargeSubscriptionProcessor Integration Test", () => {
 
   it("should charge from balance when balance covers full fee", async () => {
     // Set balance to cover full fee
-    await customerBalanceService.updateBalance(createdSubscription.id, -301, "SUBSCRIPTION_CHARGE");
+    await customerBalanceService.updateBalance(createdSubscription.id, 301, "SUBSCRIPTION_CHARGE");
 
     const testEvent: ChargeSubscriptionEvent = {
       id: "test-event-id",
@@ -284,7 +284,7 @@ describe("ChargeSubscriptionProcessor Integration Test", () => {
 
     // Verify balance was deducted
     const updatedBalance = await customerBalanceService.obtainForCustomer(createdSubscription.id);
-    expect(updatedBalance.value).toBe(-1); // -300 + 300 = 0
+    expect(updatedBalance.value).toBe(1); // 301 - 300 = 0
 
     // Verify a payment record with external_id "charged-from-balance" was created
     const balancePayment = await paymentService.findByExternalId(`${createdSubscription.id}-charged-from-balance`);

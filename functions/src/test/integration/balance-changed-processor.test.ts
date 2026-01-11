@@ -44,7 +44,7 @@ describe("BalanceChangedProcessor Integration Test", () => {
       retries: 0,
       payload: {
         customer_id: createdCustomer.id,
-        change: -50, // Negative change (refund)
+        change: 50,
         reason: "ORDER_RESOLVED"
       },
     };
@@ -65,7 +65,7 @@ describe("BalanceChangedProcessor Integration Test", () => {
 
     expect(balance).toBeDefined();
     expect(balance!.owner.id).toBe(createdCustomer.id);
-    expect(balance!.value).toBe(-50); // Should be exactly -50, not -250 (idempotency)
+    expect(balance!.value).toBe(50); // Should be exactly 50, not -250 (idempotency)
     expect(balance!.created_at).toBeInstanceOf(Date);
     expect(balance!.updated_at).toBeInstanceOf(Date);
   });

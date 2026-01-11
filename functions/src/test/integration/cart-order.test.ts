@@ -1,11 +1,12 @@
 import db from "../setup";
 import * as request from "supertest";
 import * as jwt from "jsonwebtoken";
-import { Customer, Item, CartItem, Subscription } from "../../models";
+import { Customer, Item, CartItem, Subscription, CustomerBalance } from "../../models";
 import CustomerService from "../../services/CustomerService";
 import ItemService from "../../services/ItemService";
 import CartItemService from "../../services/CartItemService";
 import SubscriptionService from "../../services/SubscriptionService";
+import CustomerBalanceService from "../../services/CustomerBalanceService";
 import moment = require("moment");
 // import SubscriptionService from "../../services/SubscriptionService";
 
@@ -34,6 +35,7 @@ describe("Cart Order Endpoint Integration Test", () => {
   let testItem: Item;
   let testCartItem: CartItem;
   let subscriptionService: SubscriptionService;
+  let customerBalanceService: CustomerBalanceService;
 
 
   beforeEach(async () => {
@@ -42,6 +44,7 @@ describe("Cart Order Endpoint Integration Test", () => {
     cartItemService = new CartItemService(db as any);
 
     subscriptionService = new SubscriptionService(db as any);
+    customerBalanceService = new CustomerBalanceService(db as any);
 
     // Create test customer
     testCustomer = {
@@ -177,6 +180,78 @@ describe("Cart Order Endpoint Integration Test", () => {
       .expect(200); 
 
 
+  });
+
+  it("should create new subscription if customer has balance more than 300", async () => {
+    // Set customer balance to 500
+    const initialBalance: CustomerBalance = {
+      id: testCustomer.id,
+      owner: { id: testCustomer.id },
+      value: 500,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    await customerBalanceService.set(initialBalance);
+    const balanceCheck = await customerBalanceService.obtainForCustomer(testCustomer.id);
+    console.log('Balance set to:', balanceCheck, 'type of value:', typeof balanceCheck.value);
+
+    // Ensure customer has no free orders left
+    await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: -1 });
+    const stats = await customerService.obtainStatistics(testCustomer.id);
+    console.log('Stats after decrement free orders:', stats);
+    console.log('number_of_free_orders <= 0?', stats.number_of_free_orders <= 0);
+
+    // Ensure no active subscription exists
+    const existingSubscription = await subscriptionService.find(testCustomer.id);
+    if (existingSubscription) {
+      console.log('Existing subscription found, deleting:', existingSubscription);
+      await subscriptionService.delete(existingSubscription);
+    }
+    console.log('Existing subscription after delete:', await subscriptionService.find(testCustomer.id));
+
+    // Debug: check hasActiveSubscription
+    const hasActive = await subscriptionService.hasActiveSubscription(testCustomer.id, new Date());
+    console.log('hasActiveSubscription result:', hasActive);
+
+    // Call cart/order endpoint
+    const response = await request(URL)
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', 'test-idempotency-key-balance-300')
+      .expect(200);
+
+    // Verify payment URL is returned (order created successfully)
+    expect(response.body).toHaveProperty('paymentUrl');
+    expect(response.body.paymentUrl).toBe("https://securepay.tinkoff.ru/p/MOCK_PAYMENT");
+
+    // Verify subscription was created
+    const subscription = await subscriptionService.find(testCustomer.id);
+    if (!subscription) {
+      // Debug: check balance after request
+      const balanceAfter = await customerBalanceService.obtainForCustomer(testCustomer.id);
+      console.log('Balance after request:', balanceAfter);
+      // Check if subscription exists with different ID?
+      const allSubscriptions = await subscriptionService.findAll();
+      console.log('All subscriptions:', allSubscriptions);
+    }
+    expect(subscription).toBeDefined();
+    expect(subscription!.status).toBe("PENDING");
+    expect(subscription!.fee).toBe(300);
+
+    // Verify balance was reduced by 300 (check via balance service)
+    const updatedBalance = await customerBalanceService.obtainForCustomer(testCustomer.id);
+    console.log('Updated balance:', updatedBalance);
+    expect(updatedBalance.value).toBe(200); // 500 - 300 = 200
+
+    // Verify cart is empty after order
+    const cartItems = await cartItemService.fetchForOwner({ id: testCustomer.id });
+    expect(cartItems.length).toBe(0);
+
+    // Verify order statistics updated
+    const finalStats = await customerService.obtainStatistics(testCustomer.id);
+    console.log('Final stats:', finalStats);
+    expect(finalStats.number_of_orders).toBe(1);
+    expect(finalStats.number_of_active_orders).toBe(1);
   });
 
 

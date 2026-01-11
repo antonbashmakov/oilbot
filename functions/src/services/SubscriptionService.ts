@@ -45,6 +45,12 @@ class SubscriptionService extends AbstractService<Subscription> {
    * Sets next_payment_date to one month ahead from now
    */
   async createSubscription(customerId: string, fee = 0, date: Date): Promise<Subscription> {
+    const subscription = this.buildSubscription(customerId, fee, date);
+
+    return this.set(subscription);
+  }
+
+  buildSubscription(customerId: string, fee = 0, date: Date): Subscription {
     const d = moment(date, "YYYY-MM-DD");
 
     const nextPaymentDate = d.add(1, "M").toDate();
@@ -57,7 +63,7 @@ class SubscriptionService extends AbstractService<Subscription> {
       fee,
     };
 
-    return this.set(subscription);
+    return subscription;
   }
 
   toPOJO(id: any, o: any): Subscription | undefined {

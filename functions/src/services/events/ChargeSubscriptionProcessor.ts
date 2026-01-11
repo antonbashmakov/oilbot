@@ -33,7 +33,7 @@ class ChargeSubscriptionProcessor extends AbstractProcessor {
     const balance = await customerBalanceService.obtainForCustomer(subscriptionId);
     const now = new Date();
 
-    const balancedFee = Math.min(300, -balance.value); // negative balance means that we owe money to customer
+    const balancedFee = Math.min(300, balance.value); // negative balance means that we owe money to customer
 
     const toCharge = 300 - balancedFee;
 
@@ -59,7 +59,7 @@ class ChargeSubscriptionProcessor extends AbstractProcessor {
 
       const ref = subscriptionService.getObjectRef(subscriptionId);
       await ref.update({next_payment_at: newNextPayment});
-      await customerBalanceService.updateBalance(subscriptionId, 300, "SUBSCRIPTION_CHARGE");
+      await customerBalanceService.updateBalance(subscriptionId, -300, "SUBSCRIPTION_CHARGE");
       await paymentService.add(payment);
       return;
     }
@@ -118,7 +118,7 @@ class ChargeSubscriptionProcessor extends AbstractProcessor {
     });
 
     if (balancedFee) {
-      await customerBalanceService.updateBalance(subscriptionId, balancedFee, "SUBSCRIPTION_CHARGE");
+      await customerBalanceService.updateBalance(subscriptionId, -balancedFee, "SUBSCRIPTION_CHARGE");
     }
 
     const adminMessage = toMessage("SUBSCRIPTION_PAYMENT_CONFIRMED_ADMIN", adminTemplateValues);
