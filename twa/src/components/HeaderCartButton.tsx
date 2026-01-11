@@ -25,7 +25,11 @@ export const HeaderCartButton: React.FC = () => {
     if (!user || !user.stats) {
       return "/";
     }
-    return (user.stats.number_of_free_orders <= 1) && (!user.subscription || user.subscription?.status !== "ACTIVE") && user.balance.value < 300 ? "/subscription" : "/cart";
+
+    if(user.subscription?.status === "ACTIVE" || (user.stats.number_of_free_orders >= 1)) return "/cart";
+    if(user.balance.value >= 300) return "/cart";
+
+    return "/subscription";
   }, [user?.stats?.number_of_fulfilled_orders, user?.stats?.number_of_active_orders]);
 
   const cartHref = getCartHref();
