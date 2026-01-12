@@ -16,6 +16,7 @@ export default function ItemDetailPage() {
   
   const { data: item, isLoading, error } = useGetItemQuery(customerId, itemId);
   const t = useTranslations('common');
+  const itemT = useTranslations('itemDetail');
   
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -55,8 +56,7 @@ export default function ItemDetailPage() {
   const totalPrice = price * quantity;
 
   return (
-    <>
-
+    <div className="relative min-h-screen flex flex-col max-w-md mx-auto bg-white dark:bg-surface-dark">
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto no-scrollbar pb-32">
         {/* Product Image with progressive loading */}
@@ -97,7 +97,7 @@ export default function ItemDetailPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-gray-500 dark:text-text-sub-dark">
                 <span className="material-symbols-outlined text-sm filled">favorite</span>
-                <span className="text-sm font-semibold">1.2k Likes</span>
+                <span className="text-sm font-semibold">{item.stats?.number_of_likes} {itemT('likes')}</span>
               </div>
             </div>
             <h1 className="text-2xl font-extrabold text-gray-900 dark:text-text-main-dark">
@@ -108,13 +108,11 @@ export default function ItemDetailPage() {
                 <span className="text-2xl font-bold text-primary">{price.toFixed(0)} ₽</span>
                 <span className="text-sm font-medium text-gray-500 dark:text-text-sub-dark ml-1">/ {item.unit_description}</span>
               </div>
-              <span className="text-base text-gray-400 line-through">{(price * 1.16).toFixed(0)} ₽</span>
             </div>
             <div className="mt-3 p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl flex gap-2.5">
               <span className="material-symbols-outlined text-gray-400 dark:text-text-sub-dark text-lg flex-shrink-0">info</span>
               <p className="text-[11px] leading-relaxed text-gray-500 dark:text-text-sub-dark font-medium">
-                This price is for one piece, calculated based on the price per 1 kg and an average weight of 250g. 
-                Please note that the actual weight may vary and the final total will be recalculated upon delivery.
+                {itemT('priceInfo', { unit: item.unit })}
               </p>
             </div>
           </div>
@@ -123,17 +121,16 @@ export default function ItemDetailPage() {
           
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-gray-900 dark:text-text-main-dark uppercase text-xs tracking-widest">
-              Product Details
+              {itemT('productDetails')}
             </h3>
             <p className="text-gray-600 dark:text-text-sub-dark text-sm leading-relaxed">
-              {item.description || 'No description available.'}
+              {item.description || itemT('noDescription')}
             </p>
             <p className="text-gray-600 dark:text-text-sub-dark text-sm leading-relaxed">
-              Perfect for quick searing or traditional Japanese style preparation. 
-              Each cut is hand-selected by our master butcher for quality and marbling consistency.
+              {itemT('preparationInfo')}
             </p>
           </div>
-          
+           {/* Delivery Information 
           <div className="grid grid-cols-2 gap-3 mt-2">
             <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-xl flex flex-col items-center text-center gap-1">
               <span className="material-symbols-outlined text-gray-400 dark:text-text-sub-dark text-xl">nutrition</span>
@@ -146,16 +143,17 @@ export default function ItemDetailPage() {
               <span className="text-sm font-bold text-gray-900 dark:text-text-main-dark">280 kcal</span>
             </div>
           </div>
+          */}
           
           {/* Delivery Information */}
           {delivery && (
             <div className="mt-4 p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-green-600 dark:text-green-400">local_shipping</span>
-                <h4 className="font-bold text-gray-900 dark:text-text-main-dark text-sm">Delivery Available</h4>
+                <h4 className="font-bold text-gray-900 dark:text-text-main-dark text-sm">{itemT('deliveryAvailable')}</h4>
               </div>
               <p className="text-gray-600 dark:text-text-sub-dark text-sm">
-                Delivery by {format(new Date(delivery.delivery_end), "dd MMM yyyy")}
+                {itemT('deliveryBy', { date: format(new Date(delivery.delivery_end), "dd MMM yyyy") })}
               </p>
             </div>
           )}
@@ -163,7 +161,7 @@ export default function ItemDetailPage() {
       </main>
 
       {/* Footer with Add to Cart */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-surface-dark/90 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 px-5 pt-4 pb-8 z-50">
+      <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 dark:bg-surface-dark/90 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 px-5 pt-4 pb-8 z-50">
         <div className="flex items-center gap-4">
           <div className="flex items-center bg-gray-100 dark:bg-white/10 rounded-xl h-14 p-1">
             <button 
@@ -200,15 +198,15 @@ export default function ItemDetailPage() {
               <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-white border-r-transparent align-[-0.125em]"></div>
             ) : (
               <>
-                <span>Add to Cart</span>
+                <span>{itemT('addToCart')}</span>
                 <div className="w-px h-4 bg-white/20 mx-1"></div>
-                <span className="text-sm font-bold">{totalPrice.toFixed(0)} ₽</span>
+                <span className="text-sm font-bold">+{totalPrice.toFixed(0)} ₽</span>
               </>
             )}
           </button>
         </div>
         <div className="h-1 w-32 bg-gray-200 dark:bg-white/20 rounded-full mx-auto mt-6"></div>
       </footer>
-    </>
+    </div>
   );
 }

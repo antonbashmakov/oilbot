@@ -6,6 +6,7 @@ import { useCallback } from "react";
 import { format, formatDate } from "date-fns";
 import { useUser } from "@/api/user/provider";
 import { useTranslations } from 'next-intl';
+import ShareButton from "./ShareButton";
 
 const MainHeader = () => {
   const { user } = useUser();
@@ -39,11 +40,11 @@ const MainHeader = () => {
           </div>
         </div>
         }
-        {(!user?.subscription && ((user?.stats?.number_of_free_orders || 0) == 1 )) && <div className="flex items-center gap-2 overflow-hidden">
+        {(!user?.subscription && ((user?.stats?.number_of_free_orders || 0) == 1)) && <div className="flex items-center gap-2 overflow-hidden">
           <span className="material-symbols-outlined text-primary">card_giftcard</span>
           <div className="flex flex-col">
             <span className="text-xs font-medium text-text-sub-light dark:text-text-sub-dark uppercase tracking-wide">
-             {t('freePlan')}
+              {t('freePlan')}
             </span>
             <h2 className="text-base font-bold leading-tight truncate">
               {t('oneFreeOrderLeft')}
@@ -51,11 +52,11 @@ const MainHeader = () => {
           </div>
         </div>
         }
-        {(!user?.subscription && ((user?.stats?.number_of_free_orders || 0) < 1 )) && <div className="flex items-center gap-2 overflow-hidden">
+        {(!user?.subscription && ((user?.stats?.number_of_free_orders || 0) < 1)) && <div className="flex items-center gap-2 overflow-hidden">
           <span className="material-symbols-outlined text-primary">card_giftcard</span>
           <div className="flex flex-col">
             <span className="text-xs font-medium text-text-sub-light dark:text-text-sub-dark uppercase tracking-wide">
-             {t('freePlan')}
+              {t('freePlan')}
             </span>
             <h2 className="text-base font-bold leading-tight truncate">
               {t('noFreeOrderLeft')}
@@ -65,6 +66,35 @@ const MainHeader = () => {
         }
         <div className="flex items-center gap-3">
           {/*<UserDisplay />*/}
+          <HeaderCartButton />
+        </div>
+      </div>
+    </div>
+  );
+};
+const HeaderWithShareButton = () => {
+  const { user } = useUser();
+  const t = useTranslations('header');
+  const router = useRouter();
+
+  const handleBack = useCallback(() => {
+    router.push("/");
+  }, [router]);
+
+
+  return (
+    <div className="flex items-center justify-between align-center bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
+      <button
+        onClick={handleBack}
+        className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-text-light dark:text-text-dark transition-colors"
+      >
+        <span className="material-symbols-outlined">arrow_back_ios_new</span>
+      </button>
+      <div className="flex items-center justify-between px-4 py-3">
+
+        <div className="flex items-center gap-3">
+          {/*<UserDisplay />*/}
+          <ShareButton />
           <HeaderCartButton />
         </div>
       </div>
@@ -155,4 +185,4 @@ const ProfileHeader = () => {
   );
 };
 
-export { MainHeader, CartHeader, OrdersHeader, ProfileHeader };
+export { MainHeader, CartHeader, OrdersHeader, ProfileHeader, HeaderWithShareButton };

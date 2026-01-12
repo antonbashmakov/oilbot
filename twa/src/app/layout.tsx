@@ -2,7 +2,7 @@
 
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Providers } from "./providers";
-import { MainHeader, CartHeader, OrdersHeader, ProfileHeader } from "@/components/Header";
+import { MainHeader, CartHeader, OrdersHeader, ProfileHeader, HeaderWithShareButton } from "@/components/Header";
 
 import "./globals.css";
 
@@ -16,6 +16,9 @@ const PATH_TO_HEADER_MAP: Record<string, React.FC> = {
   "/profile": ProfileHeader,
   "/": MainHeader,
 };
+
+const ITEM_PAGE_REGEX = /^\/items\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -34,6 +37,7 @@ export default function RootLayout({
   const pathname = usePathname();
 
   const Header = useCallback(() => {
+    if(ITEM_PAGE_REGEX.test(pathname)) return <HeaderWithShareButton />;
     const HeaderComponent = PATH_TO_HEADER_MAP[pathname || "/"];
     if(!HeaderComponent) return null;
     return <HeaderComponent />;
