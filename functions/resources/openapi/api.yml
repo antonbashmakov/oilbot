@@ -1606,6 +1606,7 @@ components:
         - price_out
         - unit
         - unit_description
+        - is_weighted
       properties:
         deliveries:
           type: array
@@ -1620,6 +1621,10 @@ components:
           type: string
           description: Item description
           example: "мясо"
+        is_weighted:
+          type: boolean
+          description: Is item sells by weight
+          example: true          
         fraction:
           type: number
           format: float
@@ -1710,6 +1715,7 @@ components:
         - status
         - unit
         - unit_description
+        - is_weighted
       properties:
         category:
           type: string
@@ -1771,6 +1777,10 @@ components:
           type: string
           description: Unit description
           example: "Отруб"
+        is_weighted:
+          type: boolean
+          description: Is item sells by weight
+          example: true
     Stats:
       type: object
       required:

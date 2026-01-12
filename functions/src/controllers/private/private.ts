@@ -139,6 +139,7 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
       unit: item.unit,
       unit_description:
         item.unit_description,
+      is_weighted: item.is_weighted,
       fraction: item.fraction,
       price_out: item.price_out,
       description: item.description,
@@ -335,7 +336,7 @@ privateApi.get("/customers/:customerId/items/:itemId", async (req: express.Reque
     // Get deliveries for the item's group (similar to category endpoint)
     const deliveryService = new DeliveryService(db);
     const groupDeliveries = await deliveryService.findClosestByGroups([item.group]);
-    const deliveries = groupDeliveries.filter(d => d.group === item.group);
+    const deliveries = groupDeliveries.filter((d) => d.group === item.group);
 
     // Construct item overview
     const itemOverview: ItemOverview = {
@@ -351,6 +352,7 @@ privateApi.get("/customers/:customerId/items/:itemId", async (req: express.Reque
       id: item.id,
       link: item.link,
       deliveries: deliveries,
+      is_weighted: item.is_weighted,
       stats: stats,
     };
 

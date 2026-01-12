@@ -165,7 +165,7 @@ export const verifyTelegramInitData = (initData: string, botToken: string) => {
 
     const jwt = generateToken({id: data.user?.id + ""} as User);
 
-    return {jwt, user: data.user};
+    return {jwt, data};
   } catch (e) {
     return;
   }

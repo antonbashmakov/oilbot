@@ -190,8 +190,7 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
       const stats = await customerService.obtainStatistics(id);
       const subscription = await subscriptionService.find(id);
       functions.logger.info("Verifying Telegram init data:", id);
-      return api.send(res, {...customer, balance, stats, subscription});
-
+      return api.send(res, { ...customer, balance, stats, subscription });
       */
       return api.badRequest(res, "Missing initData query parameter");
     }
@@ -207,9 +206,9 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
       sameSite: "strict",
     });
 
-    const systemUser = {...verification.user, id: `${verification.user?.id}`};
+    const systemUser = {...verification.data.user, id: `${verification.data.user?.id}`};
 
-    let customer = await customerService.find(`${verification.user?.id}`);
+    let customer = await customerService.find(`${verification.data.user?.id}`);
 
     if (!customer) {
       await customerService.set(systemUser);
@@ -222,6 +221,22 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
     const balance = await customerBalanceService.obtainForCustomer(customer.id);
     const stats = await customerService.obtainStatistics(customer.id);
     const subscription = await subscriptionService.find(customer.id);
+
+    if (verification.data.start_param) {
+      try {
+        /* send an share enter event later
+        const jsonString = decodeURIComponent(readBase64String(verification.data.start_param));
+
+        logger.debug("jsonString : ", jsonString);
+        const params = JSON.parse(jsonString);
+        if (params.type === "path") redirectUrl = params.value;
+
+        */
+      } catch (e) {
+        console.warn("start_param parsing failed: ", e);
+      }
+    }
+
 
     return api.send(res, {...customer, balance, stats, subscription});
   } catch (err: any) {
