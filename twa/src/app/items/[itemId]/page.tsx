@@ -13,11 +13,11 @@ export default function ItemDetailPage() {
   const itemId = params.itemId as string;
   const { user } = useUser();
   const customerId = user?.id;
-  
+
   const { data: item, isLoading, error } = useGetItemQuery(customerId, itemId);
   const t = useTranslations('common');
   const itemT = useTranslations('itemDetail');
-  
+
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const { addToCart, getItemCountInCart } = useCartStore(customerId);
@@ -50,13 +50,13 @@ export default function ItemDetailPage() {
   const imageUuid = IMAGE_TO_UUIDS[item.id];
   const thumbnailUrl = imageUuid ? `https://5rnru2cecx.ucarecd.net/${imageUuid}/-/preview/100x100/` : undefined;
   const highResUrl = imageUuid ? `https://5rnru2cecx.ucarecd.net/${imageUuid}/-/preview/800x800/` : undefined;
-  
+
   const delivery = item.deliveries?.[0];
   const price = item.fraction_price_out || 0;
   const totalPrice = price * quantity;
 
   return (
-    <div className="relative min-h-screen flex flex-col max-w-md mx-auto bg-white dark:bg-surface-dark">
+    <div className="relative min-h-screen flex flex-col  bg-white dark:bg-surface-dark">
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto no-scrollbar pb-32">
         {/* Product Image with progressive loading */}
@@ -106,19 +106,29 @@ export default function ItemDetailPage() {
             <div className="flex items-baseline gap-2 mt-1">
               <div className="flex items-baseline">
                 <span className="text-2xl font-bold text-primary">{price.toFixed(0)} ₽</span>
-                <span className="text-sm font-medium text-gray-500 dark:text-text-sub-dark ml-1">/ {item.unit_description}</span>
+                <span className="text-sm font-medium text-gray-500 dark:text-text-sub-dark ml-1">/ {item.unit_description} </span> { item.is_weighted && <span className="text-sm font-medium text-gray-500 dark:text-text-sub-dark ml-1">(≈{item.fraction}{item.unit}) </span>}
               </div>
             </div>
-            <div className="mt-3 p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl flex gap-2.5">
-              <span className="material-symbols-outlined text-gray-400 dark:text-text-sub-dark text-lg flex-shrink-0">info</span>
-              <p className="text-[11px] leading-relaxed text-gray-500 dark:text-text-sub-dark font-medium">
-                {itemT('priceInfo', { unit: item.unit })}
-              </p>
-            </div>
+            {
+              item.is_weighted && <div className="mt-3 p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl flex gap-2.5">
+                <span className="material-symbols-outlined text-gray-400 dark:text-text-sub-dark text-lg flex-shrink-0">info</span>
+                <p className="text-[16px] leading-relaxed text-gray-500 dark:text-text-sub-dark font-medium">
+                  {itemT('priceInfoWeighted', { unit: item.unit, fraction: item.fraction })}
+                </p>
+              </div>
+            }
+            {
+              !item.is_weighted && <div className="mt-3 p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl flex gap-2.5">
+                <span className="material-symbols-outlined text-gray-400 dark:text-text-sub-dark text-lg flex-shrink-0">info</span>
+                <p className="text-[16px] leading-relaxed text-gray-500 dark:text-text-sub-dark font-medium">
+                  {itemT('priceInfoPackaged', { unit: item.unit, fraction: item.fraction })}
+                </p>
+              </div>
+            }
           </div>
-          
+
           <div className="h-px bg-gray-100 dark:bg-white/10 w-full"></div>
-          
+
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-gray-900 dark:text-text-main-dark uppercase text-xs tracking-widest">
               {itemT('productDetails')}
@@ -126,11 +136,8 @@ export default function ItemDetailPage() {
             <p className="text-gray-600 dark:text-text-sub-dark text-sm leading-relaxed">
               {item.description || itemT('noDescription')}
             </p>
-            <p className="text-gray-600 dark:text-text-sub-dark text-sm leading-relaxed">
-              {itemT('preparationInfo')}
-            </p>
           </div>
-           {/* Delivery Information 
+          {/* Delivery Information 
           <div className="grid grid-cols-2 gap-3 mt-2">
             <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-xl flex flex-col items-center text-center gap-1">
               <span className="material-symbols-outlined text-gray-400 dark:text-text-sub-dark text-xl">nutrition</span>
@@ -144,7 +151,7 @@ export default function ItemDetailPage() {
             </div>
           </div>
           */}
-          
+
           {/* Delivery Information */}
           {delivery && (
             <div className="mt-4 p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl">
@@ -161,8 +168,9 @@ export default function ItemDetailPage() {
       </main>
 
       {/* Footer with Add to Cart */}
-      <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 dark:bg-surface-dark/90 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 px-5 pt-4 pb-8 z-50">
+      <footer className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-surface-dark/90 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 px-5 pt-4 pb-8 z-50">
         <div className="flex items-center gap-4">
+          {/*
           <div className="flex items-center bg-gray-100 dark:bg-white/10 rounded-xl h-14 p-1">
             <button 
               className="size-10 flex items-center justify-center text-gray-900 dark:text-text-main-dark hover:bg-white dark:hover:bg-white/20 rounded-lg transition-colors"
@@ -178,6 +186,7 @@ export default function ItemDetailPage() {
               <span className="material-symbols-outlined text-xl">add</span>
             </button>
           </div>
+          */}
           <button
             onClick={async () => {
               if (!customerId) return;

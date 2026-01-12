@@ -724,6 +724,11 @@ export interface components {
              */
             description: string;
             /**
+             * @description Is item sells by weight
+             * @example true
+             */
+            is_weighted: boolean;
+            /**
              * Format: float
              * @description Fraction value
              * @example 1.2
@@ -875,6 +880,11 @@ export interface components {
              * @example Отруб
              */
             unit_description: string;
+            /**
+             * @description Is item sells by weight
+             * @example true
+             */
+            is_weighted: boolean;
         };
         Stats: {
             /**

@@ -7,6 +7,7 @@ import { format, formatDate } from "date-fns";
 import { useUser } from "@/api/user/provider";
 import { useTranslations } from 'next-intl';
 import ShareButton from "./ShareButton";
+import Link from "next/link";
 
 const MainHeader = () => {
   const { user } = useUser();
@@ -84,12 +85,12 @@ const HeaderWithShareButton = () => {
 
   return (
     <div className="flex items-center justify-between align-center bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
-      <button
-        onClick={handleBack}
+      <Link
+        href="/"
         className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-text-light dark:text-text-dark transition-colors"
       >
         <span className="material-symbols-outlined">arrow_back_ios_new</span>
-      </button>
+      </Link>
       <div className="flex items-center justify-between px-4 py-3">
 
         <div className="flex items-center gap-3">

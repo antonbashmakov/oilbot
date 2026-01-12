@@ -9,6 +9,7 @@
     "logout": "Logout",
     "loading": "Loading...",
     "error": "Error",
+    "weight": "Weight {fraction}{unit}",
     "retry": "Retry",
     "save": "Save",
     "cancel": "Cancel",
@@ -170,10 +171,10 @@
   },
   "itemDetail": {
     "likes": "Likes",
-    "priceInfo": "This price is for one piece, calculated based on the price per 1 {unit} and an average weight of 250g. Please note that the actual weight may vary and the final total will be recalculated upon delivery.",
+    "priceInfoWeighted": "This price is for one piece, calculated based on the price per 1 {unit} and an average weight of {fraction} kg. Please note that the actual weight may vary and the final total will be recalculated upon delivery.",
+    "priceInfoPackaged": "This item is pre-packaged. Price is for one unit. The price is fixed and will not be adjusted.",
     "productDetails": "Product Details",
     "noDescription": "No description available.",
-    "preparationInfo": "Perfect for quick searing or traditional Japanese style preparation. Each cut is hand-selected by our master butcher for quality and marbling consistency.",
     "deliveryAvailable": "Delivery Available",
     "deliveryBy": "Delivery by {date}",
     "addToCart": "Add to Cart"

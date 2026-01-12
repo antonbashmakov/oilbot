@@ -9,6 +9,7 @@ import { categories, IMAGE_TO_UUIDS } from '@/data/products';
 import { useTranslations } from 'next-intl';
 
 import _ from 'lodash';
+import Link from 'next/link';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -88,19 +89,10 @@ export default function Home() {
       {items && items.length > 0 ? (
         <div className="grid grid-cols-2 gap-x-4 gap-y-6 p-4">
           {items?.map((item, index: number) => {
-            // Determine delivery info based on index
-            const deliveryOptions = [
-              { time: 'Tomorrow, 10 AM', icon: 'local_shipping' as const },
-              { time: 'Today, 6 PM', icon: 'bolt' as const },
-              { time: 'Tomorrow, 10 AM', icon: 'local_shipping' as const },
-              { time: 'Fri, 2 PM', icon: 'local_shipping' as const },
-              { time: 'Sat, 9 AM', icon: 'local_shipping' as const },
-              { time: 'Today, 5 PM', icon: 'bolt' as const },
-            ];
             const delivery = item.deliveries[0];
 
             return (
-              <a 
+              <Link
                 key={item.id || `item-${index}`} 
                 href={`/items/${item.id}`}
                 className="flex flex-col group/card"
@@ -157,8 +149,9 @@ export default function Home() {
                   </h3>
                   <div className="flex items-baseline gap-1">
                     <span className="text-primary text-lg font-bold">{(item.fraction_price_out || 0).toFixed(0)} ₽</span>
-                    <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">/ {item.unit_description}</span>
+                    <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">/ {item.unit_description}</span>                    
                   </div>
+                  {item.is_weighted && <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">{t('weight', { fraction:item.fraction, unit: item.unit })}</span>}
                   {delivery?.delivery_end && <div className="flex items-center gap-1.5 mt-1">
                     <span
                       className={`material-symbols-outlined text-[14px] text-green-600 dark:text-green-400`}
@@ -170,7 +163,7 @@ export default function Home() {
                     </p>
                   </div>}
                 </div>
-              </a>
+              </Link>
             );
           })}
         </div>

@@ -30,12 +30,12 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
     // Encode payload to base64
     const payloadString = JSON.stringify(sharePayload);
     const base64Payload = btoa(encodeURIComponent(payloadString));
-
+    const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL}?startapp=${base64Payload}`;
     // Check if Telegram WebApp is available
     const tg = (window as any)?.Telegram?.WebApp;
     if (tg && tg.shareData) {
       // Construct share URL
-      const shareUrl = `https://t.me/PoSebstoimostiBot?start=${base64Payload}`;
+      
 
       // Share data via Telegram
       tg.shareData({
@@ -43,8 +43,6 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
         url: shareUrl,
       });
     } else {
-      const shareUrl = `https://t.me/PoSebstoimostiBot?start=${base64Payload}`;
-
       // Use Web Share API if available
       if (navigator.share) {
         navigator.share({
