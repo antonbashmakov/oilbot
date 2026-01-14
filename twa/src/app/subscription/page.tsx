@@ -162,11 +162,7 @@ export default function SubscriptionPage() {
           {t('agreement.prefix')}{" "}
           <a
             className="text-gray-800 dark:text-gray-300 underline decoration-gray-300 dark:decoration-gray-600 underline-offset-2 hover:text-primary transition-colors"
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              alert(t('agreement.alert'));
-            }}
+            href="https://drive.google.com/file/d/1w4xuVLY5EqdAfi79pVlE3I3VIkhmtAIm/view?usp=sharing"
           >
             {t('agreement.link')}
           </a>{" "}

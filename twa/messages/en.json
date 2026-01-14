@@ -132,8 +132,7 @@
     "agreement": {
       "prefix": "By subscribing, you agree to our",
       "link": "Agreement",
-      "suffix": "and acknowledge that your subscription will auto-renew.",
-      "alert": "Terms and conditions would be shown here."
+      "suffix": "and acknowledge that your subscription will auto-renew."
     }
   },
   "header": {

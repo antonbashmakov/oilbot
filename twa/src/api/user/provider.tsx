@@ -19,7 +19,7 @@ const MOCK_USER: AppCustomer = {
     owner: {
       id: "270053857"
     },
-    value: 1000,
+    value: 0,
     created_at: new Date(),
     updated_at: new Date(),
   },
@@ -34,9 +34,9 @@ const MOCK_USER: AppCustomer = {
     paid_in_total: 0,
   },
   subscription: {
-    status: "ACTIVE",
+    status: "CANCELED",
     next_payment_at: "2025-11-23T00:00:00.000Z",
-    // canceled_at: "2025-11-23T00:00:00.000Z",
+    canceled_at: "2025-11-23T00:00:00.000Z",
     fee: 300,
     id: "270053857",
   }
