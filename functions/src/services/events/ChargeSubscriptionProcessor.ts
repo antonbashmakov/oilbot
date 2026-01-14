@@ -1,11 +1,11 @@
 import * as moment from "moment";
 
-import {ChargeSubscriptionEvent, Payment} from "../../models";
+import { ChargeSubscriptionEvent, Payment } from "../../models";
 import PaymentService from "../PaymentService";
 import TelegramService from "../TelegramService";
 import AbstractProcessor from "./AbstractProcessor";
-import {toMessage} from "../../messaging/util";
-import {error} from "firebase-functions/logger";
+import { toMessage } from "../../messaging/util";
+import { error } from "firebase-functions/logger";
 import SubscriptionService from "../SubscriptionService";
 import CustomerService from "../CustomerService";
 import TBankService from "../../services/payments/TBankService";
@@ -22,11 +22,6 @@ class ChargeSubscriptionProcessor extends AbstractProcessor {
     const tbankService = new TBankService();
 
     const subscriptionId = event.payload.subscription_id;
-
-    const accounting = await customerService.obtainAccounting(subscriptionId);
-    if (!accounting.rebill_id) {
-      throw new Error(`No rebill_id found for customer ${subscriptionId}`);
-    }
 
     const subscription = await subscriptionService.require(subscriptionId);
 
@@ -58,13 +53,18 @@ class ChargeSubscriptionProcessor extends AbstractProcessor {
       const newNextPayment = moment(subscription.next_payment_at).add(1, "month").toDate();
 
       const ref = subscriptionService.getObjectRef(subscriptionId);
-      await ref.update({next_payment_at: newNextPayment});
+      await ref.update({ next_payment_at: newNextPayment });
       await customerBalanceService.updateBalance(subscriptionId, -300, "SUBSCRIPTION_CHARGE");
       await paymentService.add(payment);
       return;
     }
 
-    const paymentRequest = tbankService.subscriptionToPaymentRequest({...subscription, fee: toCharge}, true);
+    const accounting = await customerService.obtainAccounting(subscriptionId);
+    if (!accounting.rebill_id) {
+      throw new Error(`No rebill_id found for customer ${subscriptionId}`);
+    }
+
+    const paymentRequest = tbankService.subscriptionToPaymentRequest({ ...subscription, fee: toCharge }, true);
     const p = await tbankService.initPayment(paymentRequest);
 
     const payment: Payment = {

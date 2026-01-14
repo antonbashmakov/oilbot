@@ -96,6 +96,15 @@ describe("Cart Order Endpoint Integration Test", () => {
   });
 
   it("should create order and payment when cart has items", async () => {
+    const initialBalance: CustomerBalance = {
+      id: testCustomer.id,
+      owner: { id: testCustomer.id },
+      value: 500,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    await customerBalanceService.set(initialBalance);
+
     const response = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
@@ -119,6 +128,16 @@ describe("Cart Order Endpoint Integration Test", () => {
   });
 
   it("should return idempotent result for duplicate requests", async () => {
+
+    const initialBalance: CustomerBalance = {
+      id: testCustomer.id,
+      owner: { id: testCustomer.id },
+      value: 500,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    await customerBalanceService.set(initialBalance);
+
     const idempotencyKey = 'test-idempotency-key-2';
 
     // First call
@@ -235,7 +254,7 @@ describe("Cart Order Endpoint Integration Test", () => {
       console.log('All subscriptions:', allSubscriptions);
     }
     expect(subscription).toBeDefined();
-    expect(subscription!.status).toBe("PENDING");
+    expect(subscription!.status).toBe("ACTIVE");
     expect(subscription!.fee).toBe(300);
 
     // Verify balance was reduced by 300 (check via balance service)
@@ -256,7 +275,14 @@ describe("Cart Order Endpoint Integration Test", () => {
 
 
   it("should return error when cart is empty", async () => {
-
+    const initialBalance: CustomerBalance = {
+      id: testCustomer.id,
+      owner: { id: testCustomer.id },
+      value: 500,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    await customerBalanceService.set(initialBalance);
 
     // Remove cart item to simulate empty cart
     await cartItemService.delete(testCartItem);
