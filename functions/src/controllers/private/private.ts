@@ -446,20 +446,6 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
     const result = await idempotencyGuardService.runIdempotentRequest<{ orders: Order[], payments: Payment[] }>(
       `cart-order-${customerId}-${idempotencyKey}`,
       async () => {
-        const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
-        const stats = await customerService.obtainStatistics(customerId);
-        const balance = await customerBalanceService.obtainForCustomer(customerId);
-        let subscriptionToCreate;
-
-        if (((stats.number_of_free_orders || 0) <= 0) && !hasActiveSubscription && balance.value < 300) {
-          logger.error(`Customer ${customerId} cannot place order due to insufficient balance and no active subscription`, {balance: balance, customer});
-          throw new Error("Active subscription is missing");
-        }
-
-        if (((stats.number_of_free_orders || 0) <= 0) && !hasActiveSubscription && balance.value >= 300) {
-          subscriptionToCreate = subscriptionService.buildSubscription(customerId, 300, new Date());
-          subscriptionToCreate.status = "ACTIVE";
-        }
 
         const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
         if (!cartItems || cartItems.length === 0) {
@@ -544,10 +530,22 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
           number_of_free_orders: -orders.length,
         });
 
-        if (subscriptionToCreate) {
-          await subscriptionService.set(subscriptionToCreate);
-          await customerBalanceService.updateBalance(customerId, -300, "SUBSCRIPTION_CHARGE");
-        }
+
+        const event: OrderCreatedEvent = {
+          id: "", // will be set by OutboxEventService
+          idempotent_key: order.id,
+          created_at: new Date(),
+          processed_at: new Date(),
+          processed: false,
+          retries: 0,
+          type: CONSTANTS.EVENTS.ORDER_CREATED,
+          payload: {order_id: order.id},
+
+        };
+
+        const eventPublisher = new EventPublisher<OrderCreatedEvent>(db);
+
+        await eventPublisher.publish(event);
 
         return {
           orders,

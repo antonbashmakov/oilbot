@@ -1879,6 +1879,8 @@ components:
         - description
         - fraction
         - fraction_price_out
+        - non_member_unit_price_out
+        - non_member_unit_price_out
         - group
         - id
         - link
@@ -1912,7 +1914,12 @@ components:
         non_member_fraction_price_out:
           type: number
           format: float
-          description: Fraction price out for non-members
+          description: Non-member fraction price out
+          example: 1439
+        non_member_unit_price_out:
+          type: number
+          format: float
+          description: Non-member unit price out
           example: 1439
         group:
           type: string

@@ -935,11 +935,24 @@ export interface components {
             fraction_price_out: number;
             /**
              * Format: float
+<<<<<<< HEAD
              * @description Fraction price out for non-members
+=======
+             * @description Non-member fraction price out
+>>>>>>> 40a4d80 (start on implementing non member prices)
              * @example 1439
              */
             non_member_fraction_price_out?: number;
             /**
+<<<<<<< HEAD
+=======
+             * Format: float
+             * @description Non-member unit price out
+             * @example 1439
+             */
+            non_member_unit_price_out: number;
+            /**
+>>>>>>> 40a4d80 (start on implementing non member prices)
              * @description Item group
              * @example BALASHOV
              */

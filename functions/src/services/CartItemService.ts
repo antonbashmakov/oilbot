@@ -3,15 +3,15 @@ import {COLLECTIONS} from "../constants";
 import {CartItem, Item, Customer} from "../models";
 
 class CartItemService extends AbstractService<CartItem> {
-  async addToCart(item: Item, customer: Customer): Promise<CartItem> {
+  async addToCart(item: Item, customer: Customer, isMember: boolean): Promise<CartItem> {
     const cartItem: CartItem = {
       id: "", // Will be set in add()
       item_id: item.id,
       name: item.name,
-      price: item.fraction_price_out,
+      price: isMember ? item.fraction_price_out : item.non_member_unit_price_out,
       quantity: 1,
       fraction: item.fraction,
-      price_for_unit: item.price_out,
+      price_for_unit: isMember ? item.price_out : item.non_member_unit_price_out,
       category: item.category,
       group: item.group,
       owner: {
