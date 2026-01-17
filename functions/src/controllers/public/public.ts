@@ -12,12 +12,14 @@ import {
 } from "./imports";
 import * as bcrypt from "bcrypt";
 import {generateToken, who} from "../../services/utils";
-import {User} from "../../models";
+import {Item, User} from "../../models";
 import {localeMiddleware} from "../../middleware/localeMiddleware";
 
 import CustomerBalanceService from "../../services/CustomerBalanceService";
 import {SubscriptionService} from "../private/imports";
 import {logger} from "firebase-functions/v1";
+import ItemService from "../../services/ItemService";
+import CartItemService from "../../services/CartItemService";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -36,6 +38,8 @@ const userService = new UserService(db);
 const customerService = new CustomerService(db);
 const customerBalanceService = new CustomerBalanceService(db);
 const subscriptionService = new SubscriptionService(db);
+const itemService = new ItemService(db);
+const cartItemService = new CartItemService(db);
 
 const publicApi = express();
 
@@ -247,6 +251,113 @@ publicApi.post("/auth/telegram", async (req: express.Request, res: express.Respo
       return api.error(res, err.message || "Internal server error");
     }
     return;
+  }
+});
+
+publicApi.post("/fix-cartitems", async (req: express.Request, res: express.Response) => {
+  try {
+    functions.logger.info("Starting fix-cartitems endpoint");
+
+    // 1) Fetch all from ITEMS table and convert list to map where id is items id and value is item object
+    const items = await itemService.findAll();
+    functions.logger.info(`Fetched ${items.length} items`);
+    
+    const idToItem = new Map<string, Item>();
+    items.forEach(item => {
+      idToItem.set(item.id, item);
+    });
+
+    // 2) Fetch all from CART_ITEMS
+    const cartItems = await cartItemService.findAll();
+    functions.logger.info(`Fetched ${cartItems.length} cart items`);
+
+    // 3) For each cart item find corresponding item in idToItem and update cart item
+    const updates: Array<{cartItem: any, item: any}> = [];
+    const notFound: string[] = [];
+    
+    for (const cartItem of cartItems) {
+      const item = idToItem.get(cartItem.item_id);
+      if (item && item.fraction_price_out !== undefined) {
+        // Only update if price is different
+        if (cartItem.price !== item.fraction_price_out) {
+          updates.push({
+            cartItem,
+            item
+          });
+        }
+      } else {
+        notFound.push(cartItem.item_id);
+      }
+    }
+
+    functions.logger.info(`Found ${updates.length} cart items to update`);
+    if (notFound.length > 0) {
+      functions.logger.warn(`Could not find items for ${notFound.length} cart items: ${notFound.join(', ')}`);
+    }
+
+    await cartItemService.runTransactionally( async t => {
+      updates.forEach(({cartItem, item}) => {
+        const docRef = cartItemService.getCollection().doc(`${cartItem.id}`);
+        t.update(docRef, { price: item.fraction_price_out });
+      });
+    });
+
+    functions.logger.info(`Successfully updated ${updates.length} cart items`);
+
+    return api.send(res, {
+      success: true,
+      message: `Updated ${updates.length} cart items`,
+      updatedCount: updates.length,
+      notFoundCount: notFound.length,
+      notFoundItemIds: notFound
+    });
+  } catch (err: any) {
+    functions.logger.error("Error in fix-cartitems:", err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+publicApi.get("/cart/owners", async (req: express.Request, res: express.Response) => {
+  try {
+    functions.logger.info("Starting /cart/owners endpoint");
+
+    // 1) Fetch all cart items
+    const cartItems = await cartItemService.findAll();
+    functions.logger.info(`Fetched ${cartItems.length} cart items`);
+
+    // 2) Extract unique owner IDs from cart items
+    const ownerIds = new Set<string>();
+    cartItems.filter(ci => !!ci.created_at).forEach(cartItem => {
+      if (cartItem.owner && cartItem.owner.id) {
+        ownerIds.add(String(cartItem.owner.id));
+      }
+    });
+
+    functions.logger.info(`Found ${ownerIds.size} unique owners`);
+
+    // 3) Fetch customer objects for each owner ID
+    const customers = [];
+    // Convert Set to Array for iteration
+    const ownerIdsArray = Array.from(ownerIds);
+    for (const ownerId of ownerIdsArray) {
+      const customer = await customerService.find(ownerId);
+      if (customer) {
+        customers.push(customer);
+      } else {
+        functions.logger.warn(`Customer not found for owner ID: ${ownerId}`);
+      }
+    }
+
+    functions.logger.info(`Returning ${customers.length} customers`);
+
+    return api.send(res, {
+      success: true,
+      count: customers.length,
+      customers
+    });
+  } catch (err: any) {
+    functions.logger.error("Error in /cart/owners:", err);
+    return api.error(res, err.message || "Internal server error");
   }
 });
 
