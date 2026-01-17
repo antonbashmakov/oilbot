@@ -9,6 +9,7 @@ export default function SubscriptionPage() {
   const { user } = useUser();
   const createSubscriptionMutation = useCreateSubscription(user?.id);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
   const t = useTranslations('subscription');
 
   const handleClose = () => {
@@ -29,11 +30,11 @@ export default function SubscriptionPage() {
       const idempotencyKey = `subscription-${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
       const res: any = await createSubscriptionMutation.mutateAsync({ idempotencyKey });
-      
+
       // Check if response has paymentUrl (similar to checkout flow)
       if (res.paymentUrl && typeof window !== 'undefined') {
         window.location.href = res.paymentUrl;
-      } 
+      }
     } catch (error: any) {
       console.error('Subscription failed:', error);
       // Show error message
@@ -134,30 +135,53 @@ export default function SubscriptionPage() {
 
       {/* Footer with subscribe button */}
       <div className="w-full px-8 pb-10 mt-auto">
-        <button
-          onClick={handleSubscribe}
-          disabled={isProcessing || createSubscriptionMutation.isPending || !user?.id}
-          className="w-full bg-primary hover:bg-red-600 active:scale-[0.98] transition-all text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isProcessing || createSubscriptionMutation.isPending ? (
-            <>
-              <span className="text-lg">{t('processing')}</span>
-              <span className="material-symbols-outlined animate-spin" style={{ fontSize: "20px" }}>
-                refresh
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="text-lg">{t('subscribe')}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-              <span className="text-lg">300/{t('month')}</span>
-              <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform" style={{ fontSize: "20px" }}>
-                arrow_forward
-              </span>
-            </>
-          )}
-        </button>
 
+        <div className="flex flex-col gap-6">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <div className="relative flex items-center pt-0.5">
+              <input
+                className="peer h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary dark:bg-gray-800 dark:border-gray-700 transition-all cursor-pointer"
+                id="terms-checkbox" type="checkbox"
+                checked={isChecked}
+                onChange={(e) => setIsChecked(e.target.checked)} />
+            </div>
+            <span className="text-sm text-gray-600 dark:text-gray-400 leading-snug">
+              {t('termsAgreement.prefix', { price: '300' })}{" "}
+              <a
+                className="text-primary font-semibold underline underline-offset-2 hover:text-red-600 transition-colors"
+                href="https://drive.google.com/file/d/1w4xuVLY5EqdAfi79pVlE3I3VIkhmtAIm/view?usp=sharing"
+              >
+                {t('termsAgreement.link')}
+              </a>
+              {t('termsAgreement.suffix')}
+            </span>
+          </label>
+
+
+          <button
+            onClick={handleSubscribe}
+            disabled={isProcessing || createSubscriptionMutation.isPending || !user?.id || !isChecked}
+            className="w-full bg-primary hover:bg-red-600 active:scale-[0.98] transition-all text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isProcessing || createSubscriptionMutation.isPending ? (
+              <>
+                <span className="text-lg">{t('processing')}</span>
+                <span className="material-symbols-outlined animate-spin" style={{ fontSize: "20px" }}>
+                  refresh
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-lg">{t('subscribe')}</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+                <span className="text-lg">300/{t('month')}</span>
+                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform" style={{ fontSize: "20px" }}>
+                  arrow_forward
+                </span>
+              </>
+            )}
+          </button>
+        </div>
         <p className="text-center text-xs text-gray-400 dark:text-gray-500 leading-normal">
           {t('agreement.prefix')}{" "}
           <a

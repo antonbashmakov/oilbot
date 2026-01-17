@@ -1,11 +1,11 @@
 import * as moment from "moment";
 
-import { ChargeSubscriptionEvent, Payment } from "../../models";
+import {ChargeSubscriptionEvent, Payment} from "../../models";
 import PaymentService from "../PaymentService";
 import TelegramService from "../TelegramService";
 import AbstractProcessor from "./AbstractProcessor";
-import { toMessage } from "../../messaging/util";
-import { error } from "firebase-functions/logger";
+import {toMessage} from "../../messaging/util";
+import {error} from "firebase-functions/logger";
 import SubscriptionService from "../SubscriptionService";
 import CustomerService from "../CustomerService";
 import TBankService from "../../services/payments/TBankService";
@@ -53,7 +53,7 @@ class ChargeSubscriptionProcessor extends AbstractProcessor {
       const newNextPayment = moment(subscription.next_payment_at).add(1, "month").toDate();
 
       const ref = subscriptionService.getObjectRef(subscriptionId);
-      await ref.update({ next_payment_at: newNextPayment });
+      await ref.update({next_payment_at: newNextPayment});
       await customerBalanceService.updateBalance(subscriptionId, -300, "SUBSCRIPTION_CHARGE");
       await paymentService.add(payment);
       return;
@@ -64,7 +64,7 @@ class ChargeSubscriptionProcessor extends AbstractProcessor {
       throw new Error(`No rebill_id found for customer ${subscriptionId}`);
     }
 
-    const paymentRequest = tbankService.subscriptionToPaymentRequest({ ...subscription, fee: toCharge }, true);
+    const paymentRequest = tbankService.subscriptionToPaymentRequest({...subscription, fee: toCharge}, true);
     const p = await tbankService.initPayment(paymentRequest);
 
     const payment: Payment = {

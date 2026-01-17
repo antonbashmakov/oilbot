@@ -133,6 +133,11 @@
       "prefix": "By subscribing, you agree to our",
       "link": "Agreement",
       "suffix": "and acknowledge that your subscription will auto-renew."
+    },
+    "termsAgreement": {
+      "prefix": "I agree to the terms of the subscription for {price}/month, billed monthly. Read the",
+      "link": "Agreement",
+      "suffix": "."
     }
   },
   "header": {
@@ -166,7 +171,10 @@
     "personalDetails": "Personal Details",
     "addressBook": "Address Book",
     "paymentMethods": "Payment Methods",
-    "orderHistory": "Order History"
+    "orderHistory": "Order History",
+    "user": "user",
+    "cancelSubscription": "Cancel Subscription",
+    "cancelSubscriptionHelp": "To cancel your subscription please reach to me at"
   },
   "itemDetail": {
     "likes": "Likes",

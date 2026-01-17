@@ -1735,6 +1735,11 @@ components:
           format: float
           description: Fraction price out
           example: 1439
+        non_member_fraction_price_out:
+          type: number
+          format: float
+          description: Fraction price out for non-members
+          example: 1439
         group:
           type: string
           description: Item group
