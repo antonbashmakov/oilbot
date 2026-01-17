@@ -386,6 +386,9 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         const balance = await customerBalanceService.obtainForCustomer(customerId);
         let subscriptionToCreate;
 
+        console.log("Customer balance:", balance.value);
+        console.log("number_of_free_orders:", stats.number_of_free_orders);
+
         if ((stats.number_of_free_orders || 0 <= 0) && !hasActiveSubscription && balance.value < 300) {
           throw new Error("Active subscription is missing");
         }

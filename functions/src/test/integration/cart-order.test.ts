@@ -159,7 +159,7 @@ describe("Cart Order Endpoint Integration Test", () => {
 
   });
 
-  it("should require subscription when customer has more than 1 fulfilled order", async () => {
+  it("should require subscription when customer has no free orders", async () => {
 
     await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: -1 });
 

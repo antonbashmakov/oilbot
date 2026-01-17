@@ -8,7 +8,7 @@ class CartItemService extends AbstractService<CartItem> {
       id: "", // Will be set in add()
       item_id: item.id,
       name: item.name,
-      price: item.price_out,
+      price: item.fraction_price_out,
       quantity: 1,
       fraction: item.fraction,
       price_for_unit: item.price_out,
