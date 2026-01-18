@@ -337,7 +337,10 @@ privateApi.post("/customers/:customerId/orders", async (req: express.Request, re
       return api.send(res, {});
     }
 
-    const order = await orderService.createOrderFromCart(customer, cartItems, null);
+
+    const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
+
+    const order = await orderService.createOrderFromCart(customer, cartItems, hasActiveSubscription);
     return api.send(res, order);
   } catch (err: any) {
     functions.logger.error(err);
@@ -447,6 +450,8 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       `cart-order-${customerId}-${idempotencyKey}`,
       async () => {
 
+        const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
+
         const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
         if (!cartItems || cartItems.length === 0) {
           throw new Error("Cart is empty");
@@ -454,7 +459,6 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         // Group cart items by their group field
         const groupedCartItems = _.groupBy(cartItems, "group");
         const groups = Object.keys(groupedCartItems);
-
         // Find deliveries for each group
         const groupDeliveries = await deliveryService.findClosestByGroups(groups);
 
