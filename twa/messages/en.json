@@ -29,6 +29,7 @@
     "yourPrice": "Your Price",
     "forMembers": "For members",
     "nonMembers": "Non members",
+    "clubMembers": "Club Members",
     "category": {
       "all": "All",
       "meat": "Meat",
@@ -210,7 +211,10 @@
     "noDescription": "No description available.",
     "deliveryAvailable": "Delivery Available",
     "deliveryBy": "Delivery by {date}",
-    "addToCart": "Add to Cart"
+    "addToCart": "Add to Cart",
+    "memberSavings": "Member Savings",
+    "memberSavingsDescription": "Save $20.00 on this item! Subscribe for $300/month to unlock Club Member pricing.",
+    "subscribeNow": "Subscribe Now"
   },
   "share": {
     "defaultText": "Check out this product!",
