@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCartStore, useCheckout } from '@/api';
 import { useCustomer } from '@/api/user/provider';
 import { useTranslations } from 'next-intl';
@@ -17,12 +18,15 @@ export default function CartPage() {
   const checkoutMutation = useCheckout(customer?.id);
   const t = useTranslations('cart');
 
+  const isMember = user?.subscription?.status === "ACTIVE";
+
+
   const cartItems = useMemo(() => {
     if (!customer?.id) return [];
     return getCartItems();
   }, [getCartItems, customer?.id]);
 
-  const cartTotal = getCartTotal();
+  
 
   const itemGroups = useMemo(() => {
     return _.groupBy(cartItems, 'item_id');
@@ -42,12 +46,31 @@ export default function CartPage() {
     return _.sortBy(representatives, 'name');
   }, [itemGroups]);
 
+  // Compute member total and non-member total based on grouped items
+  const { memberTotal, nonMemberTotal } = useMemo(() => {
+    let memberTotal = 0;
+    let nonMemberTotal = 0;
+    items.forEach(item => {
+      const quantity = item.quantity;
+      memberTotal += (item.price || 0) * quantity;
+      nonMemberTotal += (item.non_member_price || 0) * quantity;
+    });
+    return { memberTotal, nonMemberTotal };
+  }, [items]);
+
+  // Compute cart total based on membership
+  const cartTotal = useMemo(() => {
+    return items.reduce((total, item) => {
+      const price = isMember ? item.price : item.non_member_price;
+      return total + (price || 0) * item.quantity;
+    }, 0);
+  }, [items, isMember]);
+
 
   const handleQuantityChange = useCallback(async (itemId: string, delta: number) => {
 
     if (delta < 0) {
       await removeFromCart({ cartItemId: itemGroups[itemId][0].id });
-
       return;
     }
 
@@ -96,7 +119,7 @@ export default function CartPage() {
           {items.length > 0 ? (
             items.map((item, index) => {
               const quantity = item.quantity;
-              const itemTotal = (item.price || 0) * quantity;
+              const itemTotal = (isMember ? item.price : item.non_member_price || 0) * quantity;
 
               return (
                 <div
@@ -134,7 +157,7 @@ export default function CartPage() {
                     <div>
                       <div className="flex justify-between items-start">
                         <h3 className="text-text-main-light dark:text-text-main-dark text-base font-bold leading-snug line-clamp-2">
-                          {item.name || `Item ${index + 1}`}
+                          {item.name}
                         </h3>
                         <button
                           onClick={() => handleRemoveItem(item.item_id)}
@@ -144,12 +167,12 @@ export default function CartPage() {
                         </button>
                       </div>
                       <p className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium mt-1">
-                        {(item.price_for_unit || 0).toFixed(2)} ₽ / {item.group || 'unit'}
+                        {( isMember ? item.price : item.non_member_price || 0).toFixed(2)} ₽ / {item.group || 'unit'}
                       </p>
                     </div>
 
                     <div className="flex items-end justify-between mt-2">
-                      <p className="text-primary font-bold text-lg">{itemTotal.toFixed(2)} ₽</p>
+                      <p className="text-primary font-bold text-lg">{itemTotal.toFixed(2)} ₽ </p>
 
                       {/* Stepper */}
                       <div className="flex items-center bg-gray-50 dark:bg-white/10 rounded-lg p-1 gap-1 border border-gray-100 dark:border-transparent">
@@ -212,11 +235,38 @@ export default function CartPage() {
         )}
           */}
       </div>
-      
+
 
       {/* Sticky Footer for Checkout - Only shown when cart has items */}
       {cartItems.length > 0 && (
-        <div className="fixed bottom-16 left-0 right-0 max-w-md mx-auto p-4 z-40">
+        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white dark:bg-[#2a171a] border-t border-gray-100 dark:border-white/10 p-4 pb-8 z-40 flex flex-col gap-4">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex flex-col">
+              <span className="text-secondary-text-light dark:text-secondary-text-dark text-[10px] uppercase tracking-[0.1em] font-bold">
+                {t('currentTotal')}
+              </span>
+              <span className="text-text-light dark:text-text-dark text-lg font-bold">
+                {cartTotal.toFixed(2)} ₽
+              </span>
+            </div>
+            { !isMember && <div className="flex flex-col items-end">
+              <span className="text-green-600 dark:text-green-500 text-[10px] uppercase tracking-[0.1em] font-bold">
+                {t('memberPrice')}
+              </span>
+              <span className="text-green-600 dark:text-green-500 text-lg font-bold">
+                {memberTotal.toFixed(2)} ₽
+              </span>
+            </div>}
+          </div>
+          {!isMember && (
+            <button
+              onClick={() => router.push('/subscription')}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-4 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-green-600/20 active:scale-[0.98] transition-all"
+            >
+              <span className="material-symbols-outlined text-xl">card_membership</span>
+              <span>{t('subscribeAndSave', { amount: (nonMemberTotal - memberTotal).toFixed(2) })}</span>
+            </button>
+          )}
           <button
             onClick={handleCheckout}
             disabled={isLoading || checkoutMutation.isPending}

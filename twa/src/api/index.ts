@@ -228,8 +228,8 @@ export const useCartStore = (customerId?: string) => {
         return cache[itemId]?.length || 0;
     };
 
-    const getCartTotal = (): number => {
-        return getCartItems().reduce((total, item) => total + (item.price || 0), 0);
+    const getCartTotal = (isMember: boolean): number => {
+        return getCartItems().reduce((total, item) => total + (isMember ? item.price : item.non_member_price), 0);
     };
 
     return {

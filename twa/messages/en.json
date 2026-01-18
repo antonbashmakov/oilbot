@@ -64,7 +64,10 @@
     "subscriptionWarning": "This is your last purchase without subscription and next time you will have to subscribe.",
     "checkout": "Checkout",
     "processing": "Processing...",
-    "checkoutFailed": "Checkout failed. Please try again."
+    "checkoutFailed": "Checkout failed. Please try again.",
+    "currentTotal": "Current Total",
+    "memberPrice": "Member Price",
+    "subscribeAndSave": "Subscribe and save {amount} ₽!"
   },
   "orders": {
     "loading": "Loading orders...",
