@@ -25,6 +25,7 @@ import _ = require("lodash");
 // import * as jwt from "jsonwebtoken";
 import * as cookieParser from "cookie-parser";
 import moment = require("moment");
+import {logger} from "firebase-functions/v1";
 
 admin.initializeApp(functions.config().firebase, "private");
 dotenv.config();
@@ -444,7 +445,8 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
           const paymentResponse = await tbankService.initPayment(paymentRequest);
 
           if (!paymentResponse.Success) {
-            throw new Error(`Payment initialization failed for group ${group}: ${paymentResponse.Message}`);
+            logger.error(`Payment initialization failed for group ${group}: ${paymentResponse.Message}; ${paymentResponse.Details}`);
+            throw new Error(`Payment initialization failed for group ${group}: ${paymentResponse.Message}; ${paymentResponse.Details}`);
           }
 
           const payment: Payment = {
