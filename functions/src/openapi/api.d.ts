@@ -836,6 +836,18 @@ export interface components {
              */
             fraction_price_out: number;
             /**
+             * Format: float
+             * @description Non-member fraction price out
+             * @example 1439
+             */
+            non_member_fraction_price_out: number;
+            /**
+             * Format: float
+             * @description Non-member unit price out
+             * @example 1439
+             */
+            non_member_unit_price_out: number;
+            /**
              * @description Item group
              * @example BALASHOV
              */
