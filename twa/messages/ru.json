@@ -26,6 +26,9 @@
     "noDelivery": "Доставка недоступна",
     "continueShopping": "Продолжить покупки",
     "noProducts": "В этой категории товаров не найдено",
+    "yourPrice": "Ваша цена",
+    "forMembers": "Для участников",
+    "nonMembers": "Без подписки",
     "category": {
       "all": "Все",
       "meat": "Мясо",

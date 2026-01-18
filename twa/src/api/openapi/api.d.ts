@@ -749,10 +749,22 @@ export interface components {
             price: number;
             /**
              * Format: float
+             * @description Non-member price for the total quantity and fraction
+             * @example 609
+             */
+            non_member_price: number;
+            /**
+             * Format: float
              * @description Price for one unit
              * @example 609
              */
             price_for_unit: number;
+            /**
+             * Format: float
+             * @description Non-member price for one unit
+             * @example 609
+             */
+            non_member_price_for_unit: number;
             /**
              * @description Quantity
              * @example 1
@@ -800,6 +812,18 @@ export interface components {
              * @example 1439
              */
             fraction_price_out: number;
+            /**
+             * Format: float
+             * @description Non-member fraction price out
+             * @example 1439
+             */
+            non_member_fraction_price_out: number;
+            /**
+             * Format: float
+             * @description Non-member unit price out
+             * @example 1439
+             */
+            non_member_unit_price_out: number;
             /**
              * @description Item group
              * @example BALASHOV
@@ -912,10 +936,17 @@ export interface components {
             fraction_price_out: number;
             /**
              * Format: float
-             * @description Fraction price out for non-members
+
+             * @description Non-member fraction price out
              * @example 1439
              */
-            non_member_fraction_price_out?: number;
+            non_member_fraction_price_out: number;
+            /**
+             * Format: float
+             * @description Non-member unit price out
+             * @example 1439
+             */
+            non_member_unit_price_out: number;
             /**
              * @description Item group
              * @example BALASHOV

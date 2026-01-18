@@ -26,6 +26,9 @@
     "noDelivery": "No delivery available",
     "continueShopping": "Continue Shopping",
     "noProducts": "No products found in this category",
+    "yourPrice": "Your Price",
+    "forMembers": "For members",
+    "nonMembers": "Non members",
     "category": {
       "all": "All",
       "meat": "Meat",
