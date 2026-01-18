@@ -359,7 +359,7 @@ export interface paths {
         put?: never;
         /**
          * Create order from cart and initialize payment
-         * @description Transactionally and idempotently fetch all cart items for the customer, create an order from it, initialize a payment on Tinkoff bank and return payment URL
+         * @description Transactionally and idempotently fetch all cart items for the customer, split them by group, create separate orders for each group, find earliest delivery for each group, assign deliveries, initialize payment for each order, and return created orders with their payment URLs
          */
         post: operations["createOrderAndPaymentFromCart"];
         delete?: never;
@@ -2400,7 +2400,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Order created and payment initialized successfully */
+            /** @description Orders created and payments initialized successfully */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2409,13 +2409,7 @@ export interface operations {
                     "application/json": {
                         /** @example OK */
                         code?: string;
-                        data?: {
-                            /**
-                             * @description URL for payment processing
-                             * @example https://securepay.tinkoff.ru/payment/init?PaymentId=123456
-                             */
-                            paymentUrl?: string;
-                        };
+                        data?: components["schemas"]["Order"][];
                     };
                 };
             };

@@ -20,7 +20,7 @@ import {
 // import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
 // import {logger} from "firebase-functions/v1";
-import {DeliveryRef, ItemOverview, Order, OrderCreatedEvent, Payment, Subscription} from "../../models";
+import { DeliveryRef, ItemOverview, Order, OrderCreatedEvent, Payment, Subscription } from "../../models";
 import _ = require("lodash");
 // import * as jwt from "jsonwebtoken";
 import * as cookieParser from "cookie-parser";
@@ -53,7 +53,7 @@ const customerBalanceService = new CustomerBalanceService(db);
 const privateApi = express();
 
 privateApi.use(cors(
-  {origin: true} // allows all cross origin xhr requests
+  { origin: true } // allows all cross origin xhr requests
 ));
 
 privateApi.use(cookieParser());
@@ -95,7 +95,7 @@ privateApi.get("/deliveries", async (req: express.Request, res: express.Response
 
 privateApi.get("/deliveries/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const delivery = await deliveryService.find(id);
 
     if (!delivery) {
@@ -111,7 +111,7 @@ privateApi.get("/deliveries/:id", async (req: express.Request, res: express.Resp
 
 privateApi.get("/items/category/:category", async (req: express.Request, res: express.Response) => {
   try {
-    const {category} = req.params;
+    const { category } = req.params;
 
     const deliveryService = new DeliveryService(db);
 
@@ -157,14 +157,14 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
 
 privateApi.get("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId} = req.params;
+    const { customerId } = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, "Customer not found");
     }
 
-    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
+    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
     return api.send(res, cartItems || []);
   } catch (err: any) {
     functions.logger.error(err);
@@ -174,8 +174,8 @@ privateApi.get("/customers/:customerId/cart/items", async (req: express.Request,
 
 privateApi.post("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId} = req.params;
-    const {itemId} = req.body;
+    const { customerId } = req.params;
+    const { itemId } = req.body;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
@@ -197,8 +197,8 @@ privateApi.post("/customers/:customerId/cart/items", async (req: express.Request
 
 privateApi.delete("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId} = req.params;
-    const {cartItemId, itemId} = req.body;
+    const { customerId } = req.params;
+    const { cartItemId, itemId } = req.body;
 
     if (!cartItemId && !itemId) {
       return api.badRequest(res, "Either cartItemId or itemId must be provided");
@@ -210,7 +210,7 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
     }
 
     if (itemId) {
-      const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
+      const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
       const itemsToRemove = cartItems?.filter((item) => item.item_id === itemId);
       cartItemService.deleteTransactionally(itemsToRemove);
 
@@ -220,7 +220,7 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
 
     // Assuming there's a method to remove cart item by ID
     // We need to check if the cart item belongs to this customer
-    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
+    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
     const cartItem = cartItems?.find((item) => item.id === cartItemId);
 
     if (!cartItem) {
@@ -243,14 +243,14 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
 
 privateApi.get("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId} = req.params;
+    const { customerId } = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, "Customer not found");
     }
 
-    const orders = await orderService.fetchForOwner({id: String(customer.id)});
+    const orders = await orderService.fetchForOwner({ id: String(customer.id) });
 
     return api.send(res, orders || []);
   } catch (err: any) {
@@ -258,32 +258,33 @@ privateApi.get("/customers/:customerId/orders", async (req: express.Request, res
     return api.error(res, err.message || "Internal server error");
   }
 });
-
+/*
 privateApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId} = req.params;
+    const { customerId } = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, "Customer not found");
     }
 
-    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
+    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
     if (!cartItems || cartItems.length === 0) {
       return api.send(res, {});
     }
 
-    const order = await orderService.createOrderFromCart(customer, cartItems);
+    const order = await orderService.createOrderFromCart(customer, cartItems, null);
     return api.send(res, order);
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
   }
 });
+*/
 
 privateApi.get("/customers/:customerId", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId} = req.params;
+    const { customerId } = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
@@ -316,7 +317,7 @@ privateApi.get("/customers/:customerId", async (req: express.Request, res: expre
 
 privateApi.get("/customers/:customerId/items/:itemId", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId, itemId} = req.params;
+    const { customerId, itemId } = req.params;
 
     // Check if customer exists
     const customer = await customerService.find(customerId);
@@ -351,7 +352,7 @@ privateApi.get("/customers/:customerId/items/:itemId", async (req: express.Reque
       fraction_price_out: item.fraction_price_out,
       id: item.id,
       link: item.link,
-      deliveries: deliveries,
+      deliveries: deliveries as any,
       is_weighted: item.is_weighted,
       stats: stats,
     };
@@ -365,7 +366,7 @@ privateApi.get("/customers/:customerId/items/:itemId", async (req: express.Reque
 
 privateApi.post("/customers/:customerId/cart/order", async (req: express.Request, res: express.Response) => {
   try {
-    const {customerId} = req.params;
+    const { customerId } = req.params;
     const idempotencyKey = req.headers["idempotency_key"] as string;
 
     if (!idempotencyKey) {
@@ -378,16 +379,13 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
     }
 
     // Use idempotency guard to ensure transactional and idempotent operation
-    const result = await idempotencyGuardService.runIdempotentRequest<{ order: Order, payment: Payment, paymentUrl: string }>(
+    const result = await idempotencyGuardService.runIdempotentRequest<{ orders: Order[] }>(
       `cart-order-${customerId}-${idempotencyKey}`,
       async () => {
         const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
         const stats = await customerService.obtainStatistics(customerId);
         const balance = await customerBalanceService.obtainForCustomer(customerId);
         let subscriptionToCreate;
-
-        console.log("Customer balance:", balance.value);
-        console.log("number_of_free_orders:", stats.number_of_free_orders);
 
         if ((stats.number_of_free_orders || 0 <= 0) && !hasActiveSubscription && balance.value < 300) {
           throw new Error("Active subscription is missing");
@@ -398,69 +396,99 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
           subscriptionToCreate.status = "ACTIVE";
         }
 
-        const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
+        const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
         if (!cartItems || cartItems.length === 0) {
           throw new Error("Cart is empty");
         }
-        // Create order from cart (transactionally removes cart items)
-        const order = await orderService.createOrderFromCart(customer, cartItems);
-        await customerService.incrementStatistics(customerId, {number_of_orders: 1, number_of_active_orders: 1, number_of_free_orders: -1});
 
-        const paymentRequest = tbankService.orderToPaymentRequest(order);
-        const paymentResponse = await tbankService.initPayment(paymentRequest);
+        // Group cart items by their group field
+        const groupedCartItems = _.groupBy(cartItems, 'group');
+        const groups = Object.keys(groupedCartItems);
 
-        if (!paymentResponse.Success) {
-          throw new Error(`Payment initialization failed: ${paymentResponse.Message}`);
+        // Find deliveries for each group
+        const groupDeliveries = await deliveryService.findClosestByGroups(groups);
+
+        // Create a map of group to earliest delivery (closest future delivery)
+        const deliveryMap: { [key: string]: DeliveryRef } = {};
+        groupDeliveries.forEach(delivery => {
+          const group = delivery.group;
+          // If we haven't found a delivery for this group yet, or if this delivery is earlier (smaller delivery_start)
+          if (!deliveryMap[group] || delivery.delivery_start.getTime() < deliveryMap[group].delivery_start.getTime()) {
+            deliveryMap[group] = delivery;
+          }
+        });
+
+        const orders: Order[] = [];
+        const payments: Payment[] = [];
+
+        // Create order for each group
+        for (const [group, items] of Object.entries(groupedCartItems)) {
+          const delivery = deliveryMap[group];
+          console.log(`Creating order for group ${group} with delivery ${delivery?.id}`);
+
+          const order = await orderService.createOrderFromCart(customer, items, delivery,);
+          const paymentRequest = tbankService.orderToPaymentRequest(order);
+          const paymentResponse = await tbankService.initPayment(paymentRequest);
+
+          if (!paymentResponse.Success) {
+            throw new Error(`Payment initialization failed for group ${group}: ${paymentResponse.Message}`);
+          }
+
+          const payment: Payment = {
+            id: "",
+            external_id: paymentResponse.PaymentId,
+            terminal_key: paymentRequest.TerminalKey,
+            payment_url: paymentResponse.PaymentURL!,
+            order_id: order.id,
+            amount: order.total * 100,
+            total: order.total * 100,
+            status: "SENT",
+            success: false,
+            created_at: new Date(),
+            updated_at: new Date(),
+            error_code: paymentResponse.ErrorCode || "0",
+          };
+
+          const p = await paymentService.add(payment);
+          payments.push(p);
+
+          await orderService.update(order, { status: "PAYMENT_IN_PROGRESS" });
+
+          const event: OrderCreatedEvent = {
+            id: "", // will be set by OutboxEventService
+            idempotent_key: order.id,
+            created_at: new Date(),
+            processed_at: new Date(),
+            processed: false,
+            retries: 0,
+            type: CONSTANTS.EVENTS.ORDER_CREATED,
+            payload: { order_id: order.id },
+          };
+
+          const eventPublisher = new EventPublisher<OrderCreatedEvent>(db);
+          await eventPublisher.publish(event);
+
+          orders.push(order);
         }
 
-        const payment: Payment = {
-          id: "",
-          external_id: paymentResponse.PaymentId,
-          terminal_key: paymentRequest.TerminalKey,
-          payment_url: paymentResponse.PaymentURL!,
-          order_id: order.id,
-          amount: order.total * 100,
-          total: order.total * 100,
-          status: "SENT",
-          success: false,
-          created_at: new Date(),
-          updated_at: new Date(),
-          error_code: paymentResponse.ErrorCode || "0",
-        };
-
-        const p = await paymentService.add(payment);
-
-        await orderService.update(order, {status: "PAYMENT_IN_PROGRESS"});
+        // Update customer statistics (once for all orders)
+        await customerService.incrementStatistics(customerId, {
+          number_of_orders: orders.length,
+          number_of_active_orders: orders.length,
+          number_of_free_orders: -orders.length
+        });
 
         if (subscriptionToCreate) {
           await subscriptionService.set(subscriptionToCreate);
           await customerBalanceService.updateBalance(customerId, -300, "SUBSCRIPTION_CHARGE");
         }
 
-        const event: OrderCreatedEvent = {
-          id: "", // will be set by OutboxEventService
-          idempotent_key: order.id,
-          created_at: new Date(),
-          processed_at: new Date(),
-          processed: false,
-          retries: 0,
-          type: CONSTANTS.EVENTS.ORDER_CREATED,
-          payload: {order_id: order.id},
-
-        };
-
-        const eventPublisher = new EventPublisher<OrderCreatedEvent>(db);
-
-        await eventPublisher.publish(event);
-
         return {
-          order,
-          payment: p,
-          paymentUrl: p.payment_url,
+          orders,
         };
       }
     );
-    return api.send(res, {paymentUrl: result.paymentUrl});
+    return api.send(res, { orders: result.orders });
   } catch (err: any) {
     functions.logger.error(err);
 
@@ -488,7 +516,7 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
   if (!idempotencyKey) {
     return api.badRequest(res, "idempotency_key header is required");
   }
-  const {customerId} = req.params;
+  const { customerId } = req.params;
 
   // Check if customer exists
   const customer = await customerService.find(customerId);
@@ -547,7 +575,7 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
         };
       });
 
-    return api.send(res, {paymentUrl: result.payment.payment_url});
+    return api.send(res, { paymentUrl: result.payment.payment_url });
   } catch (err: any) {
     functions.logger.error(err);
 

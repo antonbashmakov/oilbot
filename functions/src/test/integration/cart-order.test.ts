@@ -1,13 +1,15 @@
 import db from "../setup";
 import * as request from "supertest";
 import * as jwt from "jsonwebtoken";
-import { Customer, Item, CartItem, Subscription, CustomerBalance } from "../../models";
+import { Customer, Item, CartItem, Subscription, CustomerBalance, Delivery } from "../../models";
 import CustomerService from "../../services/CustomerService";
 import ItemService from "../../services/ItemService";
 import CartItemService from "../../services/CartItemService";
 import SubscriptionService from "../../services/SubscriptionService";
 import CustomerBalanceService from "../../services/CustomerBalanceService";
 import moment = require("moment");
+import DeliveryService from "../../services/DeliveryService";
+import OrderService from "../../services/OrderService";
 // import SubscriptionService from "../../services/SubscriptionService";
 
 const JWT_SECRET = "secter";
@@ -36,6 +38,8 @@ describe("Cart Order Endpoint Integration Test", () => {
   let testCartItem: CartItem;
   let subscriptionService: SubscriptionService;
   let customerBalanceService: CustomerBalanceService;
+  let deliveryService: DeliveryService;
+  let orderService: OrderService;
 
 
   beforeEach(async () => {
@@ -45,6 +49,8 @@ describe("Cart Order Endpoint Integration Test", () => {
 
     subscriptionService = new SubscriptionService(db as any);
     customerBalanceService = new CustomerBalanceService(db as any);
+    deliveryService = new DeliveryService(db as any);
+    orderService = new OrderService(db as any);
 
     // Create test customer
     testCustomer = {
@@ -93,9 +99,6 @@ describe("Cart Order Endpoint Integration Test", () => {
     await itemService.set(testItem);
     await cartItemService.set(testCartItem);
 
-  });
-
-  it("should create order and payment when cart has items", async () => {
     const initialBalance: CustomerBalance = {
       id: testCustomer.id,
       owner: { id: testCustomer.id },
@@ -105,15 +108,20 @@ describe("Cart Order Endpoint Integration Test", () => {
     };
     await customerBalanceService.set(initialBalance);
 
+  });
+
+  it("should create order and payment when cart has items", async () => {
+
     const response = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
       .set('idempotency_key', 'test-idempotency-key-1')
       .expect(200);
 
-    // Verify response contains paymentUrl
-    expect(response.body).toHaveProperty('paymentUrl');
-    expect(response.body.paymentUrl).toBe("https://securepay.tinkoff.ru/p/MOCK_PAYMENT");
+    // Verify response contains orders array
+    expect(response.body).toHaveProperty('orders');
+    expect(Array.isArray(response.body.orders)).toBe(true);
+    expect(response.body.orders.length).toBe(1);
 
     // Verify mocks were called
 
@@ -154,14 +162,22 @@ describe("Cart Order Endpoint Integration Test", () => {
       .set('idempotency_key', idempotencyKey)
       .expect(200);
 
-    // Should return same result
-    expect(response1.body.paymentUrl).toBe(response2.body.paymentUrl);
+    // Should return same result (same orders array)
+    expect(response1.body.orders.length).toBe(response2.body.orders.length);
+    expect(response1.body.orders[0].id).toBe(response2.body.orders[0].id);
 
   });
 
   it("should require subscription when customer has no free orders", async () => {
-
-    await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: -1 });
+    const initialBalance: CustomerBalance = {
+      id: testCustomer.id,
+      owner: { id: testCustomer.id },
+      value: 0,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    await customerBalanceService.set(initialBalance);
+    await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: -100 });
 
     let response = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)
@@ -196,7 +212,7 @@ describe("Cart Order Endpoint Integration Test", () => {
       .post(`/customers/${testCustomer.id}/cart/order`)
       .set('Authorization', `Bearer ${createCustomerToken()}`)
       .set('idempotency_key', 'test-idempotency-key-3')
-      .expect(200); 
+      .expect(200);
 
 
   });
@@ -211,26 +227,15 @@ describe("Cart Order Endpoint Integration Test", () => {
       updated_at: new Date(),
     };
     await customerBalanceService.set(initialBalance);
-    const balanceCheck = await customerBalanceService.obtainForCustomer(testCustomer.id);
-    console.log('Balance set to:', balanceCheck, 'type of value:', typeof balanceCheck.value);
 
     // Ensure customer has no free orders left
     await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: -1 });
-    const stats = await customerService.obtainStatistics(testCustomer.id);
-    console.log('Stats after decrement free orders:', stats);
-    console.log('number_of_free_orders <= 0?', stats.number_of_free_orders <= 0);
 
     // Ensure no active subscription exists
     const existingSubscription = await subscriptionService.find(testCustomer.id);
     if (existingSubscription) {
-      console.log('Existing subscription found, deleting:', existingSubscription);
       await subscriptionService.delete(existingSubscription);
     }
-    console.log('Existing subscription after delete:', await subscriptionService.find(testCustomer.id));
-
-    // Debug: check hasActiveSubscription
-    const hasActive = await subscriptionService.hasActiveSubscription(testCustomer.id, new Date());
-    console.log('hasActiveSubscription result:', hasActive);
 
     // Call cart/order endpoint
     const response = await request(URL)
@@ -239,27 +244,19 @@ describe("Cart Order Endpoint Integration Test", () => {
       .set('idempotency_key', 'test-idempotency-key-balance-300')
       .expect(200);
 
-    // Verify payment URL is returned (order created successfully)
-    expect(response.body).toHaveProperty('paymentUrl');
-    expect(response.body.paymentUrl).toBe("https://securepay.tinkoff.ru/p/MOCK_PAYMENT");
+    // Verify orders are returned (order created successfully)
+    expect(response.body).toHaveProperty('orders');
+    expect(Array.isArray(response.body.orders)).toBe(true);
+    expect(response.body.orders.length).toBe(1);
 
     // Verify subscription was created
     const subscription = await subscriptionService.find(testCustomer.id);
-    if (!subscription) {
-      // Debug: check balance after request
-      const balanceAfter = await customerBalanceService.obtainForCustomer(testCustomer.id);
-      console.log('Balance after request:', balanceAfter);
-      // Check if subscription exists with different ID?
-      const allSubscriptions = await subscriptionService.findAll();
-      console.log('All subscriptions:', allSubscriptions);
-    }
     expect(subscription).toBeDefined();
     expect(subscription!.status).toBe("ACTIVE");
     expect(subscription!.fee).toBe(300);
 
     // Verify balance was reduced by 300 (check via balance service)
     const updatedBalance = await customerBalanceService.obtainForCustomer(testCustomer.id);
-    console.log('Updated balance:', updatedBalance);
     expect(updatedBalance.value).toBe(200); // 500 - 300 = 200
 
     // Verify cart is empty after order
@@ -268,7 +265,6 @@ describe("Cart Order Endpoint Integration Test", () => {
 
     // Verify order statistics updated
     const finalStats = await customerService.obtainStatistics(testCustomer.id);
-    console.log('Final stats:', finalStats);
     expect(finalStats.number_of_orders).toBe(1);
     expect(finalStats.number_of_active_orders).toBe(1);
   });
@@ -307,5 +303,178 @@ describe("Cart Order Endpoint Integration Test", () => {
       .expect(404); // Not Found
 
     expect(response.body.error.message).toBe("Customer not found");
+  });
+
+  it("should split cart items into different orders by group and assign corresponding deliveries", async () => {
+    // Create test deliveries for different groups
+    const delivery1: Delivery = {
+      id: "delivery-1",
+      number: 1,
+      status: "PENDING" as Delivery["status"],
+      description: "Test delivery for GROUP_A",
+      order_deadline: new Date(Date.now() + 86400000), // tomorrow
+      delivery_start: new Date(Date.now() + 86400000 * 2), // day after tomorrow
+      delivery_end: new Date(Date.now() + 86400000 * 2.5),
+      group: "GROUP_A",
+      orders: [],
+    };
+
+    const delivery2 = {
+      id: "delivery-2",
+      number: 2,
+      status: "PENDING" as Delivery["status"],
+      description: "Test delivery for GROUP_B",
+      order_deadline: new Date(Date.now() + 86400000),
+      delivery_start: new Date(Date.now() + 86400000 * 3), // later than delivery1
+      delivery_end: new Date(Date.now() + 86400000 * 3.5),
+      group: "GROUP_B",
+      orders: [],
+    };
+
+    // Create an earlier delivery for GROUP_B to test earliest delivery selection
+    const delivery2Early = {
+      id: "delivery-2-early",
+      number: 3,
+      status: "PENDING" as Delivery["status"],
+      description: "Earlier test delivery for GROUP_B",
+      order_deadline: new Date(Date.now() + 86400000),
+      delivery_start: new Date(Date.now() + 86400000 * 1.5), // earlier than delivery2
+      delivery_end: new Date(Date.now() + 86400000 * 2),
+      group: "GROUP_B",
+      orders: [],
+    };
+
+    await cartItemService.delete(testCartItem); // Clear existing cart item
+
+    await deliveryService.set(delivery1);
+    await deliveryService.set(delivery2);
+    await deliveryService.set(delivery2Early);
+
+    // Create test items with different groups
+    const item1 = {
+      id: "test-item-1",
+      name: "Test Item 1",
+      price_out: 100,
+      fraction: 1,
+      category: "TEST",
+      group: "GROUP_A",
+      description: "Test item 1 description",
+      fraction_price_out: 100,
+      link: "https://test.com/item1",
+      price_in: 80,
+      row_number: 1,
+      status: "ACTIVE",
+      unit: "кг",
+      unit_description: "килограмм",
+      is_weighted: true,
+    };
+
+    const item2 = {
+      id: "test-item-2",
+      name: "Test Item 2",
+      price_out: 200,
+      fraction: 2,
+      category: "TEST",
+      group: "GROUP_B",
+      description: "Test item 2 description",
+      fraction_price_out: 200,
+      link: "https://test.com/item2",
+      price_in: 160,
+      row_number: 2,
+      status: "ACTIVE",
+      unit: "кг",
+      unit_description: "килограмм",
+      is_weighted: true,
+    };
+
+    await itemService.set(item1);
+    await itemService.set(item2);
+
+    // Create cart items for different groups
+    const cartItem1 = {
+      id: "test-cart-item-1",
+      item_id: item1.id,
+      name: item1.name,
+      price: item1.price_out,
+      quantity: 1,
+      fraction: item1.fraction,
+      price_for_unit: item1.price_out,
+      category: item1.category,
+      group: item1.group,
+      owner: { id: testCustomer.id },
+      created_at: new Date(),
+    };
+
+    const cartItem2 = {
+      id: "test-cart-item-2",
+      item_id: item2.id,
+      name: item2.name,
+      price: item2.price_out,
+      quantity: 2,
+      fraction: item2.fraction,
+      price_for_unit: item2.price_out,
+      category: item2.category,
+      group: item2.group,
+      owner: { id: testCustomer.id },
+      created_at: new Date(),
+    };
+
+    await cartItemService.set(cartItem1);
+    await cartItemService.set(cartItem2);
+
+    // Set customer balance
+    const initialBalance: CustomerBalance = {
+      id: testCustomer.id,
+      owner: { id: testCustomer.id },
+      value: 500,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    await customerBalanceService.set(initialBalance);
+
+    // Call cart/order endpoint
+    const response = await request(URL)
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', 'test-idempotency-key-split-groups')
+      .expect(200);
+
+    // Verify response contains orders array
+    expect(response.body).toHaveProperty('orders');
+    expect(Array.isArray(response.body.orders)).toBe(true);
+    expect(response.body.orders.length).toBe(2);
+
+    const orders = await orderService.fetchForOwner(testCustomer);
+
+    expect(orders.length).toBe(2);
+
+    const order1 = orders.find((order: any) =>
+      order.items.some((item: any) => item.group === "GROUP_A")
+    );
+    const order2 = orders.find((order: any) =>
+      order.items.some((item: any) => item.group === "GROUP_B")
+    );
+
+    expect(order1).toBeDefined();
+    expect(order2).toBeDefined();
+
+    expect(order1!.items.length).toBe(1);
+    expect(order1!.items[0].group).toBe("GROUP_A");
+
+    expect(order2!.items.length).toBe(1);
+    expect(order2!.items[0].group).toBe("GROUP_B");
+
+    expect(order1!.delivery).toBeDefined();
+    expect(order1!.delivery!.id).toBe(delivery1.id);
+
+    expect(order2!.delivery).toBeDefined();
+    expect(order2!.delivery!.id).toBe(delivery2Early.id);
+
+    const cartItems = await cartItemService.fetchForOwner({ id: testCustomer.id });
+    expect(cartItems.length).toBe(0);
+
+    const stats = await customerService.obtainStatistics(testCustomer.id);
+    expect(stats.number_of_orders).toBe(2);
+    expect(stats.number_of_active_orders).toBe(2);
   });
 });

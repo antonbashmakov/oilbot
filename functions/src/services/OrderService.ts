@@ -1,6 +1,6 @@
 import AbstractService from "./AbstractService";
 import {COLLECTIONS} from "../constants";
-import {Order, Customer, CartItem, Delivery} from "../models";
+import {Order, Customer, CartItem, Delivery, DeliveryRef} from "../models";
 
 class OrderService extends AbstractService<Order> {
   findOrders(delivery: Delivery): Promise<Order[]> {
@@ -8,12 +8,12 @@ class OrderService extends AbstractService<Order> {
       .get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.id, doc.data()) as Order));
   }
 
-  async createOrderFromCart(customer: Customer, cartItems: CartItem[]): Promise<Order> {
+  async createOrderFromCart(customer: Customer, cartItems: CartItem[], delivery: DeliveryRef): Promise<Order> {
     const orderRef = this.getCollection().doc();
 
     const order: Order = {
       id: orderRef.id,
-      name: customer.first_name,
+      name: customer.first_name,      
       items: cartItems,
       status: "PENDING",
       type: "ORIGINAL",
@@ -25,6 +25,9 @@ class OrderService extends AbstractService<Order> {
       created_at: new Date(),
       updated_at: new Date(),
     };
+    if (delivery) {
+      order.delivery = { id: delivery.id , order_deadline: delivery.order_deadline, delivery_start: delivery.delivery_start, delivery_end: delivery.delivery_end };
+    }
 
     const batch = this.db.batch();
     batch.set(orderRef, order);

@@ -16,6 +16,7 @@ class DeliveryService extends AbstractService<Delivery> {
 
   toPOJO(id: any, o: any): Delivery | undefined {
     if (!o) return undefined;
+
     return {...o, id, delivery_end: o.delivery_end.toDate(), delivery_start: o.delivery_start.toDate(), order_deadline: o.order_deadline?.toDate()};
   }
 
@@ -23,7 +24,7 @@ class DeliveryService extends AbstractService<Delivery> {
     return COLLECTIONS.DELIVERIES;
   }
   getExcludedFields(): string[] {
-    return ["created_at"];
+    return ["created_at",  "delivery_start" , "delivery_end" , "order_deadline"];
   }
 }
 
