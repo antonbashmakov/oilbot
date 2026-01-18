@@ -251,11 +251,11 @@ privateApi.get("/customers/:customerId/orders", async (req: express.Request, res
     }
 
     const orders = await orderService.fetchForOwner({id: String(customer.id)});
-    const payments = await paymentService.findByOrderIds(orders.map(o => o.id));
+    const payments = await paymentService.findByOrderIds(orders.map((o) => o.id));
 
-    const groupedPayments = _.keyBy(payments, 'order_id');
+    const groupedPayments = _.keyBy(payments, "order_id");
 
-    const overviews = orders.map(order => {
+    const overviews = orders.map((order) => {
       const overview: OrderOverview = {...order};
       const p = groupedPayments[order.id];
       if (p) {
