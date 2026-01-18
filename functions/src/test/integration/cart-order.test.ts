@@ -118,10 +118,13 @@ describe("Cart Order Endpoint Integration Test", () => {
       .set('idempotency_key', 'test-idempotency-key-1')
       .expect(200);
 
-    // Verify response contains orders array
+    // Verify response contains orders and payments arrays
     expect(response.body).toHaveProperty('orders');
+    expect(response.body).toHaveProperty('payments');
     expect(Array.isArray(response.body.orders)).toBe(true);
+    expect(Array.isArray(response.body.payments)).toBe(true);
     expect(response.body.orders.length).toBe(1);
+    expect(response.body.payments.length).toBe(1);
 
     // Verify mocks were called
 
@@ -244,10 +247,13 @@ describe("Cart Order Endpoint Integration Test", () => {
       .set('idempotency_key', 'test-idempotency-key-balance-300')
       .expect(200);
 
-    // Verify orders are returned (order created successfully)
+    // Verify orders and payments are returned (order created successfully)
     expect(response.body).toHaveProperty('orders');
+    expect(response.body).toHaveProperty('payments');
     expect(Array.isArray(response.body.orders)).toBe(true);
+    expect(Array.isArray(response.body.payments)).toBe(true);
     expect(response.body.orders.length).toBe(1);
+    expect(response.body.payments.length).toBe(1);
 
     // Verify subscription was created
     const subscription = await subscriptionService.find(testCustomer.id);
@@ -439,10 +445,13 @@ describe("Cart Order Endpoint Integration Test", () => {
       .set('idempotency_key', 'test-idempotency-key-split-groups')
       .expect(200);
 
-    // Verify response contains orders array
+    // Verify response contains orders and payments arrays
     expect(response.body).toHaveProperty('orders');
+    expect(response.body).toHaveProperty('payments');
     expect(Array.isArray(response.body.orders)).toBe(true);
+    expect(Array.isArray(response.body.payments)).toBe(true);
     expect(response.body.orders.length).toBe(2);
+    expect(response.body.payments.length).toBe(2);
 
     const orders = await orderService.fetchForOwner(testCustomer);
 

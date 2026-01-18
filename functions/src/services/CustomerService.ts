@@ -85,7 +85,7 @@ class CustomerService extends AbstractService<Customer> {
       if (updates.paid_in_total !== undefined) {
         increment = {...increment, paid_in_total: FieldValue.increment(updates.paid_in_total)};
       }
-      if(Object.keys(increment).length === 0) {
+      if (Object.keys(increment).length === 0) {
         return (await ref.get()).data() as CustomerStats;
       }
       return ref.update(increment).then(() => this.obtainStatistics(customerId));

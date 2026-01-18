@@ -359,7 +359,7 @@ export interface paths {
         put?: never;
         /**
          * Create order from cart and initialize payment
-         * @description Transactionally and idempotently fetch all cart items for the customer, split them by group, create separate orders for each group, find earliest delivery for each group, assign deliveries, initialize payment for each order, and return created orders with their payment URLs
+         * @description Transactionally and idempotently fetch all cart items for the customer, split them by group, create separate orders for each group, find earliest delivery for each group, assign deliveries, initialize payment for each order, and return created orders and payments
          */
         post: operations["createOrderAndPaymentFromCart"];
         delete?: never;
@@ -1052,6 +1052,7 @@ export interface components {
             picking?: components["schemas"]["OrderPicking"];
             customer: components["schemas"]["CustomerOverview"];
             comments?: components["schemas"]["Comment"];
+            payment?: components["schemas"]["Payment"];
         } & components["schemas"]["Order"];
         User: {
             /**
@@ -2409,7 +2410,10 @@ export interface operations {
                     "application/json": {
                         /** @example OK */
                         code?: string;
-                        data?: components["schemas"]["Order"][];
+                        data?: {
+                            orders?: components["schemas"]["Order"][];
+                            payments?: components["schemas"]["Payment"][];
+                        };
                     };
                 };
             };
@@ -2532,7 +2536,7 @@ export interface operations {
                     "application/json": {
                         /** @example OK */
                         code?: string;
-                        data?: components["schemas"]["Order"][];
+                        data?: components["schemas"]["OrderOverview"][];
                     };
                 };
             };

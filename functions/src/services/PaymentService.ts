@@ -38,6 +38,13 @@ class PaymentService extends AbstractService<Payment> {
     const doc = result.docs[0];
     return this.toPOJO(doc.id, doc.data()) as Payment;
   }
+  async findByOrderIds(ids: string[]): Promise<Payment[]> {
+    const result = await this.getCollection()
+      .where("order_id", "in", ids)
+      .get();
+
+    return result.docs.map((doc) => this.toPOJO(doc.id, doc.data()) as Payment);
+  }
 
   async findByOrderId(orderId: string): Promise<Payment[]> {
     const result = await this.getCollection()

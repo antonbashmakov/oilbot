@@ -945,7 +945,7 @@ paths:
     post:
       operationId: createOrderAndPaymentFromCart
       summary: Create order from cart and initialize payment
-      description: Transactionally and idempotently fetch all cart items for the customer, split them by group, create separate orders for each group, find earliest delivery for each group, assign deliveries, initialize payment for each order, and return created orders with their payment URLs
+      description: Transactionally and idempotently fetch all cart items for the customer, split them by group, create separate orders for each group, find earliest delivery for each group, assign deliveries, initialize payment for each order, and return created orders and payments
       tags:
         - Cart
       parameters:
@@ -974,9 +974,16 @@ paths:
                     type: string
                     example: "OK"
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Order'
+                    type: object
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Order'
+                      payments:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Payment'
         '400':
           description: Bad request (e.g., cart is empty, invalid idempotency key)
           content:
@@ -1081,7 +1088,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Order'
+                      $ref: '#/components/schemas/OrderOverview'
         '404':
           description: Customer not found
           content:
@@ -2009,6 +2016,8 @@ components:
           $ref: '#/components/schemas/CustomerOverview'
         comments:
           $ref: '#/components/schemas/Comment'
+        payment:
+          $ref: '#/components/schemas/Payment'
 
     User:
       type: object

@@ -13,7 +13,7 @@ class OrderService extends AbstractService<Order> {
 
     const order: Order = {
       id: orderRef.id,
-      name: customer.first_name,      
+      name: customer.first_name,
       items: cartItems,
       status: "PENDING",
       type: "ORIGINAL",
@@ -26,7 +26,7 @@ class OrderService extends AbstractService<Order> {
       updated_at: new Date(),
     };
     if (delivery) {
-      order.delivery = { id: delivery.id , order_deadline: delivery.order_deadline, delivery_start: delivery.delivery_start, delivery_end: delivery.delivery_end };
+      order.delivery = {id: delivery.id, order_deadline: delivery.order_deadline, delivery_start: delivery.delivery_start, delivery_end: delivery.delivery_end};
     }
 
     const batch = this.db.batch();

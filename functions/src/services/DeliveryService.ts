@@ -24,7 +24,7 @@ class DeliveryService extends AbstractService<Delivery> {
     return COLLECTIONS.DELIVERIES;
   }
   getExcludedFields(): string[] {
-    return ["created_at",  "delivery_start" , "delivery_end" , "order_deadline"];
+    return ["created_at", "delivery_start", "delivery_end", "order_deadline"];
   }
 }
 

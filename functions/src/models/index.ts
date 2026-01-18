@@ -16,6 +16,7 @@ type BaseStats = components["schemas"]["Stats"];
 type BaseDeliveryOverview = components["schemas"]["DeliveryOverview"];
 type BaseDeliveryAgentOverview = components["schemas"]["DeliveryAgentOverview"];
 type BaseOrder = components["schemas"]["Order"];
+type BaseOrderOverview = components["schemas"]["OrderOverview"];
 type BaseItemOverview = components["schemas"]["ItemOverview"];
 type BaseDelivery = components["schemas"]["Delivery"];
 type BaseDeliveryRef = components["schemas"]["DeliveryRef"];
@@ -131,7 +132,7 @@ export type Delivery = Omit<BaseDelivery, "created_at" | "order_deadline" | "del
   order_deadline: Date;
   delivery_start: Date;
   delivery_end: Date;
-  
+
 };
 export type Subscription = Omit<BaseSubscription, "created_at" | "next_payment_at" | "canceled_at"> & {
   created_at: Date;
@@ -139,7 +140,7 @@ export type Subscription = Omit<BaseSubscription, "created_at" | "next_payment_a
   canceled_at?: Date;
 };
 
-export type DeliveryRef = Omit<BaseDeliveryRef, "created_at" | "delivery_start" | "delivery_end"> &  {
+export type DeliveryRef = Omit<BaseDeliveryRef, "created_at" | "order_deadline"| "delivery_start" | "delivery_end"> & {
   order_deadline: Date;
   delivery_start: Date;
   delivery_end: Date;
@@ -156,6 +157,13 @@ export type Order = Omit<BaseOrder, "delivery" | "items" | "created_at" | "updat
   updated_at: Date;
   delivery?: DeliveryRef;
 };
+export type OrderOverview = Omit<BaseOrderOverview, "payment" | "customer" | "delivery" | "items" | "created_at" | "updated_at"> & {
+  items: CartItem[];
+  created_at: Date;
+  updated_at: Date;
+  delivery?: DeliveryRef;
+  payment?: Payment;
+};
 export type DeliveryOverviewItemStats = Omit<BaseDeliveryOverviewItemStats, "orders"> & {
   orders: Order[];
 };
@@ -166,7 +174,7 @@ export type DeliveryAgentOverview = Omit<BaseDeliveryAgentOverview, "pickups" | 
   pickups: Order[];
   deliveries: Order[];
 };
-export type DeliveryOverview = Omit<BaseDeliveryOverview, "stats" | "orders" | "activeOrders" | "cancelledOrders" | "removedOrders" | "order_deadline" | "delivery_start"  | "delivery_end"> & {
+export type DeliveryOverview = Omit<BaseDeliveryOverview, "stats" | "orders" | "activeOrders" | "cancelledOrders" | "removedOrders" | "order_deadline" | "delivery_start" | "delivery_end"> & {
   orders: Order[];
   activeOrders: Order[];
   cancelledOrders: Order[];
