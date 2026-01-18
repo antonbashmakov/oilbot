@@ -99,8 +99,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
           const tg = (window as any).Telegram.WebApp;
 
-          // const initData = "user=%7B%22id%22%3A270053857%2C%22first_name%22%3A%22Anton%22%2C%22last_name%22%3A%22%C3%96ldenberg%22%2C%22username%22%3A%22antonoldenberg%22%2C%22language_code%22%3A%22en%22%2C%22is_premium%22%3Atrue%2C%22allows_write_to_pm%22%3Atrue%2C%22photo_url%22%3A%22https%3A%5C%2F%5C%2Ft.me%5C%2Fi%5C%2Fuserpic%5C%2F320%5C%2Fqp4hk15qeVGYzV4WX9tt5JoE6IIf3iBpXWT80kJC5to.svg%22%7D&chat_instance=-8163802993933103841&chat_type=private&start_param=JTdCJTIydHlwZSUyMiUzQSUyMnBhdGglMjIlMkMlMjJ2YWx1ZSUyMiUzQSUyMiUyRml0ZW1zJTJGZWZlMTAxOTMtN2JmOC00NTc4LTlmMjctNDI3ZGMzNDI3MmEyJTIyJTdE&auth_date=1768229840&signature=G0r05qa9-SiS2H-onkMOSVTBBfNZxFgV_bXBAt3BnjxUcT_z_lnA9KS5Q7F8J9MK9HhkfmFo9DolhoC1wMvMCA&hash=6d5ed8a43024e854068cd64e5a0899068a66bc2e48fe36ed3a762b435e417350";
-          const initData = tg.initData;
+          const initData = "user=%7B%22id%22%3A270053857%2C%22first_name%22%3A%22Anton%22%2C%22last_name%22%3A%22%C3%96ldenberg%22%2C%22username%22%3A%22antonoldenberg%22%2C%22language_code%22%3A%22en%22%2C%22is_premium%22%3Atrue%2C%22allows_write_to_pm%22%3Atrue%2C%22photo_url%22%3A%22https%3A%5C%2F%5C%2Ft.me%5C%2Fi%5C%2Fuserpic%5C%2F320%5C%2Fqp4hk15qeVGYzV4WX9tt5JoE6IIf3iBpXWT80kJC5to.svg%22%7D&chat_instance=-8163802993933103841&chat_type=private&start_param=JTdCJTIydHlwZSUyMiUzQSUyMnBhdGglMjIlMkMlMjJ2YWx1ZSUyMiUzQSUyMiUyRml0ZW1zJTJGZWZlMTAxOTMtN2JmOC00NTc4LTlmMjctNDI3ZGMzNDI3MmEyJTIyJTdE&auth_date=1768229840&signature=G0r05qa9-SiS2H-onkMOSVTBBfNZxFgV_bXBAt3BnjxUcT_z_lnA9KS5Q7F8J9MK9HhkfmFo9DolhoC1wMvMCA&hash=6d5ed8a43024e854068cd64e5a0899068a66bc2e48fe36ed3a762b435e417350";
+          // const initData = tg.initData;
 
           validateTelegramUser(initData).then(customer => {
             // Expand the app to full height

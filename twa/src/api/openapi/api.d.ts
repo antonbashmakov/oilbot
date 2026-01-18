@@ -359,7 +359,7 @@ export interface paths {
         put?: never;
         /**
          * Create order from cart and initialize payment
-         * @description Transactionally and idempotently fetch all cart items for the customer, create an order from it, initialize a payment on Tinkoff bank and return payment URL
+         * @description Transactionally and idempotently fetch all cart items for the customer, split them by group, create separate orders for each group, find earliest delivery for each group, assign deliveries, initialize payment for each order, and return created orders and payments
          */
         post: operations["createOrderAndPaymentFromCart"];
         delete?: never;
@@ -829,6 +829,12 @@ export interface components {
              */
             fraction_price_out: number;
             /**
+             * Format: float
+             * @description Fraction price out for non-members
+             * @example 1439
+             */
+            non_member_fraction_price_out?: number;
+            /**
              * @description Item group
              * @example BALASHOV
              */
@@ -1046,6 +1052,7 @@ export interface components {
             picking?: components["schemas"]["OrderPicking"];
             customer: components["schemas"]["CustomerOverview"];
             comments?: components["schemas"]["Comment"];
+            payment?: components["schemas"]["Payment"];
         } & components["schemas"]["Order"];
         User: {
             /**
@@ -2394,7 +2401,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Order created and payment initialized successfully */
+            /** @description Orders created and payments initialized successfully */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2404,11 +2411,8 @@ export interface operations {
                         /** @example OK */
                         code?: string;
                         data?: {
-                            /**
-                             * @description URL for payment processing
-                             * @example https://securepay.tinkoff.ru/payment/init?PaymentId=123456
-                             */
-                            paymentUrl?: string;
+                            orders?: components["schemas"]["Order"][];
+                            payments?: components["schemas"]["Payment"][];
                         };
                     };
                 };
@@ -2532,7 +2536,7 @@ export interface operations {
                     "application/json": {
                         /** @example OK */
                         code?: string;
-                        data?: components["schemas"]["Order"][];
+                        data?: components["schemas"]["OrderOverview"][];
                     };
                 };
             };

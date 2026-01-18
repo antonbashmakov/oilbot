@@ -14,10 +14,12 @@ import {
     AddToCartItem,
     RemoveFromCartItem,
     CustomerOverview,
+    OrderOverview
 } from "@/api/models";
 import { UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import useClient from "@/api/useClient";
 import _ from "lodash";
+
 
 
 export type QueryControlOptions = {
@@ -65,7 +67,7 @@ export const useGetCartItemsQuery = (customerId?: string): UseQueryResult<CartIt
 };
 
 // Orders hooks
-export const useGetOrdersQuery = (customerId?: string): UseQueryResult<Order[]> => {
+export const useGetOrdersQuery = (customerId?: string): UseQueryResult<OrderOverview[]> => {
     return useApiQuery("/api/private/customers/{customerId}/orders", {
         params: {
             path: {

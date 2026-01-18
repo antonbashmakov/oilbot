@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/api/user/provider';
 import { useGetOrdersQuery } from '@/api';
 import { useState, useMemo, useEffect } from 'react';
-import { Order } from '@/api/models';
+import { Order, OrderOverview } from '@/api/models';
 import { useTranslations } from 'next-intl';
 import _ from 'lodash';
 
@@ -16,7 +16,7 @@ export default function OrdersPage() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'processing' | 'delivered' | 'cancelled'>('all');
   const t = useTranslations('orders');
 
-  const [orderedOrders, setOrderedOrders] = useState<Order[]>([]);
+  const [orderedOrders, setOrderedOrders] = useState<OrderOverview[]>([]);
 
   useEffect(() => {
     const sorted = _.orderBy(orders, "created_at", 'desc');
@@ -138,12 +138,16 @@ export default function OrdersPage() {
   const getActionButton = (status: string) => {
     switch (status) {
       case 'PENDING':
-      case 'PAYMENT_IN_PROGRESS':
       case 'PAID':
       case 'RESOLVING':
       case 'CONCILIATION_PAYMENT_IN_PROGRESS':
         return {
           text: t('actions.trackOrder'),
+          className: 'bg-white dark:bg-[#2a171a] border border-primary text-primary hover:bg-primary/5 active:bg-primary/10'
+        };
+      case 'PAYMENT_IN_PROGRESS':
+        return {
+          text: t('actions.paymentInProgress'),
           className: 'bg-white dark:bg-[#2a171a] border border-primary text-primary hover:bg-primary/5 active:bg-primary/10'
         };
       case 'DELIVERED':
@@ -271,7 +275,7 @@ export default function OrdersPage() {
         ) : (
           filteredOrders.map((order) => {
             const statusBadge = getStatusBadge(order.status);
-            // const actionButton = getActionButton(order.status);
+            const actionButton = getActionButton(order.status);
             const orderDate = formatDate(order.created_at);
             const orderNumber = order.id ? `${t('order')} #${order.id.slice(-6)}` : t('order');
             const itemsSummary = getItemsSummary(order);
@@ -312,9 +316,9 @@ export default function OrdersPage() {
                       {order.total?.toFixed(2) || '0.00'}₽
                     </span>
                   </div>
-                  {/*<button className={`flex cursor-pointer items-center justify-center rounded-lg h-9 px-5 transition-colors text-sm font-bold leading-normal tracking-wide ${actionButton.className}`}>
+                  { order.status === 'PAYMENT_IN_PROGRESS' && <Link href={order.payment?.payment_url!} className={`flex cursor-pointer items-center justify-center rounded-lg h-9 px-5 transition-colors text-sm font-bold leading-normal tracking-wide ${actionButton.className}`}>
                     {actionButton.text}
-                  </button>*/}
+                  </Link>}
                 </div>
               </div>
             );

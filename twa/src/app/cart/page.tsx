@@ -8,9 +8,11 @@ import { useTranslations } from 'next-intl';
 
 import _ from 'lodash';
 import { IMAGE_TO_UUIDS } from '@/data/products';
+import { useRouter } from "next/navigation";
 
 export default function CartPage() {
   const { user } = useUser();
+  const router = useRouter();
   const { getCartItems, removeFromCart, getCartTotal, addToCart, isLoading } = useCartStore(user?.id);
   const checkoutMutation = useCheckout(user?.id);
   const t = useTranslations('cart');
@@ -66,8 +68,14 @@ export default function CartPage() {
       const idempotencyKey = `checkout-${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
       const res: any = await checkoutMutation.mutateAsync({ idempotencyKey });
-      if (res.paymentUrl && typeof window !== 'undefined') {
-        window.location.href = res.paymentUrl;
+      if (!res.payments || !res.payments.length && typeof window !== 'undefined') {
+        throw new Error('No payment methods returned');
+      }
+      if (res.payments.length === 1 && res.payments[0].payment_url && typeof window !== 'undefined') {
+        window.location.href = res.payments[0].payment_url;
+      }
+      if (res.payments.length > 1 && typeof window !== 'undefined') {
+        router.push("/orders");
       }
     } catch (error) {
       console.error('Checkout failed:', error);

@@ -103,6 +103,7 @@
     "actions": {
       "trackOrder": "Track Order",
       "reorder": "Reorder",
+      "paymentInProgress": "Pay",
       "details": "Details"
     }
   },

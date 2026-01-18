@@ -23,6 +23,8 @@ type BaseCustomerOverview = components["schemas"]["CustomerOverview"];
 type BaseUser = components["schemas"]["User"];
 type BaseComment = components["schemas"]["Comment"];
 
+type BaseOrderOverview = components["schemas"]["OrderOverview"];
+
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffPaymentCancelationRequest = models["schemas"]["TinkoffPaymentCancelationRequest"];
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
@@ -148,3 +150,11 @@ export interface IdempotentObject<T = any> {
   created_at: Date;
   data: T;
 }
+
+export type OrderOverview = Omit<BaseOrderOverview, "payment" | "customer" | "delivery" | "items" |"updated_at"> & {
+  items: CartItem[];
+  updated_at: Date;
+  delivery?: DeliveryRef;
+  payment?: Payment;
+};
+

@@ -10,12 +10,14 @@ export type Customer = components["schemas"]["Customer"];
 export type Item = components["schemas"]["Item"];
 export type CartItem = components["schemas"]["CartItem"];
 export type PickingItem = components["schemas"]["PickingItem"];
+type BaseOrderOverview = components["schemas"]["OrderOverview"];
 type BaseOrderPicking = components["schemas"]["OrderPicking"];
 type BasePayment = components["schemas"]["Payment"];
 type BaseCustomerBalance = components["schemas"]["CustomerBalance"];
 type BaseCustomerOverview = components["schemas"]["CustomerOverview"];
 type BaseUser = components["schemas"]["User"];
 type BaseComment = components["schemas"]["Comment"];
+type BaseDeliveryRef = components["schemas"]["DeliveryRef"];
 
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffPaymentCancelationRequest = models["schemas"]["TinkoffPaymentCancelationRequest"];
@@ -103,3 +105,15 @@ export interface IdempotentObject<T = any> {
   created_at: Date;
   data: T;
 }
+export type OrderOverview = Omit<BaseOrderOverview, "payment" | "customer" | "delivery" | "items" | "created_at" | "updated_at"> & {
+  items: CartItem[];
+  created_at: Date;
+  updated_at: Date;
+  delivery?: DeliveryRef;
+  payment?: Payment;
+};
+export type DeliveryRef = Omit<BaseDeliveryRef, "created_at" | "order_deadline"| "delivery_start" | "delivery_end"> & {
+  order_deadline: Date;
+  delivery_start: Date;
+  delivery_end: Date;
+};
