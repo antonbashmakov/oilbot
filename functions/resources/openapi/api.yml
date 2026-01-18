@@ -1684,10 +1684,12 @@ components:
         - item_id
         - name
         - owner
-        - price
         - quantity
         - category
+        - price        
         - price_for_unit
+        - non_member_price        
+        - non_member_price_for_unit
       properties:
         category:
           type: string
@@ -1719,10 +1721,20 @@ components:
             format: float
             description: Price for the total quantity and fraction
             example: 609
+        non_member_price:
+            type: number
+            format: float
+            description: Non-member price for the total quantity and fraction
+            example: 609
         price_for_unit:
             type: number
             format: float
             description: Price for one unit
+            example: 609
+        non_member_price_for_unit:
+            type: number
+            format: float
+            description: Non-member price for one unit
             example: 609
         quantity:
             type: integer
@@ -1879,7 +1891,7 @@ components:
         - description
         - fraction
         - fraction_price_out
-        - non_member_unit_price_out
+        - non_member_fraction_price_out
         - non_member_unit_price_out
         - group
         - id

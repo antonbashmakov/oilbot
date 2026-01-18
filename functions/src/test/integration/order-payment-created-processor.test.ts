@@ -58,6 +58,8 @@ describe("OrderPaymentCreatedProcessor Integration Test", () => {
           item_id: "item-1",
           fraction: 1,
           price_for_unit: 150,
+          non_member_price_for_unit: 150,
+          non_member_price: 150,
           group: "TEST_GROUP",
           owner: {id: "270053857"},
           created_at: new Date(),

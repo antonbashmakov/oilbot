@@ -451,7 +451,6 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         if (!cartItems || cartItems.length === 0) {
           throw new Error("Cart is empty");
         }
-
         // Group cart items by their group field
         const groupedCartItems = _.groupBy(cartItems, "group");
         const groups = Object.keys(groupedCartItems);
