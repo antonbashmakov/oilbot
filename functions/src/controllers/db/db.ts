@@ -124,6 +124,7 @@ const dailySubscriptionCheck = async (_context: any) => {
 // Scheduled function to process subscriptions daily at 00:00 UTC+3 (Moscow time)
 const processSubscriptionsDaily = functions.pubsub
   .schedule("0 0 * * *")
+  .timeZone("UTC")
   .onRun(
     dailySubscriptionCheck
   );
