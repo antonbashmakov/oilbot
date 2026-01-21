@@ -20,6 +20,7 @@ import {SubscriptionService} from "../private/imports";
 import {logger} from "firebase-functions/v1";
 import ItemService from "../../services/ItemService";
 import CartItemService from "../../services/CartItemService";
+import OrderService from "../../services/OrderService";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -40,6 +41,7 @@ const customerBalanceService = new CustomerBalanceService(db);
 const subscriptionService = new SubscriptionService(db);
 const itemService = new ItemService(db);
 const cartItemService = new CartItemService(db);
+const orderService = new OrderService(db);
 
 const publicApi = express();
 
@@ -261,9 +263,9 @@ publicApi.post("/fix-cartitems", async (req: express.Request, res: express.Respo
     // 1) Fetch all from ITEMS table and convert list to map where id is items id and value is item object
     const items = await itemService.findAll();
     functions.logger.info(`Fetched ${items.length} items`);
-    
+
     const idToItem = new Map<string, Item>();
-    items.forEach(item => {
+    items.forEach((item) => {
       idToItem.set(item.id, item);
     });
 
@@ -274,7 +276,7 @@ publicApi.post("/fix-cartitems", async (req: express.Request, res: express.Respo
     // 3) For each cart item find corresponding item in idToItem and update cart item
     const updates: Array<{cartItem: any, item: any}> = [];
     const notFound: string[] = [];
-    
+
     for (const cartItem of cartItems) {
       const item = idToItem.get(cartItem.item_id);
       if (item && item.fraction_price_out !== undefined) {
@@ -282,7 +284,7 @@ publicApi.post("/fix-cartitems", async (req: express.Request, res: express.Respo
         if (cartItem.price !== item.fraction_price_out) {
           updates.push({
             cartItem,
-            item
+            item,
           });
         }
       } else {
@@ -292,13 +294,13 @@ publicApi.post("/fix-cartitems", async (req: express.Request, res: express.Respo
 
     functions.logger.info(`Found ${updates.length} cart items to update`);
     if (notFound.length > 0) {
-      functions.logger.warn(`Could not find items for ${notFound.length} cart items: ${notFound.join(', ')}`);
+      functions.logger.warn(`Could not find items for ${notFound.length} cart items: ${notFound.join(", ")}`);
     }
 
-    await cartItemService.runTransactionally( async t => {
+    await cartItemService.runTransactionally( async (t) => {
       updates.forEach(({cartItem, item}) => {
         const docRef = cartItemService.getCollection().doc(`${cartItem.id}`);
-        t.update(docRef, { price: item.fraction_price_out });
+        t.update(docRef, {price: item.fraction_price_out});
       });
     });
 
@@ -309,7 +311,7 @@ publicApi.post("/fix-cartitems", async (req: express.Request, res: express.Respo
       message: `Updated ${updates.length} cart items`,
       updatedCount: updates.length,
       notFoundCount: notFound.length,
-      notFoundItemIds: notFound
+      notFoundItemIds: notFound,
     });
   } catch (err: any) {
     functions.logger.error("Error in fix-cartitems:", err);
@@ -327,7 +329,7 @@ publicApi.get("/cart/owners", async (req: express.Request, res: express.Response
 
     // 2) Extract unique owner IDs from cart items
     const ownerIds = new Set<string>();
-    cartItems.filter(ci => !!ci.created_at).forEach(cartItem => {
+    cartItems.filter((ci) => !!ci.created_at).forEach((cartItem) => {
       if (cartItem.owner && cartItem.owner.id) {
         ownerIds.add(String(cartItem.owner.id));
       }
@@ -353,10 +355,57 @@ publicApi.get("/cart/owners", async (req: express.Request, res: express.Response
     return api.send(res, {
       success: true,
       count: customers.length,
-      customers
+      customers,
     });
   } catch (err: any) {
     functions.logger.error("Error in /cart/owners:", err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+publicApi.post("/poke-all-order", async (req: express.Request, res: express.Response) => {
+  try {
+    functions.logger.info("Starting poke-all-order endpoint");
+
+    // Fetch all orders
+    const orders = await orderService.findAll();
+    functions.logger.info(`Fetched ${orders.length} orders`);
+
+    if (orders.length === 0) {
+      return api.send(res, {
+        success: true,
+        message: "No orders found",
+        updatedCount: 0,
+      });
+    }
+
+    // Update updated_at field to current date for each order
+    const batchSize = 500; // Firestore batch limit
+    let updatedCount = 0;
+
+    for (let i = 0; i < orders.length; i += batchSize) {
+      const batch = orders.slice(i, i + batchSize);
+
+      await orderService.runTransactionally(async (transaction) => {
+        batch.forEach((order) => {
+          const docRef = orderService.getCollection().doc(order.id);
+          transaction.update(docRef, {poked_at: new Date()});
+        });
+      });
+
+      updatedCount += batch.length;
+      functions.logger.info(`Updated batch ${Math.floor(i / batchSize) + 1}, total updated: ${updatedCount}`);
+    }
+
+    functions.logger.info(`Successfully updated ${updatedCount} orders`);
+
+    return api.send(res, {
+      success: true,
+      message: `Updated ${updatedCount} orders`,
+      updatedCount,
+    });
+  } catch (err: any) {
+    functions.logger.error("Error in poke-all-order:", err);
     return api.error(res, err.message || "Internal server error");
   }
 });
