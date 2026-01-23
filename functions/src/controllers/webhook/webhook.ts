@@ -37,7 +37,7 @@ interface PaymentWebhookBody {
   RebillId: string;
   Success: boolean;
   Status: string;
-  DATA?: any; // custom objects
+  Data?: any; // custom objects
   PaymentId: number;
   ErrorCode: string;
   Amount: number;
@@ -57,7 +57,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
     if (body.Success && body.Status === "CONFIRMED" ) {
       const eventPublisher = new EventPublisher<OrderPaymentConfirmedEvent>(db);
 
-      const type = (body.DATA?.OrderType || "ORDER") === "ORDER" ? CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED : CONSTANTS.EVENTS.SUBSCRIPTION_PAYMENT_CONFIRMED;
+      const type = (body.Data?.OrderType || "ORDER") === "ORDER" ? CONSTANTS.EVENTS.ORDER_PAYMENT_CONFIRMED : CONSTANTS.EVENTS.SUBSCRIPTION_PAYMENT_CONFIRMED;
 
       const event: OrderPaymentConfirmedEvent = {
         id: "", // will be set by OutboxEventService
@@ -68,7 +68,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
         type,
         payload: {
           order_id: body.OrderId,
-          subscription_id: body.DATA?.SubscriptionId,
+          subscription_id: body.Data?.SubscriptionId,
           external_id: `${body.PaymentId}`, // we do store them as strings
           rebill_id: body.RebillId,
         },
