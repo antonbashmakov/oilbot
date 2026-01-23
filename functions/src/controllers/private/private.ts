@@ -402,6 +402,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         let subscriptionToCreate;
 
         if ((stats.number_of_free_orders || 0 <= 0) && !hasActiveSubscription && balance.value < 300) {
+          logger.info(`Customer ${customerId} cannot place order due to insufficient balance and no active subscription`, {balance: balance, customer});
           throw new Error("Active subscription is missing");
         }
 
