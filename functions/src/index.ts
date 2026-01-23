@@ -16,7 +16,7 @@ export const processSubscriptionsDaily = db.processSubscriptionsDaily;
 const webhooks = functions.https.onRequest(webhookApi);
 
 const priv = functions.https.onRequest((req, res) => {
-  // Remove /api/public from the request path so Express router sees correct routes
+  functions.logger.debug(`incoming path: ${req.path}`);
   if (req.path.startsWith("/api/private")) {
     req.url = req.url.replace(/^\/api\/private/, "");
   }
@@ -24,14 +24,14 @@ const priv = functions.https.onRequest((req, res) => {
 }
 );
 const adm = functions.https.onRequest((req, res) => {
-  // Remove /api/public from the request path so Express router sees correct routes
+  functions.logger.debug(`incoming path: ${req.path}`);
   if (req.path.startsWith("/api/admin")) {
     req.url = req.url.replace(/^\/api\/admin/, "");
   }
   return adminApi(req, res);
 });
 const pub = functions.https.onRequest((req, res) => {
-  // Remove /api/public from the request path so Express router sees correct routes
+  functions.logger.debug(`incoming path: ${req.path}`);
   if (req.path.startsWith("/api/public")) {
     req.url = req.url.replace(/^\/api\/public/, "");
   }
@@ -39,7 +39,7 @@ const pub = functions.https.onRequest((req, res) => {
 });
 
 const agnt = functions.https.onRequest((req, res) => {
-  // Remove /api/agent from the request path so Express router sees correct routes
+  functions.logger.debug(`incoming path: ${req.path}`);
   if (req.path.startsWith("/api/agent")) {
     req.url = req.url.replace(/^\/api\/agent/, "");
   }
