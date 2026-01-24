@@ -170,6 +170,34 @@ describe("Cart Order Endpoint Integration Test", () => {
     expect(response1.body.orders[0].id).toBe(response2.body.orders[0].id);
 
   });
+  it("should run normally when customer has free orders", async () => {
+
+    const initialBalance: CustomerBalance = {
+      id: testCustomer.id,
+      owner: { id: testCustomer.id },
+      value: 0,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    await customerBalanceService.set(initialBalance);
+
+    const idempotencyKey = 'test-idempotency-key-2';
+
+    // First call
+    await request(URL)
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', idempotencyKey)
+      .expect(200);
+
+    // Should return same result (same orders array)
+
+
+    const orders = await orderService.fetchForOwner(testCustomer);
+
+    expect(orders.length).toBe(1);
+
+  });
 
   it("should require subscription when customer has no free orders", async () => {
     const initialBalance: CustomerBalance = {
@@ -180,7 +208,7 @@ describe("Cart Order Endpoint Integration Test", () => {
       updated_at: new Date(),
     };
     await customerBalanceService.set(initialBalance);
-    await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: -100 });
+    await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: -1 });
 
     let response = await request(URL)
       .post(`/customers/${testCustomer.id}/cart/order`)

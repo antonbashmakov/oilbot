@@ -401,12 +401,12 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
         const balance = await customerBalanceService.obtainForCustomer(customerId);
         let subscriptionToCreate;
 
-        if ((stats.number_of_free_orders || 0 <= 0) && !hasActiveSubscription && balance.value < 300) {
+        if (((stats.number_of_free_orders || 0) <= 0) && !hasActiveSubscription && balance.value < 300) {
           logger.error(`Customer ${customerId} cannot place order due to insufficient balance and no active subscription`, {balance: balance, customer});
           throw new Error("Active subscription is missing");
         }
 
-        if ((stats.number_of_free_orders || 0 <= 0) && !hasActiveSubscription && balance.value >= 300) {
+        if (((stats.number_of_free_orders || 0) <= 0) && !hasActiveSubscription && balance.value >= 300) {
           subscriptionToCreate = subscriptionService.buildSubscription(customerId, 300, new Date());
           subscriptionToCreate.status = "ACTIVE";
         }
@@ -522,6 +522,8 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
     if (err.message === "Active subscription is missing") {
       return api.paymentRequired(res, "Customer needs an active subscription to place orders");
     }
+
+    logger.error("Unhandled error during cart order creation", {error: err});
 
     return api.error(res, err.message || "Internal server error");
   }
