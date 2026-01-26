@@ -162,7 +162,7 @@ export type DeliveryRef = Omit<BaseDeliveryRef, "created_at" | "order_deadline"|
   delivery_start: Date;
   delivery_end: Date;
 };
-export type ItemOverview = BaseItemOverview & {
+export type ItemOverview = Omit<BaseItemOverview, "deliveries"> & {
   deliveries: DeliveryRef[];
 };
 export type CartItem = Omit<BaseCartItem, "created_at"> & {

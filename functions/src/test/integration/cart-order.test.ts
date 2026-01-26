@@ -68,9 +68,9 @@ describe("Cart Order Endpoint Integration Test", () => {
       price_in: 80,
       price_out: 100,
       fraction: 1,
-      non_member_fraction_price_out: 111, 
+      non_member_fraction_price_out: 111,
       non_member_unit_price_out: 120,
-      is_weighted: false,           
+      is_weighted: false,
       category: "TEST",
       group: "TEST_GROUP",
       description: "Test item description",
@@ -97,7 +97,7 @@ describe("Cart Order Endpoint Integration Test", () => {
       group: testItem.group,
       owner: { id: testCustomer.id },
       created_at: new Date(),
-    } ;
+    };
 
     // Create test data in Firestore
     await customerService.set(testCustomer);
@@ -260,14 +260,14 @@ describe("Cart Order Endpoint Integration Test", () => {
     expect(finalStats.number_of_orders).toBe(1);
     expect(finalStats.number_of_active_orders).toBe(1);
 
-    const order = await orderService.fetchForOwner({id: testCustomer.id});
+    const order = await orderService.fetchForOwner({ id: testCustomer.id });
 
     expect(order.length).toBe(1);
     expect(order[0].total).toBe(testCartItem.quantity * (testItem.non_member_fraction_price_out));
 
   });
 
-  it("should use use  member prices if  active subscription", async () => {
+  it("should use use  member prices if active subscription", async () => {
     const s: Subscription = {
       id: testCustomer.id,
       created_at: new Date(),
@@ -284,8 +284,8 @@ describe("Cart Order Endpoint Integration Test", () => {
       .expect(200);
 
     // Verify payment URL is returned (order created successfully)
-    expect(response.body).toHaveProperty('paymentUrl');
-    expect(response.body.paymentUrl).toBe("https://securepay.tinkoff.ru/p/MOCK_PAYMENT");
+    expect(response.body).toHaveProperty('payments');
+    expect(response.body.payments.length).toBe(1);
 
     const cartItems = await cartItemService.fetchForOwner({ id: testCustomer.id });
     expect(cartItems.length).toBe(0);
@@ -296,7 +296,7 @@ describe("Cart Order Endpoint Integration Test", () => {
     expect(finalStats.number_of_orders).toBe(1);
     expect(finalStats.number_of_active_orders).toBe(1);
 
-    const order = await orderService.fetchForOwner({id: testCustomer.id});
+    const order = await orderService.fetchForOwner({ id: testCustomer.id });
 
     expect(order.length).toBe(1);
     expect(order[0].total).toBe(testCartItem.quantity * (testItem.fraction_price_out));
@@ -399,6 +399,8 @@ describe("Cart Order Endpoint Integration Test", () => {
       row_number: 1,
       status: "ACTIVE",
       unit: "кг",
+      non_member_fraction_price_out: 400,
+      non_member_unit_price_out: 1100,
       unit_description: "килограмм",
       is_weighted: true,
     };
@@ -412,6 +414,8 @@ describe("Cart Order Endpoint Integration Test", () => {
       group: "GROUP_B",
       description: "Test item 2 description",
       fraction_price_out: 200,
+      non_member_fraction_price_out: 400,
+      non_member_unit_price_out: 1100,
       link: "https://test.com/item2",
       price_in: 160,
       row_number: 2,
@@ -434,6 +438,8 @@ describe("Cart Order Endpoint Integration Test", () => {
       fraction: item1.fraction,
       price_for_unit: item1.price_out,
       category: item1.category,
+      non_member_price: 200,
+      non_member_price_for_unit: 400,
       group: item1.group,
       owner: { id: testCustomer.id },
       created_at: new Date(),
@@ -449,6 +455,8 @@ describe("Cart Order Endpoint Integration Test", () => {
       price_for_unit: item2.price_out,
       category: item2.category,
       group: item2.group,
+      non_member_price: 200,
+      non_member_price_for_unit: 400,
       owner: { id: testCustomer.id },
       created_at: new Date(),
     };
