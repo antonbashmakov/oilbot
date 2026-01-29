@@ -1,5 +1,6 @@
 import axios from "axios";
 import {ConversationMessage} from "../models";
+import { logger } from "firebase-functions/v1";
 
 class TelegramService {
   private botToken: string;
@@ -12,7 +13,7 @@ class TelegramService {
 
   async sendMessage(chatId: string, text: string, thread_id: string): Promise<ConversationMessage | undefined> {
     if (!this.botToken) {
-      console.warn("TELEGRAM_BOT_TOKEN not configured, skipping Telegram message");
+      logger.warn("TELEGRAM_BOT_TOKEN not configured, skipping Telegram message");
       return;
     }
 
@@ -33,7 +34,7 @@ class TelegramService {
         thread_id,
       };
     } catch (error) {
-      console.error("Failed to send Telegram message:", error);
+      logger.error("Failed to send Telegram message:", {error, chatId, text});
       throw new Error(`Failed to send Telegram message: ${error}`);
     }
   }
