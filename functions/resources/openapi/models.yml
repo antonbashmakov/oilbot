@@ -300,3 +300,34 @@ components:
         - Details
         - ExternalRequestId
 
+    BroadcastTask:
+      type: object
+      description: A task for broadcasting messages
+      properties:
+        id:
+          type: string
+          description: Unique task identifier
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the task was created
+        finished:
+          type: boolean
+          description: Whether the task has finished
+        last_id:
+          type: string
+          description: Last processed identifier
+        message:
+          type: string
+          description: Message to broadcast
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when the task was last updated
+      required:
+        - id
+        - created_at
+        - finished
+        - updated_at
+        - message
+

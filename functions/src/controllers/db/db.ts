@@ -5,14 +5,18 @@ import * as moment from "moment-timezone";
 import {
   functions,
   admin,
+  toProcessor,
+  ChargeSubscriptionEvent,
+  OutboxEvent,
+  Subscription,
+  logger,
+  SubscriptionService,
+  EventPublisher,
+  CONSTANTS,
+  TelegramService,
+  toMessage,
+  error,
 } from "./imports";
-import {toProcessor} from "../../services/events/factory";
-import {ChargeSubscriptionEvent, OutboxEvent, Subscription} from "../../models";
-import {logger} from "../../services/logger";
-import SubscriptionService from "../../services/SubscriptionService";
-import EventPublisher, {CONSTANTS} from "../webhook/imports";
-import {TelegramService, toMessage} from "../admin/imports";
-import {error} from "firebase-functions/logger";
 
 admin.initializeApp({}, "db");
 
@@ -54,12 +58,6 @@ const processOutboxEvent = functions.firestore
       });
     }
   });
-
-/*
-const retryOutbox = functions.pubsub
-  .schedule("0 *x * * *") // each hour
-  .onRun( processOutboxEvent);
-*/
 
 const dailySubscriptionCheck = async (_context: any) => {
   // Initialize services

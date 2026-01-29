@@ -1702,6 +1702,27 @@ components:
           type: string
           description: Unique identifier for the order picking
           example: "ef4d5632-ba34-4488-97a5-b9b7af299535"      
+    CustomerRef:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Customer ID
+          example: "1019705782"
+        username:
+          type: string
+          description: Customer's username
+          example: "getting_drunk"
+        first_name:
+          type: string
+          description: Customer's first name
+          example: "Антон"
+        last_name:
+          type: string
+          description: Customer's last name
+          example: "Антон"
     Item:
       type: object
       required:
@@ -2409,6 +2430,42 @@ components:
           description: List of delivery orders
           items:
             $ref: '#/components/schemas/Order'
+
+    BroadcastResult:
+      type: object
+      description: Result of a broadcast operation
+      properties:
+        id:
+          type: string
+          description: ID of the broadcast task
+        broadcast_task_id:
+          type: string
+          description: ID of the broadcast task
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the object was created
+          example: "2025-01-10T14:30:00Z"          
+        customer:
+          $ref: '#/components/schemas/CustomerRef'
+          description: Customer reference
+        success:
+          type: boolean
+          description: Whether the broadcast was successful
+        message:
+          type: string
+          description: Result message
+        error:
+          type: object
+          nullable: true
+          description: Error details if any
+      required:
+        - id
+        - broadcast_task_id
+        - customer
+        - success
+        - message
+        - created_at
 tags:
   - name: Deliveries
     description: Operations related to deliveries

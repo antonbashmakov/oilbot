@@ -13,11 +13,14 @@ import IdempotencyGuardService from "../../services/IdempotencyGuardService";
 import TBankService from "../../services/payments/TBankService";
 import SubscriptionService from "../../services/SubscriptionService";
 import CustomerBalanceService from "../../services/CustomerBalanceService";
+import * as CONSTANTS from "../../constants";
 
 import {api} from "../../services/utils";
 import MockTBankService from "../../services/payments/MockTBankService";
-import EventPublisher, {CONSTANTS} from "../webhook/imports";
+
 import MockEventPublisher from "../../services/MockEventPublisher";
+import EventPublisher from "../../services/EventPublisher";
+
 
 
 export {

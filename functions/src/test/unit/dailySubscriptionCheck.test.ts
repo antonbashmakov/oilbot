@@ -12,23 +12,38 @@ jest.mock('../../services/SubscriptionService');
 jest.mock('../../services/EventPublisher');
 jest.mock('../../services/logger');
 
-
-
 jest.mock("../../controllers/db/imports", () => {
   const firestore = {
     database: () => firestore,
     document: () => firestore,
     onCreate: () => firestore,
-  };  
+  };
   const pubsub = {
     schedule: () => pubsub,
     timeZone: () => pubsub,
     onRun: () => pubsub,
-  }
+  };
   const functions = {
     pubsub,
     firestore,
-  };  
+  };
+  // Use the mocked modules from separate mocks
+  const SubscriptionService = require('../../services/SubscriptionService').default;
+  const EventPublisher = require('../../services/EventPublisher').default;
+  const TelegramService = require('../../services/MockTelegramService').default;
+  const logger = require('../../services/logger').logger;
+  const error = jest.fn();
+  const toMessage = jest.fn((key, params) => `Mock message for ${key}`);
+  const toProcessor = jest.fn();
+  const CONSTANTS = {
+    EVENTS: {
+      CHARGE_SUBSCRIPTION: 'CHARGE_SUBSCRIPTION',
+    },
+  };
+  const ChargeSubscriptionEvent = {};
+  const OutboxEvent = {};
+  const Subscription = {};
+
   return {
     functions,
     admin: {
@@ -39,7 +54,18 @@ jest.mock("../../controllers/db/imports", () => {
       auth: jest.fn(),
       initializeApp: jest.fn(),
     },
-  }
+    toProcessor,
+    ChargeSubscriptionEvent,
+    OutboxEvent,
+    Subscription,
+    logger,
+    SubscriptionService,
+    EventPublisher,
+    CONSTANTS,
+    TelegramService,
+    toMessage,
+    error,
+  };
 });
 // Mock moment
 jest.mock('moment-timezone', () => {
@@ -218,8 +244,6 @@ describe('dailySubscriptionCheck', () => {
     const mockContext = {};
     const result = await dailySubscriptionCheck(mockContext);
 
-
-    console.log('>>>>>><<<<<<<<<<<', result)
     // Verify subscription service was called with correct date
     expect(mockSubscriptionService.findActiveSubscriptionsNotOlderThen).toHaveBeenCalledWith(mockFourDaysAgo.toDate());
 
