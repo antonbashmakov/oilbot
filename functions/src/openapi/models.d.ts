@@ -172,6 +172,27 @@ export interface components {
             /** @example https://pay.tbank.ru/new/fU1ppgqa */
             PaymentURL?: string;
         };
+        /** @description A task for broadcasting messages */
+        BroadcastTask: {
+            /** @description Unique task identifier */
+            id: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the task was created
+             */
+            created_at: string;
+            /** @description Whether the task has finished */
+            finished: boolean;
+            /** @description Last processed identifier */
+            last_id?: string;
+            /** @description Message to broadcast */
+            message: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the task was last updated
+             */
+            updated_at: string;
+        };
     };
     responses: never;
     parameters: never;

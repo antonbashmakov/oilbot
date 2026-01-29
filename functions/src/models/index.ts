@@ -37,11 +37,22 @@ export type TinkoffResult = models["schemas"]["TinkoffResult"];
 
 
 type BaseBalanceChangeEvent = models["schemas"]["BalanceChangeEvent"];
+type BaseBroadcastTask = models["schemas"]["BroadcastTask"];
+type BaseBroadcastResult = components["schemas"]["BroadcastResult"];
+
+export type BroadcastResult = Omit<BaseBroadcastResult, "created_at" > & {
+  created_at: Date;
+}
+
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 export type BaseConversationMessage = components["schemas"]["ConversationMessage"];
 
 export type BalanceChangeEvent = Omit<BaseBalanceChangeEvent, "created_at" > & {
   created_at: Date;
+}
+export type BroadcastTask = Omit<BaseBroadcastTask, "created_at" | "updated_at"> & {
+  created_at: Date;
+  updated_at: Date;
 }
 
 export type Payment = Omit<BasePayment, "created_at" | "updated_at"> & {

@@ -805,6 +805,28 @@ export interface components {
              */
             id: string;
         };
+        CustomerRef: {
+            /**
+             * @description Customer ID
+             * @example 1019705782
+             */
+            id: string;
+            /**
+             * @description Customer's username
+             * @example getting_drunk
+             */
+            username?: string;
+            /**
+             * @description Customer's first name
+             * @example Антон
+             */
+            first_name?: string;
+            /**
+             * @description Customer's last name
+             * @example Антон
+             */
+            last_name?: string;
+        };
         Item: {
             /**
              * @description Item category
@@ -1378,6 +1400,27 @@ export interface components {
             pickups: components["schemas"]["Order"][];
             /** @description List of delivery orders */
             deliveries: components["schemas"]["Order"][];
+        };
+        /** @description Result of a broadcast operation */
+        BroadcastResult: {
+            /** @description ID of the broadcast task */
+            id: string;
+            /** @description ID of the broadcast task */
+            broadcast_task_id: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the object was created
+             * @example 2025-01-10T14:30:00Z
+             */
+            created_at: string;
+            /** @description Customer reference */
+            customer: components["schemas"]["CustomerRef"];
+            /** @description Whether the broadcast was successful */
+            success: boolean;
+            /** @description Result message */
+            message: string;
+            /** @description Error details if any */
+            error?: Record<string, never> | null;
         };
     };
     responses: never;
