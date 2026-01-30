@@ -10,6 +10,8 @@ import OrderService from "../../services/OrderService";
 import PaymentService from "../../services/PaymentService";
 import CustomerService from "../../services/CustomerService";
 import TelegramService from "../../services/TelegramService";
+import BroadcastTaskService from "../../services/BroadcastTaskService";
+import BroadcastService from "../../services/BroadcastService";
 
 import {api} from "../../services/utils";
 import * as CONSTANTS from "../../constants";
@@ -28,6 +30,8 @@ export {
   PaymentService,
   CustomerService,
   TelegramService,
+  BroadcastTaskService,
+  BroadcastService,
   api,
   toMessage,
   formatDate,

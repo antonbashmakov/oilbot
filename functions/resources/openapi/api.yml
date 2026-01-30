@@ -738,6 +738,48 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /admin/broadcast/{taskId}:
+    post:
+      operationId: runBroadcastTask
+      summary: Run a broadcast task once
+      description: Pick BroadcastTask from DB and run the task once using BroadcastService, returning list of BroadcastResult objects.
+      tags:
+        - Broadcast
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Broadcast task ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Broadcast task executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BroadcastResult'
+        '404':
+          description: Broadcast task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /private/items/category/{category}:
     
     get:

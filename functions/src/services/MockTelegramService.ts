@@ -10,7 +10,8 @@ class TelegramService {
 
   async sendMessage(chatId: string, text: string, thread_id: string): Promise<ConversationMessage | undefined> {
 
-    if (chatId === "MOCK_CHAT_ID" || chatId.startsWith("FAIL_CHAT_ID")) {
+    logger.info("MockTelegramService: sendMessage called", {chatId, text, thread_id});
+    if (chatId.startsWith("FAIL_CHAT_ID")) {
       logger.info("MockTelegramService: sendMessage called", {chatId, text, thread_id});
       throw new Error("MockTelegramService: Simulated sendMessage failure");
     }

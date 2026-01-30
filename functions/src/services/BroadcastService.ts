@@ -84,6 +84,7 @@ class BroadcastService {
 
     try {
       // Send message via Telegram
+
       const telegramMessage = await this.telegramService.sendMessage(customer.id, task.message, task.id);
       success = true;
       message = "Message sent successfully";

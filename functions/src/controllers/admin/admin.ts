@@ -10,6 +10,8 @@ import UserService, {
   PaymentService,
   CustomerService,
   TelegramService,
+  BroadcastTaskService,
+  BroadcastService,
   api,
   CONSTANTS,
   toMessage,
@@ -710,6 +712,25 @@ adminApi.post("/comments", async (req: express.Request, res: express.Response) =
 
     const savedComment = await commentService.add(comment);
     return api.send(res, savedComment);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+adminApi.post("/broadcast/:taskId", async (req: express.Request, res: express.Response) => {
+  try {
+    const { taskId } = req.params;
+    const broadcastTaskService = new BroadcastTaskService(db);
+    const broadcastService = new BroadcastService(db);
+
+    const task = await broadcastTaskService.find(taskId);
+    if (!task) {
+      return api.notFound(res, "Broadcast task not found");
+    }
+
+    const results = await broadcastService.process(task);
+    return api.send(res, results);
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");
