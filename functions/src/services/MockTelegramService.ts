@@ -1,15 +1,10 @@
 
 import {ConversationMessage} from "../models";
-import { logger } from "firebase-functions/v1";
+import {logger} from "firebase-functions/v1";
 import {v4 as uuidv4} from "uuid";
 
 class TelegramService {
-
-  constructor() {
-  }
-
   async sendMessage(chatId: string, text: string, thread_id: string): Promise<ConversationMessage | undefined> {
-
     logger.info("MockTelegramService: sendMessage called", {chatId, text, thread_id});
     if (chatId.startsWith("FAIL_CHAT_ID")) {
       logger.info("MockTelegramService: sendMessage called", {chatId, text, thread_id});
@@ -25,7 +20,7 @@ class TelegramService {
       created_at: new Date(),
       thread_id,
     };
-  } 
   }
+}
 
 export default TelegramService;

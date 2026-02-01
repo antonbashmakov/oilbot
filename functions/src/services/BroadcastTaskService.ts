@@ -3,8 +3,6 @@ import {COLLECTIONS} from "../constants";
 import {BroadcastTask} from "../models";
 
 class BroadcastTaskService extends AbstractService<BroadcastTask> {
-
-
   getCollectionName(): string {
     return COLLECTIONS.BROADCAST_TASKS;
   }

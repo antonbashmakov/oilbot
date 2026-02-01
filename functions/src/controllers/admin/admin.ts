@@ -104,7 +104,7 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
 
     const stats = allItems.reduce((s, i) => {
       if (!s[i.item_id]) {
-        s[i.item_id] = {total: 0, quantity: 0, fraction: 0,  name: i.name, group: i.group, category: i.category, orders: [] as Order[]};
+        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name, group: i.group, category: i.category, orders: [] as Order[]};
       }
       s[i.item_id].total += i.price * i.quantity;
       s[i.item_id].fraction += i.fraction;
@@ -721,7 +721,7 @@ adminApi.post("/comments", async (req: express.Request, res: express.Response) =
 
 adminApi.post("/broadcast", async (req: express.Request, res: express.Response) => {
   try {
-    const { message } = req.body;
+    const {message} = req.body;
     if (!message) {
       return api.badRequest(res, "message is required");
     }
@@ -747,7 +747,7 @@ adminApi.post("/broadcast", async (req: express.Request, res: express.Response) 
 
 adminApi.post("/broadcast/:taskId", async (req: express.Request, res: express.Response) => {
   try {
-    const { taskId } = req.params;
+    const {taskId} = req.params;
     const broadcastTaskService = new BroadcastTaskService(db);
     const broadcastService = new BroadcastService(db);
 

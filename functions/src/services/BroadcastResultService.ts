@@ -1,11 +1,11 @@
 import AbstractService from "./AbstractService";
-import { COLLECTIONS } from "../constants";
-import { BroadcastResult } from "../models";
+import {COLLECTIONS} from "../constants";
+import {BroadcastResult} from "../models";
 
 class BroadcastResultService extends AbstractService<BroadcastResult> {
   toPOJO(id: any, o: any): BroadcastResult | undefined {
     if (!o) return undefined;
-    return { ...o, id, created_at: o.created_at.toDate() };
+    return {...o, id, created_at: o.created_at.toDate()};
   }
 
   getCollectionName(): string {

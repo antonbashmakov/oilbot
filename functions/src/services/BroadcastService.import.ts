@@ -1,9 +1,9 @@
-import { BroadcastTask, BroadcastResult, Customer } from "../models";
+import {BroadcastTask, BroadcastResult, Customer} from "../models";
 import CustomerService from "./CustomerService";
 import TelegramService from "./TelegramService";
 import BroadcastResultService from "./BroadcastResultService";
 import BroadcastTaskService from "./BroadcastTaskService";
-import { Firestore } from "firebase-admin/firestore";
+import {Firestore} from "firebase-admin/firestore";
 import MockTelegramService from "./MockTelegramService";
 
 export {

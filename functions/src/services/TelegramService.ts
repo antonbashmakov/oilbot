@@ -1,6 +1,6 @@
 import axios from "axios";
 import {ConversationMessage} from "../models";
-import { logger } from "firebase-functions/v1";
+import {logger} from "firebase-functions/v1";
 
 class TelegramService {
   private botToken: string;
@@ -35,7 +35,7 @@ class TelegramService {
       };
     } catch (error: any) {
       logger.error("Failed to send Telegram message:", {error: error.response.data, chatId});
-      throw  error.response.data;
+      throw error.response.data;
     }
   }
 }

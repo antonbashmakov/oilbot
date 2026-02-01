@@ -33,7 +33,7 @@ class BroadcastService {
     const customers = await this.fetchCustomers(task.last_id, task.batch_size);
 
     if (customers.length === 0) {
-      await this.broadcastTaskService.update(task, { finished: true, updated_at: new Date() });
+      await this.broadcastTaskService.update(task, {finished: true, updated_at: new Date()});
       return [];
     }
 
@@ -46,8 +46,8 @@ class BroadcastService {
 
     // Update task last_id to the last customer id
     const lastCustomer = customers[customers.length - 1];
-    await this.broadcastTaskService.update(task, { 
-      last_id: `${lastCustomer.id}`, 
+    await this.broadcastTaskService.update(task, {
+      last_id: `${lastCustomer.id}`,
       updated_at: new Date(),
       number_of_runs: (task.number_of_runs || 0) + 1,
     });
@@ -57,7 +57,7 @@ class BroadcastService {
 
   private async fetchCustomers(startAfterId: string | undefined, limit: number): Promise<Customer[]> {
     let query = this.customerService.getCollection().orderBy("id").limit(limit);
-    
+
     if (startAfterId) {
       // Fetch the document to use as startAfter
       const startAfterDoc = await this.customerService.getCollection().doc(startAfterId).get();
@@ -67,7 +67,7 @@ class BroadcastService {
     }
 
     const snapshot = await query.get();
-    return snapshot.docs.map(doc => {
+    return snapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         ...data,
@@ -84,8 +84,8 @@ class BroadcastService {
     try {
       // Send message via Telegram
 
-      const telegramMessage = await this.telegramService.sendMessage(customer.id, task.message.replace(/\\n/g, '\n'), task.id, task.format );
-      //const telegramMessage = await this.telegramService.sendMessage('270053857', task.message.replace(/\\n/g, '\n'), task.id, task.format );
+      const telegramMessage = await this.telegramService.sendMessage(customer.id, task.message.replace(/\\n/g, "\n"), task.id, task.format );
+      // const telegramMessage = await this.telegramService.sendMessage('270053857', task.message.replace(/\\n/g, '\n'), task.id, task.format );
       success = true;
       message = "Message sent successfully";
       if (telegramMessage) {
@@ -108,7 +108,7 @@ class BroadcastService {
         first_name: customer.first_name,
         last_name: customer.last_name,
       },
-    
+
       success,
       message,
       error,
