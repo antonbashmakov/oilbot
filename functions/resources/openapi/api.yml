@@ -738,6 +738,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /admin/broadcast:
+    post:
+      operationId: createBroadcastTask
+      summary: Create a new broadcast task
+      description: Create a new broadcast task with the given message.
+      tags:
+        - Broadcast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: The message to broadcast to customers
+                  example: "Hello, this is a broadcast message"
+      responses:
+        '204':
+          description: Broadcast task created successfully
+        '400':
+          description: Bad request (e.g., missing message)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /admin/broadcast/{taskId}:
     post:
       operationId: runBroadcastTask

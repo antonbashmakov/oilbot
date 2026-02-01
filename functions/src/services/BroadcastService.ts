@@ -30,10 +30,8 @@ class BroadcastService {
       return [];
     }
 
-    // Fetch 20 customers starting from task.last_id
-    const customers = await this.fetchCustomers(task.last_id, 3);
+    const customers = await this.fetchCustomers(task.last_id, task.batch_size);
 
-    // If no customers, mark task as finished and return empty results
     if (customers.length === 0) {
       await this.broadcastTaskService.update(task, { finished: true, updated_at: new Date() });
       return [];
@@ -50,7 +48,8 @@ class BroadcastService {
     const lastCustomer = customers[customers.length - 1];
     await this.broadcastTaskService.update(task, { 
       last_id: `${lastCustomer.id}`, 
-      updated_at: new Date() 
+      updated_at: new Date(),
+      number_of_runs: (task.number_of_runs || 0) + 1,
     });
 
     return results;
@@ -85,7 +84,8 @@ class BroadcastService {
     try {
       // Send message via Telegram
 
-      const telegramMessage = await this.telegramService.sendMessage(customer.id, task.message, task.id);
+      const telegramMessage = await this.telegramService.sendMessage(customer.id, task.message.replace(/\\n/g, '\n'), task.id, task.format );
+      //const telegramMessage = await this.telegramService.sendMessage('270053857', task.message.replace(/\\n/g, '\n'), task.id, task.format );
       success = true;
       message = "Message sent successfully";
       if (telegramMessage) {

@@ -188,6 +188,15 @@ export interface components {
             /** @description Message to broadcast */
             message: string;
             /**
+             * @description Message format (e.g., HTML, plain text)
+             * @enum {enum}
+             */
+            format: "HTML" | "Markdown" | "Plaintext";
+            /** @description Number of tries for the broadcast task */
+            number_of_runs: number;
+            /** @description Number of customers to process in each batch */
+            batch_size: number;
+            /**
              * Format: date-time
              * @description Timestamp when the task was last updated
              */

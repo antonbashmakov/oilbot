@@ -37,4 +37,3 @@ export {
   formatDate,
 };
 
-export default UserService;

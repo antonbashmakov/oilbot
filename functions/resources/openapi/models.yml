@@ -320,6 +320,16 @@ components:
         message:
           type: string
           description: Message to broadcast
+        format:
+          type: enum
+          enum: ["HTML", "Markdown", "Plaintext"]
+          description: Message format (e.g., HTML, plain text)
+        number_of_runs:
+          type: number
+          description: Number of tries for the broadcast task
+        batch_size:
+          type: number
+          description: Number of customers to process in each batch
         updated_at:
           type: string
           format: date-time
@@ -330,4 +340,7 @@ components:
         - finished
         - updated_at
         - message
+        - batch_size
+        - number_of_runs
+        - format
 

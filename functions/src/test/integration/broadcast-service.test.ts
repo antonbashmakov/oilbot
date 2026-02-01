@@ -35,8 +35,11 @@ describe("BroadcastService Integration Test", () => {
       id: `task-${Date.now()}`,
       created_at: new Date(),
       updated_at: new Date(),
+      number_of_runs: 0,
       finished: false,
       last_id: "",
+      batch_size: 3,
+      format: "HTML",
       message: "Test broadcast message",
       ...task,
     };

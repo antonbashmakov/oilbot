@@ -75,6 +75,9 @@ describe("Admin Broadcast Endpoint Integration Test", () => {
       updated_at: new Date(),
       finished: false,
       last_id: "",
+      batch_size: 3,
+      format: "HTML",
+      number_of_runs: 0,
       message: "Test broadcast message",
       ...task,
     };

@@ -11,7 +11,7 @@ class TelegramService {
     this.baseUrl = `https://api.telegram.org/bot${this.botToken}`;
   }
 
-  async sendMessage(chatId: string, text: string, thread_id: string): Promise<ConversationMessage | undefined> {
+  async sendMessage(chatId: string, text: string, thread_id: string, mode = "Markdown"): Promise<ConversationMessage | undefined> {
     if (!this.botToken) {
       logger.warn("TELEGRAM_BOT_TOKEN not configured, skipping Telegram message");
       return;
@@ -21,7 +21,7 @@ class TelegramService {
       const ret = await axios.post(`${this.baseUrl}/sendMessage`, {
         chat_id: chatId,
         text: text,
-        parse_mode: "Markdown",
+        parse_mode: mode,
       });
 
       return {
@@ -33,9 +33,9 @@ class TelegramService {
         created_at: new Date(),
         thread_id,
       };
-    } catch (error) {
-      logger.error("Failed to send Telegram message:", {error, chatId, text});
-      throw new Error(`Failed to send Telegram message: ${error}`);
+    } catch (error: any) {
+      logger.error("Failed to send Telegram message:", {error: error.response.data, chatId});
+      throw  error.response.data;
     }
   }
 }
