@@ -104,7 +104,7 @@ adminApi.get("/deliveries/:id", async (req: express.Request, res: express.Respon
 
     const stats = allItems.reduce((s, i) => {
       if (!s[i.item_id]) {
-        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name, group: i.group, orders: [] as Order[]};
+        s[i.item_id] = {total: 0, quantity: 0, fraction: 0,  name: i.name, group: i.group, category: i.category, orders: [] as Order[]};
       }
       s[i.item_id].total += i.price * i.quantity;
       s[i.item_id].fraction += i.fraction;
@@ -155,7 +155,7 @@ adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: 
 
     const stats = allItems.reduce((s, i) => {
       if (!s[i.item_id]) {
-        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name};
+        s[i.item_id] = {total: 0, quantity: 0, fraction: 0, name: i.name, category: i.category};
       }
       s[i.item_id].total += i.price * i.quantity;
       s[i.item_id].fraction += i.fraction;
@@ -166,7 +166,7 @@ adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: 
     // Convert stats to CSV
     const csvRows = [];
     // Header row
-    csvRows.push(["item_id", "name", "total", "fraction", "quantity"].join(","));
+    csvRows.push(["item_id", "name", "category", "total", "fraction", "quantity"].join(","));
 
     // Data rows
 
@@ -181,7 +181,7 @@ adminApi.get("/deliveries/:id/stats/:format", async (req: express.Request, res: 
       const escapedName = stat.name.includes(",") || stat.name.includes("\"") ?
         `"${stat.name.replace(/"/g, "\"\"")}"` :
         stat.name;
-      csvRows.push([itemId, escapedName, stat.total, stat.fraction, stat.quantity].join(","));
+      csvRows.push([itemId, escapedName, stat.category, stat.total, stat.fraction, stat.quantity].join(","));
     });
 
     const csvContent = csvRows.join("\n");

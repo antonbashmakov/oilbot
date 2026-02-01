@@ -1896,6 +1896,7 @@ components:
         - fraction
         - quantity
         - name
+        - category
       properties:
         total:
           type: number
@@ -1915,6 +1916,10 @@ components:
         name:
           type: string
           description: Name of the stats item
+          example: "Сёмга филе Филе на коже 1.8 Кг"
+        category:
+          type: string
+          description: Category of the stats item
           example: "Сёмга филе Филе на коже 1.8 Кг"
           
     ItemStats:

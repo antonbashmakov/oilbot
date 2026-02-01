@@ -978,6 +978,11 @@ export interface components {
              * @example Сёмга филе Филе на коже 1.8 Кг
              */
             name: string;
+            /**
+             * @description Category of the stats item
+             * @example Сёмга филе Филе на коже 1.8 Кг
+             */
+            category: string;
         };
         ItemStats: {
             /**
