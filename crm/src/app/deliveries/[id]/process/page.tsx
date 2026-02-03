@@ -24,6 +24,7 @@ import { Order } from "@/api/models";
 import { useTranslations } from 'next-intl';
 import _ from "lodash";
 import { Category, getCategoryById, getChakraIconByCategory, getIconByCategory } from "@/utils/categoryMap";
+import CategoryTags from "./CategoryTags";
 
 export default function DeliveryProcessPage() {
   const params = useParams();
@@ -203,6 +204,10 @@ export default function DeliveryProcessPage() {
                         {t('orderBadge', { id: order.id.slice(-4) })}
                       </Badge>
                     </Flex>
+
+                    {/* Category Tags */}
+                    <CategoryTags categories={categories[order.id] || []} />
+
                     <Flex wrap="wrap" gap={2} mb={4}>
                       {(expandedOrders.includes(order.id) ? order.items : order.items.slice(0, 2)).map((item) => (
                         <Badge key={item.id} bg="surface.elevated" color="text.primary" fontSize="base" fontWeight="bold" px={4} py={2} borderRadius="lg" borderWidth="1px" borderColor="border.subtle">
@@ -280,125 +285,7 @@ export default function DeliveryProcessPage() {
                     </Flex>
 
                     {/* Category Tags */}
-                    <Flex wrap="wrap" gap={2} mb={4}>
-                      {categories[order.id]?.map(category => {
-                        // Determine colors based on category
-                        let bgColor, textColor, borderColor;
-                        switch (category) {
-                          case 'STEAKS':
-                            bgColor = "primary.blue/20";
-                            textColor = "primary.blueDark";
-                            borderColor = "primary.blue/40";
-                            break;
-                          case 'FISH':
-                            bgColor = "rgba(239, 68, 68, 0.2)";
-                            textColor = "#EF4444";
-                            borderColor = "rgba(239, 68, 68, 0.4)";
-                            break;
-                          case 'OTHER':
-                          default:
-                            bgColor = "status.warning/20";
-                            textColor = "status.warningDark";
-                            borderColor = "status.warning/40";
-                            break;
-                        }
-                        
-                        return (
-                          <Box
-                            key={category}
-                            px={4}
-                            py={2}
-                            borderRadius="lg"
-                            bg={bgColor}
-                            color={textColor}
-                            fontWeight="black"
-                            fontSize="lg"
-                            borderWidth="2px"
-                            borderColor={borderColor}
-                            display="flex"
-                            alignItems="center"
-                            gap={2}
-                          >
-                            <Icon as={getChakraIconByCategory(category as Category)} boxSize={6} />
-                            {t(`categories.${category}`)}
-                          </Box>
-                        );
-                      })}
-                      {/* STEAKS - Bluish 
-                      <Box
-                        px={4}
-                        py={2}
-                        borderRadius="lg"
-                        bg="primary.blue/20"
-                        color="primary.blueDark"
-                        fontWeight="black"
-                        fontSize="lg"
-                        borderWidth="2px"
-                        borderColor="primary.blue/40"
-                        display="flex"
-                        alignItems="center"
-                        gap={2}
-                        boxShadow="lg"
-                      >
-                        <Box
-                          as="span"
-                          className="material-symbols-outlined"
-                          style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24", transform: "scale(1.1)" }}
-                        >
-                          <Icon as={getChakraIconByCategory("STEAKS")} />
-                        </Box>
-                        STEAKS
-                      </Box>
-                      <Box
-                        px={4}
-                        py={2}
-                        borderRadius="lg"
-                        bg="status.warning/20"
-                        color="status.warningDark"
-                        fontWeight="black"
-                        fontSize="lg"
-                        borderWidth="2px"
-                        borderColor="status.warning/40"
-                        display="flex"
-                        alignItems="center"
-                        gap={2}
-                        boxShadow="lg"
-                      >
-                        <Box
-                          as="span"
-                          className="material-symbols-outlined"
-                          style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24", transform: "scale(1.1)" }}
-                        >
-                          <Icon as={getChakraIconByCategory("OTHER")} />
-                        </Box>
-                        OTHER
-                      </Box>
-                      <Box
-                        px={4}
-                        py={2}
-                        borderRadius="lg"
-                        bg="rgba(239, 68, 68, 0.2)"
-                        color="#EF4444"
-                        fontWeight="black"
-                        fontSize="lg"
-                        borderWidth="2px"
-                        borderColor="rgba(239, 68, 68, 0.4)"
-                        display="flex"
-                        alignItems="center"
-                        gap={2}
-                        boxShadow="lg"
-                      >
-                        <Box
-                          as="span"
-                          className="material-symbols-outlined"
-                          style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24", transform: "scale(1.1)" }}
-                        >
-                          <Icon as={getChakraIconByCategory("FISH")} />
-                        </Box>
-                        FISH
-                      </Box>
-                      */}
-                    </Flex>
+                    <CategoryTags categories={categories[order.id] || []} />
 
                     <Flex wrap="wrap" gap={2} mb={4}>
                       {(expandedOrders.includes(order.id) ? order.items : order.items.slice(0, 2)).map((item) => (
