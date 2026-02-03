@@ -196,7 +196,12 @@
     "itemsTotal": "{items} artiklar • ${total}",
     "orderBadge": "#{id}",
     "pickupBadge": "#PU-{id}",
-    "moreItems": "+{count} till"
+    "moreItems": "+{count} till",
+    "categories": {
+      "STEAKS": "STEAKS",
+      "OTHER": "ANNAT",
+      "FISH": "FISK"
+    }
   },
   "orderDeliveryCard": {
     "addDeliveryAddress": "Lägg till leveransadress",

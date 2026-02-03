@@ -197,7 +197,12 @@
     "itemsTotal": "{items} items • ${total}",
     "orderBadge": "#{id}",
     "pickupBadge": "#PU-{id}",
-    "moreItems": "+{count} more"
+    "moreItems": "+{count} more",
+    "categories": {
+      "STEAKS": "STEAKS",
+      "OTHER": "OTHER",
+      "FISH": "FISH"
+    }
   },
   "orderDeliveryCard": {
     "addDeliveryAddress": "Add Delivery Address",

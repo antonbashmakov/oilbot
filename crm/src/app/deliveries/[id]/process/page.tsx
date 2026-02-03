@@ -18,11 +18,12 @@ import {
   Dialog,
 } from "@chakra-ui/react";
 import { useAgentDeliveryQuery, useDeliverOrder } from "@/api";
-import { LuTruck, LuPackage, LuCheck, LuMapPin, LuStore } from "react-icons/lu";
-import { useEffect, useState } from "react";
+import { LuTruck, LuPackage, LuCheck, LuMapPin, LuStore, LuStar, LuSnowflake, LuFish } from "react-icons/lu";
+import { useEffect, useMemo, useState } from "react";
 import { Order } from "@/api/models";
 import { useTranslations } from 'next-intl';
 import _ from "lodash";
+import { Category, getCategoryById, getChakraIconByCategory, getIconByCategory } from "@/utils/categoryMap";
 
 export default function DeliveryProcessPage() {
   const params = useParams();
@@ -32,10 +33,10 @@ export default function DeliveryProcessPage() {
   const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
   const [confirmOrderId, setConfirmOrderId] = useState<string | null>(null);
   const [deliveries, setDeliveries] = useState<Order[]>([]);
+  const [categories, setCategories] = useState<Record<string, Category[]>>({});
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
   const t = useTranslations('deliveryProcess');
 
-  // Compute delivered count based on order status
-  const allOrders = [...(delivery?.deliveries || []), ...(delivery?.pickups || [])];
   const deliveredCount = allOrders.filter(order => order.status === "DELIVERED").length;
   const totalOrders = allOrders.length;
   const remainingCount = totalOrders - deliveredCount;
@@ -54,16 +55,38 @@ export default function DeliveryProcessPage() {
     }
   };
 
+  useMemo(() => {
+    if (!delivery) return;
+    setAllOrders([...delivery.deliveries, ...delivery.pickups]);
+  }, [delivery]);
+
   const handleCancel = () => {
     setConfirmOrderId(null);
   };
 
   useEffect(() => {
 
-    if(!delivery) return;
-    
+    if (!delivery) return;
+
     setDeliveries(_.sortBy(delivery.deliveries, "shipping_address"))
   }, [delivery]);
+
+  useEffect(() => {
+
+    if (!allOrders) return;
+
+    
+
+    allOrders.map(order => {
+      const categoriesSet = new Set<Category>();
+      order.items.forEach(item => {
+        const category = getCategoryById(item.item_id);
+        categoriesSet.add(category);
+      })
+      categories[order.id] = (Array.from(categoriesSet));
+    });
+    setCategories({ ...categories });
+  }, [allOrders]);
 
   const toggleExpand = (orderId: string) => {
     setExpandedOrders(prev =>
@@ -125,7 +148,7 @@ export default function DeliveryProcessPage() {
           >
             <Box textAlign="center">
               <Text fontSize="xs" color="text.secondary" fontWeight="bold" textTransform="uppercase">
-                {t('delivered')} 
+                {t('delivered')}
               </Text>
               <Flex align="baseline" justify="center" gap={1}>
                 <Text fontSize="2xl" fontWeight="black" color="status.successDark">
@@ -165,10 +188,10 @@ export default function DeliveryProcessPage() {
                   <Card.Body p={5}>
                     <Flex justify="space-between" align="start" mb={4}>
                       <Box>
-                        <Heading size="md" color="text.primary"> 
-                          {order.name || order.id.slice(-4)} 
+                        <Heading size="md" color="text.primary">
+                          {order.name || order.id.slice(-4)}
                         </Heading>
-                        <Heading size="md" color="text.primary"> 
+                        <Heading size="md" color="text.primary">
                           {order.shipping_address}
                         </Heading>
                         <Flex align="center" gap={1} mt={1} color="text.secondary" fontSize="sm">
@@ -245,7 +268,7 @@ export default function DeliveryProcessPage() {
                   <Card.Body p={5}>
                     <Flex justify="space-between" align="start" mb={4}>
                       <Box>
-                        <Heading size="md" color="text.primary"> {order.name || order.id.slice(-4)}</Heading>
+                        <Heading size="md" color="text.primary"> {order.name || order.id.slice(-4)} </Heading>
                         <Flex align="center" gap={1} mt={1} color="status.warningDark" fontSize="sm" fontWeight="medium">
                           <Icon as={LuStore} boxSize={4} />
                           <Text>{t('storePickup', { counter: order.id.slice(-1) })}</Text>
@@ -255,6 +278,128 @@ export default function DeliveryProcessPage() {
                         {t('pickupBadge', { id: order.id.slice(-3) })}
                       </Badge>
                     </Flex>
+
+                    {/* Category Tags */}
+                    <Flex wrap="wrap" gap={2} mb={4}>
+                      {categories[order.id]?.map(category => {
+                        // Determine colors based on category
+                        let bgColor, textColor, borderColor;
+                        switch (category) {
+                          case 'STEAKS':
+                            bgColor = "primary.blue/20";
+                            textColor = "primary.blueDark";
+                            borderColor = "primary.blue/40";
+                            break;
+                          case 'FISH':
+                            bgColor = "rgba(239, 68, 68, 0.2)";
+                            textColor = "#EF4444";
+                            borderColor = "rgba(239, 68, 68, 0.4)";
+                            break;
+                          case 'OTHER':
+                          default:
+                            bgColor = "status.warning/20";
+                            textColor = "status.warningDark";
+                            borderColor = "status.warning/40";
+                            break;
+                        }
+                        
+                        return (
+                          <Box
+                            key={category}
+                            px={4}
+                            py={2}
+                            borderRadius="lg"
+                            bg={bgColor}
+                            color={textColor}
+                            fontWeight="black"
+                            fontSize="lg"
+                            borderWidth="2px"
+                            borderColor={borderColor}
+                            display="flex"
+                            alignItems="center"
+                            gap={2}
+                          >
+                            <Icon as={getChakraIconByCategory(category as Category)} boxSize={6} />
+                            {t(`categories.${category}`)}
+                          </Box>
+                        );
+                      })}
+                      {/* STEAKS - Bluish 
+                      <Box
+                        px={4}
+                        py={2}
+                        borderRadius="lg"
+                        bg="primary.blue/20"
+                        color="primary.blueDark"
+                        fontWeight="black"
+                        fontSize="lg"
+                        borderWidth="2px"
+                        borderColor="primary.blue/40"
+                        display="flex"
+                        alignItems="center"
+                        gap={2}
+                        boxShadow="lg"
+                      >
+                        <Box
+                          as="span"
+                          className="material-symbols-outlined"
+                          style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24", transform: "scale(1.1)" }}
+                        >
+                          <Icon as={getChakraIconByCategory("STEAKS")} />
+                        </Box>
+                        STEAKS
+                      </Box>
+                      <Box
+                        px={4}
+                        py={2}
+                        borderRadius="lg"
+                        bg="status.warning/20"
+                        color="status.warningDark"
+                        fontWeight="black"
+                        fontSize="lg"
+                        borderWidth="2px"
+                        borderColor="status.warning/40"
+                        display="flex"
+                        alignItems="center"
+                        gap={2}
+                        boxShadow="lg"
+                      >
+                        <Box
+                          as="span"
+                          className="material-symbols-outlined"
+                          style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24", transform: "scale(1.1)" }}
+                        >
+                          <Icon as={getChakraIconByCategory("OTHER")} />
+                        </Box>
+                        OTHER
+                      </Box>
+                      <Box
+                        px={4}
+                        py={2}
+                        borderRadius="lg"
+                        bg="rgba(239, 68, 68, 0.2)"
+                        color="#EF4444"
+                        fontWeight="black"
+                        fontSize="lg"
+                        borderWidth="2px"
+                        borderColor="rgba(239, 68, 68, 0.4)"
+                        display="flex"
+                        alignItems="center"
+                        gap={2}
+                        boxShadow="lg"
+                      >
+                        <Box
+                          as="span"
+                          className="material-symbols-outlined"
+                          style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24", transform: "scale(1.1)" }}
+                        >
+                          <Icon as={getChakraIconByCategory("FISH")} />
+                        </Box>
+                        FISH
+                      </Box>
+                      */}
+                    </Flex>
+
                     <Flex wrap="wrap" gap={2} mb={4}>
                       {(expandedOrders.includes(order.id) ? order.items : order.items.slice(0, 2)).map((item) => (
                         <Badge key={item.id} bg="surface.elevated" color="text.primary" fontSize="base" fontWeight="bold" px={4} py={2} borderRadius="lg" borderWidth="1px" borderColor="border.subtle">

@@ -197,7 +197,12 @@
     "itemsTotal": "{items} товаров • ${total}",
     "orderBadge": "#{id}",
     "pickupBadge": "#PU-{id}",
-    "moreItems": "+{count} еще"
+    "moreItems": "+{count} еще",
+    "categories": {
+      "STEAKS": "СТЕЙКИ",
+      "OTHER": "ДРУГОЕ",
+      "FISH": "РЫБА"
+    }
   },
   "orderDeliveryCard": {
     "addDeliveryAddress": "Добавить адрес доставки",
