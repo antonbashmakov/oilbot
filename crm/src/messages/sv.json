@@ -124,6 +124,7 @@
     "columns": {
       "orderId": "Beställnings-ID",
       "customerName": "Kundnamn",
+      "shipping_address": "Leveransadress",
       "status": "Status",
       "items": "Artiklar",
       "name": "Namn",

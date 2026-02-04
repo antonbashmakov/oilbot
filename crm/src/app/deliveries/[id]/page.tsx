@@ -140,7 +140,9 @@ export default function DeliveryDetailPage() {
                 {
                   key: "numberOfItems",
                   header: t('columns.items'),
-                  accessor: (order) => order.items.length,
+                  accessor: (order) => {
+                    return order.items.length
+                  },
                 },
                 {
                   key: "totalValue",
