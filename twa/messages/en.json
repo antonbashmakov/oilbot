@@ -114,7 +114,8 @@
     "title": "Subscription Required",
     "description": "You need to buy a subscription to access our finest steaks, wild salmon, and artisan cheese.",
     "processing": "Processing...",
-    "subscribe": "Subscribe",
+    "subscribeCard": "By Card",
+    "subscribeSbp": "By SPB",
     "month": "month",
     "features": {
       "freeDelivery": {

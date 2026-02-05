@@ -60,21 +60,21 @@ export default function SubscriptionPage() {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-8 pt-8 pb-6 text-center">
+      <div className="flex-1 flex flex-col items-center justify-center px-8 pt-2 text-center">
         {/* Premium icon */}
-        <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-8 text-primary shadow-sm">
-          <span className="material-symbols-outlined" style={{ fontSize: "48px" }}>
+        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4 text-primary shadow-sm">
+          <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
             workspace_premium
           </span>
         </div>
 
         {/* Title */}
-        <h2 className="text-gray-900 dark:text-white text-3xl font-extrabold leading-tight tracking-tight mb-4">
+        <h2 className="text-gray-900 dark:text-white text-2xl font-extrabold leading-tight tracking-tight mb-4">
           {t('title')}
         </h2>
 
         {/* Description */}
-        <p className="text-gray-500 dark:text-gray-400 text-base font-medium leading-relaxed mb-10 max-w-xs mx-auto">
+        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-relaxed mb-5 max-w-xs mx-auto">
           {t('description')}
         </p>
 
@@ -145,7 +145,7 @@ export default function SubscriptionPage() {
                 checked={isChecked}
                 onChange={(e) => setIsChecked(e.target.checked)} />
             </div>
-            <span className="text-sm text-gray-600 dark:text-gray-400 leading-snug">
+            <span className="text-xs text-gray-600 dark:text-gray-400 leading-snug">
               {t('termsAgreement.prefix', { price: '300' })}{" "}
               <a
                 className="text-primary font-semibold underline underline-offset-2 hover:text-red-600 transition-colors"
@@ -161,7 +161,7 @@ export default function SubscriptionPage() {
           <button
             onClick={handleSubscribe}
             disabled={isProcessing || createSubscriptionMutation.isPending || !user?.id || !isChecked}
-            className="w-full bg-primary hover:bg-red-600 active:scale-[0.98] transition-all text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary hover:bg-red-600 active:scale-[0.98] transition-all text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isProcessing || createSubscriptionMutation.isPending ? (
               <>
@@ -172,12 +172,29 @@ export default function SubscriptionPage() {
               </>
             ) : (
               <>
-                <span className="text-lg">{t('subscribe')}</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-                <span className="text-lg">300/{t('month')}</span>
-                <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform" style={{ fontSize: "20px" }}>
-                  arrow_forward
+                <div className="w-8 h-8 bg-white rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <img src="/SBP.svg" alt="SBP" className="w-4 h-6" />
+                </div>
+                
+                <span className="text-lg">{t('subscribeSbp')}</span>
+              </>
+            )}
+          </button>
+          <button
+            onClick={handleSubscribe}
+            disabled={isProcessing || createSubscriptionMutation.isPending || !user?.id || !isChecked}
+            className="w-full bg-transparent border-2 border-primary/20 hover:border-primary/40 dark:border-white/10 dark:hover:border-white/20 active:scale-[0.98] transition-all text-gray-900 dark:text-white font-bold h-14 rounded-xl flex items-center justify-center gap-2"
+          >
+            {isProcessing || createSubscriptionMutation.isPending ? (
+              <>
+                <span className="text-lg">{t('processing')}</span>
+                <span className="material-symbols-outlined animate-spin" style={{ fontSize: "20px" }}>
+                  refresh
                 </span>
+              </>
+            ) : (
+              <>
+                <span className="text-lg">{t('subscribeCard')}</span>
               </>
             )}
           </button>

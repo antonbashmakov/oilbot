@@ -62,7 +62,7 @@ export default function RootLayout({
       </head>
       <body className={`${plusJakartaSans.variable} antialiased`}>
         <Providers>
-          <div className="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden pb-24 bg-background-light dark:bg-background-dark font-display text-text-main-light dark:text-text-main-dark selection:bg-primary/20">
+          <div className="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark font-display text-text-main-light dark:text-text-main-dark selection:bg-primary/20">
             <Header />
             {children}
             <Navigation />
