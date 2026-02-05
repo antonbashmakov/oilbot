@@ -109,9 +109,6 @@ export default function CartPage() {
 
   return (
     <>
-      {/* Custom Cart Header - This replaces the default page header */}
-
-
       {/* Main Content Area */}
       <div className="pb-24">
         {/* Cart Items List */}

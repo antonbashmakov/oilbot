@@ -936,7 +936,6 @@ export interface components {
             fraction_price_out: number;
             /**
              * Format: float
-
              * @description Non-member fraction price out
              * @example 1439
              */
