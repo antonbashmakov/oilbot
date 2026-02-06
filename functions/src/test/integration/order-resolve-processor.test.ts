@@ -238,7 +238,7 @@ describe("OrderResolveProcessor Integration Test", () => {
     const events = await outboxEventService.findAll();
     expect(events.length).toBe(1);
     expect(events[0].type).toBe("BALANCE_CHANGED");
-    expect(events[0].payload.change).toBe(-50);
+    expect(events[0].payload.change).toBe(50);
     expect(events[0].payload.customer_id).toBe("test-customer-id");
   });
 

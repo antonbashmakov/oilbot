@@ -50,7 +50,7 @@ class OrderResolveProcessor extends AbstractProcessor {
         const publisher = new EventPublisher<BalanceChangedEvent>(this.db);
         const event: BalanceChangedEvent = {
           id: "",
-          idempotent_key: uuidv4(),
+          idempotent_key: uuidv4(), // no good
           processed: false,
           retries: 0,
           type: CONSTANTS.EVENTS.BALANCE_CHANGED,
@@ -58,7 +58,7 @@ class OrderResolveProcessor extends AbstractProcessor {
           processed_at: new Date(),
           payload: {
             customer_id: `${order.owner.id}`,
-            change: diff,
+            change: -diff,
             reason: "ORDER_RESOLVED",
           },
         };
