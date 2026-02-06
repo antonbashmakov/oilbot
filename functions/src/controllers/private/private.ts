@@ -542,6 +542,7 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
     return api.badRequest(res, "idempotency_key header is required");
   }
   const {customerId} = req.params;
+  const {method} = req.body ;
 
   // Check if customer exists
   const customer = await customerService.find(customerId);
@@ -569,18 +570,27 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
           fee: 300,
         };
 
-        const paymentRequest = tbankService.subscriptionToPaymentRequest(subscription);
-        const paymentResponse = await tbankService.initPayment(paymentRequest);
+        const paymentRequest = method === "sbp" ? tbankService.subscriptionToInitQRPaymentRequest(subscription) : tbankService.subscriptionToInitCardPaymentRequest(subscription);
+        let paymentResponse = await tbankService.initPayment(paymentRequest);
 
         if (!paymentResponse.Success) {
           throw new Error(`Payment initialization failed: ${paymentResponse.Message}; ${paymentResponse.Details}`);
+        }
+
+        if(method === "sbp") {
+          const qrRequest = tbankService.paymentToQRRequest(paymentResponse.PaymentId);
+          paymentResponse = await tbankService.requestQR(qrRequest);
+        }
+
+        if (!paymentResponse.Success) {
+          throw new Error(`QR Payment initialization failed: ${paymentResponse.Message}; ${paymentResponse.Details}`);
         }
 
         const payment: Payment = {
           id: "",
           external_id: paymentResponse.PaymentId,
           terminal_key: paymentRequest.TerminalKey,
-          payment_url: paymentResponse.PaymentURL!,
+          payment_url:  method === "sbp" ? paymentResponse.DATA! : paymentResponse.PaymentURL!,
           order_id: customerId,
           amount: subscription.fee * 100,
           total: subscription.fee * 100,
@@ -631,6 +641,8 @@ privateApi.get("/customers/:customerId/banks", async (req: express.Request, res:
     
     // Fetch banks list from Tinkoff API
     const banks = await tbankService.banksList(banksListRequest);
+
+    logger.info(banks);
 
     // Return the banks list in the standard API response format
     return api.send(res, banks);

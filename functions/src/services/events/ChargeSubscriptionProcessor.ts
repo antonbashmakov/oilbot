@@ -64,7 +64,7 @@ class ChargeSubscriptionProcessor extends AbstractProcessor {
       throw new Error(`No rebill_id found for customer ${subscriptionId}`);
     }
 
-    const paymentRequest = tbankService.subscriptionToPaymentRequest({...subscription, fee: toCharge}, true);
+    const paymentRequest = tbankService.subscriptionToInitCardPaymentRequest({...subscription, fee: toCharge}, true);
     const p = await tbankService.initPayment(paymentRequest);
 
     const payment: Payment = {

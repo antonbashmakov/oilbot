@@ -24,53 +24,6 @@ export const BankListOverflow: React.FC<BankListOverflowProps> = ({
   // Fetch banks from API - only fetch when component is open and user is available
   const { data: banksData, isLoading, error } = useGetCustomerBanksQuery(user?.id);
 
-  // Map API bank data to UI format
-  const banks = banksData?.map((bank: ApiBank) => ({
-    id: bank.BankId,
-    name: bank.BankName,
-    description: getBankDescription(bank.BankName),
-    icon: getBankIcon(bank.BankName),
-    iconColor: getBankIconColor(bank.BankName),
-    logoUrl: bank.BankLogo
-  })) || [];
-
-  // Helper functions to map bank data
-  const getBankDescription = (bankName: string): string => {
-    const descriptions: Record<string, string> = {
-      'Т-Банк': 'Popular',
-      'Сбербанк': 'Instant Transfer',
-      'ВТБ': 'Member Choice',
-      'Альфа-Банк': 'Fast Setup',
-      'Тинькофф': 'Secure',
-      'Газпромбанк': 'Local'
-    };
-    return descriptions[bankName] || 'Available';
-  };
-
-  const getBankIcon = (bankName: string): string => {
-    const icons: Record<string, string> = {
-      'Т-Банк': 'account_balance',
-      'Сбербанк': 'savings',
-      'ВТБ': 'account_balance_wallet',
-      'Альфа-Банк': 'token',
-      'Тинькофф': 'assured_workload',
-      'Газпромбанк': 'account_balance'
-    };
-    return icons[bankName] || 'account_balance';
-  };
-
-  const getBankIconColor = (bankName: string): string => {
-    const colors: Record<string, string> = {
-      'Т-Банк': 'text-gray-400',
-      'Сбербанк': 'text-blue-600 dark:text-blue-400',
-      'ВТБ': 'text-green-600 dark:text-green-400',
-      'Альфа-Банк': 'text-purple-600 dark:text-purple-400',
-      'Тинькофф': 'text-orange-600 dark:text-orange-400',
-      'Газпромбанк': 'text-gray-400'
-    };
-    return colors[bankName] || 'text-gray-400';
-  };
-
   const handleBankSelect = (bankId: string) => {
     setSelectedBank(bankId);
     onBankSelect(bankId);
@@ -168,7 +121,7 @@ export const BankListOverflow: React.FC<BankListOverflowProps> = ({
                   {t('retry') || 'Retry'}
                 </button>
               </div>
-            ) : banks.length === 0 ? (
+            ) : banksData?.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <span className="material-symbols-outlined text-gray-400 mb-4" style={{ fontSize: "32px" }}>
                   account_balance
@@ -179,12 +132,12 @@ export const BankListOverflow: React.FC<BankListOverflowProps> = ({
               </div>
             ) : (
               <div className="space-y-2">
-                {banks.map((bank) => (
+                {banksData?.map((bank) => (
                   <button
-                    key={bank.id}
-                    onClick={() => handleBankSelect(bank.id)}
+                    key={bank.BankId}
+                    onClick={() => handleBankSelect(bank.BankId)}
                     className={`w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border ${
-                      selectedBank === bank.id
+                      selectedBank === bank.BankId
                         ? 'border-primary/20 bg-primary/5'
                         : 'border-transparent active:border-primary/20'
                     } group text-left`}
@@ -192,49 +145,43 @@ export const BankListOverflow: React.FC<BankListOverflowProps> = ({
                   >
                     <div className={`
                       w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0
-                      ${bank.iconColor.includes('blue') ? 'bg-blue-50 dark:bg-blue-900/20' :
-                        bank.iconColor.includes('green') ? 'bg-green-50 dark:bg-green-900/20' :
-                        bank.iconColor.includes('purple') ? 'bg-purple-50 dark:bg-purple-900/20' :
-                        bank.iconColor.includes('orange') ? 'bg-orange-50 dark:bg-orange-900/20' :
+
                         'bg-gray-100 dark:bg-gray-800'
                       }
                     `}>
-                      {bank.logoUrl ? (
+                      {bank.BankLogo ? (
                         <img 
-                          src={bank.logoUrl} 
-                          alt={bank.name}
+                          src={bank.BankLogo} 
+                          alt={bank.BankName}
                           className="w-6 h-6 object-contain"
                           onError={(e) => {
                             // Fallback to icon if logo fails to load
                             e.currentTarget.style.display = 'none';
                             const icon = document.createElement('span');
-                            icon.className = `material-symbols-outlined ${bank.iconColor}`;
+                            icon.className = `material-symbols-outlined`;
                             icon.style.fontSize = '24px';
-                            icon.textContent = bank.icon;
+                            icon.textContent = "";
                             e.currentTarget.parentElement?.appendChild(icon);
                           }}
                         />
                       ) : (
-                        <span className={`material-symbols-outlined ${bank.iconColor}`} style={{ fontSize: "24px" }}>
-                          {bank.icon}
+                        <span className={`material-symbols-outlined `} style={{ fontSize: "24px" }}>
+                          {bank.BankLogo}
                         </span>
                       )}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-bold text-gray-900 dark:text-white">{bank.name}</p>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                        {bank.description}
-                      </p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white">{bank.BankName}</p>
                     </div>
                     <span
                       className={`material-symbols-outlined ${
-                        selectedBank === bank.id
+                        selectedBank === bank.BankId
                           ? 'text-primary'
                           : 'text-gray-300 dark:text-gray-600 group-hover:text-primary transition-colors'
                       }`}
                       style={{ fontSize: "20px" }}
                     >
-                      {selectedBank === bank.id ? 'check_circle' : 'chevron_right'}
+                      {selectedBank === bank.BankId ? 'check_circle' : 'chevron_right'}
                     </span>
                   </button>
                 ))}

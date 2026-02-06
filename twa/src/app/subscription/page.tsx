@@ -4,21 +4,19 @@ import { useCreateSubscription } from "@/api";
 import { useUser } from "@/api/user/provider";
 import { useState } from "react";
 import { useTranslations } from 'next-intl';
-import { BankListOverflow } from "@/components/BankListOverflow";
 
 export default function SubscriptionPage() {
   const { user } = useUser();
   const createSubscriptionMutation = useCreateSubscription(user?.id);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const [showBankOverflow, setShowBankOverflow] = useState(false);
   const t = useTranslations('subscription');
 
   const handleClose = () => {
     window.location.href = "/";
   };
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (isSbp: boolean) => {
     if (!user?.id) {
       alert(t('loginRequired'));
       return;
@@ -31,7 +29,7 @@ export default function SubscriptionPage() {
       // Generate a unique idempotency key
       const idempotencyKey = `subscription-${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      const res: any = await createSubscriptionMutation.mutateAsync({ idempotencyKey });
+      const res: any = await createSubscriptionMutation.mutateAsync({ idempotencyKey, method: isSbp ? 'sbp' : 'card', bank_id: "", type: "recurrent"  });
 
       // Check if response has paymentUrl (similar to checkout flow)
       if (res.paymentUrl && typeof window !== 'undefined') {
@@ -47,13 +45,6 @@ export default function SubscriptionPage() {
     }
   };
 
-  const handleBankSelect = async (bankId: string) => {
-    console.log('Selected bank:', bankId);
-    // Here you would typically integrate with payment API
-    // For now, we'll just proceed with regular subscription
-    await handleSubscribe();
-  };
-
   const handleSbpClick = () => {
     if (!user?.id) {
       alert(t('loginRequired'));
@@ -65,7 +56,7 @@ export default function SubscriptionPage() {
       return;
     }
     
-    setShowBankOverflow(true);
+    
   };
 
   return (
@@ -182,7 +173,7 @@ export default function SubscriptionPage() {
 
 
           <button
-            onClick={handleSbpClick}
+            onClick={() => handleSubscribe(true)}
             disabled={isProcessing || createSubscriptionMutation.isPending || !user?.id || !isChecked}
             className="w-full bg-primary hover:bg-red-600 active:scale-[0.98] transition-all text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -204,7 +195,7 @@ export default function SubscriptionPage() {
             )}
           </button>
           <button
-            onClick={handleSubscribe}
+            onClick={() => handleSubscribe(false)}
             disabled={isProcessing || createSubscriptionMutation.isPending || !user?.id || !isChecked}
             className="w-full bg-transparent border-2 border-primary/20 hover:border-primary/40 dark:border-white/10 dark:hover:border-white/20 active:scale-[0.98] transition-all text-gray-900 dark:text-white font-bold h-14 rounded-xl flex items-center justify-center gap-2"
           >
@@ -234,12 +225,6 @@ export default function SubscriptionPage() {
         </p>
       </div>
 
-      {/* Bank List Overflow */}
-      <BankListOverflow
-        isOpen={showBankOverflow}
-        onClose={() => setShowBankOverflow(false)}
-        onBankSelect={handleBankSelect}
-      />
     </>
   );
 }

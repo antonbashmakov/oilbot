@@ -11,6 +11,11 @@ export type Item = components["schemas"]["Item"];
 export type CartItem = components["schemas"]["CartItem"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type Bank = components["schemas"]["Bank"];
+export type PaymentRequest = components["schemas"]["PaymentRequest"];
+export type AddToCartItem = components["schemas"]["AddToCartItem"];
+
+export type RemoveFromCartItem = components["schemas"]["RemoveFromCartItem"];
+
 type BaseOrderOverview = components["schemas"]["OrderOverview"];
 type BaseOrderPicking = components["schemas"]["OrderPicking"];
 type BasePayment = components["schemas"]["Payment"];
@@ -18,6 +23,7 @@ type BaseCustomerBalance = components["schemas"]["CustomerBalance"];
 type BaseCustomerOverview = components["schemas"]["CustomerOverview"];
 type BaseUser = components["schemas"]["User"];
 type BaseComment = components["schemas"]["Comment"];
+type BaseItemOverview = components["schemas"]["ItemOverview"];
 type BaseDeliveryRef = components["schemas"]["DeliveryRef"];
 
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
@@ -118,3 +124,7 @@ export type DeliveryRef = Omit<BaseDeliveryRef, "created_at" | "order_deadline"|
   delivery_start: Date;
   delivery_end: Date;
 };
+export type ItemOverview = BaseItemOverview & {
+  deliveries: DeliveryRef[];
+};
+

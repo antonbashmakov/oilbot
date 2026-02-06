@@ -6,7 +6,7 @@ import * as moment from "moment";
 
 import {TINKOFF_SUPPORT} from "../../constants";
 
-import {Bank, Order, Payment, Subscription, TinkoffBanksListRequest, TinkoffChargeRequest, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
+import {Bank, Order, Payment, Subscription, TinkoffBanksListRequest, TinkoffChargeRequest, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult, TinkoffSbpPaymentRequest, } from "../../models";
 dotenv.config();
 
 const terminal = process.env.TINKOFF_TERMINAL_ID || functions.config().tinkoff.TINKOFF_TERMINAL_ID;
@@ -54,7 +54,7 @@ class TBankService {
 
     return body;
   }
-  subscriptionToPaymentRequest(subscription: Subscription, isRecurrentPayment = false): TinkoffPaymentPayload {
+  subscriptionToInitCardPaymentRequest(subscription: Subscription, isRecurrentPayment = false): TinkoffPaymentPayload {
     const to = moment(subscription.next_payment_at);
     const from = to.add(-1, "month");
 
@@ -104,6 +104,43 @@ class TBankService {
 
     return body;
   }
+  subscriptionToInitQRPaymentRequest(subscription: Subscription): TinkoffPaymentPayload {
+
+    const body = this.subscriptionToPayment(subscription);
+
+    const qrBody: any = {...body};
+
+    qrBody.OperationInitiatorType;
+    qrBody.DATA.QR = "true";
+
+    const rootFields = {...qrBody, Password: password} as any;
+
+    delete rootFields.DATA;
+    delete rootFields.Receipt;
+
+
+    qrBody.Token = this.generateToken(rootFields);
+
+    functions.logger.info("Generating token for QR payment with fields", qrBody);
+
+
+    return qrBody;
+  }
+
+  paymentToQRRequest(paymentId: string): TinkoffSbpPaymentRequest {
+    const body = {
+      Token: "",
+      TerminalKey: terminal,
+      PaymentId: paymentId,
+    };
+    const rootFields = {...body, Password: password} as any;
+
+    body.Token = this.generateToken(rootFields);
+
+    return body;
+
+  }
+
   paymentToCancelRequest(payment: Payment): TinkoffPaymentCancelationRequest {
     const body = {
       Token: "",
@@ -134,11 +171,14 @@ class TBankService {
   createBanksListRequest(type: "mobile" | "desktop"): TinkoffBanksListRequest {
     const body = {
       Token: "",
+      
       TerminalKey: terminal,
       Device: { Type: type},
     };
 
     const rootFields = {...body, Password: password} as any;
+
+    delete rootFields.Device;
 
     body.Token = this.generateToken(rootFields);
 
@@ -155,6 +195,17 @@ class TBankService {
   }
   async cancelPayment(paymentRequest: TinkoffPaymentCancelationRequest): Promise<TinkoffResult> {
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Cancel", paymentRequest, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  }
+
+
+
+  async requestQR(qrRequest: TinkoffSbpPaymentRequest): Promise<TinkoffResult> {
+    const response = await axios.post("https://securepay.tinkoff.ru/v2/GetQr", qrRequest, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -181,6 +232,48 @@ class TBankService {
   generateToken(object: any): string {
     const sortedValues = Object.keys(object).sort().map((k) => object[k]).join("");
     return crypto.createHash("sha256").update(sortedValues).digest("hex");
+  }
+
+  private subscriptionToPayment(subscription: Subscription) {
+    const to = moment(subscription.next_payment_at);
+    const from = moment(subscription.next_payment_at).add(-1, "month");
+
+    const Items: TinkoffPaymentItem[] = [{
+      Name: `Подписка По Себестоимости за период ${from.format("DD.MM.YYYY")} - ${to.format("DD.MM.YYYY")}`,
+      Price: subscription.fee * 100,
+      Quantity: 1,
+      Amount: subscription.fee * 100,
+      Tax: "vat0",
+    }];
+
+    const Receipt: TinkoffReceipt = {
+      ...TINKOFF_SUPPORT,
+      Items,
+    };
+
+    const redirectDueDate = moment().add(1, "month");
+    const RedirectDueDate = redirectDueDate.format("YYYY-MM-DDTHH:mm:ssZ");
+
+    const now = new Date();
+
+    return {
+      Token: "",
+      Recurrent: "Y",
+      CustomerKey: subscription.id,
+      TerminalKey: terminal,
+      OperationInitiatorType: "1",
+      Amount: subscription.fee * 100,
+      OrderId: `${subscription.id}-${now.getFullYear()}-${now.getMonth()}-${now.getDay()}-${crypto.randomUUID().substring(0, 5)}`,
+      Description: "Оплата подписки в магазине По Себестоимости",
+      DATA: {
+        Phone: process.env.SUPPORT_PHONE,
+        Email: process.env.SUPPORT_EMAIL,
+        OrderType: "SUBSCRIPTION",
+        SubscriptionId: subscription.id,
+      },
+      Receipt,
+      RedirectDueDate,
+    };    
   }
 }
 

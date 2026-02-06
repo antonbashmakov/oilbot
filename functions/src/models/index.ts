@@ -11,7 +11,7 @@ export type AddToCartItem = components["schemas"]["AddToCartItem"];
 export type RemoveFromCartItem = components["schemas"]["RemoveFromCartItem"];
 export type BaseSubscription = components["schemas"]["Subscription"];
 export type Bank = components["schemas"]["Bank"];
-
+export type PaymentRequest = components["schemas"]["PaymentRequest"];
 
 type BaseDeliveryOverviewItemStats = components["schemas"]["DeliveryOverviewItemStats"];
 type BaseStats = components["schemas"]["Stats"];
@@ -34,9 +34,12 @@ export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffPaymentCancelationRequest = models["schemas"]["TinkoffPaymentCancelationRequest"];
 export type TinkoffBanksListRequest = models["schemas"]["TinkoffBanksListRequest"];
 export type TinkoffChargeRequest = models["schemas"]["TinkoffChargeRequest"];
+export type TinkoffQRRequest = models["schemas"]["TinkoffQRRequest"];
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
 export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 export type TinkoffResult = models["schemas"]["TinkoffResult"];
+export type TinkoffSbpPaymentRequest = models["schemas"]["TinkoffSbpPaymentRequest"];
+
 
 
 type BaseBalanceChangeEvent = models["schemas"]["BalanceChangeEvent"];

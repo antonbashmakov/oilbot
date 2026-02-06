@@ -1101,6 +1101,17 @@ paths:
           description: Customer ID
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - request
+              properties:
+                request:
+                  $ref: '#/components/schemas/PaymentRequest'
       responses:
         '200':
           description: Subscription created successfully
@@ -2622,6 +2633,29 @@ components:
         - BankName
         - BankLogo
         - BankOrder
+
+    PaymentRequest:
+      type: object
+      description: Payment request configuration
+      properties:
+        type:
+          type: string
+          enum: ["single", "recurrent"]
+          description: Type of payment (single or recurrent)
+          example: "single"
+        method:
+          type: string
+          enum: ["card", "sbp"]
+          description: Payment method (card or SBP - Fast Payments System)
+          example: "card"
+        bank_id:
+          type: string
+          description: Bank ID for SBP payments (required if method is SBP)
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6" 
+      required:
+        - type
+        - method
+        - bank_id
 tags:
   - name: Deliveries
     description: Operations related to deliveries

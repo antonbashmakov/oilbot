@@ -153,6 +153,15 @@ export interface components {
             /** @description Уникальный идентификатор сохраненных реквизитов карты покупателя. */
             RebillId?: string;
         };
+        TinkoffSbpPaymentRequest: {
+            /** @description Ключ терминала */
+            TerminalKey: string;
+            Token: string;
+            /** @description Идентификатор платежа */
+            PaymentId?: string;
+            /** @description Идентификатор банка для оплаты через СБП (поле обязательно, если Method=SBP) */
+            BankId?: string;
+        };
         TinkoffResult: {
             /** @example TBankTest */
             TerminalKey: string;
@@ -180,6 +189,11 @@ export interface components {
             ExternalRequestId: string;
             /** @example https://pay.tbank.ru/new/fU1ppgqa */
             PaymentURL?: string;
+            /**
+             * @description Данные для оплаты через СБП (поле возвращается, если Method=SBP)
+             * @example https://pay.tbank.ru/new/fU1ppgqa
+             */
+            DATA?: string;
         };
         /** @description A task for broadcasting messages */
         BroadcastTask: {
@@ -210,6 +224,29 @@ export interface components {
              * @description Timestamp when the task was last updated
              */
             updated_at: string;
+        };
+        /** @description Request for generating QR code for payment */
+        TinkoffQRRequest: {
+            /**
+             * @description Ключ терминала
+             * @example TBankTest
+             */
+            TerminalKey: string;
+            /**
+             * @description Идентификатор платежа
+             * @example 10063
+             */
+            PaymentId: number;
+            /**
+             * @description Тип данных для QR-кода
+             * @example PAYLOAD
+             */
+            DataType: string;
+            /**
+             * @description Токен безопасности
+             * @example 871199b37f207f0c4f721a37cdcc71dfcea880b4a4b85e3cf852c5dc1e99a8d6
+             */
+            Token: string;
         };
     };
     responses: never;

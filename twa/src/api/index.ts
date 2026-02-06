@@ -1,21 +1,13 @@
 import { IdempotentSupport, useApiQuery, useDeleteApi, usePatchApi, usePostApi, usePutApi } from "@/api/rq";
 import {
-    DeliveryOverview,
-    Delivery,
-    Order,
-    Payment,
-    User,
-    ConversationMessage,
-    Comment,
-    DeliveryAgentOverview,
     ItemOverview,
     CartItem,
-    Item,
     AddToCartItem,
     RemoveFromCartItem,
     CustomerOverview,
     OrderOverview,
-    Bank
+    Bank,
+    PaymentRequest
 } from "@/api/models";
 import { UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import useClient from "@/api/useClient";
@@ -91,13 +83,81 @@ export const useGetCustomerOverviewQuery = (customerId?: string): UseQueryResult
 
 // Bank hooks
 export const useGetCustomerBanksQuery = (customerId?: string): UseQueryResult<Bank[]> => {
-  return useApiQuery("/api/private/customers/{customerId}/banks", {
-    params: {
-      path: {
-        customerId: customerId || ''
-      }
+  // Mock data for banks
+  const mockBanks: Bank[] = [
+    {
+      "BankId": "075195c5-c508-4af6-b6c6-3788dfbceb07",
+      "NspkBankId": "100000000111",
+      "BankName": "Сбербанк",
+      "BankLogo": "https://qr.nspk.ru/proxyapp/logo/bank100000000111.png",
+      "BankOrder": 1
+    },
+    {
+      "BankId": "1c1c7974-7164-4b09-804f-5f9c571ce074",
+      "NspkBankId": "100000000004",
+      "BankName": "Т-Банк",
+      "BankLogo": "https://qr.nspk.ru/proxyapp/logo/bank100000000004.png",
+      "BankOrder": 2
+    },
+    {
+      "BankId": "67d7b911-70a2-4b15-823a-91505b89c69d",
+      "NspkBankId": "100000000005",
+      "BankName": "Банк ВТБ",
+      "BankLogo": "https://qr.nspk.ru/proxyapp/logo/bank100000000005.png",
+      "BankOrder": 3
+    },
+    {
+      "BankId": "64c29b81-0793-49f4-b2dc-53e4d59505b2",
+      "NspkBankId": "100000000008",
+      "BankName": "АЛЬФА-БАНК",
+      "BankLogo": "https://qr.nspk.ru/proxyapp/logo/bank100000000008.png",
+      "BankOrder": 4
+    },
+    {
+      "BankId": "8ba6dd20-b318-4568-85f7-6a3da2c1dbb4",
+      "NspkBankId": "100000000007",
+      "BankName": "Райффайзенбанк",
+      "BankLogo": "https://qr.nspk.ru/proxyapp/logo/bank100000000007.png",
+      "BankOrder": 5
+    },
+    {
+      "BankId": "5f6a7a89-8a40-4e5a-88de-532f1a05935a",
+      "NspkBankId": "100000000001",
+      "BankName": "Газпромбанк",
+      "BankLogo": "https://qr.nspk.ru/proxyapp/logo/bank100000000001.png",
+      "BankOrder": 6
     }
-  }, { retry: 1, enabled: !!customerId } as any);
+  ];
+
+  // Create a mock query result
+  const mockQueryResult: UseQueryResult<Bank[]> = {
+    data: mockBanks,
+    error: null,
+    isError: false,
+    isLoading: false,
+    isPending: false,
+    isSuccess: true,
+    status: 'success',
+    fetchStatus: 'idle',
+    dataUpdatedAt: Date.now(),
+    errorUpdatedAt: 0,
+    failureCount: 0,
+    failureReason: null,
+    errorUpdateCount: 0,
+    isFetched: true,
+    isFetchedAfterMount: true,
+    isFetching: false,
+    isInitialLoading: false,
+    isLoadingError: false,
+    isPaused: false,
+    isPlaceholderData: false,
+    isRefetchError: false,
+    isRefetching: false,
+    isStale: false,
+    refetch: async () => ({ data: mockBanks, error: null } as any),
+  } as any;
+
+  return mockQueryResult;
 };
 
 // Cart hooks
@@ -142,11 +202,13 @@ export const useCheckout = (customerId?: string) => {
     );
 };
 
+type SubscriptionPaymentRequest = PaymentRequest & IdempotentSupport
+
 export const useCreateSubscription = (customerId?: string) => {
     return usePostApi<
         "/api/private/customers/{customerId}/subscriptions",
         { customerId: string },
-        IdempotentSupport
+        SubscriptionPaymentRequest
     >(
         "/api/private/customers/{customerId}/subscriptions",
         [

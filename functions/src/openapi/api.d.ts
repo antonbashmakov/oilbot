@@ -1517,6 +1517,26 @@ export interface components {
              */
             BankOrder: number;
         };
+        /** @description Payment request configuration */
+        PaymentRequest: {
+            /**
+             * @description Type of payment (single or recurrent)
+             * @example single
+             * @enum {string}
+             */
+            type: "single" | "recurrent";
+            /**
+             * @description Payment method (card or SBP - Fast Payments System)
+             * @example card
+             * @enum {string}
+             */
+            method: "card" | "sbp";
+            /**
+             * @description Bank ID for SBP payments (required if method is SBP)
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            bank_id: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -2694,7 +2714,13 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    request: components["schemas"]["PaymentRequest"];
+                };
+            };
+        };
         responses: {
             /** @description Subscription created successfully */
             200: {

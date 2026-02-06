@@ -264,6 +264,25 @@ components:
         - Token
         - Receipt
 
+    TinkoffSbpPaymentRequest:
+      type: object
+      properties:
+        TerminalKey:
+          type: string
+          description: "Ключ терминала"
+        Token:
+          type: string
+        PaymentId:
+          type: string
+          description: "Идентификатор платежа"
+        BankId:
+          type: string
+          description: "Идентификатор банка для оплаты через СБП (поле обязательно, если Method=SBP)"
+      required:
+        - TerminalKey
+        - Token
+        - Receipt
+
     TinkoffResult:
       type: object
       properties:
@@ -306,6 +325,10 @@ components:
           example: "756478567845678436"
         PaymentURL:
           type: string
+          example: "https://pay.tbank.ru/new/fU1ppgqa"
+        DATA:
+          type: string
+          description: "Данные для оплаты через СБП (поле возвращается, если Method=SBP)"
           example: "https://pay.tbank.ru/new/fU1ppgqa"
       required:
         - TerminalKey
@@ -364,4 +387,30 @@ components:
         - batch_size
         - number_of_runs
         - format
+
+    TinkoffQRRequest:
+      type: object
+      description: Request for generating QR code for payment
+      properties:
+        TerminalKey:
+          type: string
+          description: "Ключ терминала"
+          example: "TBankTest"
+        PaymentId:
+          type: integer
+          description: "Идентификатор платежа"
+          example: 10063
+        DataType:
+          type: string
+          description: "Тип данных для QR-кода"
+          example: "PAYLOAD"
+        Token:
+          type: string
+          description: "Токен безопасности"
+          example: "871199b37f207f0c4f721a37cdcc71dfcea880b4a4b85e3cf852c5dc1e99a8d6"
+      required:
+        - TerminalKey
+        - PaymentId
+        - DataType
+        - Token
 
