@@ -135,6 +135,15 @@ export interface components {
             /** @description Идентификатор платежа */
             PaymentId?: string;
         };
+        TinkoffBanksListRequest: {
+            /** @description Ключ терминала */
+            TerminalKey: string;
+            Token: string;
+            Device: {
+                /** @enum {enum} */
+                Type: "mobile" | "desktop";
+            };
+        };
         TinkoffChargeRequest: {
             /** @description Ключ терминала */
             TerminalKey: string;

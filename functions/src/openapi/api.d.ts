@@ -1467,6 +1467,36 @@ export interface components {
             /** @description Error details if any */
             error?: Record<string, never> | null;
         };
+        /** @description Bank information */
+        Bank: {
+            /**
+             * Format: uuid
+             * @description Unique identifier for the bank
+             * @example 3fa85f64-5717-4562-b3fc-2c963f66afa6
+             */
+            BankId: string;
+            /**
+             * @description NSPK bank identifier
+             * @example 100000000004
+             */
+            NspkBankId: string;
+            /**
+             * @description Name of the bank
+             * @example Т-Банк
+             */
+            BankName: string;
+            /**
+             * Format: uri
+             * @description URL to the bank's logo
+             * @example https://qr.nspk.ru/proxyapp/logo/bank100000000004.png
+             */
+            BankLogo: string;
+            /**
+             * @description Order/priority of the bank
+             * @example 1
+             */
+            BankOrder: number;
+        };
     };
     responses: never;
     parameters: never;

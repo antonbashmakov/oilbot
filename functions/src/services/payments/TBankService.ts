@@ -6,7 +6,7 @@ import * as moment from "moment";
 
 import {TINKOFF_SUPPORT} from "../../constants";
 
-import {Order, Payment, Subscription, TinkoffChargeRequest, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
+import {Bank, Order, Payment, Subscription, TinkoffBanksListRequest, TinkoffChargeRequest, TinkoffPaymentCancelationRequest, TinkoffPaymentItem, TinkoffPaymentPayload, TinkoffReceipt, TinkoffResult} from "../../models";
 dotenv.config();
 
 const terminal = process.env.TINKOFF_TERMINAL_ID || functions.config().tinkoff.TINKOFF_TERMINAL_ID;
@@ -131,6 +131,19 @@ class TBankService {
 
     return body;
   }
+  createBanksListRequest(type: "mobile" | "desktop"): TinkoffBanksListRequest {
+    const body = {
+      Token: "",
+      TerminalKey: terminal,
+      Device: { Type: type},
+    };
+
+    const rootFields = {...body, Password: password} as any;
+
+    body.Token = this.generateToken(rootFields);
+
+    return body;
+  }
 
   async initPayment(paymentRequest: TinkoffPaymentPayload): Promise<TinkoffResult> {
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Init", paymentRequest, {
@@ -150,6 +163,14 @@ class TBankService {
   }
   async charge(chargeRequest: TinkoffChargeRequest): Promise<TinkoffResult> {
     const response = await axios.post("https://securepay.tinkoff.ru/v2/Charge", chargeRequest, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  }
+  async banksList(request: TinkoffBanksListRequest): Promise<Bank[]> {
+    const response = await axios.post("https://securepay.tinkoff.ru/v2/GetQrBankList", request, {
       headers: {
         "Content-Type": "application/json",
       },

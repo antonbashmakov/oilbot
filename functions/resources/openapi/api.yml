@@ -2549,6 +2549,38 @@ components:
         - success
         - message
         - created_at
+    Bank:
+      type: object
+      description: Bank information
+      properties:
+        BankId:
+          type: string
+          format: uuid
+          description: Unique identifier for the bank
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        NspkBankId:
+          type: string
+          description: NSPK bank identifier
+          example: "100000000004"
+        BankName:
+          type: string
+          description: Name of the bank
+          example: "Т-Банк"
+        BankLogo:
+          type: string
+          format: uri
+          description: URL to the bank's logo
+          example: "https://qr.nspk.ru/proxyapp/logo/bank100000000004.png"
+        BankOrder:
+          type: integer
+          description: Order/priority of the bank
+          example: 1
+      required:
+        - BankId
+        - NspkBankId
+        - BankName
+        - BankLogo
+        - BankOrder
 tags:
   - name: Deliveries
     description: Operations related to deliveries

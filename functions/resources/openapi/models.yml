@@ -224,6 +224,27 @@ components:
         - Token
         - Receipt
 
+    TinkoffBanksListRequest:
+      type: object
+      properties:
+        TerminalKey:
+          type: string
+          description: "Ключ терминала"
+        Token:
+          type: string
+        Device:
+          type: object
+          required:
+            - Type
+          properties:
+            Type:
+              type: enum
+              enum: ["mobile", "desktop"]
+      required:
+        - TerminalKey
+        - Token
+        - Device
+
     TinkoffChargeRequest:
       type: object
       properties:

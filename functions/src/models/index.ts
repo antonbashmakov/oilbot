@@ -9,8 +9,10 @@ export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type AddToCartItem = components["schemas"]["AddToCartItem"];
 export type RemoveFromCartItem = components["schemas"]["RemoveFromCartItem"];
-
 export type BaseSubscription = components["schemas"]["Subscription"];
+export type Bank = components["schemas"]["Bank"];
+
+
 type BaseDeliveryOverviewItemStats = components["schemas"]["DeliveryOverviewItemStats"];
 type BaseStats = components["schemas"]["Stats"];
 type BaseDeliveryOverview = components["schemas"]["DeliveryOverview"];
@@ -30,6 +32,7 @@ type BaseComment = components["schemas"]["Comment"];
 
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffPaymentCancelationRequest = models["schemas"]["TinkoffPaymentCancelationRequest"];
+export type TinkoffBanksListRequest = models["schemas"]["TinkoffBanksListRequest"];
 export type TinkoffChargeRequest = models["schemas"]["TinkoffChargeRequest"];
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
 export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
