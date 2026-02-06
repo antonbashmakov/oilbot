@@ -10,6 +10,7 @@ export type Customer = components["schemas"]["Customer"];
 export type Item = components["schemas"]["Item"];
 export type CartItem = components["schemas"]["CartItem"];
 export type PickingItem = components["schemas"]["PickingItem"];
+export type Bank = components["schemas"]["Bank"];
 type BaseOrderOverview = components["schemas"]["OrderOverview"];
 type BaseOrderPicking = components["schemas"]["OrderPicking"];
 type BasePayment = components["schemas"]["Payment"];

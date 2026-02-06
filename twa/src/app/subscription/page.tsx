@@ -4,12 +4,14 @@ import { useCreateSubscription } from "@/api";
 import { useUser } from "@/api/user/provider";
 import { useState } from "react";
 import { useTranslations } from 'next-intl';
+import { BankListOverflow } from "@/components/BankListOverflow";
 
 export default function SubscriptionPage() {
   const { user } = useUser();
   const createSubscriptionMutation = useCreateSubscription(user?.id);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+  const [showBankOverflow, setShowBankOverflow] = useState(false);
   const t = useTranslations('subscription');
 
   const handleClose = () => {
@@ -43,6 +45,27 @@ export default function SubscriptionPage() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleBankSelect = async (bankId: string) => {
+    console.log('Selected bank:', bankId);
+    // Here you would typically integrate with payment API
+    // For now, we'll just proceed with regular subscription
+    await handleSubscribe();
+  };
+
+  const handleSbpClick = () => {
+    if (!user?.id) {
+      alert(t('loginRequired'));
+      return;
+    }
+    
+    if (!isChecked) {
+      alert(t('termsAgreement.prefix', { price: '300' }) + ' ' + t('termsAgreement.link') + ' ' + t('termsAgreement.suffix'));
+      return;
+    }
+    
+    setShowBankOverflow(true);
   };
 
   return (
@@ -159,7 +182,7 @@ export default function SubscriptionPage() {
 
 
           <button
-            onClick={handleSubscribe}
+            onClick={handleSbpClick}
             disabled={isProcessing || createSubscriptionMutation.isPending || !user?.id || !isChecked}
             className="w-full bg-primary hover:bg-red-600 active:scale-[0.98] transition-all text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -210,6 +233,13 @@ export default function SubscriptionPage() {
           {t('agreement.suffix')}
         </p>
       </div>
+
+      {/* Bank List Overflow */}
+      <BankListOverflow
+        isOpen={showBankOverflow}
+        onClose={() => setShowBankOverflow(false)}
+        onBankSelect={handleBankSelect}
+      />
     </>
   );
 }

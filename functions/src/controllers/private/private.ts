@@ -616,4 +616,28 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
   }
 });
 
+privateApi.get("/customers/:customerId/banks", async (req: express.Request, res: express.Response) => {
+  try {
+    const {customerId} = req.params;
+
+    // Check if customer exists
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    // Create banks list request - using "mobile" type as default
+    const banksListRequest = tbankService.createBanksListRequest("mobile");
+    
+    // Fetch banks list from Tinkoff API
+    const banks = await tbankService.banksList(banksListRequest);
+
+    // Return the banks list in the standard API response format
+    return api.send(res, banks);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
 export default privateApi;

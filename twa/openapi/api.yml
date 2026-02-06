@@ -738,6 +738,84 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /admin/broadcast:
+    post:
+      operationId: createBroadcastTask
+      summary: Create a new broadcast task
+      description: Create a new broadcast task with the given message.
+      tags:
+        - Broadcast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: The message to broadcast to customers
+                  example: "Hello, this is a broadcast message"
+      responses:
+        '204':
+          description: Broadcast task created successfully
+        '400':
+          description: Bad request (e.g., missing message)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/broadcast/{taskId}:
+    post:
+      operationId: runBroadcastTask
+      summary: Run a broadcast task once
+      description: Pick BroadcastTask from DB and run the task once using BroadcastService, returning list of BroadcastResult objects.
+      tags:
+        - Broadcast
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Broadcast task ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Broadcast task executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BroadcastResult'
+        '404':
+          description: Broadcast task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /private/items/category/{category}:
     
     get:
@@ -1167,6 +1245,47 @@ paths:
                     example: "OK"
                   data:
                     $ref: '#/components/schemas/CustomerOverview'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /private/customers/{customerId}/banks:
+    get:
+      operationId: getCustomerBanks
+      summary: Get banks for a customer
+      description: Retrieve a list of banks associated with a customer
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with list of banks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Bank'
         '404':
           description: Customer not found
           content:
@@ -1702,6 +1821,27 @@ components:
           type: string
           description: Unique identifier for the order picking
           example: "ef4d5632-ba34-4488-97a5-b9b7af299535"      
+    CustomerRef:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Customer ID
+          example: "1019705782"
+        username:
+          type: string
+          description: Customer's username
+          example: "getting_drunk"
+        first_name:
+          type: string
+          description: Customer's first name
+          example: "Антон"
+        last_name:
+          type: string
+          description: Customer's last name
+          example: "Антон"
     Item:
       type: object
       required:
@@ -1797,6 +1937,7 @@ components:
         - fraction
         - quantity
         - name
+        - category
       properties:
         total:
           type: number
@@ -1816,6 +1957,10 @@ components:
         name:
           type: string
           description: Name of the stats item
+          example: "Сёмга филе Филе на коже 1.8 Кг"
+        category:
+          type: string
+          description: Category of the stats item
           example: "Сёмга филе Филе на коже 1.8 Кг"
           
     ItemStats:
@@ -2409,6 +2554,74 @@ components:
           description: List of delivery orders
           items:
             $ref: '#/components/schemas/Order'
+
+    BroadcastResult:
+      type: object
+      description: Result of a broadcast operation
+      properties:
+        id:
+          type: string
+          description: ID of the broadcast task
+        broadcast_task_id:
+          type: string
+          description: ID of the broadcast task
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the object was created
+          example: "2025-01-10T14:30:00Z"          
+        customer:
+          $ref: '#/components/schemas/CustomerRef'
+          description: Customer reference
+        success:
+          type: boolean
+          description: Whether the broadcast was successful
+        message:
+          type: string
+          description: Result message
+        error:
+          type: object
+          nullable: true
+          description: Error details if any
+      required:
+        - id
+        - broadcast_task_id
+        - customer
+        - success
+        - message
+        - created_at
+    Bank:
+      type: object
+      description: Bank information
+      properties:
+        BankId:
+          type: string
+          format: uuid
+          description: Unique identifier for the bank
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        NspkBankId:
+          type: string
+          description: NSPK bank identifier
+          example: "100000000004"
+        BankName:
+          type: string
+          description: Name of the bank
+          example: "Т-Банк"
+        BankLogo:
+          type: string
+          format: uri
+          description: URL to the bank's logo
+          example: "https://qr.nspk.ru/proxyapp/logo/bank100000000004.png"
+        BankOrder:
+          type: integer
+          description: Order/priority of the bank
+          example: 1
+      required:
+        - BankId
+        - NspkBankId
+        - BankName
+        - BankLogo
+        - BankOrder
 tags:
   - name: Deliveries
     description: Operations related to deliveries

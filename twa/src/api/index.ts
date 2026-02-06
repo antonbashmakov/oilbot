@@ -14,7 +14,8 @@ import {
     AddToCartItem,
     RemoveFromCartItem,
     CustomerOverview,
-    OrderOverview
+    OrderOverview,
+    Bank
 } from "@/api/models";
 import { UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import useClient from "@/api/useClient";
@@ -79,13 +80,24 @@ export const useGetOrdersQuery = (customerId?: string): UseQueryResult<OrderOver
 
 // Customer hooks
 export const useGetCustomerOverviewQuery = (customerId?: string): UseQueryResult<CustomerOverview> => {
-    return useApiQuery("/api/private/customers/{customerId}", {
-        params: {
-            path: {
-                customerId: customerId || ''
-            }
-        }
-    }, { retry: 1, enabled: !!customerId } as any);
+  return useApiQuery("/api/private/customers/{customerId}", {
+    params: {
+      path: {
+        customerId: customerId || ''
+      }
+    }
+  }, { retry: 1, enabled: !!customerId } as any);
+};
+
+// Bank hooks
+export const useGetCustomerBanksQuery = (customerId?: string): UseQueryResult<Bank[]> => {
+  return useApiQuery("/api/private/customers/{customerId}/banks", {
+    params: {
+      path: {
+        customerId: customerId || ''
+      }
+    }
+  }, { retry: 1, enabled: !!customerId } as any);
 };
 
 // Cart hooks

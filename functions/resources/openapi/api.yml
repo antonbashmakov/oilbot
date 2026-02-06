@@ -1257,6 +1257,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /private/customers/{customerId}/banks:
+    get:
+      operationId: getCustomerBanks
+      summary: Get banks for a customer
+      description: Retrieve a list of banks associated with a customer
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with list of banks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Bank'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /public/users/me:
     get:

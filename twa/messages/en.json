@@ -140,7 +140,18 @@
       "prefix": "I agree to the terms of the subscription for {price}/month, billed monthly. Read the",
       "link": "Agreement",
       "suffix": "."
-    }
+    },
+    "selectBank": "Select Bank",
+    "selectBankDescription": "For payment via Fast Payment System",
+    "sbpInfoTitle": "Payment via SBP",
+    "sbpInfoDescription": "Select your bank for quick payment. After selection, you will be redirected to the bank app to confirm the payment.",
+    "cancel": "Cancel",
+    "moreBanksMessage": "More banks being added monthly",
+    "loading": "Loading...",
+    "error": "Error",
+    "tryAgain": "Please try again later",
+    "retry": "Retry",
+    "noBanksAvailable": "No banks available at the moment"
   },
   "header": {
     "subscription": {
