@@ -278,6 +278,44 @@ privateApi.get("/customers/:customerId/orders", async (req: express.Request, res
     return api.error(res, err.message || "Internal server error");
   }
 });
+
+privateApi.get("/customers/:customerId/orders/:orderId", async (req: express.Request, res: express.Response) => {
+  try {
+    const {customerId, orderId} = req.params;
+
+    // Check if customer exists
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    // Get the specific order
+    const order = await orderService.find(orderId);
+    if (!order) {
+      return api.notFound(res, "Order not found");
+    }
+
+    // Verify the order belongs to the customer
+    if (order.owner.id !== String(customer.id)) {
+      return api.notFound(res, "Order not found for this customer");
+    }
+
+    // Get payment for this order
+    const payments = await paymentService.findByOrderIds([orderId]);
+    const payment = payments.length > 0 ? payments[0] : undefined;
+
+    // Construct order overview (following same pattern as getCustomerOrders)
+    const overview: OrderOverview = {
+      ...order,
+      payment: payment,
+    };
+
+    return api.send(res, overview);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
 /*
 privateApi.post("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
