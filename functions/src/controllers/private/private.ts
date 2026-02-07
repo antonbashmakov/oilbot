@@ -296,7 +296,7 @@ privateApi.get("/customers/:customerId/orders/:orderId", async (req: express.Req
     }
 
     // Verify the order belongs to the customer
-    if (order.owner.id !== String(customer.id)) {
+    if (String(order.owner.id) !== String(customer.id)) {
       return api.notFound(res, "Order not found for this customer");
     }
 

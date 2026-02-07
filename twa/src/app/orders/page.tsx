@@ -282,9 +282,10 @@ export default function OrdersPage() {
             const opacityClass = order.status === 'CANCELED' ? 'opacity-80' : '';
 
             return (
-              <div 
+              <Link 
                 key={order.id} 
-                className={`flex flex-col bg-white dark:bg-[#2a171a] rounded-xl p-5 shadow-sm border border-slate-100 dark:border-transparent ${opacityClass}`}
+                href={`/orders/${order.id}`}
+                className={`flex flex-col bg-white dark:bg-[#2a171a] rounded-xl p-5 shadow-sm border border-slate-100 dark:border-transparent ${opacityClass} transition-all hover:scale-[1.01] hover:shadow-md active:scale-[0.99] cursor-pointer`}
               >
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex flex-col">
@@ -316,11 +317,11 @@ export default function OrdersPage() {
                       {order.total?.toFixed(2) || '0.00'}₽
                     </span>
                   </div>
-                  { order.status === 'PAYMENT_IN_PROGRESS' && <Link href={order.payment?.payment_url!} className={`flex cursor-pointer items-center justify-center rounded-lg h-9 px-5 transition-colors text-sm font-bold leading-normal tracking-wide ${actionButton.className}`}>
+                  { order.status === 'PAYMENT_IN_PROGRESS' && <div className={`flex cursor-pointer items-center justify-center rounded-lg h-9 px-5 transition-colors text-sm font-bold leading-normal tracking-wide ${actionButton.className}`}>
                     {actionButton.text}
-                  </Link>}
+                  </div>}
                 </div>
-              </div>
+              </Link>
             );
           })
         )}

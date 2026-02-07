@@ -280,6 +280,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/broadcast": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a new broadcast task
+         * @description Create a new broadcast task with the given message.
+         */
+        post: operations["createBroadcastTask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/broadcast/{taskId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run a broadcast task once
+         * @description Pick BroadcastTask from DB and run the task once using BroadcastService, returning list of BroadcastResult objects.
+         */
+        post: operations["runBroadcastTask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/private/items/category/{category}": {
         parameters: {
             query?: never;
@@ -406,6 +446,26 @@ export interface paths {
          * @description Create a new order from a customer's cart
          */
         post: operations["createOrderFromCart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/private/customers/{customerId}/orders/{orderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a specific order for a customer
+         * @description Retrieve a specific order by ID for a customer
+         */
+        get: operations["getCustomerOrderById"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -805,6 +865,28 @@ export interface components {
              */
             id: string;
         };
+        CustomerRef: {
+            /**
+             * @description Customer ID
+             * @example 1019705782
+             */
+            id: string;
+            /**
+             * @description Customer's username
+             * @example getting_drunk
+             */
+            username?: string;
+            /**
+             * @description Customer's first name
+             * @example Антон
+             */
+            first_name?: string;
+            /**
+             * @description Customer's last name
+             * @example Антон
+             */
+            last_name?: string;
+        };
         Item: {
             /**
              * @description Item category
@@ -916,6 +998,11 @@ export interface components {
              * @example Сёмга филе Филе на коже 1.8 Кг
              */
             name: string;
+            /**
+             * @description Category of the stats item
+             * @example Сёмга филе Филе на коже 1.8 Кг
+             */
+            category: string;
         };
         ItemStats: {
             /**
@@ -1378,6 +1465,27 @@ export interface components {
             pickups: components["schemas"]["Order"][];
             /** @description List of delivery orders */
             deliveries: components["schemas"]["Order"][];
+        };
+        /** @description Result of a broadcast operation */
+        BroadcastResult: {
+            /** @description ID of the broadcast task */
+            id: string;
+            /** @description ID of the broadcast task */
+            broadcast_task_id: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the object was created
+             * @example 2025-01-10T14:30:00Z
+             */
+            created_at: string;
+            /** @description Customer reference */
+            customer: components["schemas"]["CustomerRef"];
+            /** @description Whether the broadcast was successful */
+            success: boolean;
+            /** @description Result message */
+            message: string;
+            /** @description Error details if any */
+            error?: Record<string, never> | null;
         };
     };
     responses: never;
@@ -2166,6 +2274,97 @@ export interface operations {
             };
         };
     };
+    createBroadcastTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description The message to broadcast to customers
+                     * @example Hello, this is a broadcast message
+                     */
+                    message: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Broadcast task created successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request (e.g., missing message) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    runBroadcastTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Broadcast task ID */
+                taskId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Broadcast task executed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: components["schemas"]["BroadcastResult"][];
+                    };
+                };
+            };
+            /** @description Broadcast task not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getItemsByCategory: {
         parameters: {
             query?: never;
@@ -2586,6 +2785,53 @@ export interface operations {
                 };
             };
             /** @description Customer not found or cart is empty */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getCustomerOrderById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+                /** @description Order ID */
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response with order details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: components["schemas"]["OrderOverview"];
+                    };
+                };
+            };
+            /** @description Customer or order not found */
             404: {
                 headers: {
                     [name: string]: unknown;
