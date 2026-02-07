@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "deploy": "firebase deploy --only hosting:twa",
     "openapi": "openapi-typescript openapi/api.yml -o src/api/openapi/api.d.ts && openapi-typescript openapi/models.yml -o src/api/openapi/models.d.ts"
   },
   "dependencies": {
