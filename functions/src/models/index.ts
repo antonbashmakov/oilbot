@@ -125,6 +125,7 @@ export type OrderPaymentConfirmedEvent = OutboxEvent & {
     external_id: string;
     subscription_id?: string;
     rebill_id?: string;
+    account_token?: string;
   }
 };
 export type ChargeSubscriptionEvent = OutboxEvent & {

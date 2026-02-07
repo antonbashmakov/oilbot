@@ -41,9 +41,9 @@ class SubscriptionPaymentConfirmedProcessor extends AbstractProcessor {
       const paymentDocRef = paymentService.getCollection().doc(payment.id);
       t.update(paymentDocRef, {success: true, status: "CONFIRMED"});
 
-      if (event.payload.rebill_id) {
+      if (event.payload.rebill_id || event.payload.account_token) {
         const accountingRef = customerService.getAccountingRef(subscriptionId);
-        t.set(accountingRef, {id: subscriptionId, rebill_id: event.payload.rebill_id});
+        t.set(accountingRef, {id: subscriptionId, rebill_id: event.payload.rebill_id || "", account_token: event.payload.account_token || ""}, {merge: true});
       }
     });
 

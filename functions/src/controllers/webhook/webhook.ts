@@ -34,7 +34,8 @@ webhookApi.use(express.json());
 interface PaymentWebhookBody {
   TerminalKey: string;
   OrderId: string;
-  RebillId: string;
+  RebillId?: string;
+  AccountToken?: string;
   Success: boolean;
   Status: string;
   Data?: any; // custom objects
@@ -71,6 +72,7 @@ webhookApi.post("/payment", async (req: express.Request, res: express.Response) 
           subscription_id: body.Data?.SubscriptionId,
           external_id: `${body.PaymentId}`, // we do store them as strings
           rebill_id: body.RebillId,
+          account_token: body.AccountToken,
         },
       };
 
