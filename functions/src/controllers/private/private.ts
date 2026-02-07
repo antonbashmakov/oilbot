@@ -567,7 +567,7 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
           created_at: new Date(),
           next_payment_at: nextPaymentDate,
           status: "PENDING",
-          fee: 300,
+          fee: 10,
         };
 
         const paymentRequest = method === "sbp" ? tbankService.subscriptionToInitQRPaymentRequest(subscription) : tbankService.subscriptionToInitCardPaymentRequest(subscription);
@@ -585,12 +585,12 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
         if (!paymentResponse.Success) {
           throw new Error(`QR Payment initialization failed: ${paymentResponse.Message}; ${paymentResponse.Details}`);
         }
-
+        // https://qr.nspk.ru/AD1P0060EL96K9C18LLRIJ39S23RO4HP?type=02&bank=100000000004&sum=1000&cur=RUB&crc=92EA
         const payment: Payment = {
           id: "",
           external_id: paymentResponse.PaymentId,
           terminal_key: paymentRequest.TerminalKey,
-          payment_url:  method === "sbp" ? paymentResponse.DATA! : paymentResponse.PaymentURL!,
+          payment_url:  method === "sbp" ? paymentResponse.Data! : paymentResponse.PaymentURL!,
           order_id: customerId,
           amount: subscription.fee * 100,
           total: subscription.fee * 100,

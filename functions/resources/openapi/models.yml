@@ -326,7 +326,7 @@ components:
         PaymentURL:
           type: string
           example: "https://pay.tbank.ru/new/fU1ppgqa"
-        DATA:
+        Data:
           type: string
           description: "Данные для оплаты через СБП (поле возвращается, если Method=SBP)"
           example: "https://pay.tbank.ru/new/fU1ppgqa"

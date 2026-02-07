@@ -193,7 +193,7 @@ export interface components {
              * @description Данные для оплаты через СБП (поле возвращается, если Method=SBP)
              * @example https://pay.tbank.ru/new/fU1ppgqa
              */
-            DATA?: string;
+            Data?: string;
         };
         /** @description A task for broadcasting messages */
         BroadcastTask: {
