@@ -22,7 +22,7 @@ import {
 import * as dotenv from "dotenv";
 // import {logger} from "firebase-functions/v1";
 
-import { DeliveryRef, ItemOverview, Order, OrderCreatedEvent, OrderOverview, Payment, Subscription } from "../../models";
+import {DeliveryRef, ItemOverview, Order, OrderCreatedEvent, OrderOverview, Payment, Subscription} from "../../models";
 import _ = require("lodash");
 // import * as jwt from "jsonwebtoken";
 import * as cookieParser from "cookie-parser";
@@ -57,7 +57,7 @@ const orderPickingService = new OrderPickingService(db);
 const privateApi = express();
 
 privateApi.use(cors(
-  { origin: true } // allows all cross origin xhr requests
+  {origin: true} // allows all cross origin xhr requests
 ));
 
 privateApi.use(cookieParser());
@@ -99,7 +99,7 @@ privateApi.get("/deliveries", async (req: express.Request, res: express.Response
 
 privateApi.get("/deliveries/:id", async (req: express.Request, res: express.Response) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const delivery = await deliveryService.find(id);
 
     if (!delivery) {
@@ -115,7 +115,7 @@ privateApi.get("/deliveries/:id", async (req: express.Request, res: express.Resp
 
 privateApi.get("/items/category/:category", async (req: express.Request, res: express.Response) => {
   try {
-    const { category } = req.params;
+    const {category} = req.params;
 
     const deliveryService = new DeliveryService(db);
 
@@ -165,14 +165,14 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
 
 privateApi.get("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
+    const {customerId} = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
       return api.notFound(res, "Customer not found");
     }
 
-    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
     return api.send(res, cartItems || []);
   } catch (err: any) {
     functions.logger.error(err);
@@ -182,8 +182,8 @@ privateApi.get("/customers/:customerId/cart/items", async (req: express.Request,
 
 privateApi.post("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
-    const { itemId } = req.body;
+    const {customerId} = req.params;
+    const {itemId} = req.body;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
@@ -205,8 +205,8 @@ privateApi.post("/customers/:customerId/cart/items", async (req: express.Request
 
 privateApi.delete("/customers/:customerId/cart/items", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
-    const { cartItemId, itemId } = req.body;
+    const {customerId} = req.params;
+    const {cartItemId, itemId} = req.body;
 
     if (!cartItemId && !itemId) {
       return api.badRequest(res, "Either cartItemId or itemId must be provided");
@@ -218,7 +218,7 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
     }
 
     if (itemId) {
-      const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+      const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
       const itemsToRemove = cartItems?.filter((item) => item.item_id === itemId);
       cartItemService.deleteTransactionally(itemsToRemove);
 
@@ -228,7 +228,7 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
 
     // Assuming there's a method to remove cart item by ID
     // We need to check if the cart item belongs to this customer
-    const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+    const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
     const cartItem = cartItems?.find((item) => item.id === cartItemId);
 
     if (!cartItem) {
@@ -251,7 +251,7 @@ privateApi.delete("/customers/:customerId/cart/items", async (req: express.Reque
 
 privateApi.get("/customers/:customerId/orders", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
+    const {customerId} = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
@@ -354,7 +354,7 @@ privateApi.post("/customers/:customerId/orders", async (req: express.Request, re
 
 privateApi.get("/customers/:customerId", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
+    const {customerId} = req.params;
 
     const customer = await customerService.find(customerId);
     if (!customer) {
@@ -387,7 +387,7 @@ privateApi.get("/customers/:customerId", async (req: express.Request, res: expre
 
 privateApi.get("/customers/:customerId/items/:itemId", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId, itemId } = req.params;
+    const {customerId, itemId} = req.params;
 
     // Check if customer exists
     const customer = await customerService.find(customerId);
@@ -438,7 +438,7 @@ privateApi.get("/customers/:customerId/items/:itemId", async (req: express.Reque
 
 privateApi.post("/customers/:customerId/cart/order", async (req: express.Request, res: express.Response) => {
   try {
-    const { customerId } = req.params;
+    const {customerId} = req.params;
     const idempotencyKey = req.headers["idempotency_key"] as string;
 
     if (!idempotencyKey) {
@@ -454,10 +454,9 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
     const result = await idempotencyGuardService.runIdempotentRequest<{ orders: Order[], payments: Payment[] }>(
       `cart-order-${customerId}-${idempotencyKey}`,
       async () => {
-
         const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
 
-        const cartItems = await cartItemService.fetchForOwner({ id: String(customer.id) });
+        const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
         if (!cartItems || cartItems.length === 0) {
           throw new Error("Cart is empty");
         }
@@ -547,7 +546,6 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       }
     );
     return api.send(res, {orders: result.orders, payments: result.payments});
-
   } catch (err: any) {
     functions.logger.error(err);
 
@@ -577,7 +575,7 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
   if (!idempotencyKey) {
     return api.badRequest(res, "idempotency_key header is required");
   }
-  const { customerId } = req.params;
+  const {customerId} = req.params;
 
   // Check if customer exists
   const customer = await customerService.find(customerId);
@@ -636,7 +634,7 @@ privateApi.post("/customers/:customerId/subscriptions", async (req: express.Requ
         };
       });
 
-    return api.send(res, { paymentUrl: result.payment.payment_url });
+    return api.send(res, {paymentUrl: result.payment.payment_url});
   } catch (err: any) {
     functions.logger.error(err);
 

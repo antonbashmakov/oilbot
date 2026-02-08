@@ -168,7 +168,7 @@ export const verifyTelegramInitData: (initData: string, botToken: string) => Ver
     // Validate init data.
     validate(initData, botToken, {
       // We consider init data sign valid for 1 hour from their creation moment.
-      expiresIn: 36001111111111111,
+      expiresIn: 3600,
     });
 
     const data = parse(initData);
