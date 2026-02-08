@@ -19,7 +19,7 @@ export default function OrdersPage() {
   const [orderedOrders, setOrderedOrders] = useState<OrderOverview[]>([]);
 
   useEffect(() => {
-    const sorted = _.orderBy(orders, "created_at", 'desc');
+    const sorted = _.orderBy(orders.filter(o => o.type === 'ORIGINAL'), "created_at", 'desc');
     setOrderedOrders(sorted);
   }, [orders]);
 

@@ -3,31 +3,102 @@
 import { useRouter, useParams } from "next/navigation";
 import { useGetOrderQuery } from "@/api";
 import { useUser } from "@/api/user/provider";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { CartItem, OrderPicking, PickingItem } from "@/api/models";
+
+type AggregatedItem = {
+      item_id: string;
+      name: string;
+      totalFraction: number;
+      price_for_unit: number;
+      category: string;
+      quantity: number;
+      price: number;
+    };
 
 export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { user } = useUser();
-  
+
   const orderId = params.id as string;
-  
+
   // Fetch order details using the query hook
   const { data: order, isLoading, error } = useGetOrderQuery(user?.id, orderId);
+
+  console.log("Order data:", order);
+
+  // Aggregate items by item_id
+  const aggregatedItems = useMemo(() => {
+    if (!order?.items) return [];
+
+    const itemsMap = new Map<string, AggregatedItem>();
+
+    order.items.forEach((item: CartItem) => {
+      const existing = itemsMap.get(item.item_id);
+      if (existing) {
+        // Sum up fractions for same item_id
+        existing.totalFraction += item.fraction;
+        existing.quantity += item.quantity;
+        existing.price += item.price;
+      } else {
+        itemsMap.set(item.item_id, {
+          item_id: item.item_id,
+          name: item.name,
+          totalFraction: item.fraction,
+          price_for_unit: item.price_for_unit,
+          category: item.category,
+          quantity: item.quantity,
+          price: item.price,
+        });
+      }
+    });
+
+    return Array.from(itemsMap.values());
+  }, [order]);
+  // Aggregate items by item_id
+  const aggregatedPickings = useMemo(() => {
+    if (!order?.picking?.items) return {};
+
+    const itemsMap : Record<string, AggregatedItem> = {};
+
+    order.picking.items.forEach((item: PickingItem) => {
+      const existing = itemsMap[item.item_id];
+      if (existing) {
+        // Sum up fractions for same item_id
+        existing.totalFraction += item.fraction;
+        existing.quantity += item.quantity;
+        existing.price += item.price;
+      } else {
+        itemsMap[item.item_id] = {
+          item_id: item.item_id,
+          name: item.name,
+          totalFraction: item.fraction,
+          price_for_unit: item.price_for_unit,
+          category: item.category,
+          quantity: item.quantity,
+          price: item.price,
+        }
+      }
+      });
+
+    return itemsMap;
+  }, [order]);
+
+  const totalDifference = useMemo(() => {
+    if (!order) return 0;
+    return (order.total || 0) - (order.picking?.total || 0);
+  }, [order?.total, order?.picking?.total]);
 
   const handleBack = () => {
     router.back();
   };
 
-  const handleViewBalance = () => {
-    // Navigate to store balance page
-    router.push("/profile");
-  };
-
-  const handleHelp = () => {
-    // Open help or contact support
-    window.open("https://t.me/posebestoimosti_saratov", "_blank");
-  };
+  const totalDifferenceClass = useMemo(() => {
+    if (totalDifference > 0) return "text-green-600 dark:text-green-400";
+    if (totalDifference < 0) return "text-red-600 dark:text-red-400";
+    return "text-text-sub dark:text-[#dcb8be]";
+  }, [totalDifference]);
 
   // Show loading state
   if (isLoading) {
@@ -110,7 +181,7 @@ export default function OrderDetailPage() {
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto pb-44 no-scrollbar">
-        {/* Refund notification */}
+        {/* Refund notification 
         <div className="px-4 pt-4 mb-6">
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 p-4 rounded-xl">
             <div className="flex gap-3 items-start">
@@ -129,6 +200,7 @@ export default function OrderDetailPage() {
             </div>
           </div>
         </div>
+        */}
 
         {/* Itemized breakdown */}
         <div className="px-4 mb-6">
@@ -139,98 +211,58 @@ export default function OrderDetailPage() {
             </span>
           </div>
           <div className="space-y-4">
-            {/* Item 1: Premium Ribeye Steak */}
-            <div className="bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-white/5">
-              <div className="flex gap-3 mb-4">
-                <div 
-                  className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-800 shrink-0 bg-cover bg-center shadow-inner"
-                  style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCRQnrZqEdMJggfCSqNWIUakd43HcQv1sVHSvJ0uhLLGGWLIEO-DTfTQYjJ0rTpVMq3DjbwjPGOafYdFrJb8u5HCyqQfzL12_XwNBlF-Pq5DMpWuMllv1Z3ponocH91-wGhXiUTxcZEENNq6Rd4GovL2B4llfYlrjp3ZAuXKx8FMTNwJqoBCEpkj6uRw3v5016O7GpmcNoBOM32DUgYTjIyCZIjbcOEv6pZPy0xLZIGpNxZEaAMQs9A2wpqWdWgql7FVAz7lBXJh3O4')" }}
-                />
-                <div className="flex-1 min-w-0 flex items-center">
-                  <h4 className="font-bold text-text-main dark:text-white text-sm truncate">
-                    Premium Ribeye Steak
-                  </h4>
-                </div>
-              </div>
-              <div className="space-y-2 border-t border-gray-50 dark:border-white/5 pt-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-sub dark:text-[#dcb8be]">Ordered: 0.50kg * $30.00</span>
-                  <span className="font-semibold text-text-main dark:text-white">$15.00</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-primary font-bold">Actual: 0.48kg * $30.00</span>
-                  <span className="font-bold text-text-main dark:text-white">$14.40</span>
-                </div>
-              </div>
-              <div className="mt-3 flex justify-between items-center bg-gray-50 dark:bg-black/20 px-3 py-2 rounded-lg border border-gray-100 dark:border-white/5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-text-sub dark:text-[#dcb8be]">
-                  Price Difference
-                </span>
-                <span className="text-sm font-bold text-green-600 dark:text-green-400">-$0.60</span>
-              </div>
-            </div>
+            {aggregatedItems.map((item, index) => {
+              // Calculate total price for the aggregated item
+              const totalPrice = item.price;
+              const formattedFraction = item.totalFraction.toFixed(3);
+              const formattedPricePerUnit = item.price_for_unit.toFixed(2);
+              const formattedTotalPrice = totalPrice.toFixed(2);
 
-            {/* Item 2: Atlantic Salmon Fillet */}
-            <div className="bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 opacity-90">
-              <div className="flex gap-3 mb-4">
-                <div 
-                  className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-800 shrink-0 bg-cover bg-center"
-                  style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDmNoUvnbFnhJGMGhn64mTlA8bG9lKeHSwGa1ZXUTlo-0--cR6B4ilGVpoat-cKca2dIKS0LodtNtnOkYVBspVUh1bmmtiAdaOt1ivJccpHPZK4Tmbvo2LW3tWR_XRoGXANTJWFTkVg8q-PPIAPeZ7UGMHL255lF-aduxjkDsStc3WLXbSzyyWbqIuPYWpmSlL96J_YI7yjYtxC1kKR-E9APW2XFptE9H3lhtysyxyw7Srig_nPofB9js4E8bjJxBTTKyc2MfUz3IHt')" }}
-                />
-                <div className="flex-1 min-w-0 flex items-center">
-                  <h4 className="font-bold text-text-main dark:text-white text-sm truncate">
-                    Atlantic Salmon Fillet
-                  </h4>
+              const pickedItem = aggregatedPickings[item.item_id];
+              const pickedFraction =  pickedItem?.totalFraction || 0;
+              const pickedTotalPrice = pickedItem?.price || 0;
+              const formattedPickedFraction = pickedFraction.toFixed(3);
+              const formattedPickedTotalPrice = pickedTotalPrice.toFixed(2);
+              const diff =  totalPrice - pickedTotalPrice;
+              const diffClass = diff > 0 ? "text-green-600 dark:text-green-400" : diff < 0 ? "text-red-600 dark:text-red-400" : "text-text-sub dark:text-[#dcb8be]";
+              
+              // For now, we'll skip actual fulfilled fields as requested
+              // We'll just show the ordered amount
+              return (
+                <div key={item.item_id || index} className="bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-white/5">
+                  <div className="flex gap-3 mb-4">
+                    <div className="flex-1 min-w-0 flex items-center">
+                      <h4 className="font-bold text-text-main dark:text-white text-sm truncate">
+                        {item.name}
+                      </h4>
+                    </div>
+                  </div>
+                  <div className="space-y-2 border-t border-gray-50 dark:border-white/5 pt-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-text-sub dark:text-[#dcb8be]">
+                        Ordered: {formattedFraction} * {formattedPricePerUnit}
+                      </span>
+                      <span className="font-semibold text-text-main dark:text-white">{formattedTotalPrice}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-primary font-bold">
+                        Actual: {formattedPickedFraction} * {formattedPricePerUnit}
+                      </span>
+                      <span className="font-bold text-text-main dark:text-white">-{formattedPickedTotalPrice}</span>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex justify-between items-center text-xs">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-text-sub dark:text-[#dcb8be]">
+                      Price Difference
+                    </span>
+                    <span className={`${diffClass} text-sm font-bold text-text-sub dark:text-[#dcb8be]`}>{diff.toFixed(2)}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2 border-t border-gray-50 dark:border-white/5 pt-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-sub dark:text-[#dcb8be]">Ordered: 1.00 unit * $22.00</span>
-                  <span className="font-semibold text-text-main dark:text-white">$22.00</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-sub dark:text-[#dcb8be] font-medium">Actual: 1.00 unit * $22.00</span>
-                  <span className="font-bold text-text-main dark:text-white">$22.00</span>
-                </div>
-              </div>
-              <div className="mt-3 flex justify-between items-center bg-gray-50 dark:bg-black/20 px-3 py-2 rounded-lg border border-gray-100 dark:border-white/5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-text-sub dark:text-[#dcb8be]">
-                  Price Difference
-                </span>
-                <span className="text-sm font-bold text-text-sub dark:text-[#dcb8be]">$0.00</span>
-              </div>
-            </div>
+              );
+            })}
 
-            {/* Item 3: Aged Gouda */}
-            <div className="bg-white dark:bg-surface-dark p-4 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 opacity-90">
-              <div className="flex gap-3 mb-4">
-                <div 
-                  className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-800 shrink-0 bg-cover bg-center"
-                  style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDyOaocTfH__x4hEJgYhag5RoiNJ4GRbsSWMlaLcKmMNYBhajnvbW8fy9P0ZYtsx4tPMNUoFMX18l1i0hHhmaWU30iXyCgyMKrq37czY7_TCcVYyrV3RXpiGp93ojrGo3HXU3GZzfxop-VeTG0fvJ2YjS-gFlAfJtG4i10T-NQ1tntuJlEf5Q0tqaE0dwAV2O1zFUCHIdtl5qfaU4KRpY-7P9JGFjcSWdm_Qb5qdOUgl-llR9H8g6p6xQFAdExKrKEy1UR4a0b9-dII')" }}
-                />
-                <div className="flex-1 min-w-0 flex items-center">
-                  <h4 className="font-bold text-text-main dark:text-white text-sm truncate">
-                    Aged Gouda
-                  </h4>
-                </div>
-              </div>
-              <div className="space-y-2 border-t border-gray-50 dark:border-white/5 pt-3">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-sub dark:text-[#dcb8be]">Ordered: 0.20kg * $62.50</span>
-                  <span className="font-semibold text-text-main dark:text-white">$12.50</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-text-sub dark:text-[#dcb8be] font-medium">Actual: 0.20kg * $62.50</span>
-                  <span className="font-bold text-text-main dark:text-white">$12.50</span>
-                </div>
-              </div>
-              <div className="mt-3 flex justify-between items-center bg-gray-50 dark:bg-black/20 px-3 py-2 rounded-lg border border-gray-100 dark:border-white/5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-text-sub dark:text-[#dcb8be]">
-                  Price Difference
-                </span>
-                <span className="text-sm font-bold text-text-sub dark:text-[#dcb8be]">$0.00</span>
-              </div>
-            </div>
+
+       
           </div>
         </div>
 
@@ -240,20 +272,21 @@ export default function OrderDetailPage() {
             <div className="p-5 space-y-4">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-text-sub dark:text-[#dcb8be]">Original Order Total</span>
-                <span className="font-semibold text-text-main dark:text-white">$49.50</span>
+                <span className="font-semibold text-text-main dark:text-white">
+                  {order?.total?.toFixed(2) || '0.00'}
+                </span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-text-sub dark:text-[#dcb8be]">Actual Fulfilled Total</span>
-                <span className="font-semibold text-text-main dark:text-white">$48.90</span>
+                <span className="font-semibold text-text-main dark:text-white">
+                  -{order?.picking?.total?.toFixed(2) || '0.00'}
+                </span>
               </div>
               <div className="pt-4 mt-2 border-t border-gray-100 dark:border-white/10 flex justify-between items-center">
                 <div>
                   <span className="block text-base font-bold text-primary">Total Difference</span>
-                  <span className="text-[11px] text-green-600 dark:text-green-400 font-medium">
-                    Credited to Balance
-                  </span>
                 </div>
-                <span className="text-2xl font-black text-primary">$0.60</span>
+                <span className={`${totalDifferenceClass} text-2xl font-black text-primary`}>{totalDifference}</span>
               </div>
             </div>
             <div className="bg-gray-50 dark:bg-white/5 px-5 py-3 border-t border-gray-100 dark:border-white/10">
@@ -265,7 +298,7 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Footer buttons */}
+      {/* Footer buttons 
       <div className="absolute bottom-0 left-0 w-full bg-white/95 dark:bg-background-dark/95 backdrop-blur-lg border-t border-gray-100 dark:border-white/5 p-4 flex flex-col gap-3 z-20 pb-8 rounded-t-2xl shadow-[0_-8px_20px_rgba(0,0,0,0.08)]">
         <button
           onClick={handleViewBalance}
@@ -282,7 +315,7 @@ export default function OrderDetailPage() {
           Support / Weighing Policy
         </button>
       </div>
-
+*/}
       {/* Global styles for scrollbar */}
       <style jsx global>{`
         .no-scrollbar {
