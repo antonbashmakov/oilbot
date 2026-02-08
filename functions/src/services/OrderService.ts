@@ -12,6 +12,8 @@ class OrderService extends AbstractService<Order> {
   async createOrderFromCart(customer: Customer, cartItems: CartItem[], delivery: DeliveryRef, isMember: boolean): Promise<Order> {
     const orderRef = this.getCollection().doc();
 
+    cartItems = cartItems.map((item) => ({...item, price: isMember ? item.price : item.non_member_price}));
+
     const order: Order = {
       id: orderRef.id,
       name: customer.first_name,
