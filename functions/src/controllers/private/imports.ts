@@ -14,6 +14,7 @@ import TBankService from "../../services/payments/TBankService";
 import SubscriptionService from "../../services/SubscriptionService";
 import CustomerBalanceService from "../../services/CustomerBalanceService";
 import * as CONSTANTS from "../../constants";
+import OrderPickingService from "../../services/OrderPickingService";
 
 import {api} from "../../services/utils";
 import MockTBankService from "../../services/payments/MockTBankService";
@@ -40,6 +41,7 @@ export {
   SubscriptionService,
   CustomerBalanceService,
   EventPublisher,
+  OrderPickingService,
   CONSTANTS,
 };
 

@@ -16,6 +16,7 @@ import {
   CustomerBalanceService,
   EventPublisher,
   CONSTANTS,
+  OrderPickingService,
 } from "./imports";
 // import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
@@ -49,6 +50,7 @@ const idempotencyGuardService = new IdempotencyGuardService(db);
 const tbankService = new TBankService();
 const subscriptionService = new SubscriptionService(db);
 const customerBalanceService = new CustomerBalanceService(db);
+const orderPickingService = new OrderPickingService(db);
 
 
 const privateApi = express();
@@ -303,11 +305,13 @@ privateApi.get("/customers/:customerId/orders/:orderId", async (req: express.Req
     // Get payment for this order
     const payments = await paymentService.findByOrderIds([orderId]);
     const payment = payments.length > 0 ? payments[0] : undefined;
+    const picking = await orderPickingService.find(orderId);
 
     // Construct order overview (following same pattern as getCustomerOrders)
     const overview: OrderOverview = {
       ...order,
       payment: payment,
+      picking,
     };
 
     return api.send(res, overview);
