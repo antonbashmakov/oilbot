@@ -77,6 +77,17 @@ export const useGetOrdersQuery = (customerId?: string): UseQueryResult<OrderOver
     }, { retry: 1, enabled: !!customerId } as any);
 };
 
+export const useGetOrderQuery = (customerId?: string, orderId?: string): UseQueryResult<OrderOverview> => {
+    return useApiQuery("/api/private/customers/{customerId}/orders/{orderId}", {
+        params: {
+            path: {
+                customerId: customerId || '',
+                orderId: orderId || ''
+            }
+        }
+    }, { retry: 1, enabled: !!customerId && !!orderId } as any);
+};
+
 // Customer hooks
 export const useGetCustomerOverviewQuery = (customerId?: string): UseQueryResult<CustomerOverview> => {
     return useApiQuery("/api/private/customers/{customerId}", {

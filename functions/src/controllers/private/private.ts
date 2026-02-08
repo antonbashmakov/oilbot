@@ -16,6 +16,7 @@ import {
   CustomerBalanceService,
   EventPublisher,
   CONSTANTS,
+  OrderPickingService,
 } from "./imports";
 // import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
@@ -49,6 +50,7 @@ const idempotencyGuardService = new IdempotencyGuardService(db);
 const tbankService = new TBankService();
 const subscriptionService = new SubscriptionService(db);
 const customerBalanceService = new CustomerBalanceService(db);
+const orderPickingService = new OrderPickingService(db);
 
 
 const privateApi = express();
@@ -273,6 +275,46 @@ privateApi.get("/customers/:customerId/orders", async (req: express.Request, res
     });
 
     return api.send(res, overviews);
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+
+privateApi.get("/customers/:customerId/orders/:orderId", async (req: express.Request, res: express.Response) => {
+  try {
+    const {customerId, orderId} = req.params;
+
+    // Check if customer exists
+    const customer = await customerService.find(customerId);
+    if (!customer) {
+      return api.notFound(res, "Customer not found");
+    }
+
+    // Get the specific order
+    const order = await orderService.find(orderId);
+    if (!order) {
+      return api.notFound(res, "Order not found");
+    }
+
+    // Verify the order belongs to the customer
+    if (String(order.owner.id) !== String(customer.id)) {
+      return api.notFound(res, "Order not found for this customer");
+    }
+
+    // Get payment for this order
+    const payments = await paymentService.findByOrderIds([orderId]);
+    const payment = payments.length > 0 ? payments[0] : undefined;
+    const picking = await orderPickingService.find(orderId);
+
+    // Construct order overview (following same pattern as getCustomerOrders)
+    const overview: OrderOverview = {
+      ...order,
+      payment: payment,
+      picking,
+    };
+
+    return api.send(res, overview);
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || "Internal server error");

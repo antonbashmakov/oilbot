@@ -452,6 +452,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/private/customers/{customerId}/orders/{orderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a specific order for a customer
+         * @description Retrieve a specific order by ID for a customer
+         */
+        get: operations["getCustomerOrderById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/private/customers/{customerId}": {
         parameters: {
             query?: never;
@@ -2765,6 +2785,53 @@ export interface operations {
                 };
             };
             /** @description Customer not found or cart is empty */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getCustomerOrderById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Customer ID */
+                customerId: string;
+                /** @description Order ID */
+                orderId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response with order details */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example OK */
+                        code?: string;
+                        data?: components["schemas"]["OrderOverview"];
+                    };
+                };
+            };
+            /** @description Customer or order not found */
             404: {
                 headers: {
                     [name: string]: unknown;
