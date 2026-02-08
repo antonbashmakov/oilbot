@@ -150,8 +150,8 @@ export const who = async (req: express.Request, userService: UserService) => {
 
 
 export const verifyTelegramInitData = (initData: string, botToken: string) => {
-  logger.info("Verifying Telegram init data:", initData);
-  logger.info("Bot token:", botToken);
+  // logger.info("Verifying Telegram init data:", initData);
+  // logger.info("Bot token:", botToken);
   try {
     // Validate init data.
     validate(initData, botToken, {
