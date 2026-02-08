@@ -114,7 +114,9 @@
       "originalOrderTotal": "Исходная сумма заказа",
       "actualFulfilledTotal": "Фактическая сумма выполнения",
       "totalDifference": "Общая разница",
-      "finalTotalsAdjusted": "Итоговые суммы скорректированы по точному весу"
+      "finalTotalsAdjusted": "Итоговые суммы скорректированы по точному весу",
+      "payNow": "Оплатить сейчас",
+      "secureCheckout": "Безопасная оплата"
     }
   },
   "subscription": {

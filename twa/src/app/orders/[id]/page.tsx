@@ -6,16 +6,17 @@ import { useUser } from "@/api/user/provider";
 import { useState, useEffect, useMemo } from "react";
 import { CartItem, OrderPicking, PickingItem } from "@/api/models";
 import { useTranslations } from 'next-intl';
+import Link from "next/link";
 
 type AggregatedItem = {
-      item_id: string;
-      name: string;
-      totalFraction: number;
-      price_for_unit: number;
-      category: string;
-      quantity: number;
-      price: number;
-    };
+  item_id: string;
+  name: string;
+  totalFraction: number;
+  price_for_unit: number;
+  category: string;
+  quantity: number;
+  price: number;
+};
 
 export default function OrderDetailPage() {
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function OrderDetailPage() {
   const aggregatedPickings = useMemo(() => {
     if (!order?.picking?.items) return {};
 
-    const itemsMap : Record<string, AggregatedItem> = {};
+    const itemsMap: Record<string, AggregatedItem> = {};
 
     order.picking.items.forEach((item: PickingItem) => {
       const existing = itemsMap[item.item_id];
@@ -81,7 +82,7 @@ export default function OrderDetailPage() {
           price: item.price,
         }
       }
-      });
+    });
 
     return itemsMap;
   }, [order]);
@@ -182,6 +183,24 @@ export default function OrderDetailPage() {
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto pb-44 no-scrollbar">
+        {order?.status === 'PAYMENT_IN_PROGRESS' && <div className="px-4 pt-2 mb-8">
+          <div
+            className="bg-white dark:bg-surface-dark p-1 rounded-2xl shadow-sm border border-gray-100 dark:border-white/5">
+            <Link href={order.payment?.payment_url!}
+              className="w-full bg-primary hover:bg-primary/90 text-white font-extrabold h-16 rounded-[14px] flex items-center justify-between px-6 transition-all active:scale-[0.98] shadow-lg shadow-primary/20">
+              <span className="text-lg tracking-tight uppercase">{t('payNow')}</span>
+              <span className="text-2xl">{order?.total?.toFixed(2) || '0.00'}</span>
+            </Link>
+            <div className="px-4 py-2.5 flex items-center justify-center gap-2">
+              <span
+                className="material-symbols-outlined text-[14px] text-text-sub dark:text-[#dcb8be]">verified_user</span>
+              <p
+                className="text-[11px] font-semibold text-text-sub dark:text-[#dcb8be] uppercase tracking-widest">
+                {t('secureCheckout')}</p>
+            </div>
+          </div>
+        </div>
+        }
         {/* Refund notification 
         <div className="px-4 pt-4 mb-6">
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 p-4 rounded-xl">
@@ -220,15 +239,15 @@ export default function OrderDetailPage() {
               const formattedTotalPrice = totalPrice.toFixed(2);
 
               const pickedItem = aggregatedPickings[item.item_id];
-              const pickedFraction =  pickedItem?.totalFraction || 0;
+              const pickedFraction = pickedItem?.totalFraction || 0;
               const pickedTotalPrice = pickedItem?.price || 0;
-              pickedItem.price_for_unit
+
               const formattedPickedFraction = pickedFraction.toFixed(3);
               const formattedPickedPricePerUnit = pickedItem?.price_for_unit.toFixed(2) || '0.00';
               const formattedPickedTotalPrice = pickedTotalPrice.toFixed(2);
-              const diff =  totalPrice - pickedTotalPrice;
+              const diff = totalPrice - pickedTotalPrice;
               const diffClass = diff > 0 ? "text-green-600 dark:text-green-400" : diff < 0 ? "text-red-600 dark:text-red-400" : "text-text-sub dark:text-[#dcb8be]";
-              
+
               // For now, we'll skip actual fulfilled fields as requested
               // We'll just show the ordered amount
               return (
@@ -265,7 +284,7 @@ export default function OrderDetailPage() {
             })}
 
 
-       
+
           </div>
         </div>
 

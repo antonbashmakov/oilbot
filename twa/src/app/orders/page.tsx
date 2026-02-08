@@ -16,11 +16,10 @@ export default function OrdersPage() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'processing' | 'delivered' | 'cancelled'>('all');
   const t = useTranslations('orders');
 
-  const [orderedOrders, setOrderedOrders] = useState<OrderOverview[]>([]);
+  // const [orderedOrders, setOrderedOrders] = useState<OrderOverview[]>([]);
 
-  useEffect(() => {
-    const sorted = _.orderBy(orders.filter(o => o.type === 'ORIGINAL'), "created_at", 'desc');
-    setOrderedOrders(sorted);
+  const orderedOrders = useMemo(() => {
+    return _.orderBy(orders.filter(o => o.type === 'ORIGINAL'), "created_at", 'desc');
   }, [orders]);
 
   // Filter orders based on active filter
@@ -317,7 +316,7 @@ export default function OrdersPage() {
                       {order.total?.toFixed(2) || '0.00'}₽
                     </span>
                   </div>
-                  { order.status === 'PAYMENT_IN_PROGRESS' && <div className={`flex cursor-pointer items-center justify-center rounded-lg h-9 px-5 transition-colors text-sm font-bold leading-normal tracking-wide ${actionButton.className}`}>
+                  { order.status === 'PAYMENT_IN_PROGRESS' && <div  className={`flex cursor-pointer items-center justify-center rounded-lg h-9 px-5 transition-colors text-sm font-bold leading-normal tracking-wide ${actionButton.className}`}>
                     {actionButton.text}
                   </div>}
                 </div>

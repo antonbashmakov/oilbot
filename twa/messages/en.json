@@ -121,7 +121,9 @@
       "originalOrderTotal": "Original Order Total",
       "actualFulfilledTotal": "Actual Fulfilled Total",
       "totalDifference": "Total Difference",
-      "finalTotalsAdjusted": "Final totals adjusted for exact weighed weights"
+      "finalTotalsAdjusted": "Final totals adjusted for exact weighed weights",
+      "payNow": "Pay Now",
+      "secureCheckout": "Secure Checkout"
     }
   },
   "subscription": {
