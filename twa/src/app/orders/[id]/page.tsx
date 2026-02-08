@@ -5,6 +5,7 @@ import { useGetOrderQuery } from "@/api";
 import { useUser } from "@/api/user/provider";
 import { useState, useEffect, useMemo } from "react";
 import { CartItem, OrderPicking, PickingItem } from "@/api/models";
+import { useTranslations } from 'next-intl';
 
 type AggregatedItem = {
       item_id: string;
@@ -20,13 +21,13 @@ export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { user } = useUser();
+  const t = useTranslations('orders.detail');
 
   const orderId = params.id as string;
 
   // Fetch order details using the query hook
   const { data: order, isLoading, error } = useGetOrderQuery(user?.id, orderId);
 
-  console.log("Order data:", order);
 
   // Aggregate items by item_id
   const aggregatedItems = useMemo(() => {
@@ -113,7 +114,7 @@ export default function OrderDetailPage() {
             <span className="material-symbols-outlined">arrow_back_ios_new</span>
           </button>
           <h2 className="text-text-main dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">
-            Loading...
+            {t('loading')}
           </h2>
         </div>
         <div className="flex-1 flex items-center justify-center">
@@ -121,7 +122,7 @@ export default function OrderDetailPage() {
             <span className="material-symbols-outlined animate-spin text-primary text-4xl mb-4">
               refresh
             </span>
-            <p className="text-text-sub dark:text-[#dcb8be]">Loading order details...</p>
+            <p className="text-text-sub dark:text-[#dcb8be]">{t('loadingDetails')}</p>
           </div>
         </div>
       </div>
@@ -141,7 +142,7 @@ export default function OrderDetailPage() {
             <span className="material-symbols-outlined">arrow_back_ios_new</span>
           </button>
           <h2 className="text-text-main dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">
-            Error
+            {t('error')}
           </h2>
         </div>
         <div className="flex-1 flex items-center justify-center p-8">
@@ -149,13 +150,13 @@ export default function OrderDetailPage() {
             <span className="material-symbols-outlined text-red-500 text-4xl mb-4">
               error
             </span>
-            <p className="text-text-main dark:text-white font-medium mb-2">Failed to load order details</p>
-            <p className="text-text-sub dark:text-[#dcb8be] text-sm mb-4">Please try again later</p>
+            <p className="text-text-main dark:text-white font-medium mb-2">{t('failedToLoad')}</p>
+            <p className="text-text-sub dark:text-[#dcb8be] text-sm mb-4">{t('tryAgainLater')}</p>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
             >
-              Retry
+              {t('retry')}
             </button>
           </div>
         </div>
@@ -175,7 +176,7 @@ export default function OrderDetailPage() {
           <span className="material-symbols-outlined">arrow_back_ios_new</span>
         </button>
         <h2 className="text-text-main dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">
-          Fulfillment Details
+          {t('fulfillmentDetails')}
         </h2>
       </div>
 
@@ -205,7 +206,7 @@ export default function OrderDetailPage() {
         {/* Itemized breakdown */}
         <div className="px-4 mb-6">
           <div className="flex justify-between items-end mb-4 px-1">
-            <h3 className="text-text-main dark:text-white text-lg font-bold">Itemized Breakdown</h3>
+            <h3 className="text-text-main dark:text-white text-lg font-bold">{t('itemizedBreakdown')}</h3>
             <span className="text-text-sub dark:text-[#dcb8be] text-xs font-medium">
               {order ? `Order #${order.id?.substring(0, 8) || 'N/A'}` : 'Order #2394-FDA'}
             </span>
@@ -221,7 +222,9 @@ export default function OrderDetailPage() {
               const pickedItem = aggregatedPickings[item.item_id];
               const pickedFraction =  pickedItem?.totalFraction || 0;
               const pickedTotalPrice = pickedItem?.price || 0;
+              pickedItem.price_for_unit
               const formattedPickedFraction = pickedFraction.toFixed(3);
+              const formattedPickedPricePerUnit = pickedItem?.price_for_unit.toFixed(2) || '0.00';
               const formattedPickedTotalPrice = pickedTotalPrice.toFixed(2);
               const diff =  totalPrice - pickedTotalPrice;
               const diffClass = diff > 0 ? "text-green-600 dark:text-green-400" : diff < 0 ? "text-red-600 dark:text-red-400" : "text-text-sub dark:text-[#dcb8be]";
@@ -240,20 +243,20 @@ export default function OrderDetailPage() {
                   <div className="space-y-2 border-t border-gray-50 dark:border-white/5 pt-3">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-text-sub dark:text-[#dcb8be]">
-                        Ordered: {formattedFraction} * {formattedPricePerUnit}
+                        {t('ordered')}: {formattedFraction} * {formattedPricePerUnit}
                       </span>
                       <span className="font-semibold text-text-main dark:text-white">{formattedTotalPrice}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-primary font-bold">
-                        Actual: {formattedPickedFraction} * {formattedPricePerUnit}
+                        {t('actual')}: {formattedPickedFraction} * {formattedPickedPricePerUnit}
                       </span>
                       <span className="font-bold text-text-main dark:text-white">-{formattedPickedTotalPrice}</span>
                     </div>
                   </div>
                   <div className="mt-3 flex justify-between items-center text-xs">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-text-sub dark:text-[#dcb8be]">
-                      Price Difference
+                      {t('priceDifference')}
                     </span>
                     <span className={`${diffClass} text-sm font-bold text-text-sub dark:text-[#dcb8be]`}>{diff.toFixed(2)}</span>
                   </div>
@@ -271,27 +274,27 @@ export default function OrderDetailPage() {
           <div className="bg-white dark:bg-surface-dark rounded-xl shadow-md border border-gray-100 dark:border-white/5 overflow-hidden">
             <div className="p-5 space-y-4">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-text-sub dark:text-[#dcb8be]">Original Order Total</span>
+                <span className="text-text-sub dark:text-[#dcb8be]">{t('originalOrderTotal')}</span>
                 <span className="font-semibold text-text-main dark:text-white">
                   {order?.total?.toFixed(2) || '0.00'}
                 </span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-text-sub dark:text-[#dcb8be]">Actual Fulfilled Total</span>
+                <span className="text-text-sub dark:text-[#dcb8be]">{t('actualFulfilledTotal')}</span>
                 <span className="font-semibold text-text-main dark:text-white">
                   -{order?.picking?.total?.toFixed(2) || '0.00'}
                 </span>
               </div>
               <div className="pt-4 mt-2 border-t border-gray-100 dark:border-white/10 flex justify-between items-center">
                 <div>
-                  <span className="block text-base font-bold text-primary">Total Difference</span>
+                  <span className="block text-base font-bold text-primary">{t('totalDifference')}</span>
                 </div>
                 <span className={`${totalDifferenceClass} text-2xl font-black text-primary`}>{totalDifference}</span>
               </div>
             </div>
             <div className="bg-gray-50 dark:bg-white/5 px-5 py-3 border-t border-gray-100 dark:border-white/10">
               <p className="text-[10px] text-text-sub dark:text-[#dcb8be] text-center uppercase tracking-wide font-medium">
-                Final totals adjusted for exact weighed weights
+                {t('finalTotalsAdjusted')}
               </p>
             </div>
           </div>

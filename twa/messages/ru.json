@@ -98,6 +98,23 @@
       "paymentInProgress": "Оплатить",
       "reorder": "Повторить заказ",
       "details": "Подробности"
+    },
+    "detail": {
+      "loading": "Загрузка...",
+      "loadingDetails": "Загрузка деталей заказа...",
+      "error": "Ошибка",
+      "failedToLoad": "Не удалось загрузить детали заказа",
+      "tryAgainLater": "Пожалуйста, попробуйте позже",
+      "retry": "Повторить",
+      "fulfillmentDetails": "Детали выполнения",
+      "itemizedBreakdown": "Детализация товаров",
+      "ordered": "Заказано",
+      "actual": "Фактически",
+      "priceDifference": "Разница в цене",
+      "originalOrderTotal": "Исходная сумма заказа",
+      "actualFulfilledTotal": "Фактическая сумма выполнения",
+      "totalDifference": "Общая разница",
+      "finalTotalsAdjusted": "Итоговые суммы скорректированы по точному весу"
     }
   },
   "subscription": {

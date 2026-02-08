@@ -105,6 +105,23 @@
       "reorder": "Reorder",
       "paymentInProgress": "Pay",
       "details": "Details"
+    },
+    "detail": {
+      "loading": "Loading...",
+      "loadingDetails": "Loading order details...",
+      "error": "Error",
+      "failedToLoad": "Failed to load order details",
+      "tryAgainLater": "Please try again later",
+      "retry": "Retry",
+      "fulfillmentDetails": "Fulfillment Details",
+      "itemizedBreakdown": "Itemized Breakdown",
+      "ordered": "Ordered",
+      "actual": "Actual",
+      "priceDifference": "Price Difference",
+      "originalOrderTotal": "Original Order Total",
+      "actualFulfilledTotal": "Actual Fulfilled Total",
+      "totalDifference": "Total Difference",
+      "finalTotalsAdjusted": "Final totals adjusted for exact weighed weights"
     }
   },
   "subscription": {
