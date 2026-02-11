@@ -163,7 +163,7 @@ export type VerificationResult = {
 
 export const verifyTelegramInitData: (initData: string, botToken: string) => VerificationResult | undefined = (initData: string, botToken: string) => {
   // logger.info("Verifying Telegram init data:", initData);
-  // logger.info("Bot token:", botToken);
+  logger.info("Bot token:", botToken.substring(0, 5) + "..." + botToken.substring(botToken.length - 5));
   try {
     // Validate init data.
     validate(initData, botToken, {
