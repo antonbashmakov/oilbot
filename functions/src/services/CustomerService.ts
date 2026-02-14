@@ -109,7 +109,7 @@ class CustomerService extends AbstractService<Customer> {
 
     if (o.created_at) {
       ret.created_at = o.created_at.toDate();
-      ret.last_seen_at = o.last_seen_at.toDate();
+      ret.last_seen_at = o.last_seen_at?.toDate();
     }
 
 
