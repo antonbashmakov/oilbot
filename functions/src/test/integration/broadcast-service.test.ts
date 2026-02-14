@@ -25,6 +25,9 @@ describe("BroadcastService Integration Test", () => {
       username,
       first_name,
       last_name,
+      created_at: new Date(),
+      last_seen_at: new Date(),
+      origin: "TELEGRAM",
     };
     await customerService.set(customer);
     return customer;

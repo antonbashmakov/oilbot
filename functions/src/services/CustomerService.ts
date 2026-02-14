@@ -92,6 +92,16 @@ class CustomerService extends AbstractService<Customer> {
     });
   }
 
+  findByExternalId(externalId: string): Promise<Customer | undefined> {
+    return this.db.collection(this.getCollectionName()).where("external_id", "==", externalId).get().then((snapshot) => {
+      if (snapshot.empty) {
+        return undefined;
+      }
+      const doc = snapshot.docs[0];
+      return this.toPOJO(doc.data() as Customer, doc.id);
+    });
+  }
+
 
   getCollectionName(): string {
     return COLLECTIONS.CUSTOMERS;
