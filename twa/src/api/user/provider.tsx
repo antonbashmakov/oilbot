@@ -3,7 +3,6 @@
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useGetCartItemsQuery, validateTelegramUser } from '..';
 import { CustomerOverview } from '../models';
-import { useRouter } from "next/navigation";
 
 import bridge from '@vkontakte/vk-bridge';
 
@@ -93,27 +92,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [appUser, setAppUser] = useState<AppCustomer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const router = useRouter()
 
   // Initialize Telegram Web App and fetch user
   useEffect(() => {
-    const initTelegram = () => {
+    const initTelegram = (initData: string) => {
       try {
-
-        console.log('window.location.href', window.location.href);
-        //const initData =  (window as any).Telegram?.WebApp ? (window as any).Telegram?.WebApp.initData : window.location.href.split("?")[1] || "";
-        let initData =  (window.location.href.split("#")[1] || window.location.href.split("?")[1] || "").replace(/&tgWebAppVersion.*$/, "");
-        //let initData = "tgWebAppData=user%3D%257B%2522id%2522%253A270053857%252C%2522first_name%2522%253A%2522Anton%2522%252C%2522last_name%2522%253A%2522%25C3%2596ldenberg%2522%252C%2522username%2522%253A%2522antonoldenberg%2522%252C%2522language_code%2522%253A%2522en%2522%252C%2522is_premium%2522%253Atrue%252C%2522allows_write_to_pm%2522%253Atrue%252C%2522photo_url%2522%253A%2522https%253A%255C%252F%255C%252Ft.me%255C%252Fi%255C%252Fuserpic%255C%252F320%255C%252Fqp4hk15qeVGYzV4WX9tt5JoE6IIf3iBpXWT80kJC5to.svg%2522%257D%26chat_instance%3D-2470516004042899611%26chat_type%3Dprivate%26auth_date%3D1771352597%26signature%3DucELZrU9XEXK4JQpnnkIQYpnF6e_csQokMErg7yAWj-Y9vBGeM6PV3Wvq4UhjotYXRJ-8lV0Udz3S_ajGMEGAQ%26hash%3D2d5f168ed2097271a8743fc7c612ef2e9d8c47913181092e62e67d42dde117e0&tgWebAppVersion";
 
         if (initData.startsWith("tgWebAppData")) {
           initData = decodeURIComponent(initData.split("=")[1] || "");
         }
 
         console.log('Telegram init data:', initData);
-        // Check if we're in a Telegram Web App
-
         validateTelegramUser(initData).then(customer => {
-          // Expand the app to full height
 
           setTelegramUser(customer);
 
@@ -128,7 +118,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           if (!tg) return;
 
           tg.expand();
-
 
           // Set Telegram theme parameters as CSS variables
           if (tg.themeParams) {
@@ -152,20 +141,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           });
         });
 
-
-        /*
-        const startParam = tg.initDataUnsafe?.start_param;
-        // const startParam = "JTdCJTIydHlwZSUyMiUzQSUyMnBhdGglMjIlMkMlMjJ2YWx1ZSUyMiUzQSUyMiUyRml0ZW1zJTJGZWZlMTAxOTMtN2JmOC00NTc4LTlmMjctNDI3ZGMzNDI3MmEyJTIyJTdE";
-        if (startParam && !sessionStorage.getItem(startParam)) {
-          const json = JSON.parse(decodeURIComponent(atob(startParam)));
-          sessionStorage.setItem(startParam, "1");
-          if (json.type === "path") {
-            return router.replace(json.value);
-          }
-        }
-        */
-
-
         setIsLoading(false);
       } catch (error) {
         console.error('Error initializing Telegram Web App:', error);
@@ -182,15 +157,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     // Load Telegram Web App script if not already loaded
     if (typeof window !== 'undefined') {
-      console.log('Initializing VK Bridge', window.location.href);
-      bridge.send("VKWebAppInit");
-      initTelegram();
-      /*
-      if (!(window as any).Telegram?.WebApp) {
+      console.log('Initializing frontend app', window.location.href);
+
+      let initData = (window.location.href.split("#")[1] || window.location.href.split("?")[1] || "").replace(/&tgWebAppVersion.*$/, "");
+
+      if (initData.indexOf("sign") === -1) { // is tg webapp
         const script = document.createElement('script');
         script.src = 'https://telegram.org/js/telegram-web-app.js';
         script.async = true;
-        script.onload = initTelegram;
+        script.onload = () => initTelegram((window as any).Telegram?.WebApp.initData);
         script.onerror = () => {
           console.error('Failed to load Telegram Web App script');
           // Fallback to mock user
@@ -202,9 +177,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         };
         document.head.appendChild(script);
       } else {
-        initTelegram();
+        bridge.send("VKWebAppInit");
+        initTelegram(initData);
       }
-      */
+
     } else {
       // Server-side rendering, set loading to false on client side
       setIsLoading(false);
