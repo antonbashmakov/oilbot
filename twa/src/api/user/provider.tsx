@@ -100,68 +100,71 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const initTelegram = () => {
       try {
 
-        const initData =  (window as any).Telegram?.WebApp ? (window as any).Telegram?.WebApp.initData : window.location.href.split("?")[1] || "";
+        console.log('window.location.href', window.location.href);
+        //const initData =  (window as any).Telegram?.WebApp ? (window as any).Telegram?.WebApp.initData : window.location.href.split("?")[1] || "";
+        let initData =  (window.location.href.split("#")[1] || window.location.href.split("?")[1] || "").replace(/&tgWebAppVersion.*$/, "");
+        //let initData = "tgWebAppData=user%3D%257B%2522id%2522%253A270053857%252C%2522first_name%2522%253A%2522Anton%2522%252C%2522last_name%2522%253A%2522%25C3%2596ldenberg%2522%252C%2522username%2522%253A%2522antonoldenberg%2522%252C%2522language_code%2522%253A%2522en%2522%252C%2522is_premium%2522%253Atrue%252C%2522allows_write_to_pm%2522%253Atrue%252C%2522photo_url%2522%253A%2522https%253A%255C%252F%255C%252Ft.me%255C%252Fi%255C%252Fuserpic%255C%252F320%255C%252Fqp4hk15qeVGYzV4WX9tt5JoE6IIf3iBpXWT80kJC5to.svg%2522%257D%26chat_instance%3D-2470516004042899611%26chat_type%3Dprivate%26auth_date%3D1771352597%26signature%3DucELZrU9XEXK4JQpnnkIQYpnF6e_csQokMErg7yAWj-Y9vBGeM6PV3Wvq4UhjotYXRJ-8lV0Udz3S_ajGMEGAQ%26hash%3D2d5f168ed2097271a8743fc7c612ef2e9d8c47913181092e62e67d42dde117e0&tgWebAppVersion";
+
+        if (initData.startsWith("tgWebAppData")) {
+          initData = decodeURIComponent(initData.split("=")[1] || "");
+        }
 
         console.log('Telegram init data:', initData);
         // Check if we're in a Telegram Web App
-          
 
-          // const initData = "user=%7B%22id%22%3A270053857%2C%22first_name%22%3A%22Anton%22%2C%22last_name%22%3A%22%C3%96ldenberg%22%2C%22username%22%3A%22antonoldenberg%22%2C%22language_code%22%3A%22en%22%2C%22is_premium%22%3Atrue%2C%22allows_write_to_pm%22%3Atrue%2C%22photo_url%22%3A%22https%3A%5C%2F%5C%2Ft.me%5C%2Fi%5C%2Fuserpic%5C%2F320%5C%2Fqp4hk15qeVGYzV4WX9tt5JoE6IIf3iBpXWT80kJC5to.svg%22%7D&chat_instance=-8163802993933103841&chat_type=private&start_param=JTdCJTIydHlwZSUyMiUzQSUyMnBhdGglMjIlMkMlMjJ2YWx1ZSUyMiUzQSUyMiUyRml0ZW1zJTJGZWZlMTAxOTMtN2JmOC00NTc4LTlmMjctNDI3ZGMzNDI3MmEyJTIyJTdE&auth_date=1768229840&signature=G0r05qa9-SiS2H-onkMOSVTBBfNZxFgV_bXBAt3BnjxUcT_z_lnA9KS5Q7F8J9MK9HhkfmFo9DolhoC1wMvMCA&hash=6d5ed8a43024e854068cd64e5a0899068a66bc2e48fe36ed3a762b435e417350";
-          // const initData = tg.initData;
+        validateTelegramUser(initData).then(customer => {
+          // Expand the app to full height
 
-          validateTelegramUser(initData).then(customer => {
-            // Expand the app to full height
+          setTelegramUser(customer);
 
-            setTelegramUser(customer);
-
-            // Convert Telegram user to AppUser
-            setAppUser({
-              ...customer,
-              is_mock: false,
-            });
-
-            const tg = (window as any).Telegram?.WebApp;
-
-            if(!tg) return;
-            
-            tg.expand();
-
-
-            // Set Telegram theme parameters as CSS variables
-            if (tg.themeParams) {
-              document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
-              document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
-              document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#999999');
-              document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color || '#2481cc');
-              document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#2481cc');
-              document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
-            }
-
-            // Set viewport to prevent zoom on mobile
-            tg.enableClosingConfirmation();
-            tg.disableVerticalSwipes();
-
-          }).catch(err => {
-            console.warn('User was now validated properly', err);
-            setAppUser({
-              ...MOCK_USER,
-              is_mock: true,
-            });
+          // Convert Telegram user to AppUser
+          setAppUser({
+            ...customer,
+            is_mock: false,
           });
 
-          
-          /*
-          const startParam = tg.initDataUnsafe?.start_param;
-          // const startParam = "JTdCJTIydHlwZSUyMiUzQSUyMnBhdGglMjIlMkMlMjJ2YWx1ZSUyMiUzQSUyMiUyRml0ZW1zJTJGZWZlMTAxOTMtN2JmOC00NTc4LTlmMjctNDI3ZGMzNDI3MmEyJTIyJTdE";
-          if (startParam && !sessionStorage.getItem(startParam)) {
-            const json = JSON.parse(decodeURIComponent(atob(startParam)));
-            sessionStorage.setItem(startParam, "1");
-            if (json.type === "path") {
-              return router.replace(json.value);
-            }
+          const tg = (window as any).Telegram?.WebApp;
+
+          if (!tg) return;
+
+          tg.expand();
+
+
+          // Set Telegram theme parameters as CSS variables
+          if (tg.themeParams) {
+            document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
+            document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
+            document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#999999');
+            document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color || '#2481cc');
+            document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#2481cc');
+            document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
           }
-          */
-       
+
+          // Set viewport to prevent zoom on mobile
+          tg.enableClosingConfirmation();
+          tg.disableVerticalSwipes();
+
+        }).catch(err => {
+          console.warn('User was now validated properly', err);
+          setAppUser({
+            ...MOCK_USER,
+            is_mock: true,
+          });
+        });
+
+
+        /*
+        const startParam = tg.initDataUnsafe?.start_param;
+        // const startParam = "JTdCJTIydHlwZSUyMiUzQSUyMnBhdGglMjIlMkMlMjJ2YWx1ZSUyMiUzQSUyMiUyRml0ZW1zJTJGZWZlMTAxOTMtN2JmOC00NTc4LTlmMjctNDI3ZGMzNDI3MmEyJTIyJTdE";
+        if (startParam && !sessionStorage.getItem(startParam)) {
+          const json = JSON.parse(decodeURIComponent(atob(startParam)));
+          sessionStorage.setItem(startParam, "1");
+          if (json.type === "path") {
+            return router.replace(json.value);
+          }
+        }
+        */
+
 
         setIsLoading(false);
       } catch (error) {
@@ -180,8 +183,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     // Load Telegram Web App script if not already loaded
     if (typeof window !== 'undefined') {
       console.log('Initializing VK Bridge', window.location.href);
-        bridge.send("VKWebAppInit");
-        initTelegram();
+      bridge.send("VKWebAppInit");
+      initTelegram();
       /*
       if (!(window as any).Telegram?.WebApp) {
         const script = document.createElement('script');
