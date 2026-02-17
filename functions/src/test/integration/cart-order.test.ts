@@ -181,6 +181,8 @@ describe("Cart Order Endpoint Integration Test", () => {
     };
     await customerBalanceService.set(initialBalance);
 
+    await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: 1 });
+
     const idempotencyKey = 'test-idempotency-key-2';
 
     // First call

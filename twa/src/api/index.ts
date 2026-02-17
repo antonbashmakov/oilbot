@@ -157,7 +157,7 @@ export const useCreateSubscription = (customerId?: string) => {
 
 
 export const validateTelegramUser = async (initData: string) => {
-    return fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL || ""}/api/public/auth/telegram` , {
+    return fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL || ""}/api/public/auth` , {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

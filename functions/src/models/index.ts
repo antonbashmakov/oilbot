@@ -1,7 +1,7 @@
 import {components} from "../openapi/api";
 import {components as models} from "../openapi/models";
 
-export type Customer = components["schemas"]["Customer"];
+type BaseCustomer = components["schemas"]["Customer"];
 export type CustomerStats = components["schemas"]["CustomerStats"];
 export type ItemStats = components["schemas"]["ItemStats"];
 export type CustomerAccounting = components["schemas"]["CustomerAccounting"];
@@ -60,12 +60,18 @@ export type Payment = Omit<BasePayment, "created_at" | "updated_at"> & {
   updated_at: Date;
   confirmed_at?: Date;
 };
+export type Customer = Omit<BaseCustomer, "created_at" | "last_seen_at"> & {
+  created_at: Date;
+  last_seen_at: Date;
+};
 export type CustomerBalance = Omit<BaseCustomerBalance, "created_at" | "updated_at"> & {
   created_at: Date;
   updated_at: Date;
 };
-export type CustomerOverview = Omit<BaseCustomerOverview, "balance"> & {
+export type CustomerOverview = Omit<BaseCustomerOverview, "balance" | "created_at" | "last_seen_at"> & {
   balance: CustomerBalance;
+  created_at: Date;
+  last_seen_at: Date;
 };
 export type OrderPicking = Omit<BaseOrderPicking, "created_at"> & {
   created_at: Date;
