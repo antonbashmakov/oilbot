@@ -11,13 +11,13 @@ import {
   CustomerService,
 } from "./imports";
 import * as bcrypt from "bcrypt";
-import { generateToken, verifyVKInitData, who } from "../../services/utils";
-import { User } from "../../models";
-import { localeMiddleware } from "../../middleware/localeMiddleware";
+import {generateToken, verifyVKInitData, who} from "../../services/utils";
+import {User} from "../../models";
+import {localeMiddleware} from "../../middleware/localeMiddleware";
 
 import CustomerBalanceService from "../../services/CustomerBalanceService";
-import { SubscriptionService } from "../private/imports";
-import { logger } from "firebase-functions/v1";
+import {SubscriptionService} from "../private/imports";
+import {logger} from "firebase-functions/v1";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -53,7 +53,7 @@ publicApi.use(express.json());
 
 publicApi.post("/signup", async (req: express.Request, res: express.Response) => {
   try {
-    const { email, password } = req.body;
+    const {email, password} = req.body;
 
     // Validate required fields
     if (!email || !password) {
@@ -100,7 +100,7 @@ publicApi.post("/signup", async (req: express.Request, res: express.Response) =>
 
 publicApi.post("/login", async (req: express.Request, res: express.Response) => {
   try {
-    const { email, password } = req.body;
+    const {email, password} = req.body;
 
     // Validate required fields
     if (!email || !password) {
@@ -156,7 +156,7 @@ publicApi.get("/users/me", async (req: express.Request, res: express.Response) =
 
 publicApi.get("/stats/:userId", async (req: express.Request, res: express.Response) => {
   try {
-    const { userId } = req.params;
+    const {userId} = req.params;
 
     if (!userId) {
       return api.badRequest(res, "Missing userId parameter");
@@ -169,7 +169,7 @@ publicApi.get("/stats/:userId", async (req: express.Request, res: express.Respon
     }
 
 
-    await customerService.incrementStatistics(userId, { number_of_free_orders: -1 });
+    await customerService.incrementStatistics(userId, {number_of_free_orders: -1});
     const stats = await customerService.obtainStatistics(userId);
     return api.send(res, stats);
   } catch (err: any) {
@@ -180,8 +180,7 @@ publicApi.get("/stats/:userId", async (req: express.Request, res: express.Respon
 
 publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
   try {
-
-    const { initData } = req.body;
+    const {initData} = req.body;
 
     functions.logger.info("Aut init data:", initData);
 
@@ -191,14 +190,14 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
 
     const decodedInitData = decodeURIComponent(initData);
 
-    const isTelegram = decodedInitData.split("&").find(pair => pair.split("=")[0] === "signature");
-    const isVK = decodedInitData.split("&").find(pair => pair.split("=")[0] === "sign");
+    const isTelegram = decodedInitData.split("&").find((pair) => pair.split("=")[0] === "signature");
+    const isVK = decodedInitData.split("&").find((pair) => pair.split("=")[0] === "sign");
 
     if (!isTelegram && !isVK) {
       return api.badRequest(res, "Invalid initData format");
     }
 
-    const verification = isTelegram ? verifyTelegramInitData(req.body.initData as string, process.env.TELEGRAM_BOT_TOKEN as string) : verifyVKInitData(req.body.initData as string, process.env.VK_SECRET_KEY as string);
+    const verification = isTelegram ? verifyTelegramInitData(decodedInitData, process.env.TELEGRAM_BOT_TOKEN as string) : verifyVKInitData(req.body.initData as string, process.env.VK_SECRET_KEY as string);
 
     if (!verification) {
       return api.forbidden(res, "Invalid Telegram init data");
@@ -225,7 +224,7 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
       customer = await customerService.add(customer);
     }
 
-    await customerService.update(customer, { last_seen_at: new Date() });
+    await customerService.update(customer, {last_seen_at: new Date()});
 
     logger.debug("Current customer : ", customer);
 
@@ -233,7 +232,7 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
     const stats = await customerService.obtainStatistics(customer.id);
     const subscription = await subscriptionService.find(customer.id);
 
-    return api.send(res, { ...customer, balance, stats, subscription });
+    return api.send(res, {...customer, balance, stats, subscription});
   } catch (err: any) {
     functions.logger.error(err);
     // The authorize function already sends error responses, so we just need to return

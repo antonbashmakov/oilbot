@@ -1,12 +1,12 @@
 import * as moment from "moment";
 import * as jwt from "jsonwebtoken";
 
-import { User } from "../models";
+import {User} from "../models";
 import UserService from "./UserService";
-import { express } from "../controllers/private/imports";
-import { intersection } from "lodash";
-import { logger } from "firebase-functions/v1";
-import { validate, parse } from "@tma.js/init-data-node";
+import {express} from "../controllers/private/imports";
+import {intersection} from "lodash";
+import {logger} from "firebase-functions/v1";
+import {validate, parse} from "@tma.js/init-data-node";
 import * as crypto from "crypto";
 
 
@@ -33,18 +33,18 @@ interface ExpressResponse {
 export const api = {
   badRequest: (response: ExpressResponse, message = "", code = "BAD_REQUEST"): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(400).send({ error: { code, message } }),
+    .status(400).send({error: {code, message}}),
   paymentRequired: (response: ExpressResponse, message = "", code = "PAYMENT_REQUIRED"): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(402).send({ error: { code, message } }),
+    .status(402).send({error: {code, message}}),
 
   notFound: (response: ExpressResponse, message = ""): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(404).send({ error: { code: "NOT_FOUND", message: (message || NOT_FOUND) } }),
+    .status(404).send({error: {code: "NOT_FOUND", message: (message || NOT_FOUND)}}),
 
   error: (response: ExpressResponse, message = "", code: string = COMMON_ERROR): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(500).send({ error: { code, message } }),
+    .status(500).send({error: {code, message}}),
 
   send: (response: ExpressResponse, data: any = {}): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -55,15 +55,15 @@ export const api = {
 
   redirect: (response: ExpressResponse, data: any = {}): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(301).send({ code: "REDIRECT", data }),
+    .status(301).send({code: "REDIRECT", data}),
 
   forbidden: (response: ExpressResponse, message = "", code = "FORBIDDEN"): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(403).send({ error: { code, message } }),
+    .status(403).send({error: {code, message}}),
 
   unauthorized: (response: ExpressResponse, message = "", code = "UNAUTHORIZED"): ExpressResponse => response
     .header(CONTENT_TYPE, APPLICATION_JSON)
-    .status(401).send({ error: { code, message } }),
+    .status(401).send({error: {code, message}}),
 };
 
 export const jsonify = (object: any): any => JSON.parse(JSON.stringify(object));
@@ -102,7 +102,7 @@ export const readBase64String = (text: string): string => `${Buffer.from(text, "
 export const purgeHtml = (html: string): string => html.replace(/[\s]/gi, "");
 
 export const generateToken = (user: User): string => {
-  return jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, {
+  return jwt.sign({id: user.id}, process.env.JWT_SECRET as string, {
     expiresIn: "1d",
   });
 };
@@ -131,7 +131,7 @@ export const authorize = async (req: express.Request, res: express.Response, nex
 
     (req as any).user = user;
   } catch (err) {
-    return res.status(401).json({ message: "Invalid token" });
+    return res.status(401).json({message: "Invalid token"});
   }
 
   if (next) return next();
@@ -175,49 +175,47 @@ export const verifyTelegramInitData: (initData: string, botToken: string) => Ver
 
     logger.info("User data:", data.user);
 
-    const jwt = generateToken({ id: data.user?.id + "" } as User);
+    const jwt = generateToken({id: data.user?.id + ""} as User);
 
-    return { jwt, user: { id: `${data.user?.id}`, first_name: data.user?.first_name, last_name: data.user?.last_name } };
+    return {jwt, user: {id: `${data.user?.id}`, first_name: data.user?.first_name, last_name: data.user?.last_name}};
   } catch (e) {
     return undefined;
   }
 };
 
 export const verifyVKInitData: (initData: string, botToken: string) => VerificationResult | undefined = (initData: string, secretKey: string) => {
-
-
   let sign;
-  
+
   const queryParams: { key: string, value: string }[] = [];
   const vkUser: ExternalUser = {
     id: "",
   };
 
   const processQueryParam = (key: string, value: string) => {
-    if (typeof value === 'string') {
-      if (key === 'sign') {
+    if (typeof value === "string") {
+      if (key === "sign") {
         sign = value;
-      } else if (key.startsWith('vk_')) {
-        queryParams.push({ key, value });
+      } else if (key.startsWith("vk_")) {
+        queryParams.push({key, value});
       }
 
       switch (key) {
-        case 'vk_user_id':
-          vkUser.id = value;
-          break;
-        case 'vk_first_name':
-          vkUser.first_name = value;
-          break;
-        case 'vk_last_name':
-          vkUser.last_name = value;
-          break;
+      case "vk_user_id":
+        vkUser.id = value;
+        break;
+      case "vk_first_name":
+        vkUser.first_name = value;
+        break;
+      case "vk_last_name":
+        vkUser.last_name = value;
+        break;
       }
     }
   };
 
 
-  for (const param of initData.split('&')) {
-    const [key, value] = param.split('=');
+  for (const param of initData.split("&")) {
+    const [key, value] = param.split("=");
     processQueryParam(key, value);
   }
 
@@ -226,27 +224,27 @@ export const verifyVKInitData: (initData: string, botToken: string) => Verificat
   }
   const queryString = queryParams
     .sort((a, b) => a.key.localeCompare(b.key))
-    .reduce((acc, { key, value }, idx) => {
-      return acc + (idx === 0 ? '' : '&') + `${key}=${encodeURIComponent(value)}`;
-    }, '');
+    .reduce((acc, {key, value}, idx) => {
+      return acc + (idx === 0 ? "" : "&") + `${key}=${encodeURIComponent(value)}`;
+    }, "");
 
   const paramsHash = crypto
-    .createHmac('sha256', secretKey)
+    .createHmac("sha256", secretKey)
     .update(queryString)
     .digest()
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=$/, '');
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=$/, "");
 
   const isValid = paramsHash === sign;
 
   if (!isValid) {
     return undefined;
   }
-  const jwt = generateToken({ id: vkUser.id } as User);
+  const jwt = generateToken({id: vkUser.id} as User);
 
-  return { jwt, user: vkUser };
+  return {jwt, user: vkUser};
 };
 
 

@@ -102,7 +102,7 @@ class CustomerService extends AbstractService<Customer> {
     });
   }
 
-    toPOJO(id: any, o: any): Customer | undefined {
+  toPOJO(id: any, o: any): Customer | undefined {
     if (!o) return;
 
     const ret = {...o, id: `${id}`} as Customer; // convert all ids to string
