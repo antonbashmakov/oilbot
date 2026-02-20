@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useGetItemQuery, useCartStore } from '@/api';
-import { useUser } from '@/api/user/provider';
+import { useCustomer } from '@/api/user/provider';
 import { IMAGE_TO_UUIDS } from '@/data/products';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
@@ -11,8 +11,8 @@ import { useState } from 'react';
 export default function ItemDetailPage() {
   const params = useParams();
   const itemId = params.itemId as string;
-  const { user } = useUser();
-  const customerId = user?.id;
+  const { customer } = useCustomer();
+  const customerId = customer?.id;
 
   const { data: item, isLoading, error } = useGetItemQuery(customerId, itemId);
   const t = useTranslations('common');

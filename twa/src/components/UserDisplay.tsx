@@ -1,9 +1,9 @@
 "use client";
 
-import { useUser } from '@/api/user/provider';
+import { useCustomer } from '@/api/user/provider';
 
 export const UserDisplay: React.FC = () => {
-  const { user, isLoading, isError } = useUser();
+  const { customer, isLoading, isError } = useCustomer();
 
   if (isLoading) {
     return (
@@ -26,12 +26,11 @@ export const UserDisplay: React.FC = () => {
     );
   }
 
-  if (!user) {
+  if (!customer) {
     return null;
   }
 
-  const displayName = user.first_name || user.username || `User ${user.id}`;
-  const isMockUser = user.is_mock;
+  const displayName = customer.first_name || customer.username || `User ${customer.id}`;
 
   return (
     <div className="flex items-center gap-2">
@@ -41,16 +40,10 @@ export const UserDisplay: React.FC = () => {
             person
           </span>
         </div>
-        {isMockUser && (
-          <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-yellow-500 border border-white dark:border-gray-800"></div>
-        )}
       </div>
       <div className="hidden md:flex flex-col">
         <span className="text-sm font-medium text-text-main-light dark:text-text-main-dark">
           {displayName}
-        </span>
-        <span className="text-xs text-text-sub-light dark:text-text-sub-dark">
-          {isMockUser ? 'Demo mode' : 'Telegram'}
         </span>
       </div>
     </div>

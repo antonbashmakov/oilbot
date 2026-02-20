@@ -20,7 +20,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!data) return;
-    const items = _.sortBy(data, ['category', 'name']);
+    const items = _.sortBy(_.sortBy(data, ['category', 'name']), item => !item.deliveries || item.deliveries.length === 0);
     setItems(items);
   }, [data, selectedCategory]);
 
@@ -93,7 +93,7 @@ export default function Home() {
 
             return (
               <Link
-                key={item.id || `item-${index}`} 
+                key={item.id || `item-${index}`}
                 href={`/items/${item.id}`}
                 className="flex flex-col group/card"
               >
@@ -102,7 +102,7 @@ export default function Home() {
                   <div
                     className="w-full aspect-square bg-center bg-cover transition-transform duration-500 group-hover/card:scale-105 relative"
                     style={{
-                      backgroundImage: item.id && IMAGE_TO_UUIDS[item.id] ?  `url(https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.id]}/-/preview/100x100/)` : 'none',
+                      backgroundImage: item.id && IMAGE_TO_UUIDS[item.id] ? `url(https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.id]}/-/preview/100x100/)` : 'none',
                       backgroundColor: 'transparent',
                     }}
                     aria-label={item.name || 'Product image'}
@@ -127,31 +127,24 @@ export default function Home() {
 
                   {/* Quick Add FAB */}
                   <div className="absolute bottom-2 right-2" onClick={(e) => e.preventDefault()}>
-                  <CartButton
-                    itemId={item.id || `item-${index}`}
-                    itemData={{
-                      name: item.name,
-                      price: item.fraction_price_out,
-                      fraction: item.fraction,
-                      group: item.group,
-                      price_for_unit: item.fraction_price_out,
-                      quantity: 1,
-                    }}
-                    
-                  />
+                    <CartButton
+                      itemId={item.id || `item-${index}`}
+                      disabled={!delivery || (delivery.delivery_end ? new Date(delivery.delivery_end) < new Date() : false)}
+                    />
                   </div>
-
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <h3 className="text-text-main-light dark:text-text-main-dark text-base font-bold leading-tight">
-                    {item.name || `Product ${index + 1}`}
-                  </h3>
+                  <div className="h-[calc(2*1.25rem)] sm:h-[calc(2*1.5rem)] overflow-hidden">
+                    <h3 className="text-text-main-light dark:text-text-main-dark text-base font-bold leading-tight ">
+                      {item.name || `Product ${index + 1}`}
+                    </h3>
+                  </div>
                   <div className="flex items-baseline gap-1">
                     <span className="text-primary text-lg font-bold">{(item.fraction_price_out || 0).toFixed(0)} ₽</span>
-                    <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">/ {item.unit_description}</span>                    
+                    <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">/ {item.unit_description}</span>
                   </div>
-                  {item.is_weighted && <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">{t('weight', { fraction:item.fraction, unit: item.unit })}</span>}
+                  {item.is_weighted && <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">{t('weight', { fraction: item.fraction, unit: item.unit })}</span>}
                   {delivery?.delivery_end && <div className="flex items-center gap-1.5 mt-1">
                     <span
                       className={`material-symbols-outlined text-[14px] text-green-600 dark:text-green-400`}
@@ -160,6 +153,11 @@ export default function Home() {
                     </span>
                     <p className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">
                       {format(new Date(delivery.delivery_end), "dd MMM yyyy")}
+                    </p>
+                  </div>}
+                  {!delivery && <div className="flex items-center gap-1.5 mt-1">
+                    <p className="text-primary text-lg text-xs font-medium">
+                      {t('noDelivery')}
                     </p>
                   </div>}
                 </div>

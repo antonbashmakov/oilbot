@@ -1,13 +1,13 @@
 "use client";
 
 import { useCartStore } from '@/api';
-import { useUser } from '@/api/user/provider';
+import { useCustomer } from '@/api/user/provider';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
 export const HeaderCartButton: React.FC = () => {
-  const { user } = useUser();
-  const { getCartCount } = useCartStore(user?.id);
+  const { customer } = useCustomer();
+  const { getCartCount } = useCartStore(customer?.id);
   
   const cartCount = getCartCount();
   const [badgeScale, setBadgeScale] = useState(1);
@@ -22,15 +22,15 @@ export const HeaderCartButton: React.FC = () => {
   }, [cartCount]);
 
   const getCartHref = useCallback(() => {
-    if (!user || !user.stats) {
+    if (!customer || !customer.stats) {
       return "/";
     }
 
-    if(user.subscription?.status === "ACTIVE" || (user.stats.number_of_free_orders >= 1)) return "/cart";
-    if(user.balance.value >= 300) return "/cart";
+    if(customer.subscription?.status === "ACTIVE" || (customer.stats.number_of_free_orders >= 1)) return "/cart";
+    if(customer.balance.value >= 300) return "/cart";
 
     return "/subscription";
-  }, [user?.stats?.number_of_fulfilled_orders, user?.stats?.number_of_active_orders]);
+  }, [customer?.stats?.number_of_fulfilled_orders, customer?.stats?.number_of_active_orders]);
 
   const cartHref = getCartHref();
 

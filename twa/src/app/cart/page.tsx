@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useCartStore, useCheckout } from '@/api';
-import { useUser } from '@/api/user/provider';
+import { useCustomer } from '@/api/user/provider';
 import { useTranslations } from 'next-intl';
 
 import _ from 'lodash';
@@ -11,16 +11,16 @@ import { IMAGE_TO_UUIDS } from '@/data/products';
 import { useRouter } from "next/navigation";
 
 export default function CartPage() {
-  const { user } = useUser();
+  const { customer } = useCustomer();
   const router = useRouter();
-  const { getCartItems, removeFromCart, getCartTotal, addToCart, isLoading } = useCartStore(user?.id);
-  const checkoutMutation = useCheckout(user?.id);
+  const { getCartItems, removeFromCart, getCartTotal, addToCart, isLoading } = useCartStore(customer?.id);
+  const checkoutMutation = useCheckout(customer?.id);
   const t = useTranslations('cart');
 
   const cartItems = useMemo(() => {
-    if (!user?.id) return [];
+    if (!customer?.id) return [];
     return getCartItems();
-  }, [getCartItems, user?.id]);
+  }, [getCartItems, customer?.id]);
 
   const cartTotal = getCartTotal();
 
@@ -59,13 +59,13 @@ export default function CartPage() {
   }, [removeFromCart]);
 
   const handleCheckout = useCallback(async () => {
-    if (!user?.id || cartItems.length === 0) {
+    if (!customer?.id || cartItems.length === 0) {
       return;
     }
 
     try {
       // Generate a unique idempotency key
-      const idempotencyKey = `checkout-${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const idempotencyKey = `checkout-${customer.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
       const res: any = await checkoutMutation.mutateAsync({ idempotencyKey });
       if (!res.payments || !res.payments.length && typeof window !== 'undefined') {
@@ -82,7 +82,7 @@ export default function CartPage() {
       // In a real app, you would show an error message to the user
       alert(t('checkoutFailed'));
     }
-  }, [user?.id, cartItems, checkoutMutation, t]);
+  }, [customer?.id, cartItems, checkoutMutation, t]);
 
   return (
     <>

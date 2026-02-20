@@ -23,6 +23,7 @@
     "quantity": "Quantity",
     "total": "Total",
     "checkout": "Checkout",
+    "noDelivery": "No delivery available",
     "continueShopping": "Continue Shopping",
     "noProducts": "No products found in this category",
     "category": {
@@ -172,6 +173,8 @@
     "noFreeOrderLeft": "No free order left",
     "myCart": "My Cart",
     "myOrders": "My Orders",
+    "noUser": "Could not load user",
+    "loadingUser": "Loading user...",
     "profile": "Profile"
   },
   "profile": {

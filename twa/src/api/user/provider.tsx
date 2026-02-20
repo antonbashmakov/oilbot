@@ -1,51 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { useGetCartItemsQuery, validateTelegramUser } from '..';
-import { CustomerOverview } from '../models';
+import { useGetCartItemsQuery, validateUser } from '..';
 
 import bridge from '@vkontakte/vk-bridge';
-
-// Mock user object as provided in the task
-const MOCK_USER: AppCustomer = {
-  id: "270053857",
-  is_mock: true,
-  is_bot: null,
-  language_code: "ru",
-  last_name: "Öldenberg",
-  username: "antonoldenberg",
-  first_name: "Anton",// Added for consistency
-  balance: {
-    id: "270053857",
-    owner: {
-      id: "270053857"
-    },
-    value: 0,
-    created_at: new Date(),
-    updated_at: new Date(),
-  },
-  stats: {
-    id: "270053857",
-    number_of_free_orders: 0,
-    number_of_orders: 0,
-    number_of_canceled_orders: 0,
-    number_of_fulfilled_orders: 0,
-    number_of_active_orders: 0,
-    number_of_paid_months: 0,
-    paid_in_total: 0,
-  },
-  subscription: {
-    status: "CANCELED",
-    next_payment_at: "2025-11-23T00:00:00.000Z",
-    canceled_at: "2025-11-23T00:00:00.000Z",
-    fee: 300,
-    id: "270053857",
-  }
-};
-
-// Type for Telegram Web App user
-interface TelegramUser {
-  id: number;
+import { CustomerOverview } from '../models';
+/*
+interface Customer {
+  id: string;
   first_name?: string;
   last_name?: string;
   username?: string;
@@ -53,27 +15,9 @@ interface TelegramUser {
   is_premium?: boolean;
   is_bot?: boolean;
 }
-
-// Type for our app user (combining Telegram and mock user fields)
-interface AppUser {
-  id: string;
-  first_name?: string;
-  last_name?: string;
-  username?: string;
-  language_code?: string;
-  is_premium?: boolean;
-  is_bot?: boolean | null;
-  // Additional fields that might be useful
-  is_mock?: boolean;
-}
-
-interface AppCustomer extends CustomerOverview {
-  is_mock: boolean
-}
-
+*/
 interface UserContextType {
-  user: AppCustomer | null;
-  telegramUser: TelegramUser | null;
+  customer: CustomerOverview | null;
   isLoading: boolean;
   isError: boolean;
   refetch: () => void;
@@ -85,33 +29,25 @@ interface UserProviderProps {
   children: ReactNode;
 }
 
-
-
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
-  const [appUser, setAppUser] = useState<AppCustomer | null>(null);
+  const [customer, setCustomer] = useState<CustomerOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
   // Initialize Telegram Web App and fetch user
   useEffect(() => {
-    const initTelegram = (initData: string) => {
+    const init = (initData: string) => {
       try {
 
         if (initData.startsWith("tgWebAppData")) {
           initData = decodeURIComponent(initData.split("=")[1] || "");
         }
 
-        console.log('Telegram init data:', initData);
-        validateTelegramUser(initData).then(customer => {
+        console.log('Init data:', initData);
+        validateUser(initData).then(customer => {
 
-          setTelegramUser(customer);
-
+          setCustomer(customer);
           // Convert Telegram user to AppUser
-          setAppUser({
-            ...customer,
-            is_mock: false,
-          });
 
           const tg = (window as any).Telegram?.WebApp;
 
@@ -135,10 +71,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
         }).catch(err => {
           console.warn('User was now validated properly', err);
-          setAppUser({
-            ...MOCK_USER,
-            is_mock: true,
-          });
         });
 
         setIsLoading(false);
@@ -146,39 +78,49 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         console.error('Error initializing Telegram Web App:', error);
         setIsError(true);
         setIsLoading(false);
-
-        // Fallback to mock user on error
-        setAppUser({
-          ...MOCK_USER,
-          is_mock: true,
-        });
       }
     };
 
     // Load Telegram Web App script if not already loaded
     if (typeof window !== 'undefined') {
       console.log('Initializing frontend app', window.location.href);
+      setIsLoading(true);
 
-      let initData = (window.location.href.split("#")[1] || window.location.href.split("?")[1] || "").replace(/&tgWebAppVersion.*$/, "");
+      /** 
+       * Try init data from URL first. It will be sent on first run.
+       * Telegram sends init data after # sign while VK sends it after ? sign, so we need to check both. 
+       * Also, we need to remove tgWebAppVersion parameter if it exists, because it can cause issues with validation on server side.
+       */
+      let initData: string | null | "" = (window.location.href.split("#")[1] || window.location.href.split("?")[1] || "").replace(/&tgWebAppVersion.*$/, "");
+
+      if (initData) {
+        // save in storage for later use, because both VK and Telegram would send them once.
+        sessionStorage.setItem("initData", initData);
+      }
+
+      if (!initData) {
+        // we didn't find data in URL, try to get it from storage. 
+        initData = sessionStorage.getItem("initData");
+      }
+
+      if (!initData) {
+        // No init data found, we cant validate user it is error. Ideally we should never get here, because Telegram should always send init data, but just in case.
+        setIsLoading(false);
+        return;
+      }
 
       if (initData.indexOf("sign") === -1) { // is tg webapp
         const script = document.createElement('script');
         script.src = 'https://telegram.org/js/telegram-web-app.js';
         script.async = true;
-        script.onload = () => initTelegram((window as any).Telegram?.WebApp.initData);
+        script.onload = () => init((window as any).Telegram?.WebApp.initData);
         script.onerror = () => {
-          console.error('Failed to load Telegram Web App script');
-          // Fallback to mock user
-          setAppUser({
-            ...MOCK_USER,
-            is_mock: true,
-          });
           setIsLoading(false);
         };
         document.head.appendChild(script);
       } else {
         bridge.send("VKWebAppInit");
-        initTelegram(initData);
+        init(initData);
       }
 
     } else {
@@ -194,11 +136,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     // Re-initialization will happen in useEffect
   };
 
-  useGetCartItemsQuery(appUser?.id);
+  useGetCartItemsQuery(customer?.id);
 
   const value: UserContextType = {
-    user: appUser,
-    telegramUser,
+    customer,
     isLoading,
     isError,
     refetch,
@@ -211,10 +152,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   );
 };
 
-export const useUser = (): UserContextType => {
+export const useCustomer = (): UserContextType => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error('useCustomer must be used within a UserProvider');
   }
   return context;
 };

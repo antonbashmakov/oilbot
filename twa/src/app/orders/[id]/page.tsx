@@ -2,7 +2,7 @@
 
 import { useRouter, useParams } from "next/navigation";
 import { useGetOrderQuery } from "@/api";
-import { useUser } from "@/api/user/provider";
+import { useCustomer } from "@/api/user/provider";
 import { useState, useEffect, useMemo } from "react";
 import { CartItem, OrderPicking, PickingItem } from "@/api/models";
 import { useTranslations } from 'next-intl';
@@ -21,13 +21,13 @@ type AggregatedItem = {
 export default function OrderDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { user } = useUser();
+  const { customer } = useCustomer();
   const t = useTranslations('orders.detail');
 
   const orderId = params.id as string;
 
   // Fetch order details using the query hook
-  const { data: order, isLoading, error } = useGetOrderQuery(user?.id, orderId);
+  const { data: order, isLoading, error } = useGetOrderQuery(customer?.id, orderId);
 
 
   // Aggregate items by item_id
