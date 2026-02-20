@@ -2,18 +2,18 @@
 
 import { ReactNode, useEffect, useState } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-import { useUser } from '@/api/user/provider';
+import { useCustomer } from '@/api/user/provider';
 
 interface LocaleProviderProps {
   children: ReactNode;
 }
 
 export function LocaleProvider({ children }: LocaleProviderProps) {
-  const { user } = useUser();
+  const { customer } = useCustomer();
   const [messages, setMessages] = useState<Record<string, any> | null>(null);
   
   // Determine locale from user's language_code
-  const locale = user?.language_code || "ru";
+  const locale = customer?.language_code || "ru";
   
   useEffect(() => {
     // Dynamically load messages based on locale

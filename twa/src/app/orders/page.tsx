@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@/api/user/provider';
+import { useCustomer } from '@/api/user/provider';
 import { useGetOrdersQuery } from '@/api';
 import { useState, useMemo, useEffect } from 'react';
 import { Order, OrderOverview } from '@/api/models';
@@ -11,8 +11,8 @@ import _ from 'lodash';
 
 export default function OrdersPage() {
  //  const router = useRouter();
-  const { user } = useUser();
-  const { data: orders = [], isLoading, error } = useGetOrdersQuery(user?.id);
+  const { customer } = useCustomer();
+  const { data: orders = [], isLoading, error } = useGetOrdersQuery(customer?.id);
   const [activeFilter, setActiveFilter] = useState<'all' | 'processing' | 'delivered' | 'cancelled'>('all');
   const t = useTranslations('orders');
 

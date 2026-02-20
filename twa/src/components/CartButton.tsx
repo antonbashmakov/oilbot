@@ -2,36 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import { useCartStore } from '@/api';
-import { useUser } from '@/api/user/provider';
+import { useCustomer } from '@/api/user/provider';
 
 interface CartButtonProps {
   itemId: string;
-  itemData?: {
-    name?: string;
-    price?: number;
-    fraction?: number;
-    group?: string;
-    price_for_unit?: number;
-    quantity?: number;
-  };
   className?: string;
+  disabled?: boolean;
 }
 
 export const CartButton: React.FC<CartButtonProps> = ({ 
   itemId, 
-  itemData,
-  className = '' 
+  className = '' ,
+  disabled = false,
 }) => {
-  const { user } = useUser();
-  const { addToCart, getItemCountInCart, isLoading } = useCartStore(user?.id);
+  const { customer } = useCustomer();
+  const { addToCart, getItemCountInCart, isLoading } = useCartStore(customer?.id);
   
   const [isAnimating, setIsAnimating] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const cartCount = (getItemCountInCart(itemId));
   
   const handleAddToCart = async () => {
-    if (!user?.id) {
-      console.error('No user ID available for cart');
+    if (!customer?.id) {
+      console.error('No customer ID available for cart');
       return;
     }
     
@@ -66,7 +59,7 @@ export const CartButton: React.FC<CartButtonProps> = ({
     <div className="relative flex justify-end items-center">
       <button
         onClick={handleAddToCart}
-        disabled={isLoading || isAnimating || !user?.id}
+        disabled={isLoading || isAnimating || !customer?.id || disabled}
         className={`
           relative flex size-10 items-center justify-center rounded-full 
           bg-white dark:bg-surface-dark text-primary shadow-lg 

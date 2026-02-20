@@ -1,15 +1,13 @@
 "use client";
 
-import { useEffect, useState } from 'react';
 import { useGetCustomerOverviewQuery } from '@/api';
-import { useUser } from '@/api/user/provider';
+import { useCustomer } from '@/api/user/provider';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
-import Link from 'next/link';
 
 export default function ProfilePage() {
-  const { user } = useUser();
-  const { data, isLoading, error } = useGetCustomerOverviewQuery(user?.id);
+  const { customer } = useCustomer();
+  const { data, isLoading, error } = useGetCustomerOverviewQuery(customer?.id);
   const t = useTranslations('common');
   const tProfile = useTranslations('profile');
 
@@ -36,8 +34,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-
-  const customer = data || user;
 
   // Format subscription date if available
   const formatSubscriptionDate = (dateString?: string) => {
@@ -107,7 +103,7 @@ export default function ProfilePage() {
             {customer?.first_name || ''} {customer?.last_name || ''}
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mt-1">
-            @{customer?.username || tProfile('user')} • {tProfile('memberSince', { year: '2023' })}
+            @{customer?.username || tProfile('customer')} • {tProfile('memberSince', { year: '2023' })}
           </p>
         </div>
       </div>

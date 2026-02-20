@@ -1,13 +1,13 @@
 "use client";
 
 import { useCreateSubscription } from "@/api";
-import { useUser } from "@/api/user/provider";
+import { useCustomer } from "@/api/user/provider";
 import { useState } from "react";
 import { useTranslations } from 'next-intl';
 
 export default function SubscriptionPage() {
-  const { user } = useUser();
-  const createSubscriptionMutation = useCreateSubscription(user?.id);
+  const { customer } = useCustomer();
+  const createSubscriptionMutation = useCreateSubscription(customer?.id);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const t = useTranslations('subscription');
@@ -17,7 +17,7 @@ export default function SubscriptionPage() {
   };
 
   const handleSubscribe = async () => {
-    if (!user?.id) {
+    if (!customer?.id) {
       alert(t('loginRequired'));
       return;
     }
@@ -27,7 +27,7 @@ export default function SubscriptionPage() {
     setIsProcessing(true);
     try {
       // Generate a unique idempotency key
-      const idempotencyKey = `subscription-${user.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const idempotencyKey = `subscription-${customer.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
       const res: any = await createSubscriptionMutation.mutateAsync({ idempotencyKey });
 
@@ -160,7 +160,7 @@ export default function SubscriptionPage() {
 
           <button
             onClick={handleSubscribe}
-            disabled={isProcessing || createSubscriptionMutation.isPending || !user?.id || !isChecked}
+            disabled={isProcessing || createSubscriptionMutation.isPending || !customer?.id || !isChecked}
             className="w-full bg-primary hover:bg-red-600 active:scale-[0.98] transition-all text-white font-bold h-14 rounded-xl shadow-lg shadow-primary/30 flex items-center justify-center gap-2 group mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isProcessing || createSubscriptionMutation.isPending ? (
