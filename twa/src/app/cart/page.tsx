@@ -13,13 +13,11 @@ import { IMAGE_TO_UUIDS } from '@/data/products';
 export default function CartPage() {
   const { customer } = useCustomer();
   const router = useRouter();
-  const { user } = useUser();
-  const { getCartItems, removeFromCart, getCartTotal, addToCart, isLoading } = useCartStore(user?.id);
-  const checkoutMutation = useCheckout(user?.id);
+  const { getCartItems, removeFromCart, getCartTotal, addToCart, isLoading } = useCartStore(customer?.id);
+  const checkoutMutation = useCheckout(customer?.id);
   const t = useTranslations('cart');
 
-  const isMember = user?.subscription?.status === "ACTIVE";
-
+  const isMember = customer?.subscription?.status === "ACTIVE";
 
   const cartItems = useMemo(() => {
     if (!customer?.id) return [];

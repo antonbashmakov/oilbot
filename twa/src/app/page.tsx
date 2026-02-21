@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGetItemsQuery } from '@/api';
 import { ProductGridCard } from '@/components/ProductGridCard';
 import type { ItemOverview } from '@/api/models';
@@ -8,13 +8,13 @@ import { categories } from '@/data/products';
 import { useTranslations } from 'next-intl';
 
 import _ from 'lodash';
-import { useUser } from '@/api/user/provider';
+import { useCustomer } from '@/api/user/provider';
 
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const { data, isLoading, error } = useGetItemsQuery(selectedCategory);
   const t = useTranslations('common');
-  const { user } = useUser();
+  const { customer } = useCustomer();
 
   const [items, setItems] = useState<ItemOverview[]>([]);
 
@@ -89,7 +89,7 @@ export default function Home() {
       {items && items.length > 0 ? (
         <div className="grid grid-cols-2 gap-x-4 gap-y-6 p-4">
           {items?.map((item, index: number) => (
-            <ProductGridCard key={item.id || `item-${index}`} item={item} isMember={user?.subscription?.status === "ACTIVE"} />
+            <ProductGridCard key={item.id || `item-${index}`} item={item} isMember={customer?.subscription?.status === "ACTIVE"} />
           ))}
         </div>
       ) : (

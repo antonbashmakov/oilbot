@@ -7,7 +7,7 @@ import { IMAGE_TO_UUIDS } from '@/data/products';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { is } from 'date-fns/locale';
+
 
 export default function ItemDetailPage() {
   const params = useParams();
@@ -27,8 +27,8 @@ export default function ItemDetailPage() {
   const cartCount = getItemCountInCart(itemId);
 
   useEffect(() => {
-    setIsMember(user?.subscription?.status === "ACTIVE");
-  }, [user]);
+    setIsMember(customer?.subscription?.status === "ACTIVE");
+  }, [customer?.subscription?.status]);
 
   // Handle loading state
   if (isLoading) {

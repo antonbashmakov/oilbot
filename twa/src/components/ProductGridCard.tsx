@@ -54,14 +54,7 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({ item, isMember
         <div className="absolute bottom-2 right-2" onClick={(e) => e.preventDefault()}>
           <CartButton
             itemId={item.id}
-            itemData={{
-              name: item.name,
-              price: item.fraction_price_out,
-              fraction: item.fraction,
-              group: item.group,
-              price_for_unit: item.fraction_price_out,
-              quantity: 1,
-            }}
+            disabled={!delivery}
           />
         </div>
       </div>
@@ -70,7 +63,7 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({ item, isMember
         <h3 className="text-text-main-light dark:text-text-main-dark text-base font-bold leading-tight min-h-[2.5em] leading-[1.25]">
           {item.name}
         </h3>
-        { !isMember && <div className="flex flex-col gap-1 mt-1">
+        {!isMember && <div className="flex flex-col gap-1 mt-1">
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="text-primary text-base font-bold leading-none">{item.non_member_fraction_price_out}₽</span>
@@ -89,8 +82,8 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({ item, isMember
           </div>
 
         </div>
-      }
-        { isMember && <div className="flex flex-col gap-1 mt-1">
+        }
+        {isMember && <div className="flex flex-col gap-1 mt-1">
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="text-primary text-base font-bold leading-none">{item.fraction_price_out}₽</span>
@@ -109,7 +102,7 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({ item, isMember
           </div>
 
         </div>
-      }
+        }
         {/*<div className="flex items-baseline gap-1">
           <span className="text-primary text-lg font-bold">{(item.fraction_price_out || 0).toFixed(0)} ₽</span>
           <span className="text-text-sub-light dark:text-text-sub-dark text-xs font-medium">/ {item.unit_description}</span>                    
@@ -130,6 +123,11 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({ item, isMember
             </p>
           </div>
         )}
+        {!delivery && <div className="flex items-center gap-1.5 mt-1">
+          <p className="text-primary text-lg text-xs font-medium">
+            {t('noDelivery')}
+          </p>
+        </div>}
       </div>
     </Link>
   );

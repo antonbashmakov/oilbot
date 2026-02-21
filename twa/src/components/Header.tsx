@@ -82,10 +82,6 @@ const MainHeader = () => {
           </div>
         </div>
         }
-        {customer && <div className="flex items-center gap-3">
-          {/*<UserDisplay />*/}
-          <HeaderCartButton />
-        </div>}
       </div>
     </div>
   );
