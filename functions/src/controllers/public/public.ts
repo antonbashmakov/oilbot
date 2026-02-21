@@ -243,5 +243,55 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
     return;
   }
 });
+/*
+publicApi.post("/update-customers", async (req: express.Request, res: express.Response) => {
+  try {
+    functions.logger.info("Starting batch customer update");
+
+    // Fetch all customers
+    const customers = await customerService.findAll();
+    functions.logger.info(`Found ${customers.length} customers to update`);
+
+    if (customers.length === 0) {
+      return api.send(res, {message: "No customers found to update", updatedCount: 0});
+    }
+
+    // Update customers in batches to avoid Firestore batch limits (500 operations)
+    const BATCH_SIZE = 400; // Conservative batch size to stay under 500 limit
+    let updatedCount = 0;
+    let batchCount = 0;
+
+    for (let i = 0; i < customers.length; i += BATCH_SIZE) {
+      batchCount++;
+      const batch = db.batch();
+      const batchCustomers = customers.slice(i, i + BATCH_SIZE);
+
+      for (const customer of batchCustomers) {
+        // Update customer with origin: "TELEGRAM" and external_id equal to document id
+        const customerRef = db.collection("CUSTOMERS").doc(customer.id);
+        batch.update(customerRef, {
+          origin: "TELEGRAM",
+          external_id: customer.id,
+        });
+      }
+
+      // Commit the batch
+      await batch.commit();
+      updatedCount += batchCustomers.length;
+      functions.logger.info(`Batch ${batchCount}: Updated ${batchCustomers.length} customers (total: ${updatedCount})`);
+    }
+
+    functions.logger.info(`Successfully updated ${updatedCount} customers`);
+    return api.send(res, {
+      message: `Successfully updated ${updatedCount} customers`,
+      updatedCount,
+      totalCustomers: customers.length,
+    });
+  } catch (err: any) {
+    functions.logger.error("Update customers error:", err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
+*/
 
 export default publicApi;

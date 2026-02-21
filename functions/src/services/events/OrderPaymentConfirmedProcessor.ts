@@ -44,14 +44,13 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
 
     const customerService = new CustomerService(this.db);
 
-    let customer = await customerService.require(order.owner.id);
+    const customer = await customerService.require(order.owner.id);
 
     const chatId = customer.external_id || order.owner.id; // Fallback to owner id if external_id is not set. Old customers from telegram do not have external_id, but we can send messages to them using owner id as chat id. New customers from VK will have external_id and we will use it to send messages.
 
     switch (order.type) {
     case "CONCILIATION": {
-
-      if(customer.origin === "VK") break; // Do not send message for VK customers so far
+      if (customer.origin === "VK") break; // Do not send message for VK customers so far
 
       const templateValues = {
         originalOrderId: order.reconciliated_order_id,
@@ -62,8 +61,7 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
     }
 
     case "ORIGINAL": {
-
-      if(customer.origin === "VK") break; // Do not send message for VK customers so far
+      if (customer.origin === "VK") break; // Do not send message for VK customers so far
 
       const templateValues = {
         items: order.items.map((item) => ({
