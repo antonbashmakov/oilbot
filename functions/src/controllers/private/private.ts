@@ -126,6 +126,8 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
       items = await itemService.findByCategory(category);
     }
 
+    items = items.filter((item) => item.status === 'ACTIVE');
+
     if (!items || items.length === 0) {
       return api.send(res, []);
     }
