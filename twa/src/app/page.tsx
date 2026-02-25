@@ -89,7 +89,7 @@ export default function Home() {
       {items && items.length > 0 ? (
         <div className="grid grid-cols-2 gap-x-4 gap-y-6 p-4">
           {items?.map((item, index: number) => (
-            <ProductGridCard key={item.id || `item-${index}`} item={item} isMember={customer?.subscription?.status === "ACTIVE"} />
+            <ProductGridCard key={item.id || `item-${index}`} item={item} isMember={!!customer?.is_member} />
           ))}
         </div>
       ) : (

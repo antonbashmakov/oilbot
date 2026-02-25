@@ -27,14 +27,14 @@ export const ProductGridCard: React.FC<ProductGridCardProps> = ({ item, isMember
         <div
           className="w-full aspect-square bg-center bg-cover transition-transform duration-500 group-hover/card:scale-105 relative"
           style={{
-            backgroundImage: item.id && IMAGE_TO_UUIDS[item.id] ? `url(https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.id]}/-/preview/100x100/)` : 'none',
+            backgroundImage: item.id && IMAGE_TO_UUIDS[item.id] ? `url(https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.id]}/-/preview/100x100/)` : `https://firebasestorage.googleapis.com/v0/b/posebestoimosti-473916.firebasestorage.app/o/imgs%2F100_100%2F${item.id}.jpg?alt=media`,
             backgroundColor: 'transparent',
           }}
           aria-label={item.name || 'Product image'}
         >
           {item.id && (
             <img
-              src={IMAGE_TO_UUIDS[item.id] ? `https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.id]}/-/preview/400x400/` : undefined}
+              src={IMAGE_TO_UUIDS[item.id] ? `https://5rnru2cecx.ucarecd.net/${IMAGE_TO_UUIDS[item.id]}/-/preview/400x400/` : `https://firebasestorage.googleapis.com/v0/b/posebestoimosti-473916.firebasestorage.app/o/imgs%2F400_400%2F${item.id}.jpg?alt=media`}
               alt={item.name || 'Product image'}
               className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300"
               loading="lazy"

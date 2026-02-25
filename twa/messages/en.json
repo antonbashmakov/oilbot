@@ -178,6 +178,7 @@
     "freePlan": "Free Plan",
     "oneFreeOrderLeft": "One free order left",
     "noFreeOrderLeft": "No free order left",
+    "pendingSubscription": "Waiting for subscription payment",
     "myCart": "My Cart",
     "myOrders": "My Orders",
     "noUser": "Could not load user",

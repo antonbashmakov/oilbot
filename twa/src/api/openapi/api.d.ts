@@ -613,6 +613,11 @@ export interface components {
              */
             id: string;
             /**
+             * @description Unique identifier in the system of origin (e.g., Telegram or VK)
+             * @example 1019705782
+             */
+            external_id?: string;
+            /**
              * @description Whether the customer is a bot
              * @example null
              */
@@ -627,6 +632,24 @@ export interface components {
              * @example getting_drunk
              */
             username?: string;
+            /**
+             * Format: date-time
+             * @description When customer was created
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            created_at?: string;
+            /**
+             * Format: date-time
+             * @description When customer was last seen
+             * @example 2025-11-23T00:00:00.000Z
+             */
+            last_seen_at?: string;
+            /**
+             * @description Customer origin
+             * @example TELEGRAM
+             * @enum {enum}
+             */
+            origin?: "TELEGRAM" | "VK";
         };
         Subscription: {
             /**
@@ -639,7 +662,7 @@ export interface components {
              * @description When subscription was created
              * @example 2025-11-23T00:00:00.000Z
              */
-            created_at?: string;
+            created_at: string;
             /**
              * Format: date-time
              * @description When subscription was canceled
@@ -665,6 +688,11 @@ export interface components {
             balance: components["schemas"]["CustomerBalance"];
             stats?: components["schemas"]["CustomerStats"];
             subscription?: components["schemas"]["Subscription"];
+            /**
+             * @description Whether the customer is a member (has an active subscription)
+             * @example true
+             */
+            is_member?: boolean;
         } & components["schemas"]["Customer"];
         OrderPickingPatch: {
             /** @description Items to update in this order picking */

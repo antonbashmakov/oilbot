@@ -1527,6 +1527,10 @@ components:
           type: string
           description: Unique identifier for the customer
           example: "1019705782"
+        external_id:
+          type: string
+          description: Unique identifier in the system of origin (e.g., Telegram or VK)
+          example: "1019705782"
         is_bot:
           type: boolean
           nullable: true
@@ -1540,6 +1544,23 @@ components:
           type: string
           description: Customer's username
           example: "getting_drunk"
+        created_at:
+          type: string
+          format: date-time
+          description: When customer was created
+          example: "2025-11-23T00:00:00.000Z"            
+        last_seen_at:
+          type: string
+          format: date-time
+          description: When customer was last seen
+          example: "2025-11-23T00:00:00.000Z"    
+        origin:
+          type: enum
+          enum:
+            - TELEGRAM
+            - VK
+          description: Customer origin
+          example: "TELEGRAM"        
     Subscription:
       type: object
       required:
@@ -1547,6 +1568,10 @@ components:
         - fee
         - next_payment_at
         - status
+        - created_at
+        - last_seen_at
+        - origin
+        - external_id
       properties:
         id:
           type: string
@@ -1592,6 +1617,10 @@ components:
           $ref: '#/components/schemas/CustomerStats'
         subscription:
           $ref: '#/components/schemas/Subscription'
+        is_member:
+          type: boolean
+          description: Whether the customer is a member (has an active subscription)
+          example: true
     OrderPickingPatch:
       type: object
       required:
@@ -1913,7 +1942,6 @@ components:
         non_member_fraction_price_out:
           type: number
           format: float
-
           description: Non-member fraction price out
           example: 1439
         non_member_unit_price_out:

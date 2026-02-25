@@ -17,7 +17,7 @@ export default function CartPage() {
   const checkoutMutation = useCheckout(customer?.id);
   const t = useTranslations('cart');
 
-  const isMember = customer?.subscription?.status === "ACTIVE";
+  const isMember = customer?.is_member;
 
   const cartItems = useMemo(() => {
     if (!customer?.id) return [];
