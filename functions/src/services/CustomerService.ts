@@ -19,7 +19,7 @@ class CustomerService extends AbstractService<Customer> {
         id: customerId,
         number_of_orders: 0,
         number_of_active_orders: 0,
-        number_of_free_orders: 0,
+        number_of_free_orders: 1,
         number_of_canceled_orders: 0,
         number_of_fulfilled_orders: 0,
         number_of_paid_months: 0,

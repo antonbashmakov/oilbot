@@ -688,6 +688,11 @@ export interface components {
             balance: components["schemas"]["CustomerBalance"];
             stats?: components["schemas"]["CustomerStats"];
             subscription?: components["schemas"]["Subscription"];
+            /**
+             * @description Whether the customer is a member (has an active subscription)
+             * @example true
+             */
+            is_member?: boolean;
         } & components["schemas"]["Customer"];
         OrderPickingPatch: {
             /** @description Items to update in this order picking */

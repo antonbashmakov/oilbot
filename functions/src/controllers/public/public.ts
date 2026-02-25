@@ -232,7 +232,8 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
     const stats = await customerService.obtainStatistics(customer.id);
     const subscription = await subscriptionService.find(customer.id);
 
-    return api.send(res, {...customer, balance, stats, subscription});
+    const is_member = subscription && subscription.status === "ACTIVE" || stats.number_of_free_orders > 0;
+    return api.send(res, {...customer, balance, stats, subscription, is_member});
   } catch (err: any) {
     functions.logger.error(err);
     // The authorize function already sends error responses, so we just need to return

@@ -127,7 +127,7 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
       items = await itemService.findByCategory(category);
     }
 
-    items = items.filter((item) => item.status === 'ACTIVE');
+    items = items.filter((item) => item.status === "ACTIVE");
 
     if (!items || items.length === 0) {
       return api.send(res, []);
@@ -461,6 +461,9 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
           throw new Error("Cart is empty");
         }
 
+        const stats = await customerService.obtainStatistics(customerId);
+        const isMember = hasActiveSubscription || stats.number_of_free_orders > 0;
+
         // Group cart items by their group field
         const groupedCartItems = _.groupBy(cartItems, "group");
         const groups = Object.keys(groupedCartItems);
@@ -486,7 +489,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
           const delivery = deliveryMap[group];
           console.log(`Creating order for group ${group} with delivery ${delivery?.id}`);
 
-          const order = await orderService.createOrderFromCart(customer, items, delivery, hasActiveSubscription);
+          const order = await orderService.createOrderFromCart(customer, items, delivery, isMember);
           const paymentRequest = tbankService.orderToPaymentRequest(order);
           const paymentResponse = await tbankService.initPayment(paymentRequest);
 

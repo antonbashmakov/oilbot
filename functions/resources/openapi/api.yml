@@ -1617,6 +1617,10 @@ components:
           $ref: '#/components/schemas/CustomerStats'
         subscription:
           $ref: '#/components/schemas/Subscription'
+        is_member:
+          type: boolean
+          description: Whether the customer is a member (has an active subscription)
+          example: true
     OrderPickingPatch:
       type: object
       required:
