@@ -1514,6 +1514,13 @@ components:
       type: object
       required:
         - id
+        - first_name
+        - last_name
+        - email
+        - created_at
+        - last_seen_at
+        - external_id
+        - origin
       properties:
         first_name:
           type: string

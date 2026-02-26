@@ -61,7 +61,11 @@ class ChargeSubscriptionProcessor extends AbstractProcessor {
 
     const accounting = await customerService.obtainAccounting(subscriptionId);
     if (!accounting.rebill_id) {
-      throw new Error(`No rebill_id found for customer ${subscriptionId}`);
+      await subscriptionService.update(subscription, {
+        status: "CANCELED_PAYMENT_OVERDUE",
+        canceled_at: new Date(),
+      });
+      return;
     }
 
     const paymentRequest = tbankService.subscriptionToPaymentRequest({...subscription, fee: toCharge}, true);
@@ -101,6 +105,12 @@ class ChargeSubscriptionProcessor extends AbstractProcessor {
         updated_at: new Date(),
         error_code: chargeResult.ErrorCode || "UNKNOWN",
       });
+
+      await subscriptionService.update(subscription, {
+        status: "CANCELED_PAYMENT_OVERDUE",
+        canceled_at: new Date(),
+      });
+
       const adminMessage = toMessage("SUBSCRIPTION_PAYMENT_FAILED_ADMIN", adminTemplateValues);
       await telegramService.sendMessage("270053857", adminMessage, subscriptionId).catch((e) => error(`Failed to send SUBSCRIPTION_PAYMENT_CONFIRMED_ADMIN to 270053857 : ${e}`));
       return;

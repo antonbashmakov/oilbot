@@ -233,7 +233,7 @@ describe("ChargeSubscriptionProcessor Integration Test", () => {
     expect(mockTBankService.charge).toHaveBeenCalled();
   });
 
-  it("should throw error when no rebill_id found", async () => {
+  it("should cancel subscription when no rebill_id found", async () => {
     // Remove accounting rebill_id
     await customerService.getAccountingRef(createdSubscription.id).update({ rebill_id: null });
 
@@ -249,9 +249,28 @@ describe("ChargeSubscriptionProcessor Integration Test", () => {
       },
     };
 
-    await expect(chargeSubscriptionProcessor.process(testEvent))
-      .rejects
-      .toThrow(`No rebill_id found for customer ${createdSubscription.id}`);
+    // Process the event - should not throw but cancel subscription
+    await chargeSubscriptionProcessor.process(testEvent);
+
+    // Verify subscription was canceled
+    const updatedSubscription = await subscriptionService.find(createdSubscription.id);
+    expect(updatedSubscription).toBeDefined();
+    expect(updatedSubscription!.status).toBe("CANCELED_PAYMENT_OVERDUE");
+    expect(updatedSubscription!.canceled_at).toBeDefined();
+    expect(updatedSubscription!.canceled_at).toBeInstanceOf(Date);
+
+    // Verify no payment was created
+    const payments = await paymentService.findAll();
+    expect(payments.length).toBe(0);
+
+    // Verify TBankService methods were NOT called
+    expect(mockTBankService.subscriptionToPaymentRequest).not.toHaveBeenCalled();
+    expect(mockTBankService.initPayment).not.toHaveBeenCalled();
+    expect(mockTBankService.paymentToChargeRequest).not.toHaveBeenCalled();
+    expect(mockTBankService.charge).not.toHaveBeenCalled();
+
+    // Verify no Telegram messages were sent
+    expect(mockTelegramService.sendMessage).not.toHaveBeenCalled();
   });
 
   it("should charge from balance when balance covers full fee", async () => {
@@ -293,7 +312,7 @@ describe("ChargeSubscriptionProcessor Integration Test", () => {
     expect(balancePayment!.success).toBe(true);
   });
 
-  it("should handle charge failure and send failure telegram message", async () => {
+  it("should handle charge failure, cancel subscription and send failure telegram message", async () => {
     // Mock charge failure
     mockTBankService.charge.mockResolvedValueOnce({
       Success: false,
@@ -323,6 +342,13 @@ describe("ChargeSubscriptionProcessor Integration Test", () => {
     };
 
     await chargeSubscriptionProcessor.process(testEvent);
+
+    // Verify subscription was canceled
+    const updatedSubscription = await subscriptionService.find(createdSubscription.id);
+    expect(updatedSubscription).toBeDefined();
+    expect(updatedSubscription!.status).toBe("CANCELED_PAYMENT_OVERDUE");
+    expect(updatedSubscription!.canceled_at).toBeDefined();
+    expect(updatedSubscription!.canceled_at).toBeInstanceOf(Date);
 
     // Verify payment was marked as FAILED (but note bug: later overwritten to CONFIRMED)
     const failedPayment = await paymentService.findByExternalId("mock-payment-id");

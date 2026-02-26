@@ -57,7 +57,7 @@ describe("Admin Broadcast Endpoint Integration Test", () => {
     }
   });
 
-  const createCustomer = async (id: string, username?: string, first_name?: string, last_name?: string) => {
+  const createCustomer = async (id: string, first_name: string, last_name: string, username?: string) => {
     const customer: Customer = {
       id,
       username,
@@ -66,6 +66,7 @@ describe("Admin Broadcast Endpoint Integration Test", () => {
       created_at: new Date(),
       last_seen_at: new Date(),
       origin: "TELEGRAM",
+      external_id: id,
     };
     await customerService.set(customer);
     return customer;
@@ -149,10 +150,10 @@ describe("Admin Broadcast Endpoint Integration Test", () => {
 
   it("should handle telegram failures", async () => {
     // Create 2 normal customers and 2 failure customers
-    await createCustomer("cust_success1", "success1");
-    await createCustomer("FAIL_CHAT_ID_1", "fail1");
-    await createCustomer("cust_success2", "success2");
-    await createCustomer("FAIL_CHAT_ID_2", "fail2");
+    await createCustomer("cust_success1", "First1", "Last1");
+    await createCustomer("FAIL_CHAT_ID_1", "FirstFail1", "LastFail1");
+    await createCustomer("cust_success2", "First2", "Last2");
+    await createCustomer("FAIL_CHAT_ID_2", "FirstFail2", "LastFail2");
 
     const task = await createBroadcastTask({ last_id: "" });
 
@@ -188,7 +189,7 @@ describe("Admin Broadcast Endpoint Integration Test", () => {
   });
 
   it("should not process if task already finished", async () => {
-    await createCustomer("cust1", "user1");
+    await createCustomer("cust1", "First1", "Last1" ,"user1");
     const task = await createBroadcastTask({ finished: true });
 
     const adminToken = createAdminToken();
