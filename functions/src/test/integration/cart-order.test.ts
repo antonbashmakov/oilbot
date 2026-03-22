@@ -65,40 +65,49 @@ describe("Cart Order Endpoint Integration Test", () => {
     testItem = {
       id: "test-item-id",
       name: "Test Item",
+      price_in: 80,
       price_out: 100,
       fraction: 1,
+      non_member_fraction_price_out: 111,
+      non_member_unit_price_out: 120,
+      is_weighted: false,
       category: "TEST",
       group: "TEST_GROUP",
       description: "Test item description",
       fraction_price_out: 100,
       link: "https://test.com/item",
-      price_in: 80,
       row_number: 1,
       status: "ACTIVE",
       unit: "кг",
       unit_description: "килограмм",
-    } as any;
+    };
 
     // Create test cart item
     testCartItem = {
       id: "test-cart-item-id",
       item_id: testItem.id,
       name: testItem.name,
-      price: testItem.price_out,
+      price: testItem.fraction_price_out,
+      non_member_price: testItem.non_member_fraction_price_out,
+      price_for_unit: testItem.price_out,
+      non_member_price_for_unit: testItem.non_member_unit_price_out,
       quantity: 1,
       fraction: testItem.fraction,
-      price_for_unit: testItem.price_out,
       category: testItem.category,
       group: testItem.group,
       owner: { id: testCustomer.id },
       created_at: new Date(),
-    } as any;
+    };
 
     // Create test data in Firestore
     await customerService.set(testCustomer);
     await itemService.set(testItem);
     await cartItemService.set(testCartItem);
 
+
+  });
+
+  it("should create order and payment when cart has items", async () => {
     const initialBalance: CustomerBalance = {
       id: testCustomer.id,
       owner: { id: testCustomer.id },
@@ -201,56 +210,7 @@ describe("Cart Order Endpoint Integration Test", () => {
 
   });
 
-  it("should require subscription when customer has no free orders", async () => {
-    const initialBalance: CustomerBalance = {
-      id: testCustomer.id,
-      owner: { id: testCustomer.id },
-      value: 0,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-    await customerBalanceService.set(initialBalance);
-    await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: -1 });
-
-    let response = await request(URL)
-      .post(`/customers/${testCustomer.id}/cart/order`)
-      .set('Authorization', `Bearer ${createCustomerToken()}`)
-      .set('idempotency_key', 'test-idempotency-key-3')
-      .expect(402); // Payment Required
-
-    expect(response.body.error.code).toBe("PAYMENT_REQUIRED");
-    expect(response.body.error.message).toBe("Customer needs an active subscription to place orders");
-
-    await customerService.incrementStatistics(testCustomer.id, { number_of_fulfilled_orders: -1, number_of_active_orders: 1 });
-
-    response = await request(URL)
-      .post(`/customers/${testCustomer.id}/cart/order`)
-      .set('Authorization', `Bearer ${createCustomerToken()}`)
-      .set('idempotency_key', 'test-idempotency-key-3')
-      .expect(402); // Payment Required
-
-    expect(response.body.error.code).toBe("PAYMENT_REQUIRED");
-    expect(response.body.error.message).toBe("Customer needs an active subscription to place orders");
-
-    const s: Subscription = {
-      id: testCustomer.id,
-      created_at: new Date(),
-      next_payment_at: moment(new Date()).add(1, "month").toDate(),
-      status: "ACTIVE",
-      fee: 300,
-    };
-    await subscriptionService.set(s);
-
-    response = await request(URL)
-      .post(`/customers/${testCustomer.id}/cart/order`)
-      .set('Authorization', `Bearer ${createCustomerToken()}`)
-      .set('idempotency_key', 'test-idempotency-key-3')
-      .expect(200);
-
-
-  });
-
-  it("should create new subscription if customer has balance more than 300", async () => {
+  it("should use use non member prices if no active subscription", async () => {
     // Set customer balance to 500
     const initialBalance: CustomerBalance = {
       id: testCustomer.id,
@@ -260,8 +220,6 @@ describe("Cart Order Endpoint Integration Test", () => {
       updated_at: new Date(),
     };
     await customerBalanceService.set(initialBalance);
-
-    // Ensure customer has no free orders left
     await customerService.incrementStatistics(testCustomer.id, { number_of_free_orders: -1 });
 
     // Ensure no active subscription exists
@@ -285,15 +243,13 @@ describe("Cart Order Endpoint Integration Test", () => {
     expect(response.body.orders.length).toBe(1);
     expect(response.body.payments.length).toBe(1);
 
-    // Verify subscription was created
+    // Verify subscription was not created
     const subscription = await subscriptionService.find(testCustomer.id);
-    expect(subscription).toBeDefined();
-    expect(subscription!.status).toBe("ACTIVE");
-    expect(subscription!.fee).toBe(300);
 
-    // Verify balance was reduced by 300 (check via balance service)
+    expect(subscription).toBeUndefined()
+    // Verify balance was not changed
     const updatedBalance = await customerBalanceService.obtainForCustomer(testCustomer.id);
-    expect(updatedBalance.value).toBe(200); // 500 - 300 = 200
+    expect(updatedBalance.value).toBe(500); // 500 - 300 = 200
 
     // Verify cart is empty after order
     const cartItems = await cartItemService.fetchForOwner({ id: testCustomer.id });
@@ -303,6 +259,48 @@ describe("Cart Order Endpoint Integration Test", () => {
     const finalStats = await customerService.obtainStatistics(testCustomer.id);
     expect(finalStats.number_of_orders).toBe(1);
     expect(finalStats.number_of_active_orders).toBe(1);
+
+    const order = await orderService.fetchForOwner({ id: testCustomer.id });
+
+    expect(order.length).toBe(1);
+    expect(order[0].total).toBe(testCartItem.quantity * (testItem.non_member_fraction_price_out));
+
+  });
+
+  it("should use use  member prices if active subscription", async () => {
+    const s: Subscription = {
+      id: testCustomer.id,
+      created_at: new Date(),
+      next_payment_at: moment(new Date()).add(2, "month").toDate(),
+      status: "ACTIVE",
+      fee: 300,
+    };
+    await subscriptionService.set(s);
+
+    const response = await request(URL)
+      .post(`/customers/${testCustomer.id}/cart/order`)
+      .set('Authorization', `Bearer ${createCustomerToken()}`)
+      .set('idempotency_key', 'test-idempotency-key-balance-300')
+      .expect(200);
+
+    // Verify payment URL is returned (order created successfully)
+    expect(response.body).toHaveProperty('payments');
+    expect(response.body.payments.length).toBe(1);
+
+    const cartItems = await cartItemService.fetchForOwner({ id: testCustomer.id });
+    expect(cartItems.length).toBe(0);
+
+    // Verify order statistics updated
+    const finalStats = await customerService.obtainStatistics(testCustomer.id);
+    console.log('Final stats:', finalStats);
+    expect(finalStats.number_of_orders).toBe(1);
+    expect(finalStats.number_of_active_orders).toBe(1);
+
+    const order = await orderService.fetchForOwner({ id: testCustomer.id });
+
+    expect(order.length).toBe(1);
+    expect(order[0].total).toBe(testCartItem.quantity * (testItem.fraction_price_out));
+
   });
 
 
@@ -401,6 +399,8 @@ describe("Cart Order Endpoint Integration Test", () => {
       row_number: 1,
       status: "ACTIVE",
       unit: "кг",
+      non_member_fraction_price_out: 400,
+      non_member_unit_price_out: 1100,
       unit_description: "килограмм",
       is_weighted: true,
     };
@@ -414,6 +414,8 @@ describe("Cart Order Endpoint Integration Test", () => {
       group: "GROUP_B",
       description: "Test item 2 description",
       fraction_price_out: 200,
+      non_member_fraction_price_out: 400,
+      non_member_unit_price_out: 1100,
       link: "https://test.com/item2",
       price_in: 160,
       row_number: 2,
@@ -436,6 +438,8 @@ describe("Cart Order Endpoint Integration Test", () => {
       fraction: item1.fraction,
       price_for_unit: item1.price_out,
       category: item1.category,
+      non_member_price: 200,
+      non_member_price_for_unit: 400,
       group: item1.group,
       owner: { id: testCustomer.id },
       created_at: new Date(),
@@ -451,6 +455,8 @@ describe("Cart Order Endpoint Integration Test", () => {
       price_for_unit: item2.price_out,
       category: item2.category,
       group: item2.group,
+      non_member_price: 200,
+      non_member_price_for_unit: 400,
       owner: { id: testCustomer.id },
       created_at: new Date(),
     };

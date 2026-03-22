@@ -163,12 +163,12 @@ export type VerificationResult = {
 
 export const verifyTelegramInitData: (initData: string, botToken: string) => VerificationResult | undefined = (initData: string, botToken: string) => {
   // logger.info("Verifying Telegram init data:", initData);
-  // logger.info("Bot token:", botToken);
+  logger.info("Bot token:", botToken.substring(0, 5) + "..." + botToken.substring(botToken.length - 5));
   try {
     // Validate init data.
     validate(initData, botToken, {
       // We consider init data sign valid for 1 hour from their creation moment.
-      expiresIn: 3600111111111,
+      expiresIn: 3600,
     });
 
     const data = parse(initData);

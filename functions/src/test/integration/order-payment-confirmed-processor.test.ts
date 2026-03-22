@@ -1,9 +1,10 @@
 import db from "../setup";
-import {Order, Payment, OrderPaymentConfirmedEvent} from "../../models";
+import {Order, Payment, OrderPaymentConfirmedEvent, Customer} from "../../models";
 import OrderPaymentConfirmedProcessor from "../../services/events/OrderPaymentConfirmedProcessor";
 import OrderService from "../../services/OrderService";
 import PaymentService from "../../services/PaymentService";
 import TelegramService from "../../services/TelegramService";
+import CustomerService from "../../services/CustomerService";
 
 // Mock TelegramService
 jest.mock("../../services/TelegramService");
@@ -18,15 +19,31 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
   let orderPaymentConfirmedProcessor: OrderPaymentConfirmedProcessor;
   let orderService: OrderService;
   let paymentService: PaymentService;
-
+  let customerService: CustomerService;
   let createdOrder: Order;
   let createdPayment: Payment;
   let createdConciliationOrder: Order;
+  let createdCustomer: Customer;
 
   beforeEach(async () => {
     orderPaymentConfirmedProcessor = new OrderPaymentConfirmedProcessor(db as any);
     orderService = new OrderService(db as any);
     paymentService = new PaymentService(db as any);
+    customerService = new CustomerService(db as any);
+
+    // Create test customer
+    createdCustomer = {
+      created_at: new Date(),
+      id: "test-customer-id",
+      first_name: "Test",
+      last_name: "Customer",
+      email: "test@example.com",
+      phone: "+1234567890",
+      last_seen_at: new Date(),
+      external_id: "test-customer-id",
+      origin: "TELEGRAM",
+    } as Customer;
+    await customerService.set(createdCustomer);
 
     // Create test order
     createdOrder = {
@@ -293,6 +310,8 @@ describe("OrderPaymentConfirmedProcessor Integration Test", () => {
     // Verify conciliation telegram message was sent
     const telegramCalls = mockTelegramService.sendMessage.mock.calls;
     const customerMessageCall = telegramCalls.find((call) => call[0] === "test-customer-id");
+
+    console.log("Telegram calls:", telegramCalls);
     expect(customerMessageCall).toBeDefined();
 
     const message = customerMessageCall![1];

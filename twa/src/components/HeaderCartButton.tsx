@@ -21,22 +21,9 @@ export const HeaderCartButton: React.FC = () => {
     }
   }, [cartCount]);
 
-  const getCartHref = useCallback(() => {
-    if (!customer || !customer.stats) {
-      return "/";
-    }
-
-    if(customer.subscription?.status === "ACTIVE" || (customer.stats.number_of_free_orders >= 1)) return "/cart";
-    if(customer.balance.value >= 300) return "/cart";
-
-    return "/subscription";
-  }, [customer?.stats?.number_of_fulfilled_orders, customer?.stats?.number_of_active_orders]);
-
-  const cartHref = getCartHref();
-
   return (
-    <Link 
-      href={cartHref}
+    <Link     
+      href={"/cart"}
       className="relative flex size-10 items-center justify-center rounded-full bg-background-light dark:bg-white/10 hover:bg-gray-100 dark:hover:bg-white/20 transition-colors"
       aria-label="Shopping cart"
     >
@@ -47,7 +34,7 @@ export const HeaderCartButton: React.FC = () => {
       {/* Cart badge with count */}
       {cartCount > 0 && (
         <div 
-          className="absolute top-1.5 right-1.5 h-5 w-5 rounded-full bg-primary text-white 
+          className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-primary text-white 
                      flex items-center justify-center text-xs font-bold transition-transform duration-300 ring-2 ring-white dark:ring-surface-dark"
           style={{ transform: `scale(${badgeScale})` }}
         >

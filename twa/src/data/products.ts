@@ -24,7 +24,7 @@ export const categories = [
 
 export const navItems = [
   { id: 1, label: 'Home', icon: 'home', active: true },
-  { id: 2, label: 'Search', icon: 'search', active: false },
+  { id: 2, label: 'Cart', icon: 'shopping_cart', active: false },
   { id: 3, label: 'Orders', icon: 'receipt_long', active: false },
   { id: 4, label: 'Profile', icon: 'account_circle', active: false },
 ];

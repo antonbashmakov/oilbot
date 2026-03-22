@@ -5,6 +5,7 @@ import TelegramService from "../TelegramService";
 import AbstractProcessor from "./AbstractProcessor";
 import {toMessage} from "../../messaging/util";
 import {error, warn} from "firebase-functions/logger";
+import CustomerService from "../CustomerService";
 
 class OrderPaymentConfirmedProcessor extends AbstractProcessor {
   async process(event: OrderPaymentConfirmedEvent): Promise<void> {
@@ -41,17 +42,27 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
       }
     });
 
+    const customerService = new CustomerService(this.db);
+
+    const customer = await customerService.require(order.owner.id);
+
+    const chatId = customer.external_id || order.owner.id; // Fallback to owner id if external_id is not set. Old customers from telegram do not have external_id, but we can send messages to them using owner id as chat id. New customers from VK will have external_id and we will use it to send messages.
+
     switch (order.type) {
     case "CONCILIATION": {
+      if (customer.origin === "VK") break; // Do not send message for VK customers so far
+
       const templateValues = {
         originalOrderId: order.reconciliated_order_id,
       };
       const message = toMessage("ORDER_PAYMENT_CONFIRMED_CONCILIATION", templateValues);
-      telegramService.sendMessage(order.owner.id, message, orderId).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_CONCILIATION to ${order.owner.id}: ${e}`));
+      telegramService.sendMessage(chatId, message, orderId).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_CONCILIATION to ${order.owner.id}: ${e}`));
       break;
     }
 
     case "ORIGINAL": {
+      if (customer.origin === "VK") break; // Do not send message for VK customers so far
+
       const templateValues = {
         items: order.items.map((item) => ({
           name: item.name,
@@ -60,7 +71,9 @@ class OrderPaymentConfirmedProcessor extends AbstractProcessor {
         total: order.total,
       };
       const message = toMessage("ORDER_PAYMENT_CONFIRMED_ORIGINAL", templateValues);
-      telegramService.sendMessage(order.owner.id, message, orderId).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_ORIGINAL to ${order.owner.id}: ${e}`));
+
+
+      telegramService.sendMessage(chatId, message, orderId).catch((e) => error(`Failed to send ORDER_PAYMENT_CONFIRMED_ORIGINAL to ${order.owner.id}: ${e}`));
       break;
     }
 

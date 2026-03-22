@@ -601,12 +601,12 @@ export interface components {
              * @description Customer's first name
              * @example Антон
              */
-            first_name?: string;
+            first_name: string;
             /**
              * @description Customer's first name
              * @example Антон
              */
-            last_name?: string;
+            last_name: string;
             /**
              * @description Unique identifier for the customer
              * @example 1019705782
@@ -616,7 +616,7 @@ export interface components {
              * @description Unique identifier in the system of origin (e.g., Telegram or VK)
              * @example 1019705782
              */
-            external_id?: string;
+            external_id: string;
             /**
              * @description Whether the customer is a bot
              * @example null
@@ -637,19 +637,19 @@ export interface components {
              * @description When customer was created
              * @example 2025-11-23T00:00:00.000Z
              */
-            created_at?: string;
+            created_at: string;
             /**
              * Format: date-time
              * @description When customer was last seen
              * @example 2025-11-23T00:00:00.000Z
              */
-            last_seen_at?: string;
+            last_seen_at: string;
             /**
              * @description Customer origin
              * @example TELEGRAM
              * @enum {enum}
              */
-            origin?: "TELEGRAM" | "VK";
+            origin: "TELEGRAM" | "VK";
         };
         Subscription: {
             /**
@@ -688,6 +688,11 @@ export interface components {
             balance: components["schemas"]["CustomerBalance"];
             stats?: components["schemas"]["CustomerStats"];
             subscription?: components["schemas"]["Subscription"];
+            /**
+             * @description Whether the customer is a member (has an active subscription)
+             * @example true
+             */
+            is_member?: boolean;
         } & components["schemas"]["Customer"];
         OrderPickingPatch: {
             /** @description Items to update in this order picking */
@@ -772,10 +777,22 @@ export interface components {
             price: number;
             /**
              * Format: float
+             * @description Non-member price for the total quantity and fraction
+             * @example 609
+             */
+            non_member_price: number;
+            /**
+             * Format: float
              * @description Price for one unit
              * @example 609
              */
             price_for_unit: number;
+            /**
+             * Format: float
+             * @description Non-member price for one unit
+             * @example 609
+             */
+            non_member_price_for_unit: number;
             /**
              * @description Quantity
              * @example 1
@@ -823,6 +840,18 @@ export interface components {
              * @example 1439
              */
             fraction_price_out: number;
+            /**
+             * Format: float
+             * @description Non-member fraction price out
+             * @example 1439
+             */
+            non_member_fraction_price_out: number;
+            /**
+             * Format: float
+             * @description Non-member unit price out
+             * @example 1439
+             */
+            non_member_unit_price_out: number;
             /**
              * @description Item group
              * @example BALASHOV
@@ -935,10 +964,16 @@ export interface components {
             fraction_price_out: number;
             /**
              * Format: float
-             * @description Fraction price out for non-members
+             * @description Non-member fraction price out
              * @example 1439
              */
-            non_member_fraction_price_out?: number;
+            non_member_fraction_price_out: number;
+            /**
+             * Format: float
+             * @description Non-member unit price out
+             * @example 1439
+             */
+            non_member_unit_price_out: number;
             /**
              * @description Item group
              * @example BALASHOV

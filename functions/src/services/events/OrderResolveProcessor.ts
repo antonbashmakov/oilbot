@@ -86,8 +86,10 @@ class OrderResolveProcessor extends AbstractProcessor {
           name: "Финальный расчёт заказа",
           owner: order.items[0].owner,
           price: diff,
+          non_member_price: diff,
           quantity: 1,
           price_for_unit: diff,
+          non_member_price_for_unit: diff,
           created_at: new Date(),
         }],
       };

@@ -9,9 +9,11 @@ class CartItemService extends AbstractService<CartItem> {
       item_id: item.id,
       name: item.name,
       price: item.fraction_price_out,
+      non_member_price: item.non_member_fraction_price_out,
       quantity: 1,
       fraction: item.fraction,
       price_for_unit: item.price_out,
+      non_member_price_for_unit: item.non_member_unit_price_out,
       category: item.category,
       group: item.group,
       owner: {

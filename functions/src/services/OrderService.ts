@@ -8,8 +8,11 @@ class OrderService extends AbstractService<Order> {
       .get().then((result: any) => result.docs.map((doc: any) => this.toPOJO(doc.id, doc.data()) as Order));
   }
 
-  async createOrderFromCart(customer: Customer, cartItems: CartItem[], delivery: DeliveryRef): Promise<Order> {
+
+  async createOrderFromCart(customer: Customer, cartItems: CartItem[], delivery: DeliveryRef, isMember: boolean): Promise<Order> {
     const orderRef = this.getCollection().doc();
+
+    cartItems = cartItems.map((item) => ({...item, price: isMember ? item.price : item.non_member_price}));
 
     const order: Order = {
       id: orderRef.id,
@@ -18,7 +21,7 @@ class OrderService extends AbstractService<Order> {
       status: "PENDING",
       type: "ORIGINAL",
       number_of_items: cartItems.length,
-      total: cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0),
+      total: cartItems.reduce((acc, item) => acc + (isMember ? item.price : item.non_member_price) * item.quantity, 0),
       owner: {
         id: `${customer.id}`,
       },

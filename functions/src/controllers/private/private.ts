@@ -21,7 +21,8 @@ import {
 // import {authorize} from "../../services/utils";
 import * as dotenv from "dotenv";
 // import {logger} from "firebase-functions/v1";
-import {DeliveryRef, ItemOverview, Order, OrderOverview, OrderCreatedEvent, Payment, Subscription} from "../../models";
+
+import {DeliveryRef, ItemOverview, Order, OrderCreatedEvent, OrderOverview, Payment, Subscription} from "../../models";
 import _ = require("lodash");
 // import * as jwt from "jsonwebtoken";
 import * as cookieParser from "cookie-parser";
@@ -126,7 +127,7 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
       items = await itemService.findByCategory(category);
     }
 
-    items = items.filter((item) => item.status === 'ACTIVE');
+    items = items.filter((item) => item.status === "ACTIVE");
 
     if (!items || items.length === 0) {
       return api.send(res, []);
@@ -137,7 +138,7 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
     const groupDeliveries = await deliveryService.findClosestByGroups(groups);
     const deliveryMap: { [key: string]: DeliveryRef[] } = _.groupBy(groupDeliveries, "group");
 
-    const itemOverviews = items.map((item) => ({
+    const itemOverviews: ItemOverview[] = items.map((item) => ({
       name: item.name,
       category: item.category,
       group: item.group,
@@ -149,9 +150,11 @@ privateApi.get("/items/category/:category", async (req: express.Request, res: ex
       price_out: item.price_out,
       description: item.description,
       fraction_price_out: item.fraction_price_out,
+      non_member_fraction_price_out: item.non_member_fraction_price_out,
+      non_member_unit_price_out: item.non_member_unit_price_out,
       id: item.id, link: item.link,
       deliveries: deliveryMap[item.group] || [],
-    } as ItemOverview));
+    }));
 
     return api.send(res, itemOverviews);
   } catch (err: any) {
@@ -337,7 +340,10 @@ privateApi.post("/customers/:customerId/orders", async (req: express.Request, re
       return api.send(res, {});
     }
 
-    const order = await orderService.createOrderFromCart(customer, cartItems, null);
+
+    const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
+
+    const order = await orderService.createOrderFromCart(customer, cartItems, hasActiveSubscription);
     return api.send(res, order);
   } catch (err: any) {
     functions.logger.error(err);
@@ -414,6 +420,8 @@ privateApi.get("/customers/:customerId/items/:itemId", async (req: express.Reque
       price_out: item.price_out,
       description: item.description,
       fraction_price_out: item.fraction_price_out,
+      non_member_fraction_price_out: item.non_member_fraction_price_out,
+      non_member_unit_price_out: item.non_member_unit_price_out,
       id: item.id,
       link: item.link,
       deliveries: deliveries as any,
@@ -447,31 +455,21 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
       `cart-order-${customerId}-${idempotencyKey}`,
       async () => {
         const hasActiveSubscription = await subscriptionService.hasActiveSubscription(customerId, new Date());
-        const stats = await customerService.obtainStatistics(customerId);
-        const balance = await customerBalanceService.obtainForCustomer(customerId);
-        let subscriptionToCreate;
-
-        if (((stats.number_of_free_orders || 0) <= 0) && !hasActiveSubscription && balance.value < 300) {
-          logger.error(`Customer ${customerId} cannot place order due to insufficient balance and no active subscription`, {balance: balance, customer});
-          throw new Error("Active subscription is missing");
-        }
-
-        if (((stats.number_of_free_orders || 0) <= 0) && !hasActiveSubscription && balance.value >= 300) {
-          subscriptionToCreate = subscriptionService.buildSubscription(customerId, 300, new Date());
-          subscriptionToCreate.status = "ACTIVE";
-        }
 
         const cartItems = await cartItemService.fetchForOwner({id: String(customer.id)});
         if (!cartItems || cartItems.length === 0) {
           throw new Error("Cart is empty");
         }
 
+        const stats = await customerService.obtainStatistics(customerId);
+        const isMember = hasActiveSubscription || stats.number_of_free_orders > 0;
+
         // Group cart items by their group field
         const groupedCartItems = _.groupBy(cartItems, "group");
         const groups = Object.keys(groupedCartItems);
-
         // Find deliveries for each group
         const groupDeliveries = await deliveryService.findClosestByGroups(groups);
+
 
         // Create a map of group to earliest delivery (closest future delivery)
         const deliveryMap: { [key: string]: DeliveryRef } = {};
@@ -491,7 +489,7 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
           const delivery = deliveryMap[group];
           console.log(`Creating order for group ${group} with delivery ${delivery?.id}`);
 
-          const order = await orderService.createOrderFromCart(customer, items, delivery,);
+          const order = await orderService.createOrderFromCart(customer, items, delivery, isMember);
           const paymentRequest = tbankService.orderToPaymentRequest(order);
           const paymentResponse = await tbankService.initPayment(paymentRequest);
 
@@ -543,11 +541,6 @@ privateApi.post("/customers/:customerId/cart/order", async (req: express.Request
           number_of_active_orders: orders.length,
           number_of_free_orders: -orders.length,
         });
-
-        if (subscriptionToCreate) {
-          await subscriptionService.set(subscriptionToCreate);
-          await customerBalanceService.updateBalance(customerId, -300, "SUBSCRIPTION_CHARGE");
-        }
 
         return {
           orders,

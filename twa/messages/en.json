@@ -26,6 +26,10 @@
     "noDelivery": "No delivery available",
     "continueShopping": "Continue Shopping",
     "noProducts": "No products found in this category",
+    "yourPrice": "Your Price",
+    "forMembers": "For members",
+    "nonMembers": "Non members",
+    "clubMembers": "Club Members",
     "category": {
       "all": "All",
       "meat": "Meat",
@@ -60,7 +64,10 @@
     "subscriptionWarning": "This is your last purchase without subscription and next time you will have to subscribe.",
     "checkout": "Checkout",
     "processing": "Processing...",
-    "checkoutFailed": "Checkout failed. Please try again."
+    "checkoutFailed": "Checkout failed. Please try again.",
+    "currentTotal": "Current Total",
+    "memberPrice": "Member Price",
+    "subscribeAndSave": "Subscribe and save {amount} ₽!"
   },
   "orders": {
     "loading": "Loading orders...",
@@ -171,6 +178,7 @@
     "freePlan": "Free Plan",
     "oneFreeOrderLeft": "One free order left",
     "noFreeOrderLeft": "No free order left",
+    "pendingSubscription": "Waiting for subscription payment",
     "myCart": "My Cart",
     "myOrders": "My Orders",
     "noUser": "Could not load user",
@@ -207,7 +215,10 @@
     "noDescription": "No description available.",
     "deliveryAvailable": "Delivery Available",
     "deliveryBy": "Delivery by {date}",
-    "addToCart": "Add to Cart"
+    "addToCart": "Add to Cart",
+    "memberSavings": "Member Savings",
+    "memberSavingsDescription": "Save $20.00 on this item! Subscribe for $300/month to unlock Club Member pricing.",
+    "subscribeNow": "Subscribe Now"
   },
   "share": {
     "defaultText": "Check out this product!",

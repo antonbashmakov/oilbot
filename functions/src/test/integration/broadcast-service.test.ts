@@ -23,11 +23,12 @@ describe("BroadcastService Integration Test", () => {
     const customer: Customer = {
       id,
       username,
-      first_name,
-      last_name,
+      first_name: first_name || "",
+      last_name: last_name || "",
       created_at: new Date(),
       last_seen_at: new Date(),
       origin: "TELEGRAM",
+      external_id: id,
     };
     await customerService.set(customer);
     return customer;

@@ -74,8 +74,6 @@ class TBankService {
     const redirectDueDate = moment().add(1, "month");
     const RedirectDueDate = redirectDueDate.format("YYYY-MM-DDTHH:mm:ssZ");
 
-    const now = new Date();
-
     const body = {
       Token: "",
       Recurrent: "Y",
@@ -83,7 +81,7 @@ class TBankService {
       OperationInitiatorType: !isRecurrentPayment ? "1" : "R",
       TerminalKey: terminal,
       Amount: subscription.fee * 100,
-      OrderId: `${subscription.id}-${now.getFullYear()}-${now.getMonth()}-${now.getDay()}-${crypto.randomUUID().substring(0, 5)}`,
+      OrderId: `${subscription.id}-${moment().format("YYYY-MM-DD")}-${crypto.randomUUID().substring(0, 5)}`,
       Description: "Оплата подписки в магазине По Себестоимости",
       DATA: {
         Phone: process.env.SUPPORT_PHONE,

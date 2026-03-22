@@ -7,10 +7,21 @@ import { useTranslations } from 'next-intl';
 import ShareButton from "./ShareButton";
 import Link from "next/link";
 import { useCustomer } from "@/api/user/provider";
+import { useMemo } from "react";
 
 const MainHeader = () => {
   const { customer, isLoading } = useCustomer();
   const t = useTranslations('header');
+
+  const isActiveSubscription = useMemo(() => {
+    return customer?.subscription?.status === "ACTIVE" && customer.subscription.next_payment_at;
+  }, [customer]);
+  const isCanceledSubscription = useMemo(() => {
+    return customer?.subscription?.status === "CANCELED" || customer?.subscription?.status === "CANCELED_PAYMENT_OVERDUE";
+  }, [customer]);
+  const oneFreeOrderLeft = useMemo(() => {
+    return customer?.stats?.number_of_free_orders === 1;
+  }, [customer]);
 
   return (
     <div className="sticky top-0 z-30 bg-surface-light/95 dark:bg-surface-dark/95 backdrop-blur-md border-b border-gray-100 dark:border-white/5">
@@ -33,19 +44,19 @@ const MainHeader = () => {
           </div>
         </div>
         }
-        {customer && customer.subscription?.status === "ACTIVE" && customer?.subscription?.next_payment_at && <div className="flex items-center gap-2 overflow-hidden">
+        {customer && isActiveSubscription && <div className="flex items-center gap-2 overflow-hidden">
           <span className="material-symbols-outlined text-green-600 dark:text-green-400 filled">verified</span>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-wide">
               {t('subscription.active')}
             </span>
             <h2 className="text-base font-bold leading-tight truncate">
-              {t('nextPayment')}: {format(new Date(customer?.subscription?.next_payment_at), "dd MMM yyyy")}
+              {t('nextPayment')}: {format(new Date(customer!.subscription!.next_payment_at), "dd MMM yyyy")}
             </h2>
           </div>
         </div>
         }
-        {(customer && customer.subscription?.status === "CANCELED" || customer?.subscription?.status === "CANCELED_PAYMENT_OVERDUE") && customer?.subscription?.canceled_at && <div className="flex items-center gap-2 overflow-hidden">
+        {customer && isCanceledSubscription && !oneFreeOrderLeft && <div className="flex items-center gap-2 overflow-hidden">
           <span className="material-symbols-outlined text-primary">stars</span>
           <div className="flex flex-col">
             <span
@@ -53,12 +64,12 @@ const MainHeader = () => {
               {t('subscription.label')}
             </span>
             <h2 className="text-base font-bold leading-tight truncate">
-              {t('canceledAt')}: {format(new Date(customer?.subscription?.canceled_at), "dd MMM yyyy")}
+              {t('canceledAt')}: {format(new Date(customer.subscription!.canceled_at!), "dd MMM yyyy")}
             </h2>
           </div>
         </div>
         }
-        {(customer && !customer.subscription && ((customer?.stats?.number_of_free_orders || 0) == 1)) && <div className="flex items-center gap-2 overflow-hidden">
+        {(customer && (isCanceledSubscription || !customer.subscription) && oneFreeOrderLeft) && <div className="flex items-center gap-2 overflow-hidden">
           <span className="material-symbols-outlined text-primary">card_giftcard</span>
           <div className="flex flex-col">
             <span className="text-xs font-medium text-text-sub-light dark:text-text-sub-dark uppercase tracking-wide">
@@ -70,22 +81,30 @@ const MainHeader = () => {
           </div>
         </div>
         }
-        {(customer && !customer.subscription && ((customer?.stats?.number_of_free_orders || 0) < 1)) && <div className="flex items-center gap-2 overflow-hidden">
+        {(customer && !customer.subscription && !oneFreeOrderLeft) && <div className="flex items-center gap-2 overflow-hidden">
           <span className="material-symbols-outlined text-primary">card_giftcard</span>
           <div className="flex flex-col">
             <span className="text-xs font-medium text-text-sub-light dark:text-text-sub-dark uppercase tracking-wide">
               {t('freePlan')}
             </span>
             <h2 className="text-base font-bold leading-tight truncate">
-              {t('noFreeOrderLeft')}
+              {t('noFreeOrderLeft')}  
             </h2>
           </div>
         </div>
         }
-        {customer && <div className="flex items-center gap-3">
-          {/*<UserDisplay />*/}
-          <HeaderCartButton />
-        </div>}
+        {(customer && customer.subscription && customer.subscription.status === "PENDING") && <div className="flex items-center gap-2 overflow-hidden">
+          <span className="material-symbols-outlined text-primary">card_giftcard</span>
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-text-sub-light dark:text-text-sub-dark uppercase tracking-wide">
+              {t('freePlan')}
+            </span>
+            <h2 className="text-base font-bold leading-tight truncate">
+              {t('pendingSubscription')}  
+            </h2>
+          </div>
+        </div>
+        }
       </div>
     </div>
   );

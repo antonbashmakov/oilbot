@@ -1514,6 +1514,13 @@ components:
       type: object
       required:
         - id
+        - first_name
+        - last_name
+        - email
+        - created_at
+        - last_seen_at
+        - external_id
+        - origin
       properties:
         first_name:
           type: string
@@ -1617,6 +1624,10 @@ components:
           $ref: '#/components/schemas/CustomerStats'
         subscription:
           $ref: '#/components/schemas/Subscription'
+        is_member:
+          type: boolean
+          description: Whether the customer is a member (has an active subscription)
+          example: true
     OrderPickingPatch:
       type: object
       required:
@@ -1684,10 +1695,12 @@ components:
         - item_id
         - name
         - owner
-        - price
         - quantity
         - category
+        - price        
         - price_for_unit
+        - non_member_price        
+        - non_member_price_for_unit
       properties:
         category:
           type: string
@@ -1719,10 +1732,20 @@ components:
             format: float
             description: Price for the total quantity and fraction
             example: 609
+        non_member_price:
+            type: number
+            format: float
+            description: Non-member price for the total quantity and fraction
+            example: 609
         price_for_unit:
             type: number
             format: float
             description: Price for one unit
+            example: 609
+        non_member_price_for_unit:
+            type: number
+            format: float
+            description: Non-member price for one unit
             example: 609
         quantity:
             type: integer
@@ -1760,6 +1783,8 @@ components:
         - unit
         - unit_description
         - is_weighted
+        - non_member_fraction_price_out
+        - non_member_unit_price_out        
       properties:
         deliveries:
           type: array
@@ -1788,6 +1813,16 @@ components:
           format: float
           description: Fraction price out
           example: 1439
+        non_member_fraction_price_out:
+          type: number
+          format: float
+          description: Non-member fraction price out
+          example: 1439
+        non_member_unit_price_out:
+          type: number
+          format: float
+          description: Non-member unit price out
+          example: 1439          
         group:
           type: string
           description: Item group
@@ -1879,6 +1914,8 @@ components:
         - description
         - fraction
         - fraction_price_out
+        - non_member_fraction_price_out
+        - non_member_unit_price_out
         - group
         - id
         - link
@@ -1912,7 +1949,12 @@ components:
         non_member_fraction_price_out:
           type: number
           format: float
-          description: Fraction price out for non-members
+          description: Non-member fraction price out
+          example: 1439
+        non_member_unit_price_out:
+          type: number
+          format: float
+          description: Non-member unit price out
           example: 1439
         group:
           type: string

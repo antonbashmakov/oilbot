@@ -1,15 +1,17 @@
 "use client";
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useGetItemQuery, useCartStore } from '@/api';
 import { useCustomer } from '@/api/user/provider';
 import { IMAGE_TO_UUIDS } from '@/data/products';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
 
 export default function ItemDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const itemId = params.itemId as string;
   const { customer } = useCustomer();
   const customerId = customer?.id;
@@ -20,8 +22,13 @@ export default function ItemDetailPage() {
 
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isMember, setIsMember] = useState(false);
   const { addToCart, getItemCountInCart } = useCartStore(customerId);
   const cartCount = getItemCountInCart(itemId);
+
+  useEffect(() => {
+    setIsMember(customer?.subscription?.status === "ACTIVE");
+  }, [customer?.subscription?.status]);
 
   // Handle loading state
   if (isLoading) {
@@ -52,7 +59,7 @@ export default function ItemDetailPage() {
   const highResUrl = imageUuid ? `https://5rnru2cecx.ucarecd.net/${imageUuid}/-/preview/800x800/` : undefined;
 
   const delivery = item.deliveries?.[0];
-  const price = item.fraction_price_out || 0;
+  const price = isMember ? item.fraction_price_out : item.non_member_fraction_price_out;
   const totalPrice = price * quantity;
 
   return (
@@ -103,28 +110,43 @@ export default function ItemDetailPage() {
             <h1 className="text-2xl font-extrabold text-gray-900 dark:text-text-main-dark">
               {item.name || 'Product'}
             </h1>
-            <div className="flex items-baseline gap-2 mt-1">
-              <div className="flex items-baseline">
-                <span className="text-2xl font-bold text-primary">{price.toFixed(0)} ₽</span>
-                <span className="text-sm font-medium text-gray-500 dark:text-text-sub-dark ml-1">/ {item.unit_description} </span> { item.is_weighted && <span className="text-sm font-medium text-gray-500 dark:text-text-sub-dark ml-1">(≈{item.fraction}{item.unit}) </span>}
+            <div className="flex flex-col gap-2 mt-3">
+              <div className="flex items-center justify-between rounded-xl  ">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary">{t('yourPrice')}</span>
+                  <div className="flex items-baseline">
+                    <span className="text-2xl font-bold text-primary">{price.toFixed(0)} ₽</span>
+                    <span className="text-sm font-medium text-gray-500 dark:text-text-sub-dark ml-1">/ {item.unit_description} </span> {item.is_weighted && <span className="text-sm font-medium text-gray-500 dark:text-text-sub-dark ml-1">(≈{item.fraction}{item.unit}) </span>}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{isMember ? t('nonMembers') : t('clubMembers')} {t('price')}</span>
+                  <span className="text-lg text-gray-400 line-through">{isMember ? item.non_member_fraction_price_out : item.fraction_price_out}</span>
+                </div>
               </div>
             </div>
-            {
-              item.is_weighted && <div className="mt-3 p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl flex gap-2.5">
-                <span className="material-symbols-outlined text-gray-400 dark:text-text-sub-dark text-lg flex-shrink-0">info</span>
-                <p className="text-[16px] leading-relaxed text-gray-500 dark:text-text-sub-dark font-medium">
-                  {itemT('priceInfoWeighted', { unit: item.unit, fraction: item.fraction })}
-                </p>
+            <div className="mt-3 p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl flex gap-2.5">
+              <span className="material-symbols-outlined text-gray-400 dark:text-text-sub-dark text-lg flex-shrink-0">info</span>
+              <p className="text-[16px] leading-relaxed text-gray-500 dark:text-text-sub-dark font-medium">
+                {item.is_weighted ? itemT('priceInfoWeighted', { unit: item.unit, fraction: item.fraction }) : itemT('priceInfoPackaged', { unit: item.unit, fraction: item.fraction })}
+              </p>
+            </div>
+            {!isMember && <div className="mt-4 p-4 bg-black rounded-2xl text-white shadow-xl overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-2 opacity-80 text-white" >
+                <span className="material-symbols-outlined text-6xl">workspace_premium</span>
               </div>
-            }
-            {
-              !item.is_weighted && <div className="mt-3 p-3 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-xl flex gap-2.5">
-                <span className="material-symbols-outlined text-gray-400 dark:text-text-sub-dark text-lg flex-shrink-0">info</span>
-                <p className="text-[16px] leading-relaxed text-gray-500 dark:text-text-sub-dark font-medium">
-                  {itemT('priceInfoPackaged', { unit: item.unit, fraction: item.fraction })}
-                </p>
+              <div className="relative z-10 flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-primary font-bold text-sm">{itemT('memberSavings')}</span>
+                  <p className="text-sm font-medium leading-snug">{itemT('memberSavingsDescription', { savings: item.non_member_fraction_price_out - item.fraction_price_out })}</p>
+                </div>
+                <button
+                  onClick={() => router.push('/subscription')}
+                  className="w-full bg-white text-black font-bold py-2.5 rounded-xl text-sm active:scale-[0.98] transition-all">
+                  {itemT('subscribeNow')}
+                </button>
               </div>
-            }
+            </div>}
           </div>
 
           <div className="h-px bg-gray-100 dark:bg-white/10 w-full"></div>

@@ -19,7 +19,7 @@ class CustomerService extends AbstractService<Customer> {
         id: customerId,
         number_of_orders: 0,
         number_of_active_orders: 0,
-        number_of_free_orders: 0,
+        number_of_free_orders: 1,
         number_of_canceled_orders: 0,
         number_of_fulfilled_orders: 0,
         number_of_paid_months: 0,
@@ -108,8 +108,10 @@ class CustomerService extends AbstractService<Customer> {
     const ret = {...o, id: `${id}`} as Customer; // convert all ids to string
 
     if (o.created_at) {
-      ret.created_at = o.created_at.toDate();
-      ret.last_seen_at = o.last_seen_at?.toDate();
+      ret.created_at = o.created_at?.toDate();
+    }
+    if (o.last_seen_at) {
+      ret.last_seen_at = o.last_seen_at.toDate();
     }
 
 
@@ -121,7 +123,7 @@ class CustomerService extends AbstractService<Customer> {
     return COLLECTIONS.CUSTOMERS;
   }
   getExcludedFields(): string[] {
-    return ["created_at"];
+    return ["created_at", "last_seen_at"];
   }
 }
 
