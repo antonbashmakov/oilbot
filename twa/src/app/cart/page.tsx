@@ -6,16 +6,22 @@ import { useRouter } from 'next/navigation';
 import { useCartStore, useCheckout } from '@/api';
 import { useCustomer } from '@/api/user/provider';
 import { useTranslations } from 'next-intl';
+import PhoneVerification from '@/components/PhoneVerification';
 
 import _ from 'lodash';
 import { IMAGE_TO_UUIDS } from '@/data/products';
 
 export default function CartPage() {
-  const { customer } = useCustomer();
+  const { customer, isLoading: isCustomerLoading } = useCustomer();
   const router = useRouter();
   const { getCartItems, removeFromCart, getCartTotal, addToCart, isLoading } = useCartStore(customer?.id);
   const checkoutMutation = useCheckout(customer?.id);
   const t = useTranslations('cart');
+
+  // Show phone verification if no customer
+  if (!customer && !isCustomerLoading) {
+    return <PhoneVerification returnTo="cart" />;
+  }
 
   const isMember = customer?.is_member;
 
