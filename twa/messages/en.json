@@ -225,5 +225,20 @@
     "shareTitle": "Product Share",
     "linkCopied": "Link copied to clipboard!",
     "linkCopyError": "Not shared: {error}"
+  },
+  "phoneVerification": {
+    "title": "Welcome to Weshop",
+    "subtitle": "Enter your phone number to get started",
+    "smsInfo": "We'll send a 4-digit verification code to this number. Standard messaging rates may apply.",
+    "sendCode": "Send Code",
+    "termsPrefix": "By continuing, you agree to our",
+    "terms": "Terms",
+    "and": "and",
+    "privacy": "Privacy",
+    "verifyTitle": "Verify your number",
+    "sentCode": "We sent a 4-digit code to",
+    "didntReceive": "Didn't receive code?",
+    "resendCode": "Resend Code",
+    "verifyContinue": "Verify & Continue"
   }
 }

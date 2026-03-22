@@ -4,12 +4,18 @@ import { useGetCustomerOverviewQuery } from '@/api';
 import { useCustomer } from '@/api/user/provider';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
+import PhoneVerification from '@/components/PhoneVerification';
 
 export default function ProfilePage() {
-  const { customer } = useCustomer();
+  const { customer, isLoading: isCustomerLoading } = useCustomer();
   const { data, isLoading, error } = useGetCustomerOverviewQuery(customer?.id);
   const t = useTranslations('common');
   const tProfile = useTranslations('profile');
+
+  // Show phone verification if no customer
+  if (!customer && !isCustomerLoading) {
+    return <PhoneVerification returnTo="profile" />;
+  }
 
   // Handle loading state
   if (isLoading) {
