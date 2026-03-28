@@ -1,7 +1,6 @@
 
 import {
   CustomerService,
-  TelegramService,
   BroadcastResultService,
   BroadcastTaskService,
   Firestore,
@@ -9,17 +8,18 @@ import {
   BroadcastResult,
   Customer,
 } from "./BroadcastService.import";
+import MessagingService from "./MessagingService";
 
 
 class BroadcastService {
   private customerService: CustomerService;
-  private telegramService: TelegramService;
+  private messagingService: MessagingService;
   private broadcastResultService: BroadcastResultService;
   private broadcastTaskService: BroadcastTaskService;
 
   constructor(firestore: Firestore) {
     this.customerService = new CustomerService(firestore);
-    this.telegramService = new TelegramService();
+    this.messagingService = new MessagingService(firestore);
     this.broadcastResultService = new BroadcastResultService(firestore);
     this.broadcastTaskService = new BroadcastTaskService(firestore);
   }
@@ -84,8 +84,9 @@ class BroadcastService {
     try {
       // Send message via Telegram
 
-      const telegramMessage = await this.telegramService.sendMessage(customer.id, task.message.replace(/\\n/g, "\n"), task.id, task.format );
-      // const telegramMessage = await this.telegramService.sendMessage('270053857', task.message.replace(/\\n/g, '\n'), task.id, task.format );
+
+      const telegramMessage = await this.messagingService.sendMessage(customer, task.message.replace(/\\n/g, "\n"), {thread_id: task.id, format: task.format} );
+      //const telegramMessage = await this.messagingService.sendMessage({id : '270053857', external_id: '270053857', origin: "TELEGRAM"} as any, task.message.replace(/\\n/g, "\n"), {thread_id: task.id, format: task.format} );
       success = true;
       message = "Message sent successfully";
       if (telegramMessage) {

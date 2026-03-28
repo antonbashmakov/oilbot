@@ -55,6 +55,7 @@ adminApi.use(localeMiddleware);
 adminApi.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const userService = new UserService(db);
   try {
+    // return next();
     return await authorize(req, res, next, userService, ["ADMIN"]);
   } catch (err: any) {
     logger.error(err);

@@ -29,11 +29,10 @@ class ConversationMessageService extends AbstractService<ConversationMessage> {
     return result.docs.map((doc) => this.toPOJO(doc.id, doc.data()) as ConversationMessage);
   }
   async findByFilter(filter: MessageFilter): Promise<ConversationMessage[]> {
-
     let q = this.getCollection()
       .where("recipient_id", "==", filter.recipient);
 
-    if(filter.threadId) q = q.where("thread_id", "==", filter.threadId);
+    if (filter.threadId) q = q.where("thread_id", "==", filter.threadId);
 
     const result = await q.get();
 
