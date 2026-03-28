@@ -1545,6 +1545,19 @@ export interface components {
             /** @description Error details if any */
             error?: Record<string, never> | null;
         };
+        /** @description Filter for querying messages */
+        MessageFilter: {
+            /**
+             * @description Filter messages by thread ID
+             * @example thread-123
+             */
+            threadId?: string;
+            /**
+             * @description Filter messages by recipient
+             * @example CUSTOMER
+             */
+            recipient?: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -2134,7 +2147,10 @@ export interface operations {
     };
     getMessagesForCustomer: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Filter messages by thread ID */
+                threadId?: string;
+            };
             header?: never;
             path: {
                 /** @description Customer ID */
@@ -2195,6 +2211,11 @@ export interface operations {
                      * @example Hello, this is a test message
                      */
                     text: string;
+                    /**
+                     * @description The text message to send
+                     * @example Hello, this is a test message
+                     */
+                    thread_id?: string;
                 };
             };
         };

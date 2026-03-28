@@ -563,6 +563,13 @@ paths:
           description: Customer ID
           schema:
             type: string
+        - name: threadId
+          in: query
+          required: false
+          description: Filter messages by thread ID
+          schema:
+            type: string
+
       responses:
         '200':
           description: Successful response
@@ -613,6 +620,10 @@ paths:
                 - text
               properties:
                 text:
+                  type: string
+                  description: The text message to send
+                  example: "Hello, this is a test message"
+                thread_id:
                   type: string
                   description: The text message to send
                   example: "Hello, this is a test message"
@@ -2662,6 +2673,18 @@ components:
         - success
         - message
         - created_at
+    MessageFilter:
+      type: object
+      description: Filter for querying messages
+      properties:
+        threadId:
+          type: string
+          description: Filter messages by thread ID
+          example: "thread-123"
+        recipient:
+          type: string
+          description: Filter messages by recipient
+          example: "CUSTOMER"
 tags:
   - name: Deliveries
     description: Operations related to deliveries

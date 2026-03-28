@@ -9,6 +9,7 @@ export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type AddToCartItem = components["schemas"]["AddToCartItem"];
 export type RemoveFromCartItem = components["schemas"]["RemoveFromCartItem"];
+export type MessageFilter = components["schemas"]["MessageFilter"];
 
 export type BaseSubscription = components["schemas"]["Subscription"];
 type BaseDeliveryOverviewItemStats = components["schemas"]["DeliveryOverviewItemStats"];
