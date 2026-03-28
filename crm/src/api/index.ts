@@ -201,12 +201,16 @@ export function useDeliverOrder() {
   });
 }
 
-export const useAdminCustomerMessagesQuery = (customerId?: string): UseQueryResult<ConversationMessage[]> => {
+export const useAdminCustomerMessagesQuery = (customerId?: string, threadId?: string): UseQueryResult<ConversationMessage[]> => {
   return useApiQuery("/api/admin/customers/{customerId}/messages", {
     params: {
       path: {
         customerId: customerId || ""
+      },
+      query: {
+        threadId
       }
+
     }
   }, { retry: 1, enabled: !!customerId } as any)
 };
@@ -215,14 +219,14 @@ export function useSendCustomerMessage(customerId?: string) {
   return usePostApi<
     '/api/admin/customers/{customerId}/messages',
     { customerId: string },
-    { text: string }
+    { text: string, thread_id?: string }
   >(
     '/api/admin/customers/{customerId}/messages',
     [
       '/api/admin/customers/{customerId}/messages'
     ],
     {
-      customerId: customerId || ''
+      customerId: customerId || '',
     }
   );
 };

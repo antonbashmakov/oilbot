@@ -13,951 +13,231 @@ export interface paths {
      * Get all deliveries
      * @description Retrieve a list of all deliveries
      */
-    get: {
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["Delivery"][];
-            };
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getAllDeliveries"];
   };
   "/admin/deliveries/{id}": {
     /**
      * Get delivery by ID
      * @description Retrieve a specific delivery by its ID
      */
-    get: {
-      parameters: {
-        path: {
-          /** @description Delivery ID */
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["DeliveryOverview"];
-            };
-          };
-        };
-        /** @description Delivery not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getDeliveryById"];
   };
   "/admin/deliveries/{id}/stats/{format}": {
     /**
      * Get delivery statistics in CSV format
      * @description Retrieve delivery order statistics filtered by status and export as CSV
      */
-    get: {
-      parameters: {
-        query?: {
-          /** @description Filter orders by status */
-          status?: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED" | "CANCELED";
-        };
-        path: {
-          /** @description Delivery ID */
-          id: string;
-          /** @description Output format */
-          format: "CSV";
-        };
-      };
-      responses: {
-        /** @description Successful response with CSV file */
-        200: {
-          headers: {
-            /** @description Attachment filename */
-            "Content-Disposition"?: string;
-          };
-          content: {
-            "text/csv": string;
-          };
-        };
-        /** @description Delivery not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getDeliveryStats"];
   };
   "/admin/orders/{id}": {
     /**
      * Get order overview by ID
      * @description Retrieve a specific delivery by its ID
      */
-    get: {
-      parameters: {
-        path: {
-          /** @description Order ID */
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["OrderOverview"];
-            };
-          };
-        };
-        /** @description Delivery not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getOrderOverview"];
     /**
      * Update an order
      * @description Update an order's name
      */
-    patch: {
-      parameters: {
-        path: {
-          /** @description Order ID */
-          id: string;
-        };
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["OrderPatch"];
-        };
-      };
-      responses: {
-        /** @description Order successfully updated */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["Order"];
-            };
-          };
-        };
-        /** @description Bad request */
-        400: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Order not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    patch: operations["updateOrder"];
   };
   "/admin/order-pickings/{id}": {
     /**
      * Update order picking items
      * @description Update the items in an order picking
      */
-    patch: {
-      parameters: {
-        path: {
-          /** @description Order Picking ID */
-          id: string;
-        };
-      };
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["OrderPickingPatch"];
-        };
-      };
-      responses: {
-        /** @description Order picking successfully updated */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["OrderPicking"];
-            };
-          };
-        };
-        /** @description Order picking not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    patch: operations["updateOrderPicking"];
   };
   "/admin/order-pickings/{pickingId}/items/{itemId}/collect": {
     /**
      * Collect an item in an order picking
      * @description Mark an item in an order picking as collected.
      */
-    post: {
-      parameters: {
-        path: {
-          /** @description Order Picking ID */
-          pickingId: string;
-          /** @description Item ID */
-          itemId: string;
-        };
-      };
-      responses: {
-        /** @description Item successfully collected */
-        204: {
-          content: never;
-        };
-        /** @description Order picking or item not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    post: operations["collectOrderPickingItem"];
   };
   "/admin/orders/{id}/order-picking": {
     /**
      * Start order picking process
      * @description Check if order picking exists, return existing one or create new from order
      */
-    post: {
-      parameters: {
-        path: {
-          /** @description Order ID */
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Order picking found or created successfully */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["OrderPicking"];
-            };
-          };
-        };
-        /** @description Order not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    post: operations["startOrderPicking"];
   };
   "/admin/orders/{id}/consolidate": {
     /**
      * Resolve an order
      * @description Marks an order as resolved.
      */
-    post: {
-      parameters: {
-        path: {
-          /** @description Order ID */
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Order successfully resolved */
-        204: {
-          content: never;
-        };
-      };
-    };
+    post: operations["consolidateOrder"];
   };
   "/admin/orders/{id}/cancel": {
     /**
      * Cancel an order
      * @description Cancel an order and emit OrderCancelledEvent. Order can only be cancelled if status is PENDING, PAYMENT_IN_PROGRESS, PAYMENT_FAILED, or PAID.
      */
-    put: {
-      parameters: {
-        path: {
-          /** @description Order ID */
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Order successfully cancelled */
-        204: {
-          content: never;
-        };
-        /** @description Bad request (e.g., order cannot be cancelled in current status) */
-        400: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Order not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    put: operations["cancelOrder"];
   };
   "/admin/orders/{id}/conciliation": {
     /**
      * Get conciliation order
      * @description Retrieve the conciliation order for a given order ID
      */
-    get: {
-      parameters: {
-        path: {
-          /** @description Order ID */
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["Order"];
-            };
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getConciliationOrder"];
   };
   "/admin/orders/{orderId}/payments": {
     /**
      * Get all payments for an order
      * @description Retrieve all payments for an order, including payments from conciliation orders
      */
-    get: {
-      parameters: {
-        path: {
-          /** @description Order ID */
-          orderId: string;
-        };
-      };
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["Payment"][];
-            };
-          };
-        };
-        /** @description Order not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getPaymentsForOrder"];
     /**
      * Create a new payment for an order
      * @description Create a new payment for an order using idempotency key. Returns 400 if order already has a payment in status 'SENT' or 'CONFIRMED'
      */
-    post: {
-      parameters: {
-        path: {
-          /** @description Order ID */
-          orderId: string;
-        };
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            /**
-             * @description Idempotency key to prevent duplicate payment creation
-             * @example unique-key-123
-             */
-            idempotency_key: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Payment created successfully */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["Payment"];
-            };
-          };
-        };
-        /** @description Order already has a payment in status 'SENT' or 'CONFIRMED' */
-        400: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Order not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    post: operations["createPaymentForOrder"];
   };
   "/admin/customers/{customerId}/messages": {
     /**
      * Get all messages for a customer
      * @description Retrieve all conversation messages for a specific customer
      */
-    get: {
-      parameters: {
-        path: {
-          /** @description Customer ID */
-          customerId: string;
-        };
-      };
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["ConversationMessage"][];
-            };
-          };
-        };
-        /** @description Customer not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getMessagesForCustomer"];
     /**
      * Send a message to a customer
      * @description Send a text message to a customer via Telegram and save it to CONVERSATION_MESSAGES
      */
-    post: {
-      parameters: {
-        path: {
-          /** @description Customer ID */
-          customerId: string;
-        };
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            /**
-             * @description The text message to send
-             * @example Hello, this is a test message
-             */
-            text: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Message sent successfully */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["ConversationMessage"];
-            };
-          };
-        };
-        /** @description Customer not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    post: operations["sendMessageToCustomer"];
   };
   "/admin/comments": {
     /**
      * Get comments
      * @description Retrieve comments with optional filtering by entity_id and class
      */
-    get: {
-      parameters: {
-        query?: {
-          /** @description Filter comments by entity ID */
-          entity_id?: string;
-          /** @description Filter comments by class/type */
-          class?: string;
-        };
-      };
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["Comment"][];
-            };
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getComments"];
     /**
      * Create a comment
      * @description Create a new comment
      */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            /**
-             * @description The comment text content
-             * @example This is a comment
-             */
-            text: string;
-            /**
-             * @description ID of the entity this comment belongs to
-             * @example order-456
-             */
-            entity_id: string;
-            /**
-             * @description The class/type of the comment
-             * @example NOTE
-             */
-            class: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Comment created successfully */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["Comment"];
-            };
-          };
-        };
-        /** @description Bad request (e.g., missing required fields) */
-        400: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    post: operations["createComment"];
+  };
+  "/admin/broadcast": {
+    /**
+     * Create a new broadcast task
+     * @description Create a new broadcast task with the given message.
+     */
+    post: operations["createBroadcastTask"];
+  };
+  "/admin/broadcast/{taskId}": {
+    /**
+     * Run a broadcast task once
+     * @description Pick BroadcastTask from DB and run the task once using BroadcastService, returning list of BroadcastResult objects.
+     */
+    post: operations["runBroadcastTask"];
   };
   "/private/items/category/{category}": {
     /**
      * Get items by category
      * @description Retrieve a list of items for a specific category
      */
-    get: {
-      parameters: {
-        path: {
-          /** @description Category name */
-          category: string;
-        };
-      };
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["Item"][];
-            };
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getItemsByCategory"];
   };
-  "/private/customers/{customerId}/cart/items/{itemId}": {
+  "/private/customers/{customerId}/items/{itemId}": {
+    /**
+     * Get item overview for a customer
+     * @description Retrieve item overview for a specific customer and item
+     */
+    get: operations["getCustomerItem"];
+  };
+  "/private/customers/{customerId}/cart/items": {
+    /**
+     * Get cart items for a customer
+     * @description Retrieve all items in a customer's cart
+     */
+    get: operations["getCartItems"];
     /**
      * Add item to cart
      * @description Add an item to a customer's cart
      */
-    post: {
-      parameters: {
-        path: {
-          /** @description Customer ID */
-          customerId: number;
-          /** @description Item ID */
-          itemId: string;
-        };
-      };
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["Item"][];
-            };
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    post: operations["addItemToCart"];
+    /**
+     * Remove item from cart
+     * @description Remove an item from a customer's cart
+     */
+    delete: operations["removeItemFromCart"];
+  };
+  "/private/customers/{customerId}/cart/order": {
+    /**
+     * Create order from cart and initialize payment
+     * @description Transactionally and idempotently fetch all cart items for the customer, split them by group, create separate orders for each group, find earliest delivery for each group, assign deliveries, initialize payment for each order, and return created orders and payments
+     */
+    post: operations["createOrderAndPaymentFromCart"];
+  };
+  "/private/customers/{customerId}/subscriptions": {
+    /**
+     * Create a subscription for a customer
+     * @description Create a new subscription for a customer. If customer already has an active subscription which is not passed due (current date is before next_payment_date) throw bad request. If there is no active subscription for user create one and set next_payment_date month ahead.
+     */
+    post: operations["createSubscription"];
   };
   "/private/customers/{customerId}/orders": {
+    /**
+     * Get all orders for a customer
+     * @description Retrieve a list of all orders for a specific customer
+     */
+    get: operations["getCustomerOrders"];
     /**
      * Create order from cart
      * @description Create a new order from a customer's cart
      */
-    post: {
-      parameters: {
-        path: {
-          /** @description Customer ID */
-          customerId: number;
-        };
-      };
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["Order"];
-            };
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    post: operations["createOrderFromCart"];
+  };
+  "/private/customers/{customerId}/orders/{orderId}": {
+    /**
+     * Get a specific order for a customer
+     * @description Retrieve a specific order by ID for a customer
+     */
+    get: operations["getCustomerOrderById"];
+  };
+  "/private/customers/{customerId}": {
+    /**
+     * Get customer overview
+     * @description Retrieve customer overview including balance, stats, and subscription
+     */
+    get: operations["getCustomerOverview"];
   };
   "/public/users/me": {
     /**
      * Get current user information
      * @description Retrieve the authenticated user's information
      */
-    get: {
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["User"];
-            };
-          };
-        };
-        /** @description Unauthorized (user not authenticated) */
-        401: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description User not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getCurrentUser"];
   };
   "/public/signup": {
     /**
      * Register a new user
      * @description Create a new user account
      */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["SignupRequest"];
-        };
-      };
-      responses: {
-        /** @description User created successfully */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["User"];
-            };
-          };
-        };
-        /** @description Bad request (e.g., email already exists, invalid input) */
-        400: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    post: operations["signupUser"];
   };
   "/public/login": {
     /**
      * Login a user
      * @description Authenticate a user with email and password
      */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["LoginRequest"];
-        };
-      };
-      responses: {
-        /** @description User authenticated successfully */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["User"];
-            };
-          };
-        };
-        /** @description Bad request (e.g., missing fields, invalid credentials) */
-        400: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Unauthorized (invalid credentials) */
-        401: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    post: operations["loginUser"];
   };
   "/agent/deliveries/{id}": {
     /**
      * Get delivery agent overview by ID
      * @description Retrieve delivery agent overview including pickups and deliveries
      */
-    get: {
-      parameters: {
-        path: {
-          /** @description Delivery agent ID */
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Successful response */
-        200: {
-          content: {
-            "application/json": {
-              /** @example OK */
-              code?: string;
-              data?: components["schemas"]["DeliveryAgentOverview"];
-            };
-          };
-        };
-        /** @description Delivery agent not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    get: operations["getDeliveryAgentOverview"];
   };
   "/agent/orders/{id}/deliver": {
     /**
      * Mark order as delivered
      * @description Set order status to DELIVERED
      */
-    put: {
-      parameters: {
-        path: {
-          /** @description Order ID */
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Order successfully marked as delivered */
-        204: {
-          content: never;
-        };
-        /** @description Bad request (e.g., order cannot be delivered in current status) */
-        400: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Order not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Internal server error */
-        500: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
+    put: operations["markOrderAsDelivered"];
   };
 }
 
@@ -970,17 +250,22 @@ export interface components {
        * @description Customer's first name
        * @example Антон
        */
-      first_name?: string;
+      first_name: string;
       /**
        * @description Customer's first name
        * @example Антон
        */
-      last_name?: string;
+      last_name: string;
       /**
        * @description Unique identifier for the customer
        * @example 1019705782
        */
       id: string;
+      /**
+       * @description Unique identifier in the system of origin (e.g., Telegram or VK)
+       * @example 1019705782
+       */
+      external_id: string;
       /**
        * @description Whether the customer is a bot
        * @example null
@@ -990,15 +275,73 @@ export interface components {
        * @description Customer's language code
        * @example ru
        */
-      language_code: string;
+      language_code?: string;
       /**
        * @description Customer's username
        * @example getting_drunk
        */
       username?: string;
+      /**
+       * Format: date-time
+       * @description When customer was created
+       * @example 2025-11-23T00:00:00.000Z
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description When customer was last seen
+       * @example 2025-11-23T00:00:00.000Z
+       */
+      last_seen_at: string;
+      /**
+       * @description Customer origin
+       * @example TELEGRAM
+       * @enum {enum}
+       */
+      origin: TELEGRAM | VK;
+    };
+    Subscription: {
+      /**
+       * @description Unique identifier for the customer
+       * @example 1019705782
+       */
+      id: string;
+      /**
+       * Format: date-time
+       * @description When subscription was created
+       * @example 2025-11-23T00:00:00.000Z
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description When subscription was canceled
+       * @example 2025-11-23T00:00:00.000Z
+       */
+      canceled_at?: string;
+      /**
+       * Format: date-time
+       * @description When to charge next payment
+       * @example 2025-11-23T00:00:00.000Z
+       */
+      next_payment_at: string;
+      /** @enum {string} */
+      status: "PENDING" | "ACTIVE" | "CANCELED" | "CANCELED_PAYMENT_OVERDUE";
+      /**
+       * Format: float
+       * @description Cost of the subscription
+       * @example 609
+       */
+      fee: number;
     };
     CustomerOverview: WithRequired<{
       balance: components["schemas"]["CustomerBalance"];
+      stats?: components["schemas"]["CustomerStats"];
+      subscription?: components["schemas"]["Subscription"];
+      /**
+       * @description Whether the customer is a member (has an active subscription)
+       * @example true
+       */
+      is_member?: boolean;
     } & components["schemas"]["Customer"], "balance">;
     OrderPickingPatch: {
       /** @description Items to update in this order picking */
@@ -1045,6 +388,11 @@ export interface components {
     };
     CartItem: {
       /**
+       * @description Item category
+       * @example MEAT
+       */
+      category: string;
+      /**
        * Format: float
        * @description Fraction value
        * @example 0.42
@@ -1078,21 +426,120 @@ export interface components {
       price: number;
       /**
        * Format: float
+       * @description Non-member price for the total quantity and fraction
+       * @example 609
+       */
+      non_member_price: number;
+      /**
+       * Format: float
        * @description Price for one unit
        * @example 609
        */
       price_for_unit: number;
+      /**
+       * Format: float
+       * @description Non-member price for one unit
+       * @example 609
+       */
+      non_member_price_for_unit: number;
       /**
        * @description Quantity
        * @example 1
        */
       quantity: number;
       owner: components["schemas"]["OwnerRef"];
+      /**
+       * Format: date-time
+       * @description Delivery end date and time
+       * @example 2025-11-23T00:00:00.000Z
+       */
+      created_at?: string;
     };
     PickingItem: ({
-      /** @enum {unknown} */
+      /** @enum {string} */
       status?: "PENDING" | "COLLECTED" | "CANCELED";
-    }) & components["schemas"]["OrderItem"];
+    }) & components["schemas"]["CartItem"];
+    ItemOverview: {
+      /** @description Deliveries containing this item group */
+      deliveries?: components["schemas"]["DeliveryRef"][];
+      /**
+       * @description Item category
+       * @example MEAT
+       */
+      category: string;
+      /**
+       * @description Item description
+       * @example мясо
+       */
+      description: string;
+      /**
+       * @description Is item sells by weight
+       * @example true
+       */
+      is_weighted: boolean;
+      /**
+       * Format: float
+       * @description Fraction value
+       * @example 1.2
+       */
+      fraction: number;
+      /**
+       * Format: float
+       * @description Fraction price out
+       * @example 1439
+       */
+      fraction_price_out: number;
+      /**
+       * Format: float
+       * @description Non-member fraction price out
+       * @example 1439
+       */
+      non_member_fraction_price_out: number;
+      /**
+       * Format: float
+       * @description Non-member unit price out
+       * @example 1439
+       */
+      non_member_unit_price_out: number;
+      /**
+       * @description Item group
+       * @example BALASHOV
+       */
+      group: string;
+      /**
+       * @description Unique identifier for the item
+       * @example 06088197-f7ef-4bf2-8b3f-2f4a05c6c104
+       */
+      id: string;
+      /**
+       * @description Link to item details
+       * @example https://t.me/posebestoimosti_saratov/214
+       */
+      link: string;
+      /**
+       * @description Item name
+       * @example Телятина Филе (Тендер Лоин)
+       */
+      name: string;
+      /**
+       * Format: float
+       * @description Price out
+       * @example 1199
+       */
+      price_out: number;
+      /**
+       * @description Unit of measurement
+       * @example Кг
+       */
+      unit: string;
+      /**
+       * @description Unit description
+       * @example Отруб
+       */
+      unit_description: string;
+      /** @description Statistics for the item including likes and share enters */
+      stats?: components["schemas"]["ItemStats"];
+    };
     OwnerRef: {
       /**
        * @description Owner ID
@@ -1119,6 +566,28 @@ export interface components {
        */
       id: string;
     };
+    CustomerRef: {
+      /**
+       * @description Customer ID
+       * @example 1019705782
+       */
+      id: string;
+      /**
+       * @description Customer's username
+       * @example getting_drunk
+       */
+      username?: string;
+      /**
+       * @description Customer's first name
+       * @example Антон
+       */
+      first_name?: string;
+      /**
+       * @description Customer's last name
+       * @example Антон
+       */
+      last_name?: string;
+    };
     Item: {
       /**
        * @description Item category
@@ -1142,6 +611,18 @@ export interface components {
        * @example 1439
        */
       fraction_price_out: number;
+      /**
+       * Format: float
+       * @description Non-member fraction price out
+       * @example 1439
+       */
+      non_member_fraction_price_out: number;
+      /**
+       * Format: float
+       * @description Non-member unit price out
+       * @example 1439
+       */
+      non_member_unit_price_out: number;
       /**
        * @description Item group
        * @example BALASHOV
@@ -1193,7 +674,12 @@ export interface components {
        * @description Unit description
        * @example Отруб
        */
-      unti_description: string;
+      unit_description: string;
+      /**
+       * @description Is item sells by weight
+       * @example true
+       */
+      is_weighted: boolean;
     };
     Stats: {
       /**
@@ -1219,6 +705,23 @@ export interface components {
        * @example Сёмга филе Филе на коже 1.8 Кг
        */
       name: string;
+      /**
+       * @description Category of the stats item
+       * @example Сёмга филе Филе на коже 1.8 Кг
+       */
+      category: string;
+    };
+    ItemStats: {
+      /**
+       * @description Number of likes for the item
+       * @example 42
+       */
+      number_of_likes?: number;
+      /**
+       * @description Number of share enters for the item
+       * @example 15
+       */
+      number_of_share_enters?: number;
     };
     DeliveryOverviewItemStats: {
       orders?: components["schemas"]["Order"][];
@@ -1307,10 +810,10 @@ export interface components {
       /** @description Items in this order */
       items: components["schemas"]["CartItem"][];
       /** @enum {string} */
-      status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED" | "CANCELED" | "DELIVERED";
+      status: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONSOLIDATION_SUCCESSFUL" | "CONCILIATED" | "CANCELED" | "DELIVERED";
       /**
        * @description Current status of the order
-       * @example PAID
+       * @example CONCILIATION
        * @enum {string}
        */
       type: "CONCILIATION" | "ORIGINAL";
@@ -1326,11 +829,24 @@ export interface components {
        * @example 150.75
        */
       total: number;
+      /**
+       * Format: date-time
+       * @description Delivery end date and time
+       * @example 2025-11-23T00:00:00.000Z
+       */
+      created_at: string;
+      /**
+       * Format: date-time
+       * @description Delivery end date and time
+       * @example 2025-11-23T00:00:00.000Z
+       */
+      updated_at: string;
     };
     OrderOverview: WithRequired<{
       picking?: components["schemas"]["OrderPicking"];
       customer: components["schemas"]["CustomerOverview"];
       comments?: components["schemas"]["Comment"];
+      payment?: components["schemas"]["Payment"];
     } & components["schemas"]["Order"], "customer">;
     User: {
       /**
@@ -1392,7 +908,7 @@ export interface components {
       /** @description Unique identifier for the message */
       id: string;
       /** @description Unique identifier a thread those messages belongs to */
-      thread_id?: string;
+      thread_id: string;
       /**
        * @description The provider used to send the message
        * @enum {string}
@@ -1423,7 +939,12 @@ export interface components {
        * @description Error code from payment provider
        * @example 0
        */
-      error_code?: number | null;
+      error_code?: string | null;
+      /**
+       * @description Message from payment provider
+       * @example 0
+       */
+      message?: string | null;
       /** @enum {string} */
       status: "SENT" | "CONFIRMED" | "FAILED" | "TIMED_OUT" | "CANCELED" | "REJECTED";
       /**
@@ -1506,6 +1027,61 @@ export interface components {
        */
       updated_at?: string;
     };
+    CustomerAccounting: {
+      /**
+       * @description Internal payment ID
+       * @example payment-123456
+       */
+      id: string;
+      /**
+       * @description Id at bank to charge recursive payments
+       * @example some-id-here
+       */
+      rebill_id: string;
+    };
+    CustomerStats: {
+      /**
+       * @description Unique identifier for the customer
+       * @example 1019705782
+       */
+      id: string;
+      /**
+       * @description Total number of orders for the customer
+       * @example 10
+       */
+      number_of_orders: number;
+      /**
+       * @description Total number of orders for the customer
+       * @example 10
+       */
+      number_of_active_orders: number;
+      /**
+       * @description Total number of orders for the customer
+       * @example 10
+       */
+      number_of_free_orders: number;
+      /**
+       * @description Number of canceled orders for the customer
+       * @example 2
+       */
+      number_of_canceled_orders: number;
+      /**
+       * @description Number of fulfilled orders for the customer
+       * @example 7
+       */
+      number_of_fulfilled_orders: number;
+      /**
+       * @description Number of paid subscription months for the customer
+       * @example 3
+       */
+      number_of_paid_months: number;
+      /**
+       * Format: float
+       * @description Total amount paid by the customer
+       * @example 4500.75
+       */
+      paid_in_total: number;
+    };
     SignupRequest: {
       /**
        * Format: email
@@ -1531,6 +1107,25 @@ export interface components {
        * @example password123
        */
       password: string;
+    };
+    AddToCartItem: {
+      /**
+       * @description Item ID to add to cart
+       * @example 06088197-f7ef-4bf2-8b3f-2f4a05c6c104
+       */
+      itemId: string;
+    };
+    RemoveFromCartItem: {
+      /**
+       * @description Cart item ID to remove from cart
+       * @example db13bdf1-cd12-4650-82be-f55af1e79bf7
+       */
+      cartItemId?: string;
+      /**
+       * @description item ID to remove from cart. All the cart items of this item will be removed
+       * @example db13bdf1-cd12-4650-82be-f55af1e79bf7
+       */
+      itemId?: string;
     };
     Comment: {
       /**
@@ -1578,6 +1173,40 @@ export interface components {
       /** @description List of delivery orders */
       deliveries: components["schemas"]["Order"][];
     };
+    /** @description Result of a broadcast operation */
+    BroadcastResult: {
+      /** @description ID of the broadcast task */
+      id: string;
+      /** @description ID of the broadcast task */
+      broadcast_task_id: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the object was created
+       * @example 2025-01-10T14:30:00Z
+       */
+      created_at: string;
+      /** @description Customer reference */
+      customer: components["schemas"]["CustomerRef"];
+      /** @description Whether the broadcast was successful */
+      success: boolean;
+      /** @description Result message */
+      message: string;
+      /** @description Error details if any */
+      error?: Record<string, unknown> | null;
+    };
+    /** @description Filter for querying messages */
+    MessageFilter: {
+      /**
+       * @description Filter messages by thread ID
+       * @example thread-123
+       */
+      threadId?: string;
+      /**
+       * @description Filter messages by recipient
+       * @example CUSTOMER
+       */
+      recipient?: string;
+    };
   };
   responses: never;
   parameters: never;
@@ -1590,4 +1219,1332 @@ export type $defs = Record<string, never>;
 
 export type external = Record<string, never>;
 
-export type operations = Record<string, never>;
+export interface operations {
+
+  /**
+   * Get all deliveries
+   * @description Retrieve a list of all deliveries
+   */
+  getAllDeliveries: {
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["Delivery"][];
+          };
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get delivery by ID
+   * @description Retrieve a specific delivery by its ID
+   */
+  getDeliveryById: {
+    parameters: {
+      path: {
+        /** @description Delivery ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["DeliveryOverview"];
+          };
+        };
+      };
+      /** @description Delivery not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get delivery statistics in CSV format
+   * @description Retrieve delivery order statistics filtered by status and export as CSV
+   */
+  getDeliveryStats: {
+    parameters: {
+      query?: {
+        /** @description Filter orders by status */
+        status?: "PENDING" | "PAYMENT_IN_PROGRESS" | "PAYMENT_FAILED" | "PAID" | "RESOLVING" | "CONCILIATION_PAYMENT_IN_PROGRESS" | "CONCILIATED" | "CANCELED";
+      };
+      path: {
+        /** @description Delivery ID */
+        id: string;
+        /** @description Output format */
+        format: "CSV";
+      };
+    };
+    responses: {
+      /** @description Successful response with CSV file */
+      200: {
+        headers: {
+          /** @description Attachment filename */
+          "Content-Disposition"?: string;
+        };
+        content: {
+          "text/csv": string;
+        };
+      };
+      /** @description Delivery not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get order overview by ID
+   * @description Retrieve a specific delivery by its ID
+   */
+  getOrderOverview: {
+    parameters: {
+      path: {
+        /** @description Order ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["OrderOverview"];
+          };
+        };
+      };
+      /** @description Delivery not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Update an order
+   * @description Update an order's name
+   */
+  updateOrder: {
+    parameters: {
+      path: {
+        /** @description Order ID */
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrderPatch"];
+      };
+    };
+    responses: {
+      /** @description Order successfully updated */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["Order"];
+          };
+        };
+      };
+      /** @description Bad request */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Order not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Update order picking items
+   * @description Update the items in an order picking
+   */
+  updateOrderPicking: {
+    parameters: {
+      path: {
+        /** @description Order Picking ID */
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrderPickingPatch"];
+      };
+    };
+    responses: {
+      /** @description Order picking successfully updated */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["OrderPicking"];
+          };
+        };
+      };
+      /** @description Order picking not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Collect an item in an order picking
+   * @description Mark an item in an order picking as collected.
+   */
+  collectOrderPickingItem: {
+    parameters: {
+      path: {
+        /** @description Order Picking ID */
+        pickingId: string;
+        /** @description Item ID */
+        itemId: string;
+      };
+    };
+    responses: {
+      /** @description Item successfully collected */
+      204: {
+        content: never;
+      };
+      /** @description Order picking or item not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Start order picking process
+   * @description Check if order picking exists, return existing one or create new from order
+   */
+  startOrderPicking: {
+    parameters: {
+      path: {
+        /** @description Order ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Order picking found or created successfully */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["OrderPicking"];
+          };
+        };
+      };
+      /** @description Order not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Resolve an order
+   * @description Marks an order as resolved.
+   */
+  consolidateOrder: {
+    parameters: {
+      path: {
+        /** @description Order ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Order successfully resolved */
+      204: {
+        content: never;
+      };
+    };
+  };
+  /**
+   * Cancel an order
+   * @description Cancel an order and emit OrderCancelledEvent. Order can only be cancelled if status is PENDING, PAYMENT_IN_PROGRESS, PAYMENT_FAILED, or PAID.
+   */
+  cancelOrder: {
+    parameters: {
+      path: {
+        /** @description Order ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Order successfully cancelled */
+      204: {
+        content: never;
+      };
+      /** @description Bad request (e.g., order cannot be cancelled in current status) */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Order not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get conciliation order
+   * @description Retrieve the conciliation order for a given order ID
+   */
+  getConciliationOrder: {
+    parameters: {
+      path: {
+        /** @description Order ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["Order"];
+          };
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get all payments for an order
+   * @description Retrieve all payments for an order, including payments from conciliation orders
+   */
+  getPaymentsForOrder: {
+    parameters: {
+      path: {
+        /** @description Order ID */
+        orderId: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["Payment"][];
+          };
+        };
+      };
+      /** @description Order not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Create a new payment for an order
+   * @description Create a new payment for an order using idempotency key. Returns 400 if order already has a payment in status 'SENT' or 'CONFIRMED'
+   */
+  createPaymentForOrder: {
+    parameters: {
+      path: {
+        /** @description Order ID */
+        orderId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description Idempotency key to prevent duplicate payment creation
+           * @example unique-key-123
+           */
+          idempotency_key: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Payment created successfully */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["Payment"];
+          };
+        };
+      };
+      /** @description Order already has a payment in status 'SENT' or 'CONFIRMED' */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Order not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get all messages for a customer
+   * @description Retrieve all conversation messages for a specific customer
+   */
+  getMessagesForCustomer: {
+    parameters: {
+      query?: {
+        /** @description Filter messages by thread ID */
+        threadId?: string;
+      };
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["ConversationMessage"][];
+          };
+        };
+      };
+      /** @description Customer not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Send a message to a customer
+   * @description Send a text message to a customer via Telegram and save it to CONVERSATION_MESSAGES
+   */
+  sendMessageToCustomer: {
+    parameters: {
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The text message to send
+           * @example Hello, this is a test message
+           */
+          text: string;
+          /**
+           * @description The text message to send
+           * @example Hello, this is a test message
+           */
+          thread_id?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Message sent successfully */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["ConversationMessage"];
+          };
+        };
+      };
+      /** @description Customer not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get comments
+   * @description Retrieve comments with optional filtering by entity_id and class
+   */
+  getComments: {
+    parameters: {
+      query?: {
+        /** @description Filter comments by entity ID */
+        entity_id?: string;
+        /** @description Filter comments by class/type */
+        class?: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["Comment"][];
+          };
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Create a comment
+   * @description Create a new comment
+   */
+  createComment: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The comment text content
+           * @example This is a comment
+           */
+          text: string;
+          /**
+           * @description ID of the entity this comment belongs to
+           * @example order-456
+           */
+          entity_id: string;
+          /**
+           * @description The class/type of the comment
+           * @example NOTE
+           */
+          class: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Comment created successfully */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["Comment"];
+          };
+        };
+      };
+      /** @description Bad request (e.g., missing required fields) */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Create a new broadcast task
+   * @description Create a new broadcast task with the given message.
+   */
+  createBroadcastTask: {
+    requestBody: {
+      content: {
+        "application/json": {
+          /**
+           * @description The message to broadcast to customers
+           * @example Hello, this is a broadcast message
+           */
+          message: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Broadcast task created successfully */
+      204: {
+        content: never;
+      };
+      /** @description Bad request (e.g., missing message) */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Run a broadcast task once
+   * @description Pick BroadcastTask from DB and run the task once using BroadcastService, returning list of BroadcastResult objects.
+   */
+  runBroadcastTask: {
+    parameters: {
+      path: {
+        /** @description Broadcast task ID */
+        taskId: string;
+      };
+    };
+    responses: {
+      /** @description Broadcast task executed successfully */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["BroadcastResult"][];
+          };
+        };
+      };
+      /** @description Broadcast task not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get items by category
+   * @description Retrieve a list of items for a specific category
+   */
+  getItemsByCategory: {
+    parameters: {
+      path: {
+        /** @description Category name */
+        category: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["ItemOverview"][];
+          };
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get item overview for a customer
+   * @description Retrieve item overview for a specific customer and item
+   */
+  getCustomerItem: {
+    parameters: {
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+        /** @description Item ID */
+        itemId: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["ItemOverview"];
+          };
+        };
+      };
+      /** @description Customer or item not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get cart items for a customer
+   * @description Retrieve all items in a customer's cart
+   */
+  getCartItems: {
+    parameters: {
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+      };
+    };
+    responses: {
+      /** @description Successful response with cart items */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["CartItem"][];
+          };
+        };
+      };
+      /** @description Customer not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Add item to cart
+   * @description Add an item to a customer's cart
+   */
+  addItemToCart: {
+    parameters: {
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AddToCartItem"];
+      };
+    };
+    responses: {
+      /** @description Item successfully added to cart */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["CartItem"];
+          };
+        };
+      };
+      /** @description Customer or item not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Remove item from cart
+   * @description Remove an item from a customer's cart
+   */
+  removeItemFromCart: {
+    parameters: {
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RemoveFromCartItem"];
+      };
+    };
+    responses: {
+      /** @description Item successfully removed from cart */
+      204: {
+        content: never;
+      };
+      /** @description Customer or cart item not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Create order from cart and initialize payment
+   * @description Transactionally and idempotently fetch all cart items for the customer, split them by group, create separate orders for each group, find earliest delivery for each group, assign deliveries, initialize payment for each order, and return created orders and payments
+   */
+  createOrderAndPaymentFromCart: {
+    parameters: {
+      header: {
+        /** @description Idempotency key to prevent duplicate order creation */
+        idempotency_key: string;
+      };
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+      };
+    };
+    responses: {
+      /** @description Orders created and payments initialized successfully */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: {
+              orders?: components["schemas"]["Order"][];
+              payments?: components["schemas"]["Payment"][];
+            };
+          };
+        };
+      };
+      /** @description Bad request (e.g., cart is empty, invalid idempotency key) */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Customer not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Conflict (e.g., duplicate request with same idempotency key) */
+      409: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Create a subscription for a customer
+   * @description Create a new subscription for a customer. If customer already has an active subscription which is not passed due (current date is before next_payment_date) throw bad request. If there is no active subscription for user create one and set next_payment_date month ahead.
+   */
+  createSubscription: {
+    parameters: {
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+      };
+    };
+    responses: {
+      /** @description Subscription created successfully */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: {
+              /**
+               * @description URL for payment processing
+               * @example https://securepay.tinkoff.ru/payment/init?PaymentId=123456
+               */
+              paymentUrl?: string;
+            };
+          };
+        };
+      };
+      /** @description Bad request (e.g., customer already has an active subscription) */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Customer not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get all orders for a customer
+   * @description Retrieve a list of all orders for a specific customer
+   */
+  getCustomerOrders: {
+    parameters: {
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+      };
+    };
+    responses: {
+      /** @description Successful response with customer orders */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["OrderOverview"][];
+          };
+        };
+      };
+      /** @description Customer not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Create order from cart
+   * @description Create a new order from a customer's cart
+   */
+  createOrderFromCart: {
+    parameters: {
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+      };
+    };
+    responses: {
+      /** @description Order successfully created from cart */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["Order"];
+          };
+        };
+      };
+      /** @description Customer not found or cart is empty */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get a specific order for a customer
+   * @description Retrieve a specific order by ID for a customer
+   */
+  getCustomerOrderById: {
+    parameters: {
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+        /** @description Order ID */
+        orderId: string;
+      };
+    };
+    responses: {
+      /** @description Successful response with order details */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["OrderOverview"];
+          };
+        };
+      };
+      /** @description Customer or order not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get customer overview
+   * @description Retrieve customer overview including balance, stats, and subscription
+   */
+  getCustomerOverview: {
+    parameters: {
+      path: {
+        /** @description Customer ID */
+        customerId: string;
+      };
+    };
+    responses: {
+      /** @description Successful response with customer overview */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["CustomerOverview"];
+          };
+        };
+      };
+      /** @description Customer not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get current user information
+   * @description Retrieve the authenticated user's information
+   */
+  getCurrentUser: {
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["User"];
+          };
+        };
+      };
+      /** @description Unauthorized (user not authenticated) */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description User not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Register a new user
+   * @description Create a new user account
+   */
+  signupUser: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SignupRequest"];
+      };
+    };
+    responses: {
+      /** @description User created successfully */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["User"];
+          };
+        };
+      };
+      /** @description Bad request (e.g., email already exists, invalid input) */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Login a user
+   * @description Authenticate a user with email and password
+   */
+  loginUser: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoginRequest"];
+      };
+    };
+    responses: {
+      /** @description User authenticated successfully */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["User"];
+          };
+        };
+      };
+      /** @description Bad request (e.g., missing fields, invalid credentials) */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Unauthorized (invalid credentials) */
+      401: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Get delivery agent overview by ID
+   * @description Retrieve delivery agent overview including pickups and deliveries
+   */
+  getDeliveryAgentOverview: {
+    parameters: {
+      path: {
+        /** @description Delivery agent ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Successful response */
+      200: {
+        content: {
+          "application/json": {
+            /** @example OK */
+            code?: string;
+            data?: components["schemas"]["DeliveryAgentOverview"];
+          };
+        };
+      };
+      /** @description Delivery agent not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+  /**
+   * Mark order as delivered
+   * @description Set order status to DELIVERED
+   */
+  markOrderAsDelivered: {
+    parameters: {
+      path: {
+        /** @description Order ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description Order successfully marked as delivered */
+      204: {
+        content: never;
+      };
+      /** @description Bad request (e.g., order cannot be delivered in current status) */
+      400: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Order not found */
+      404: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+      /** @description Internal server error */
+      500: {
+        content: {
+          "application/json": components["schemas"]["Error"];
+        };
+      };
+    };
+  };
+}

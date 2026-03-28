@@ -25,7 +25,7 @@ import {
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
 import { DataTable, Column, DecimalDataField } from "@/components/DataTable";
-import { CartItem, Order, PickingItem } from "@/api/models";
+import { CartItem, ConversationMessage, Order, PickingItem } from "@/api/models";
 import { useAdminOrderOverviewQuery, useCollectPickingItem, useConsolidateOrder, usePatchOrderPicking, usePatchOrder, useStartOrderPicking, useAdminOrderConciliationQuery, useAdminOrderPaymentsQuery, useCreateOrderPayment, useCancelOrder, useAdminCustomerMessagesQuery, useSendCustomerMessage } from "@/api";
 import { LuPencilLine, LuX, LuCheck } from "react-icons/lu";
 import { InfoMessage } from "@/components/ui/InfoMessage";
@@ -54,6 +54,7 @@ export default function OrderPage() {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState<boolean>(false);
   const [items, setItems] = useState<CartItem[]>([]);
   const [pickingItems, setPickingItems] = useState<PickingItem[]>([]);
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
 
   const { data: order } = useAdminOrderOverviewQuery(orderId as string);
   const { data: conciliationOrder } = useAdminOrderConciliationQuery(orderId as string);
@@ -68,7 +69,7 @@ export default function OrderPage() {
   const { mutate: patchOrder, isPending: isPatchingOrder } = usePatchOrder(orderId as string);
   
   // Customer messages
-  const { data: messages = [], refetch: refetchMessages } = useAdminCustomerMessagesQuery(order?.customer!.id);
+  const { data: orderMessages = [], refetch: refetchMessages } = useAdminCustomerMessagesQuery(order?.customer!.id, order?.id);
   const { mutate: sendMessage, isPending: isSendingMessage } = useSendCustomerMessage(order?.customer!.id);
 
   // Sort payments into original and conciliation arrays
@@ -81,6 +82,7 @@ export default function OrderPage() {
 
   useEffect(() => setIsMissingOriginalPayment(!originalPayments?.filter(p => (p.status === 'SENT' || p.status === 'CONFIRMED')).length), [originalPayments]);
   useEffect(() => setIsMissingConsolidationPayment(order?.status === 'RESOLVING' && !conciliationPayments?.filter(p => (p.status === 'SENT' || p.status === 'CONFIRMED')).length), [conciliationPayments]);
+  useEffect(() => setMessages(_.orderBy(orderMessages || [], 'created_at')), [orderMessages]);
 
   const isRowDisabled = (item: PickingItem) => {
     return isCollecting || !isOrderEditable || (item.status === 'CANCELED');
@@ -157,7 +159,7 @@ export default function OrderPage() {
 
   const onSendMessage = useCallback((text: string) => {
     if (order?.customer?.id) {
-      sendMessage({ text }, {
+      sendMessage({ text, thread_id: order?.id }, {
         onSuccess: () => {
           refetchMessages();
         }

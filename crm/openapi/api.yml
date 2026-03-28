@@ -563,6 +563,13 @@ paths:
           description: Customer ID
           schema:
             type: string
+        - name: threadId
+          in: query
+          required: false
+          description: Filter messages by thread ID
+          schema:
+            type: string
+
       responses:
         '200':
           description: Successful response
@@ -613,6 +620,10 @@ paths:
                 - text
               properties:
                 text:
+                  type: string
+                  description: The text message to send
+                  example: "Hello, this is a test message"
+                thread_id:
                   type: string
                   description: The text message to send
                   example: "Hello, this is a test message"
@@ -738,6 +749,84 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /admin/broadcast:
+    post:
+      operationId: createBroadcastTask
+      summary: Create a new broadcast task
+      description: Create a new broadcast task with the given message.
+      tags:
+        - Broadcast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: The message to broadcast to customers
+                  example: "Hello, this is a broadcast message"
+      responses:
+        '204':
+          description: Broadcast task created successfully
+        '400':
+          description: Bad request (e.g., missing message)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/broadcast/{taskId}:
+    post:
+      operationId: runBroadcastTask
+      summary: Run a broadcast task once
+      description: Pick BroadcastTask from DB and run the task once using BroadcastService, returning list of BroadcastResult objects.
+      tags:
+        - Broadcast
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Broadcast task ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Broadcast task executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BroadcastResult'
+        '404':
+          description: Broadcast task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /private/items/category/{category}:
     
     get:
@@ -768,6 +857,52 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/ItemOverview'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/customers/{customerId}/items/{itemId}:
+    get:
+      operationId: getCustomerItem
+      summary: Get item overview for a customer
+      description: Retrieve item overview for a specific customer and item
+      tags:
+        - Items
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+        - name: itemId
+          in: path
+          required: true
+          description: Item ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/ItemOverview'
+        '404':
+          description: Customer or item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error
           content:
@@ -895,8 +1030,166 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /private/customers/{customerId}/cart/order:
+    post:
+      operationId: createOrderAndPaymentFromCart
+      summary: Create order from cart and initialize payment
+      description: Transactionally and idempotently fetch all cart items for the customer, split them by group, create separate orders for each group, find earliest delivery for each group, assign deliveries, initialize payment for each order, and return created orders and payments
+      tags:
+        - Cart
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+        - name: idempotency_key
+          in: header
+          required: true
+          description: Idempotency key to prevent duplicate order creation
+          schema:
+            type: string
+            example: "unique-key-123"
+      responses:
+        '200':
+          description: Orders created and payments initialized successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: object
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Order'
+                      payments:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Payment'
+        '400':
+          description: Bad request (e.g., cart is empty, invalid idempotency key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict (e.g., duplicate request with same idempotency key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/customers/{customerId}/subscriptions:
+    post:
+      operationId: createSubscription
+      summary: Create a subscription for a customer
+      description: Create a new subscription for a customer. If customer already has an active subscription which is not passed due (current date is before next_payment_date) throw bad request. If there is no active subscription for user create one and set next_payment_date month ahead.
+      tags:
+        - Subscriptions
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Subscription created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: object
+                    properties:
+                      paymentUrl:
+                        type: string
+                        description: URL for payment processing
+                        example: "https://securepay.tinkoff.ru/payment/init?PaymentId=123456"        
+        '400':
+          description: Bad request (e.g., customer already has an active subscription)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /private/customers/{customerId}/orders:
-    
+    get:
+      operationId: getCustomerOrders
+      summary: Get all orders for a customer
+      description: Retrieve a list of all orders for a specific customer
+      tags:
+        - Orders
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with customer orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OrderOverview'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     post:
       operationId: createOrderFromCart
       summary: Create order from cart
@@ -925,6 +1218,92 @@ paths:
                     $ref: '#/components/schemas/Order'
         '404':
           description: Customer not found or cart is empty
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/customers/{customerId}/orders/{orderId}:
+    get:
+      operationId: getCustomerOrderById
+      summary: Get a specific order for a customer
+      description: Retrieve a specific order by ID for a customer
+      tags:
+        - Orders
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+        - name: orderId
+          in: path
+          required: true
+          description: Order ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with order details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/OrderOverview'
+        '404':
+          description: Customer or order not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /private/customers/{customerId}:
+    get:
+      operationId: getCustomerOverview
+      summary: Get customer overview
+      description: Retrieve customer overview including balance, stats, and subscription
+      tags:
+        - Customers
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with customer overview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: "OK"
+                  data:
+                    $ref: '#/components/schemas/CustomerOverview'
+        '404':
+          description: Customer not found
           content:
             application/json:
               schema:
@@ -1146,7 +1525,13 @@ components:
       type: object
       required:
         - id
-        - language_code
+        - first_name
+        - last_name
+        - email
+        - created_at
+        - last_seen_at
+        - external_id
+        - origin
       properties:
         first_name:
           type: string
@@ -1159,6 +1544,10 @@ components:
         id:
           type: string
           description: Unique identifier for the customer
+          example: "1019705782"
+        external_id:
+          type: string
+          description: Unique identifier in the system of origin (e.g., Telegram or VK)
           example: "1019705782"
         is_bot:
           type: boolean
@@ -1173,6 +1562,66 @@ components:
           type: string
           description: Customer's username
           example: "getting_drunk"
+        created_at:
+          type: string
+          format: date-time
+          description: When customer was created
+          example: "2025-11-23T00:00:00.000Z"            
+        last_seen_at:
+          type: string
+          format: date-time
+          description: When customer was last seen
+          example: "2025-11-23T00:00:00.000Z"    
+        origin:
+          type: enum
+          enum:
+            - TELEGRAM
+            - VK
+          description: Customer origin
+          example: "TELEGRAM"        
+    Subscription:
+      type: object
+      required:
+        - id
+        - fee
+        - next_payment_at
+        - status
+        - created_at
+        - last_seen_at
+        - origin
+        - external_id
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the customer
+          example: "1019705782"
+        created_at:
+          type: string
+          format: date-time
+          description: When subscription was created
+          example: "2025-11-23T00:00:00.000Z"  
+        canceled_at:
+          type: string
+          format: date-time
+          description: When subscription was canceled
+          example: "2025-11-23T00:00:00.000Z"  
+        next_payment_at:
+          type: string
+          format: date-time
+          description: When to charge next payment
+          example: "2025-11-23T00:00:00.000Z" 
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACTIVE
+            - CANCELED
+            - CANCELED_PAYMENT_OVERDUE
+        fee:
+            type: number
+            format: float
+            description: Cost of the subscription
+            example: 609
     CustomerOverview: 
       type: object
       required:
@@ -1182,6 +1631,14 @@ components:
       properties:
         balance: 
           $ref: '#/components/schemas/CustomerBalance'
+        stats:
+          $ref: '#/components/schemas/CustomerStats'
+        subscription:
+          $ref: '#/components/schemas/Subscription'
+        is_member:
+          type: boolean
+          description: Whether the customer is a member (has an active subscription)
+          example: true
     OrderPickingPatch:
       type: object
       required:
@@ -1249,10 +1706,12 @@ components:
         - item_id
         - name
         - owner
-        - price
         - quantity
         - category
+        - price        
         - price_for_unit
+        - non_member_price        
+        - non_member_price_for_unit
       properties:
         category:
           type: string
@@ -1284,10 +1743,20 @@ components:
             format: float
             description: Price for the total quantity and fraction
             example: 609
+        non_member_price:
+            type: number
+            format: float
+            description: Non-member price for the total quantity and fraction
+            example: 609
         price_for_unit:
             type: number
             format: float
             description: Price for one unit
+            example: 609
+        non_member_price_for_unit:
+            type: number
+            format: float
+            description: Non-member price for one unit
             example: 609
         quantity:
             type: integer
@@ -1324,6 +1793,9 @@ components:
         - price_out
         - unit
         - unit_description
+        - is_weighted
+        - non_member_fraction_price_out
+        - non_member_unit_price_out        
       properties:
         deliveries:
           type: array
@@ -1338,6 +1810,10 @@ components:
           type: string
           description: Item description
           example: "мясо"
+        is_weighted:
+          type: boolean
+          description: Is item sells by weight
+          example: true          
         fraction:
           type: number
           format: float
@@ -1348,6 +1824,16 @@ components:
           format: float
           description: Fraction price out
           example: 1439
+        non_member_fraction_price_out:
+          type: number
+          format: float
+          description: Non-member fraction price out
+          example: 1439
+        non_member_unit_price_out:
+          type: number
+          format: float
+          description: Non-member unit price out
+          example: 1439          
         group:
           type: string
           description: Item group
@@ -1377,6 +1863,9 @@ components:
           type: string
           description: Unit description
           example: "Отруб"
+        stats:
+          $ref: '#/components/schemas/ItemStats'
+          description: Statistics for the item including likes and share enters
 
     OwnerRef:
       type: object
@@ -1408,6 +1897,27 @@ components:
           type: string
           description: Unique identifier for the order picking
           example: "ef4d5632-ba34-4488-97a5-b9b7af299535"      
+    CustomerRef:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Customer ID
+          example: "1019705782"
+        username:
+          type: string
+          description: Customer's username
+          example: "getting_drunk"
+        first_name:
+          type: string
+          description: Customer's first name
+          example: "Антон"
+        last_name:
+          type: string
+          description: Customer's last name
+          example: "Антон"
     Item:
       type: object
       required:
@@ -1415,6 +1925,8 @@ components:
         - description
         - fraction
         - fraction_price_out
+        - non_member_fraction_price_out
+        - non_member_unit_price_out
         - group
         - id
         - link
@@ -1425,6 +1937,7 @@ components:
         - status
         - unit
         - unit_description
+        - is_weighted
       properties:
         category:
           type: string
@@ -1443,6 +1956,16 @@ components:
           type: number
           format: float
           description: Fraction price out
+          example: 1439
+        non_member_fraction_price_out:
+          type: number
+          format: float
+          description: Non-member fraction price out
+          example: 1439
+        non_member_unit_price_out:
+          type: number
+          format: float
+          description: Non-member unit price out
           example: 1439
         group:
           type: string
@@ -1486,6 +2009,10 @@ components:
           type: string
           description: Unit description
           example: "Отруб"
+        is_weighted:
+          type: boolean
+          description: Is item sells by weight
+          example: true
     Stats:
       type: object
       required:
@@ -1493,6 +2020,7 @@ components:
         - fraction
         - quantity
         - name
+        - category
       properties:
         total:
           type: number
@@ -1513,6 +2041,22 @@ components:
           type: string
           description: Name of the stats item
           example: "Сёмга филе Филе на коже 1.8 Кг"
+        category:
+          type: string
+          description: Category of the stats item
+          example: "Сёмга филе Филе на коже 1.8 Кг"
+          
+    ItemStats:
+      type: object
+      properties:
+        number_of_likes:
+          type: integer
+          description: Number of likes for the item
+          example: 42
+        number_of_share_enters:
+          type: integer
+          description: Number of share enters for the item
+          example: 15
           
     DeliveryOverviewItemStats:
       type: object
@@ -1620,6 +2164,8 @@ components:
         - owner
         - total
         - type
+        - created_at
+        - updated_at
       properties:
         id:
           type: string
@@ -1653,6 +2199,7 @@ components:
             - PAID
             - RESOLVING
             - CONCILIATION_PAYMENT_IN_PROGRESS
+            - CONSOLIDATION_SUCCESSFUL
             - CONCILIATED
             - CANCELED
             - DELIVERED
@@ -1674,6 +2221,16 @@ components:
           format: float
           description: Total value of the order
           example: 150.75
+        created_at:
+          type: string
+          format: date-time
+          description: Delivery end date and time
+          example: "2025-11-23T00:00:00.000Z"           
+        updated_at:
+          type: string
+          format: date-time
+          description: Delivery end date and time
+          example: "2025-11-23T00:00:00.000Z"           
     OrderOverview:
       type: object
       required:
@@ -1687,6 +2244,8 @@ components:
           $ref: '#/components/schemas/CustomerOverview'
         comments:
           $ref: '#/components/schemas/Comment'
+        payment:
+          $ref: '#/components/schemas/Payment'
 
     User:
       type: object
@@ -1812,10 +2371,15 @@ components:
           description: URL for payment processing
           example: "https://securepay.tinkoff.ru/payment/init"
         error_code:
-          type: number
+          type: string
           nullable: true
           description: Error code from payment provider
-          example: 0
+          example: "0"
+        message:
+          type: string
+          nullable: true
+          description: Message from payment provider
+          example: "0"
         status:
           type: string
           enum:
@@ -1897,6 +2461,66 @@ components:
           format: date-time
           description: Balance last update timestamp
           example: "2025-01-10T14:30:00Z"
+    CustomerAccounting:
+      type: object
+      required:
+        - id
+        - rebill_id
+      properties:
+        id:
+          type: string
+          description: Internal payment ID
+          example: "payment-123456"      
+        rebill_id:
+          type: string          
+          description: Id at bank to charge recursive payments
+          example: "some-id-here"
+
+    CustomerStats:
+      type: object
+      required:
+        - id
+        - number_of_orders
+        - number_of_active_orders
+        - number_of_free_orders
+        - number_of_canceled_orders
+        - number_of_fulfilled_orders
+        - number_of_paid_months
+        - paid_in_total
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the customer
+          example: "1019705782"      
+        number_of_orders:
+          type: integer
+          description: Total number of orders for the customer
+          example: 10
+        number_of_active_orders:
+          type: integer
+          description: Total number of orders for the customer
+          example: 10
+        number_of_free_orders:
+          type: integer
+          description: Total number of orders for the customer
+          example: 10
+        number_of_canceled_orders:
+          type: integer
+          description: Number of canceled orders for the customer
+          example: 2
+        number_of_fulfilled_orders:
+          type: integer
+          description: Number of fulfilled orders for the customer
+          example: 7
+        number_of_paid_months:
+          type: integer
+          description: Number of paid subscription months for the customer
+          example: 3
+        paid_in_total:
+          type: number
+          format: float
+          description: Total amount paid by the customer
+          example: 4500.75
 
     SignupRequest:
       type: object
@@ -2013,6 +2637,54 @@ components:
           description: List of delivery orders
           items:
             $ref: '#/components/schemas/Order'
+
+    BroadcastResult:
+      type: object
+      description: Result of a broadcast operation
+      properties:
+        id:
+          type: string
+          description: ID of the broadcast task
+        broadcast_task_id:
+          type: string
+          description: ID of the broadcast task
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the object was created
+          example: "2025-01-10T14:30:00Z"          
+        customer:
+          $ref: '#/components/schemas/CustomerRef'
+          description: Customer reference
+        success:
+          type: boolean
+          description: Whether the broadcast was successful
+        message:
+          type: string
+          description: Result message
+        error:
+          type: object
+          nullable: true
+          description: Error details if any
+      required:
+        - id
+        - broadcast_task_id
+        - customer
+        - success
+        - message
+        - created_at
+    MessageFilter:
+      type: object
+      description: Filter for querying messages
+      properties:
+        threadId:
+          type: string
+          description: Filter messages by thread ID
+          example: "thread-123"
+        recipient:
+          type: string
+          description: Filter messages by recipient
+          example: "CUSTOMER"
 tags:
   - name: Deliveries
     description: Operations related to deliveries
