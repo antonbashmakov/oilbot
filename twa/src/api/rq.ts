@@ -47,7 +47,7 @@ export function useApiQuery<P extends PathsWithMethod<ApiPaths, 'get'>>(p: P | u
         queryFn: () => (handleResult(GET(p as P, init), dataInterceptor)),
         enabled: !!p && options.enabled,
     });
-}
+};
 
 export function usePatchApi<
     K extends keyof ApiPaths,
