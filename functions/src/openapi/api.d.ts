@@ -1000,6 +1000,19 @@ export interface components {
              */
             created_at: string;
         };
+        /** @description Filter for querying messages */
+        MessageFilter: {
+            /**
+             * @description Filter messages by thread ID
+             * @example thread-123
+             */
+            threadId?: string;
+            /**
+             * @description Filter messages by recipient
+             * @example CUSTOMER
+             */
+            recipient?: string;
+        };
     };
     responses: never;
     parameters: never;

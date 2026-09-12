@@ -1248,7 +1248,18 @@ components:
           format: date-time
           description: Time the message was created.
           example: '2026-09-12T14:30:00Z'
-
+    MessageFilter:
+      type: object
+      description: Filter for querying messages
+      properties:
+        threadId:
+          type: string
+          description: Filter messages by thread ID
+          example: "thread-123"
+        recipient:
+          type: string
+          description: Filter messages by recipient
+          example: "CUSTOMER"
 
 tags:
   - name: Deliveries
