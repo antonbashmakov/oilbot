@@ -2,6 +2,8 @@ import {components} from "../openapi/api";
 import {components as models} from "../openapi/models";
 
 type BaseCustomer = components["schemas"]["Customer"];
+type BaseChatMessage = components["schemas"]["ChatMessage"];
+
 export type CustomerStats = components["schemas"]["CustomerStats"];
 export type ItemStats = components["schemas"]["ItemStats"];
 export type CustomerAccounting = components["schemas"]["CustomerAccounting"];
@@ -39,6 +41,10 @@ export type TinkoffResult = models["schemas"]["TinkoffResult"];
 type BaseBalanceChangeEvent = models["schemas"]["BalanceChangeEvent"];
 type BaseBroadcastTask = models["schemas"]["BroadcastTask"];
 type BaseBroadcastResult = components["schemas"]["BroadcastResult"];
+
+export type ChatMessage = Omit<BaseChatMessage, "createdAt"> & {
+  created_at: Date;
+};
 
 export type BroadcastResult = Omit<BaseBroadcastResult, "created_at" > & {
   created_at: Date;

@@ -1,6 +1,8 @@
 import { components } from "./openapi/api";
 import { components as models } from "./openapi/models";
 
+type BaseChatMessage = components["schemas"]["ChatMessage"];
+
 export type Customer = components["schemas"]["Customer"];
 export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
@@ -35,6 +37,10 @@ export type TinkoffResult = models["schemas"]["TinkoffResult"];
 
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 export type BaseConversationMessage = components["schemas"]["ConversationMessage"];
+
+export type ChatMessage = Omit<BaseChatMessage, "createdAt"> & {
+  created_at: Date;
+};
 
 export type Payment = Omit<BasePayment, "created_at" | "updated_at"> & {
   created_at: Date;
