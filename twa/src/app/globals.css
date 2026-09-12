@@ -1,116 +1,151 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --primary: #ec1337;
-  --background-light: #f8f6f6;
-  --background-dark: #181112;
-  --surface-light: #ffffff;
-  --surface-dark: #221013;
-  --text-main-light: #181112;
-  --text-main-dark: #ffffff;
-  --text-sub-light: #896168;
-  --text-sub-dark: #dcb8be;
-}
+/* Makes dark: classes activate when <html class="dark"> is used */
+@custom-variant dark (&:where(.dark, .dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-background-light: var(--background-light);
-  --color-background-dark: var(--background-dark);
-  --color-surface-light: var(--surface-light);
-  --color-surface-dark: var(--surface-dark);
-  --color-text-main-light: var(--text-main-light);
-  --color-text-main-dark: var(--text-main-dark);
-  --color-text-sub-light: var(--text-sub-light);
-  --color-text-sub-dark: var(--text-sub-dark);
-  --font-sans: var(--font-plus-jakarta-sans);
-  --font-display: var(--font-plus-jakarta-sans);
-  --radius-default: 0.5rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+@theme {
+  /* Colors */
+  --color-on-secondary: #00344d;
+  --color-secondary: #89ceff;
+  --color-secondary-fixed: #c9e6ff;
+  --color-tertiary-fixed-dim: #4edea3;
+  --color-on-surface-variant: #d8c3ad;
+  --color-on-tertiary-fixed: #002113;
+  --color-on-secondary-fixed: #001e2f;
+  --color-background: #0f141c;
+  --color-inverse-primary: #855300;
+  --color-on-background: #dee2ee;
+  --color-on-primary-container: #613b00;
+  --color-on-error-container: #ffdad6;
+  --color-on-primary-fixed-variant: #653e00;
+  --color-surface-container-lowest: #090e16;
+  --color-on-tertiary-container: #004e34;
+  --color-surface: #0f141c;
+  --color-primary-fixed: #ffddb8;
+  --color-primary: #ffc174;
+  --color-error: #ffb4ab;
+  --color-surface-variant: #30353e;
+  --color-on-secondary-container: #00344e;
+  --color-primary-fixed-dim: #ffb95f;
+  --color-on-error: #690005;
+  --color-on-primary: #472a00;
+  --color-surface-container-highest: #30353e;
+  --color-on-secondary-fixed-variant: #004c6e;
+  --color-tertiary: #56e5a9;
+  --color-surface-tint: #ffb95f;
+  --color-surface-bright: #343942;
+  --color-on-surface: #dee2ee;
+  --color-tertiary-container: #30c88f;
+  --color-on-tertiary: #003824;
+  --color-outline-variant: #534434;
+  --color-secondary-fixed-dim: #89ceff;
+  --color-surface-container-high: #252a33;
+  --color-secondary-container: #00a2e6;
+  --color-tertiary-fixed: #6ffbbe;
+  --color-surface-dim: #0f141c;
+  --color-on-tertiary-fixed-variant: #005236;
+  --color-error-container: #93000a;
+  --color-on-primary-fixed: #2a1700;
+  --color-inverse-surface: #dee2ee;
+  --color-primary-container: #f59e0b;
+  --color-inverse-on-surface: #2c3139;
+  --color-surface-container: #1b2028;
+  --color-surface-container-low: #171c24;
+  --color-outline: #a08e7a;
+
+  /* Border radius */
+  --radius: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
   --radius-full: 9999px;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+  /* Spacing */
+  --spacing-layout-gutter: 1.25rem;
+  --spacing-space-3xl: 4rem;
+  --spacing-space-sm: 0.75rem;
+  --spacing-chat-max-width: 48rem;
+  --spacing-space-xs: 0.5rem;
+  --spacing-space-xl: 2rem;
+  --spacing-space-2xl: 3rem;
+  --spacing-layout-margin-mobile: 1rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-2xs: 0.25rem;
+  --spacing-space-md: 1rem;
+  --spacing-layout-margin-desktop: 2rem;
+  --spacing-content-max-width: 72rem;
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
+  /* Fonts */
+  --font-label-lg: "Space Grotesk", sans-serif;
+  --font-headline-lg: "Space Grotesk", sans-serif;
+  --font-body-lg: "Hanken Grotesk", sans-serif;
+  --font-display-lg-mobile: "Space Grotesk", sans-serif;
+  --font-label-sm: "Space Grotesk", sans-serif;
+  --font-display-lg: "Space Grotesk", sans-serif;
+  --font-body-sm: "Hanken Grotesk", sans-serif;
+  --font-mono-metric: "Space Grotesk", sans-serif;
+  --font-label-md: "Space Grotesk", sans-serif;
+  --font-headline-sm: "Space Grotesk", sans-serif;
+  --font-headline-md: "Space Grotesk", sans-serif;
+  --font-body-md: "Hanken Grotesk", sans-serif;
 
-/* Hide scrollbar for IE, Edge and Firefox */
-.no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
+  /* Font sizes */
+  --text-label-lg: 14px;
+  --text-label-lg--line-height: 18px;
+  --text-label-lg--letter-spacing: 0.04em;
+  --text-label-lg--font-weight: 600;
 
-.material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
-}
+  --text-headline-lg: 28px;
+  --text-headline-lg--line-height: 36px;
+  --text-headline-lg--letter-spacing: -0.015em;
+  --text-headline-lg--font-weight: 600;
 
-.material-symbols-outlined.filled {
-  font-variation-settings:
-  'FILL' 1,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
-}
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+  --text-body-lg--letter-spacing: 0em;
+  --text-body-lg--font-weight: 400;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-plus-jakarta-sans), sans-serif;
-  min-height: max(884px, 100dvh);
-}
+  --text-display-lg-mobile: 32px;
+  --text-display-lg-mobile--line-height: 40px;
+  --text-display-lg-mobile--letter-spacing: -0.02em;
+  --text-display-lg-mobile--font-weight: 700;
 
-/* Cart animation keyframes */
-@keyframes fly-to-cart {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(100px, -100px) scale(0);
-    opacity: 0;
-  }
-}
+  --text-label-sm: 10px;
+  --text-label-sm--line-height: 14px;
+  --text-label-sm--letter-spacing: 0.08em;
+  --text-label-sm--font-weight: 600;
 
-@keyframes ping {
-  75%, 100% {
-    transform: scale(1.5);
-    opacity: 0;
-  }
-}
+  --text-display-lg: 44px;
+  --text-display-lg--line-height: 52px;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
 
-@keyframes bounce {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
+  --text-body-sm: 12px;
+  --text-body-sm--line-height: 16px;
+  --text-body-sm--letter-spacing: 0.015em;
+  --text-body-sm--font-weight: 400;
 
-.animate-fly-to-cart {
-  animation: fly-to-cart 0.8s ease-in-out forwards;
-}
+  --text-mono-metric: 15px;
+  --text-mono-metric--line-height: 20px;
+  --text-mono-metric--letter-spacing: 0.05em;
+  --text-mono-metric--font-weight: 700;
 
-.animate-ping {
-  animation: ping 0.5s cubic-bezier(0, 0, 0.2, 1);
-}
+  --text-label-md: 12px;
+  --text-label-md--line-height: 16px;
+  --text-label-md--letter-spacing: 0.06em;
+  --text-label-md--font-weight: 500;
 
-.animate-bounce {
-  animation: bounce 0.3s ease-in-out;
+  --text-headline-sm: 18px;
+  --text-headline-sm--line-height: 24px;
+  --text-headline-sm--letter-spacing: 0em;
+  --text-headline-sm--font-weight: 600;
+
+  --text-headline-md: 22px;
+  --text-headline-md--line-height: 28px;
+  --text-headline-md--letter-spacing: -0.01em;
+  --text-headline-md--font-weight: 600;
+
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+  --text-body-md--letter-spacing: 0.01em;
+  --text-body-md--font-weight: 400;
 }
