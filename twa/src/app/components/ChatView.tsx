@@ -1,5 +1,6 @@
 import ChatMessage from "./ChatMessage";
 import Carousel from "./Carousel";
+import Footer from "./Footer";
 import { messages } from "../data/mock";
 import { useGetMessages } from '@/api';
 
@@ -23,6 +24,7 @@ const ChatView = () => {
         <ChatMessage key={message.id} message={message} />
       ))}
       {/*<Carousel />*/}
+      <Footer />
     </main>
   );
 };
