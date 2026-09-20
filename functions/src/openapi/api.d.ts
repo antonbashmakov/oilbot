@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/private/customers/{customerId}/chats/latest/messages": {
+    "/private/customers/{customerId}/chats/{chatId}/messages": {
         parameters: {
             query?: never;
             header?: never;
@@ -14,7 +14,11 @@ export interface paths {
         /** Get messages from a customer's latest chat */
         get: operations["getLatestCustomerChatMessages"];
         put?: never;
-        post?: never;
+        /**
+         * Create a message in a customer's chat
+         * @description Create a new message in the given customer's chat and return it.
+         */
+        post: operations["createCustomerChatMessage"];
         delete?: never;
         options?: never;
         head?: never;
@@ -982,11 +986,16 @@ export interface components {
              */
             id: string;
             /**
+             * @description Unique identifier of the chat to which the message belongs.
+             * @example chat_01J9Z7Y6X5W4V3U2T1S0
+             */
+            chat_id: string;
+            /**
              * @description Author of the message.
              * @example assistant
              * @enum {string}
              */
-            role: "CUSTOMER" | "ASSISTANT";
+            role: "user" | "assistant";
             /**
              * @description Text content of the message.
              * @example How can I help you today?
@@ -1032,6 +1041,8 @@ export interface operations {
             path: {
                 /** @description Unique identifier of the customer. */
                 customerId: string;
+                /** @description Unique identifier of the chat. */
+                chatId: string;
             };
             cookie?: never;
         };
@@ -1044,6 +1055,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChatMessage"][];
+                };
+            };
+            /** @description Customer or chat not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createCustomerChatMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier of the customer. */
+                customerId: string;
+                /** @description Unique identifier of the chat. */
+                chatId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatMessage"];
+            };
+        };
+        responses: {
+            /** @description The created message. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
                 };
             };
             /** @description Customer or chat not found. */

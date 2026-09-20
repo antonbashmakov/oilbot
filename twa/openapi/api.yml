@@ -20,7 +20,7 @@ security:
   - bearerAuth: []
 
 paths:
-  /private/customers/{customerId}/chats/latest/messages:
+  /private/customers/{customerId}/chats/{chatId}/messages:
     get:
       operationId: getLatestCustomerChatMessages
       summary: Get messages from a customer's latest chat
@@ -31,6 +31,12 @@ paths:
           in: path
           required: true
           description: Unique identifier of the customer.
+          schema:
+            type: string
+        - name: chatId
+          in: path
+          required: true
+          description: Unique identifier of the chat.
           schema:
             type: string
         - name: oldestMessage
@@ -1216,12 +1222,12 @@ components:
         - message
         - created_at
 
-
     ChatMessage:
       type: object
       description: A message in an AI chat.
       required:
         - id
+        - chat_id
         - role
         - content
         - owner
@@ -1231,12 +1237,16 @@ components:
           type: string
           description: Unique identifier of the message.
           example: msg_01J9Z7Y6X5W4V3U2T1S0
+        chat_id:
+          type: string
+          description: Unique identifier of the chat to which the message belongs.
+          example: chat_01J9Z7Y6X5W4V3U2T1S0
         role:
           type: string
           description: Author of the message.
           enum:
-            - CUSTOMER
-            - ASSISTANT
+            - user
+            - assistant
           example: assistant
         content:
           type: string
@@ -1249,6 +1259,18 @@ components:
           format: date-time
           description: Time the message was created.
           example: '2026-09-12T14:30:00Z'
+    MessageFilter:
+      type: object
+      description: Filter for querying messages
+      properties:
+        threadId:
+          type: string
+          description: Filter messages by thread ID
+          example: "thread-123"
+        recipient:
+          type: string
+          description: Filter messages by recipient
+          example: "CUSTOMER"
 
 tags:
   - name: Deliveries

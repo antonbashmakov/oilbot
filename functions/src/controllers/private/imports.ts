@@ -4,6 +4,7 @@ import * as admin from "firebase-admin";
 import * as cors from "cors";
 import DeliveryService from "../../services/DeliveryService";
 import ChatService from "../../services/ChatService";
+import ChatbotService from "../../services/ChatbotService";
 import ItemService from "../../services/ItemService";
 import CustomerService from "../../services/CustomerService";
 import CartItemService from "../../services/CartItemService";
@@ -44,6 +45,7 @@ export {
   EventPublisher,
   OrderPickingService,
   ChatService,
+  ChatbotService,
   CONSTANTS,
 };
 

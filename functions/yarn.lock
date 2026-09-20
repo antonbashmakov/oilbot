@@ -5470,6 +5470,11 @@ onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
+openai@^7.19.0:
+  version "7.19.0"
+  resolved "https://registry.yarnpkg.com/openai/-/openai-7.19.0.tgz#8c02695d0afbdf1d41d5bb78b31bddaad14d99ad"
+  integrity sha512-MX2s3u2L5racTO0CC/SWpCOasJQBCJrqLKXK+l82cAhdeF8mPMBEe/gxMm0ZFa2xpKpOFLRjxv5afYEZbBXmbQ==
+
 openapi-typescript@^7.10.1:
   version "7.10.1"
   resolved "https://registry.yarnpkg.com/openapi-typescript/-/openapi-typescript-7.10.1.tgz#813bb63b3252e7c6d5e706c9b7fa962164604d53"

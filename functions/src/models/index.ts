@@ -43,7 +43,7 @@ type BaseBalanceChangeEvent = models["schemas"]["BalanceChangeEvent"];
 type BaseBroadcastTask = models["schemas"]["BroadcastTask"];
 type BaseBroadcastResult = components["schemas"]["BroadcastResult"];
 
-export type ChatMessage = Omit<BaseChatMessage, "createdAt"> & {
+export type ChatMessage = Omit<BaseChatMessage, "created_at"> & {
   created_at: Date;
 };
 

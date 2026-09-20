@@ -20,7 +20,7 @@ security:
   - bearerAuth: []
 
 paths:
-  /private/customers/{customerId}/chats/latest/messages:
+  /private/customers/{customerId}/chats/{chatId}/messages:
     get:
       operationId: getLatestCustomerChatMessages
       summary: Get messages from a customer's latest chat
@@ -31,6 +31,12 @@ paths:
           in: path
           required: true
           description: Unique identifier of the customer.
+          schema:
+            type: string
+        - name: chatId
+          in: path
+          required: true
+          description: Unique identifier of the chat.
           schema:
             type: string
         - name: oldestMessage
@@ -48,6 +54,44 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ChatMessage'
+        '404':
+          description: Customer or chat not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      operationId: createCustomerChatMessage
+      summary: Create a message in a customer's chat
+      description: Create a new message in the given customer's chat and return it.
+      tags:
+        - Chats
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Unique identifier of the customer.
+          schema:
+            type: string
+        - name: chatId
+          in: path
+          required: true
+          description: Unique identifier of the chat.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessage'
+      responses:
+        '200':
+          description: The created message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
         '404':
           description: Customer or chat not found.
           content:
@@ -1221,6 +1265,7 @@ components:
       description: A message in an AI chat.
       required:
         - id
+        - chat_id
         - role
         - content
         - owner
@@ -1230,12 +1275,16 @@ components:
           type: string
           description: Unique identifier of the message.
           example: msg_01J9Z7Y6X5W4V3U2T1S0
+        chat_id:
+          type: string
+          description: Unique identifier of the chat to which the message belongs.
+          example: chat_01J9Z7Y6X5W4V3U2T1S0
         role:
           type: string
           description: Author of the message.
           enum:
-            - CUSTOMER
-            - ASSISTANT
+            - user
+            - assistant
           example: assistant
         content:
           type: string

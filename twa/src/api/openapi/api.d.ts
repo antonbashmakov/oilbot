@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/private/customers/{customerId}/chats/latest/messages": {
+    "/private/customers/{customerId}/chats/{chatId}/messages": {
         parameters: {
             query?: never;
             header?: never;
@@ -982,11 +982,16 @@ export interface components {
              */
             id: string;
             /**
+             * @description Unique identifier of the chat to which the message belongs.
+             * @example chat_01J9Z7Y6X5W4V3U2T1S0
+             */
+            chat_id: string;
+            /**
              * @description Author of the message.
              * @example assistant
              * @enum {string}
              */
-            role: "CUSTOMER" | "ASSISTANT";
+            role: "user" | "assistant";
             /**
              * @description Text content of the message.
              * @example How can I help you today?
@@ -999,6 +1004,19 @@ export interface components {
              * @example 2026-09-12T14:30:00Z
              */
             created_at: string;
+        };
+        /** @description Filter for querying messages */
+        MessageFilter: {
+            /**
+             * @description Filter messages by thread ID
+             * @example thread-123
+             */
+            threadId?: string;
+            /**
+             * @description Filter messages by recipient
+             * @example CUSTOMER
+             */
+            recipient?: string;
         };
     };
     responses: never;
@@ -1019,6 +1037,8 @@ export interface operations {
             path: {
                 /** @description Unique identifier of the customer. */
                 customerId: string;
+                /** @description Unique identifier of the chat. */
+                chatId: string;
             };
             cookie?: never;
         };
