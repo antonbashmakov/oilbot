@@ -14,7 +14,11 @@ export interface paths {
         /** Get messages from a customer's latest chat */
         get: operations["getLatestCustomerChatMessages"];
         put?: never;
-        post?: never;
+        /**
+         * Create a message in a customer's chat
+         * @description Create a new message in the given customer's chat and return it.
+         */
+        post: operations["createCustomerChatMessage"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1018,6 +1022,58 @@ export interface components {
              */
             recipient?: string;
         };
+        /** @description Масло из доступного списка продуктов, передаваемого агенту подбора */
+        AvailableOil: {
+            /**
+             * @description Идентификатор продукта
+             * @example oil_001
+             */
+            id: string;
+            /**
+             * @description Название масла
+             * @example Mobil 1 ESP 5W-30
+             */
+            name: string;
+            /**
+             * @description Вязкость (SAE)
+             * @example 5W-30
+             */
+            sae: string;
+            /**
+             * @description Список допусков API
+             * @example [
+             *       "SN"
+             *     ]
+             */
+            api: string[];
+            /**
+             * @description Список допусков ACEA
+             * @example [
+             *       "C3"
+             *     ]
+             */
+            acea: string[];
+            /**
+             * @description Список OEM-допусков производителя автомобиля
+             * @example [
+             *       "VW 507 00"
+             *     ]
+             */
+            oem_approvals?: string[];
+        };
+        /**
+         * @description Сообщение (AI message), передаваемое агенту подбора моторного масла.
+         *     Содержит описание автомобиля пользователя и список доступных масел.
+         */
+        OilAgentMessage: {
+            /**
+             * @description Описание автомобиля пользователя
+             * @example Volkswagen Passat 2019 2.0 TDI 150 hp
+             */
+            car: string;
+            /** @description Список доступных масел, из которых агент выбирает подходящие */
+            available_oils: components["schemas"]["AvailableOil"][];
+        };
     };
     responses: never;
     parameters: never;
@@ -1051,6 +1107,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChatMessage"][];
+                };
+            };
+            /** @description Customer or chat not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    createCustomerChatMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier of the customer. */
+                customerId: string;
+                /** @description Unique identifier of the chat. */
+                chatId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChatMessage"];
+            };
+        };
+        responses: {
+            /** @description The created message. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"];
                 };
             };
             /** @description Customer or chat not found. */

@@ -9,7 +9,7 @@ const ChatMessageComponent = ({ message }: { message: ChatMessage }) => {
     }
   }, [message]);
 
-  if (message.role === "ASSISTANT") {
+  if (message.role === "assistant") {
     return (
       <div className="flex flex-col items-start max-w-[94%] space-y-1">
         <div className="bg-surface-container-low border border-secondary/20 border-l-2 border-l-secondary rounded-[1rem_1rem_1rem_0.25rem] p-3.5 shadow-sm text-on-surface font-body-md text-body-md space-y-2">

@@ -1022,6 +1022,58 @@ export interface components {
              */
             recipient?: string;
         };
+        /** @description Масло из доступного списка продуктов, передаваемого агенту подбора */
+        AvailableOil: {
+            /**
+             * @description Идентификатор продукта
+             * @example oil_001
+             */
+            id: string;
+            /**
+             * @description Название масла
+             * @example Mobil 1 ESP 5W-30
+             */
+            name: string;
+            /**
+             * @description Вязкость (SAE)
+             * @example 5W-30
+             */
+            sae: string;
+            /**
+             * @description Список допусков API
+             * @example [
+             *       "SN"
+             *     ]
+             */
+            api: string[];
+            /**
+             * @description Список допусков ACEA
+             * @example [
+             *       "C3"
+             *     ]
+             */
+            acea: string[];
+            /**
+             * @description Список OEM-допусков производителя автомобиля
+             * @example [
+             *       "VW 507 00"
+             *     ]
+             */
+            oem_approvals?: string[];
+        };
+        /**
+         * @description Сообщение (AI message), передаваемое агенту подбора моторного масла.
+         *     Содержит описание автомобиля пользователя и список доступных масел.
+         */
+        OilAgentMessage: {
+            /**
+             * @description Описание автомобиля пользователя
+             * @example Volkswagen Passat 2019 2.0 TDI 150 hp
+             */
+            car: string;
+            /** @description Список доступных масел, из которых агент выбирает подходящие */
+            available_oils: components["schemas"]["AvailableOil"][];
+        };
     };
     responses: never;
     parameters: never;

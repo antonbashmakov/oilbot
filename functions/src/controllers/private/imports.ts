@@ -2,6 +2,8 @@ import * as functions from "firebase-functions";
 import * as express from "express";
 import * as admin from "firebase-admin";
 import * as cors from "cors";
+import { readFile }  from 'node:fs/promises';
+
 import DeliveryService from "../../services/DeliveryService";
 import ChatService from "../../services/ChatService";
 import ChatbotService from "../../services/ChatbotService";
@@ -23,6 +25,7 @@ import MockTBankService from "../../services/payments/MockTBankService";
 
 import MockEventPublisher from "../../services/MockEventPublisher";
 import EventPublisher from "../../services/EventPublisher";
+import {OilAgentMessage}  from "../../models";
 
 
 export {
@@ -31,6 +34,7 @@ export {
   admin,
   cors,
   api,
+  readFile,
   DeliveryService,
   ItemService,
   CustomerService,
@@ -46,6 +50,7 @@ export {
   OrderPickingService,
   ChatService,
   ChatbotService,
+  OilAgentMessage,
   CONSTANTS,
 };
 

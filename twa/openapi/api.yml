@@ -60,6 +60,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    post:
+      operationId: createCustomerChatMessage
+      summary: Create a message in a customer's chat
+      description: Create a new message in the given customer's chat and return it.
+      tags:
+        - Chats
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Unique identifier of the customer.
+          schema:
+            type: string
+        - name: chatId
+          in: path
+          required: true
+          description: Unique identifier of the chat.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessage'
+      responses:
+        '200':
+          description: The created message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+        '404':
+          description: Customer or chat not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 
 components:
@@ -1271,6 +1309,70 @@ components:
           type: string
           description: Filter messages by recipient
           example: "CUSTOMER"
+
+
+    AvailableOil:
+      type: object
+      description: Масло из доступного списка продуктов, передаваемого агенту подбора
+      properties:
+        id:
+          type: string
+          description: Идентификатор продукта
+          example: "oil_001"
+        name:
+          type: string
+          description: Название масла
+          example: "Mobil 1 ESP 5W-30"
+        sae:
+          type: string
+          description: Вязкость (SAE)
+          example: "5W-30"
+        api:
+          type: array
+          description: Список допусков API
+          items:
+            type: string
+          example: ["SN"]
+        acea:
+          type: array
+          description: Список допусков ACEA
+          items:
+            type: string
+          example: ["C3"]
+        oem_approvals:
+          type: array
+          description: Список OEM-допусков производителя автомобиля
+          items:
+            type: string
+          example: ["VW 507 00"]
+      required:
+        - id
+        - name
+        - sae
+        - api
+        - acea
+        - oemApprovals
+
+    OilAgentMessage:
+      type: object
+      description: |
+        Сообщение (AI message), передаваемое агенту подбора моторного масла.
+        Содержит описание автомобиля пользователя и список доступных масел.
+      properties:
+        car:
+          type: string
+          description: Описание автомобиля пользователя
+          example: "Volkswagen Passat 2019 2.0 TDI 150 hp"
+        available_oils:
+          type: array
+          description: Список доступных масел, из которых агент выбирает подходящие
+          items:
+            $ref: '#/components/schemas/AvailableOil'
+      required:
+        - car
+        - available_oils
+
+
 
 tags:
   - name: Deliveries

@@ -36,7 +36,7 @@ class ChatbotService {
       chat_id: messages[0].chat_id,
 
     }
-  }
+  }  
 }
 
 export default ChatbotService;

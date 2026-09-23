@@ -15,11 +15,12 @@ export type QueryControlOptions = {
 
 export const useGetMessages =  (customerId?: string): UseQueryResult<ChatMessage[]> => {
     return useApiQuery(
-        "/api/private/customers/{customerId}/chats/latest/messages",
+        "/api/private/customers/{customerId}/chats/{chatId}/messages",
         {
             params: {
                 path: {
                     customerId: customerId || "Cz0KB5zXRqMsEho8BOLC",
+                    chatId: "latest"
                 },
             }
         }

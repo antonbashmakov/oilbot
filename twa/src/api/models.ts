@@ -33,8 +33,6 @@ export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
 export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 export type TinkoffResult = models["schemas"]["TinkoffResult"];
 
-
-
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 export type BaseConversationMessage = components["schemas"]["ConversationMessage"];
 
