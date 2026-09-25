@@ -9,6 +9,8 @@ export type PickingItem = components["schemas"]["PickingItem"];
 export type AddToCartItem = components["schemas"]["AddToCartItem"];
 export type RemoveFromCartItem = components["schemas"]["RemoveFromCartItem"];
 
+export type ChatMessageView = components["schemas"]["ChatMessageView"];
+
 type BaseDeliveryOverviewItemStats = components["schemas"]["DeliveryOverviewItemStats"];
 type BaseStats = components["schemas"]["Stats"];
 type BaseDeliveryOverview = components["schemas"]["DeliveryOverview"];

@@ -344,3 +344,100 @@ components:
         - number_of_runs
         - format
 
+
+    OilAgentResponse:
+      type: object
+      description: |
+        Общий ответ агента подбора моторного масла. Набор заполненных полей
+        зависит от значения status. Все поля, кроме status, могут быть null.
+      properties:
+        status:
+          type: string
+          enum: ["need_more_info", "success", "not_found", "unknown"]
+          description: |
+            Статус ответа:
+            * need_more_info — требуется дополнительная информация об автомобиле;
+            * success — масло найдено;
+            * not_found — подходящего масла нет;
+            * unknown — невозможно надёжно определить требования.
+          example: "success"
+        question:
+          type: string
+          nullable: true
+          description: Уточняющий вопрос пользователю (для статуса need_more_info)
+          example: "Какой двигатель установлен на вашем автомобиле?"
+        car:
+          type: object
+          nullable: true
+          description: Описание автомобиля, определённое агентом (для статусов success и not_found)
+          properties:
+            make:
+              type: string
+              description: Марка автомобиля
+              example: "Volkswagen"
+            model:
+              type: string
+              description: Модель автомобиля
+              example: "Passat"
+            year:
+              type: integer
+              description: Год выпуска автомобиля
+              example: 2019
+            engine:
+              type: string
+              description: Описание двигателя (объём, мощность, тип топлива и т.п.)
+              example: "2.0 TDI 150 hp"
+          required:
+            - make
+            - model
+            - year
+            - engine
+        requirements:
+          type: object
+          nullable: true
+          description: Требования производителя к моторному маслу (для статусов success и not_found)
+          properties:
+            sae:
+              type: array
+              description: Требуемая вязкость по SAE
+              items:
+                type: string
+              example: ["5W-30"]
+            acea:
+              type: array
+              description: Требуемые допуски ACEA
+              items:
+                type: string
+              example: ["C3"]
+            api:
+              type: array
+              description: Требуемые допуски API
+              items:
+                type: string
+              example: []
+            oemApprovals:
+              type: array
+              description: Требуемые OEM-допуски производителя автомобиля
+              items:
+                type: string
+              example: ["VW 507 00"]
+          required:
+            - sae
+            - acea
+            - api
+            - oemApprovals
+        recommendedOilIds:
+          type: array
+          nullable: true
+          description: Идентификаторы рекомендованных масел (для статусов success и not_found)
+          items:
+            type: string
+          example: ["oil_001"]
+        reason:
+          type: string
+          nullable: true
+          description: Обоснование результата подбора или причина его отсутствия
+          example: "Масло соответствует требуемому допуску производителя VW 507 00."
+      required:
+        - status
+

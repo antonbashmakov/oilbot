@@ -84,7 +84,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ChatMessage'
+              $ref: '#/components/schemas/ChatMessageView'
       responses:
         '200':
           description: The created message.
@@ -1297,6 +1297,18 @@ components:
           format: date-time
           description: Time the message was created.
           example: '2026-09-12T14:30:00Z'
+    
+    ChatMessageView:
+      type: object
+      description: A message in an AI chat. DTO for API requests
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: Text content of the message.
+          example: How can I help you today?
+    
     MessageFilter:
       type: object
       description: Filter for querying messages

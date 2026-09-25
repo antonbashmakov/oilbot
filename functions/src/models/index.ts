@@ -42,6 +42,8 @@ export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];
 export type TinkoffPaymentItem = models["schemas"]["TinkoffPaymentItem"];
 export type TinkoffResult = models["schemas"]["TinkoffResult"];
 
+export type OilAgentResponse = models["schemas"]["OilAgentResponse"];
+
 
 type BaseBalanceChangeEvent = models["schemas"]["BalanceChangeEvent"];
 type BaseBroadcastTask = models["schemas"]["BroadcastTask"];

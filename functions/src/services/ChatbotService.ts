@@ -1,4 +1,4 @@
-import { ChatMessage } from "../models";
+import { ChatMessage, OilAgentResponse } from "../models";
 
 import OpenAI from "openai";
 
@@ -14,7 +14,8 @@ class ChatbotService {
     });
   }
 
-  async createConversationMessage(messages: ChatMessage[]): Promise<ChatMessage> {
+  async createConversationMessage(messages: ChatMessage[]): Promise<OilAgentResponse> {
+    
     const completion = await this.bot.chat.completions.create({
       messages: [
         ...messages.map((message) => ({
@@ -27,15 +28,13 @@ class ChatbotService {
       stream: false,
     });
 
-    return {
-      id: `msg_${Date.now()}`,
-      role: "assistant",
-      content: completion.choices[0].message.content || completion.choices[0].message.refusal || "",
-      created_at: new Date(),
-      owner: { id: "" },
-      chat_id: messages[0].chat_id,
+    const content = completion.choices[0].message.content || completion.choices[0].message.refusal || "";
 
+    if (!content) {
+      throw new Error("No content returned from the chatbot.");
     }
+
+    return  JSON.parse(content) as OilAgentResponse;
   }  
 }
 

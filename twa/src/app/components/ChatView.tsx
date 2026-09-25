@@ -1,11 +1,19 @@
 import ChatMessage from "./ChatMessage";
-import Carousel from "./Carousel";
 import Footer from "./Footer";
-import { messages } from "../data/mock";
-import { useGetMessages } from '@/api';
+import { useGetMessages, useSendMessage } from '@/api';
+import { useCallback } from "react";
 
 const ChatView = () => {
   const { data: messages } = useGetMessages();
+  const { mutate: sendMessage } = useSendMessage("Cz0KB5zXRqMsEho8BOLC", "latest");
+
+  const handleSendMessage = useCallback(async (content: string) => {
+    await sendMessage({
+      content
+    });
+
+    return true;
+  }, []);
 
   return (
     <main className="flex-1 w-full max-w-chat-max-width mx-auto pt-20 pb-40 px-layout-margin-mobile flex flex-col space-y-space-lg">
@@ -24,7 +32,7 @@ const ChatView = () => {
         <ChatMessage key={message.id} message={message} />
       ))}
       {/*<Carousel />*/}
-      <Footer />
+      <Footer onSubmit={handleSendMessage} />
     </main>
   );
 };

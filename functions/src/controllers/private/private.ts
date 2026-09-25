@@ -6,15 +6,14 @@ import {
   api,
   ChatService,
   ChatbotService,
-  readFile,
   OilAgentMessage,
 } from './imports';
 
 import * as dotenv from 'dotenv';
 import * as cookieParser from 'cookie-parser';
 import initialMessage from '../../prompts/initialMessage';
+import oilBotMessage from '../../prompts/oilagent';
 import { ChatMessage } from '../../models';
-
 
 admin.initializeApp(functions.config().firebase, 'private');
 dotenv.config();
@@ -75,11 +74,10 @@ privateApi.post('/customers/:customerId/chats/:chatId/messages', async (req: exp
       return api.error(res, 'No messages found for this chat. Please start a conversation first.');
     }
 
-    const text = await readFile('../../prompts/oilagent.md', 'utf8');
 
     const m = {
       role: "assistant",
-      content: text,
+      content: oilBotMessage.content,
       owner: { id: customerId },
       created_at: new Date()
     } as ChatMessage;
@@ -96,18 +94,20 @@ privateApi.post('/customers/:customerId/chats/:chatId/messages', async (req: exp
       created_at: new Date()
     } as ChatMessage;
 
-    let message = await chatService.add(content);
+    let message = await chatService.addMessageForUser({ id: customerId }, chatId, content);
 
     messages.push(m);
     messages.push(m2);
 
-    message = await chatbotService.createConversationMessage(messages);
+    const answer = await chatbotService.createConversationMessage(messages);
+
     message.chat_id = chatId;
     message.owner = { id: customerId };
+    message.content = answer.question || '';
 
     await chatService.add(message);
 
-    return api.send(res, message);
+    return api.send(res, answer);
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || 'Internal server error');

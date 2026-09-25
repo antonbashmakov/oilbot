@@ -202,6 +202,91 @@ export interface components {
              */
             updated_at: string;
         };
+        /**
+         * @description Общий ответ агента подбора моторного масла. Набор заполненных полей
+         *     зависит от значения status. Все поля, кроме status, могут быть null.
+         */
+        OilAgentResponse: {
+            /**
+             * @description Статус ответа:
+             *     * need_more_info — требуется дополнительная информация об автомобиле;
+             *     * success — масло найдено;
+             *     * not_found — подходящего масла нет;
+             *     * unknown — невозможно надёжно определить требования.
+             * @example success
+             * @enum {string}
+             */
+            status: "need_more_info" | "success" | "not_found" | "unknown";
+            /**
+             * @description Уточняющий вопрос пользователю (для статуса need_more_info)
+             * @example Какой двигатель установлен на вашем автомобиле?
+             */
+            question?: string | null;
+            /** @description Описание автомобиля, определённое агентом (для статусов success и not_found) */
+            car?: {
+                /**
+                 * @description Марка автомобиля
+                 * @example Volkswagen
+                 */
+                make: string;
+                /**
+                 * @description Модель автомобиля
+                 * @example Passat
+                 */
+                model: string;
+                /**
+                 * @description Год выпуска автомобиля
+                 * @example 2019
+                 */
+                year: number;
+                /**
+                 * @description Описание двигателя (объём, мощность, тип топлива и т.п.)
+                 * @example 2.0 TDI 150 hp
+                 */
+                engine: string;
+            } | null;
+            /** @description Требования производителя к моторному маслу (для статусов success и not_found) */
+            requirements?: {
+                /**
+                 * @description Требуемая вязкость по SAE
+                 * @example [
+                 *       "5W-30"
+                 *     ]
+                 */
+                sae: string[];
+                /**
+                 * @description Требуемые допуски ACEA
+                 * @example [
+                 *       "C3"
+                 *     ]
+                 */
+                acea: string[];
+                /**
+                 * @description Требуемые допуски API
+                 * @example []
+                 */
+                api: string[];
+                /**
+                 * @description Требуемые OEM-допуски производителя автомобиля
+                 * @example [
+                 *       "VW 507 00"
+                 *     ]
+                 */
+                oemApprovals: string[];
+            } | null;
+            /**
+             * @description Идентификаторы рекомендованных масел (для статусов success и not_found)
+             * @example [
+             *       "oil_001"
+             *     ]
+             */
+            recommendedOilIds?: string[] | null;
+            /**
+             * @description Обоснование результата подбора или причина его отсутствия
+             * @example Масло соответствует требуемому допуску производителя VW 507 00.
+             */
+            reason?: string | null;
+        };
     };
     responses: never;
     parameters: never;

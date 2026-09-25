@@ -1,11 +1,11 @@
 import AbstractService from "./AbstractService";
-import {COLLECTIONS} from "../constants";
-import {ChatMessage} from "../models";
+import { COLLECTIONS } from "../constants";
+import { ChatMessage } from "../models";
 
 class ChatService extends AbstractService<ChatMessage> {
 
   async fetchMessages(owner: { id: string }, limit: number, startAfterId?: string | undefined): Promise<ChatMessage[]> {
-    let query = this.getCollection().where("owner.id", "==", owner.id).orderBy("created_at", "desc").limit(limit);
+    let query = this.getCollection().where("owner.id", "==", owner.id).orderBy("created_at", "asc").limit(limit);
 
     if (startAfterId) {
       // Fetch the document to use as startAfter
@@ -26,10 +26,24 @@ class ChatService extends AbstractService<ChatMessage> {
     });
   }
 
+  async addMessageForUser(owner: { id: string }, chatId: string, content: string): Promise<ChatMessage> {
+    const newMessage: ChatMessage = {
+      id: '',
+      role: 'user',
+      content,
+      owner,
+      created_at: new Date(),
+      chat_id: chatId
+    };
+
+    const docRef = await this.getCollection().add(newMessage);
+    return { ...newMessage, id: docRef.id };
+  }
+
   toPOJO(id: any, o: any): ChatMessage | undefined {
     if (!o) return;
 
-    const ret = {...o, id: `${id}`} as ChatMessage; 
+    const ret = { ...o, id: `${id}` } as ChatMessage;
 
     if (o.created_at) {
       ret.created_at = o.created_at?.toDate();

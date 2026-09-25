@@ -5,6 +5,7 @@ import useClient from "@/api/useClient";
 
 import {
     ChatMessage,
+    ChatMessageView,
 } from "@/api/models";
 
 import _ from "lodash";
@@ -24,6 +25,20 @@ export const useGetMessages =  (customerId?: string): UseQueryResult<ChatMessage
                 },
             }
         }
+    );
+};
+
+export const useSendMessage = (customerId?: string, chatId?: string) => {
+    return usePostApi<
+        "/api/private/customers/{customerId}/chats/{chatId}/messages",
+        { customerId: string, chatId: string },
+        ChatMessageView
+    >(
+        "/api/private/customers/{customerId}/chats/{chatId}/messages",
+        [
+            "/api/private/customers/{customerId}/cart/items"
+        ],
+        { customerId: customerId || '', chatId: chatId || '' },
     );
 };
 

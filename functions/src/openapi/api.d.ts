@@ -1009,6 +1009,14 @@ export interface components {
              */
             created_at: string;
         };
+        /** @description A message in an AI chat. DTO for API requests */
+        ChatMessageView: {
+            /**
+             * @description Text content of the message.
+             * @example How can I help you today?
+             */
+            content: string;
+        };
         /** @description Filter for querying messages */
         MessageFilter: {
             /**
@@ -1134,7 +1142,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ChatMessage"];
+                "application/json": components["schemas"]["ChatMessageView"];
             };
         };
         responses: {
