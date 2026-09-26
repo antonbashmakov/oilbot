@@ -13,6 +13,7 @@ export type AddToCartItem = components["schemas"]["AddToCartItem"];
 export type RemoveFromCartItem = components["schemas"]["RemoveFromCartItem"];
 export type MessageFilter = components["schemas"]["MessageFilter"];
 
+export type Product = components["schemas"]["Product"];
 export type AvailableOil = components["schemas"]["AvailableOil"];
 export type OilAgentMessage = components["schemas"]["OilAgentMessage"];
 

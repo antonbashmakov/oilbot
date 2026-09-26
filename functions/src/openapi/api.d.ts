@@ -1002,6 +1002,8 @@ export interface components {
              */
             content: string;
             owner: components["schemas"]["OwnerRef"];
+            /** @description List of products associated with the message. */
+            products?: components["schemas"]["Product"][];
             /**
              * Format: date-time
              * @description Time the message was created.
@@ -1029,6 +1031,66 @@ export interface components {
              * @example CUSTOMER
              */
             recipient?: string;
+        };
+        Product: {
+            /**
+             * @description Идентификатор продукта
+             * @example product_001
+             */
+            id: string;
+            /**
+             * @description Наименование товара
+             * @example Масло Motul 8100 Eco-Lite 0W20 4L
+             */
+            name: string;
+            /**
+             * @description Артикул товара
+             * @example 108535
+             */
+            article: string;
+            /**
+             * @description Цена товара
+             * @example 10050
+             */
+            price: number;
+            /**
+             * @description Единица измерения
+             * @example шт
+             */
+            unit: string;
+            features?: components["schemas"]["ProductFeatures"];
+        };
+        /** @description Характеристики товара */
+        ProductFeatures: {
+            /**
+             * @description Класс вязкости SAE
+             * @example 0W-20
+             */
+            sae: string;
+            /**
+             * @description Список классификаций API
+             * @example [
+             *       "SP-RC"
+             *     ]
+             */
+            api: string[];
+            /**
+             * @description Список классификаций ACEA
+             * @example [
+             *       "C3"
+             *     ]
+             */
+            acea: string[];
+            /**
+             * @description Список OEM-допусков и спецификаций производителей автомобилей
+             * @example [
+             *       "VW 504 00",
+             *       "VW 507 00",
+             *       "MB 229.51",
+             *       "BMW LL-04"
+             *     ]
+             */
+            oem_approvals?: string[];
         };
         /** @description Масло из доступного списка продуктов, передаваемого агенту подбора */
         AvailableOil: {
@@ -1152,7 +1214,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ChatMessage"];
+                    "application/json": components["schemas"]["ChatMessage"][];
                 };
             };
             /** @description Customer or chat not found. */

@@ -19,6 +19,7 @@ import SubscriptionService from "../../services/SubscriptionService";
 import CustomerBalanceService from "../../services/CustomerBalanceService";
 import * as CONSTANTS from "../../constants";
 import OrderPickingService from "../../services/OrderPickingService";
+import ProductService from "../../services/ProductService";
 
 import {api} from "../../services/utils";
 import MockTBankService from "../../services/payments/MockTBankService";
@@ -51,6 +52,7 @@ export {
   ChatService,
   ChatbotService,
   OilAgentMessage,
+  ProductService,
   CONSTANTS,
 };
 

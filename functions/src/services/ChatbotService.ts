@@ -15,7 +15,15 @@ class ChatbotService {
   }
 
   async createConversationMessage(messages: ChatMessage[]): Promise<OilAgentResponse> {
-    
+    /*
+
+    console.log(this.bot)
+    return {
+      status: "success",
+      recommendedOilIds: ["4ra7rGtLmj7P9JNkJOkE", "AYXjOK5lcbWO5A6Jw6ds", "Ygh0Z5s8jMQvu1fpVDjT"],
+    }
+    */
+
     const completion = await this.bot.chat.completions.create({
       messages: [
         ...messages.map((message) => ({

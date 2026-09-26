@@ -91,7 +91,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatMessage'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatMessage'
         '404':
           description: Customer or chat not found.
           content:
@@ -1292,6 +1294,11 @@ components:
           example: How can I help you today?
         owner:
           $ref: '#/components/schemas/OwnerRef'
+        products:
+          type: array
+          description: List of products associated with the message.
+          items:
+            $ref: '#/components/schemas/Product'
         created_at:
           type: string
           format: date-time
@@ -1322,6 +1329,75 @@ components:
           description: Filter messages by recipient
           example: "CUSTOMER"
 
+
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - article
+        - price
+        - unit
+      properties:
+        id:
+          type: string
+          description: Идентификатор продукта
+          example: "product_001"
+        name:
+          type: string
+          description: Наименование товара
+          example: "Масло Motul 8100 Eco-Lite 0W20 4L"
+        article:
+          type: string
+          description: Артикул товара
+          example: "108535"
+        price:
+          type: integer
+          description: Цена товара
+          example: 10050
+        unit:
+          type: string
+          description: Единица измерения
+          example: "шт"
+        features:
+          $ref: "#/components/schemas/ProductFeatures"
+
+    ProductFeatures:
+      type: object
+      description: Характеристики товара
+      required:
+        - sae
+        - api
+        - acea
+      properties:
+        sae:
+          type: string
+          description: Класс вязкости SAE
+          example: "0W-20"
+        api:
+          type: array
+          description: Список классификаций API
+          items:
+            type: string
+          example:
+            - "SP-RC"
+        acea:
+          type: array
+          description: Список классификаций ACEA
+          items:
+            type: string
+          example:
+            - "C3"
+        oem_approvals:
+          type: array
+          description: Список OEM-допусков и спецификаций производителей автомобилей
+          items:
+            type: string
+          example:
+            - "VW 504 00"
+            - "VW 507 00"
+            - "MB 229.51"
+            - "BMW LL-04"
 
     AvailableOil:
       type: object

@@ -7,6 +7,7 @@ import {
   ChatService,
   ChatbotService,
   OilAgentMessage,
+  ProductService,
 } from './imports';
 
 import * as dotenv from 'dotenv';
@@ -14,6 +15,7 @@ import * as cookieParser from 'cookie-parser';
 import initialMessage from '../../prompts/initialMessage';
 import oilBotMessage from '../../prompts/oilagent';
 import { ChatMessage } from '../../models';
+// import { logger } from 'firebase-functions/v1';
 
 admin.initializeApp(functions.config().firebase, 'private');
 dotenv.config();
@@ -28,6 +30,7 @@ if (process.env.GCLOUD_PROJECT !== 'test-project' && db.databaseId !== process.e
 
 const chatService = new ChatService(db);
 const chatbotService = new ChatbotService();
+const productService = new ProductService(db);
 
 const privateApi = express();
 
@@ -74,6 +77,8 @@ privateApi.post('/customers/:customerId/chats/:chatId/messages', async (req: exp
       return api.error(res, 'No messages found for this chat. Please start a conversation first.');
     }
 
+    const allProducts = await productService.findAll();
+
 
     const m = {
       role: "assistant",
@@ -84,7 +89,14 @@ privateApi.post('/customers/:customerId/chats/:chatId/messages', async (req: exp
 
     const oilMessage = {
       car: content,
-      available_oils: []
+      available_oils: allProducts.map((p) => ({
+        id: p.id,
+        name: p.name,
+        sae: p.features?.sae ?? "",
+        api: p.features?.api ?? [],
+        acea: p.features?.acea ?? [],
+        oem_approvals: p.features?.oem_approvals,
+      })),
     } as OilAgentMessage;
 
     const m2 = {
@@ -96,18 +108,30 @@ privateApi.post('/customers/:customerId/chats/:chatId/messages', async (req: exp
 
     let message = await chatService.addMessageForUser({ id: customerId }, chatId, content);
 
+    const ret = [{ ...message }];
+
     messages.push(m);
     messages.push(m2);
 
-    const answer = await chatbotService.createConversationMessage(messages);
+    const aiAnswer = await chatbotService.createConversationMessage(messages);
 
     message.chat_id = chatId;
     message.owner = { id: customerId };
-    message.content = answer.question || '';
 
-    await chatService.add(message);
+    if (aiAnswer.status == 'not_found') {
+      message.content = aiAnswer.reason || '';
+    } else if (aiAnswer.status == 'need_more_info') {
+      message.content = aiAnswer.question || '';
+    } else if (aiAnswer.status == 'success') {
+      const products = await productService.findByIds(aiAnswer.recommendedOilIds || []);
+      message.products = products;
+    }
 
-    return api.send(res, answer);
+    message.role = 'assistant';
+
+    const answer = await chatService.add(message);
+
+    return api.send(res, [...ret, answer]);
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || 'Internal server error');
