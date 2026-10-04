@@ -29,6 +29,15 @@ const ChatView = () => {
 
   }, [answers]);
 
+  // Keep the newest message (and the pending indicator) in view by scrolling the
+  // page to the bottom whenever the conversation grows.
+  useEffect(() => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [conversation.length, pendingMessage]);
+
   const handleSendMessage = useCallback(async (content: string) => {
     try {
       await sendMessage({
