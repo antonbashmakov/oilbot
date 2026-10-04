@@ -19,6 +19,7 @@ type BaseUser = components["schemas"]["User"];
 type BaseComment = components["schemas"]["Comment"];
 type BaseDeliveryRef = components["schemas"]["DeliveryRef"];
 
+export type Product = components["schemas"]["Product"];
 export type TinkoffPaymentPayload = models["schemas"]["TinkoffPaymentPayload"];
 export type TinkoffPaymentCancelationRequest = models["schemas"]["TinkoffPaymentCancelationRequest"];
 export type TinkoffReceipt = models["schemas"]["TinkoffReceipt"];

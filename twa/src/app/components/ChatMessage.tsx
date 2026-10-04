@@ -37,7 +37,7 @@ const ChatMessageComponent = ({ message }: { message: ChatMessage }) => {
         <p className="font-medium tracking-wide">{message.content}</p>
       </div>
       <div className="flex items-center gap-1 pr-1 text-on-surface-variant font-label-sm text-[11px]">
-        <span>{message.created_at}</span>
+        <span>{message.created_at.toISOString()}</span>
         <span
           className="material-symbols-outlined text-[13px] text-tertiary"
           style={{ fontVariationSettings: "'FILL' 1" }}

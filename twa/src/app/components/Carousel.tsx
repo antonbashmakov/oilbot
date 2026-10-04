@@ -1,7 +1,7 @@
 import GoodsItem from "./GoodsItem";
-import { products } from "../data/mock";
+import { Product } from "@/api/models";
 
-const Carousel = () => {
+const Carousel = ({ products }: { products: Product[] }) => {
   return (
     <div className="w-full space-y-space-sm pt-1">
       <div className="flex gap-3.5 overflow-x-auto no-scrollbar snap-x snap-mandatory py-1 -mx-layout-margin-mobile px-layout-margin-mobile">

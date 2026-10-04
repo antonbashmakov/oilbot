@@ -1,19 +1,45 @@
-import ChatMessage from "./ChatMessage";
+import { ChatMessage } from "@/api/models";
+import ChatMessageComponent from "./ChatMessage";
 import Footer from "./Footer";
+import PendingMessage from "./PendingMessage";
 import { useGetMessages, useSendMessage } from '@/api';
-import { useCallback } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
+import Carousel from "./Carousel";
+// import { products } from "@/app/data/mock";
 
 const ChatView = () => {
-  const { data: messages } = useGetMessages();
-  const { mutate: sendMessage } = useSendMessage("Cz0KB5zXRqMsEho8BOLC", "latest");
+  const { data: messages } = useGetMessages("Cz0KB5zXRqMsEho8BOLC");
+  const { mutateAsync: sendMessage, data: answers, isPending, variables } = useSendMessage("Cz0KB5zXRqMsEho8BOLC", "latest");
+
+  const [conversation, setConversation] = useState<ChatMessage[]>([]);
+
+  // Temporary message shown while we await the answer from sendMessage.
+  const pendingMessage = isPending ? variables?.content ?? null : null;
+
+  useEffect(() => {
+    if(!messages) return;
+    setConversation([...messages]);
+
+  }, [messages]);
+
+  useEffect(() => {
+    if(!answers) return;
+    // The response already contains the message we sent, so the temporary one can be dropped.
+    setConversation((prev) => [...prev, ...answers.map((a) => ({...a, created_at: new Date(a.created_at)}))]);
+
+  }, [answers]);
 
   const handleSendMessage = useCallback(async (content: string) => {
-    await sendMessage({
-      content
-    });
+    try {
+      await sendMessage({
+        content
+      });
 
-    return true;
-  }, []);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [sendMessage]);
 
   return (
     <main className="flex-1 w-full max-w-chat-max-width mx-auto pt-20 pb-40 px-layout-margin-mobile flex flex-col space-y-space-lg">
@@ -28,10 +54,17 @@ const ChatView = () => {
           Active Session
         </span>
       </div>
-      {messages && messages.map((message, index) => (
-        <ChatMessage key={message.id} message={message} />
+      {conversation && conversation.map((m) => (
+        <Fragment key={m.id}>
+          {m.products && m.products.length > 0 && (
+            <Carousel products={m.products} />
+          )}
+          {!m.products && (
+            <ChatMessageComponent message={m} />
+          )}
+        </Fragment>
       ))}
-      {/*<Carousel />*/}
+      {pendingMessage && <PendingMessage content={pendingMessage} />}
       <Footer onSubmit={handleSendMessage} />
     </main>
   );

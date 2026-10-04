@@ -10,11 +10,21 @@ import {
 
 import _ from "lodash";
 
+const chatMessageInterceptor = (data: ChatMessage[]) => {
+
+    return data.map((msg) => {
+        return {
+            ...msg,
+            created_at: new Date(msg.created_at)
+        };
+    });
+};
+
 export type QueryControlOptions = {
     enabled?: boolean
 }
 
-export const useGetMessages =  (customerId?: string): UseQueryResult<ChatMessage[]> => {
+export const useGetMessages = (customerId?: string): UseQueryResult<ChatMessage[]> => {
     return useApiQuery(
         "/api/private/customers/{customerId}/chats/{chatId}/messages",
         {
@@ -24,7 +34,7 @@ export const useGetMessages =  (customerId?: string): UseQueryResult<ChatMessage
                     chatId: "latest"
                 },
             }
-        }
+        }, { enabled: !!customerId } as any, chatMessageInterceptor
     );
 };
 

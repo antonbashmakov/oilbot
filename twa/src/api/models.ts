@@ -8,6 +8,7 @@ export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type AddToCartItem = components["schemas"]["AddToCartItem"];
 export type RemoveFromCartItem = components["schemas"]["RemoveFromCartItem"];
+export type Product = components["schemas"]["Product"];
 
 export type ChatMessageView = components["schemas"]["ChatMessageView"];
 
@@ -38,7 +39,7 @@ export type TinkoffResult = models["schemas"]["TinkoffResult"];
 export type BaseOutboxEvent = models["schemas"]["BaseOutboxEvent"];
 export type BaseConversationMessage = components["schemas"]["ConversationMessage"];
 
-export type ChatMessage = Omit<BaseChatMessage, "createdAt"> & {
+export type ChatMessage = Omit<BaseChatMessage, "created_at"> & {
   created_at: Date;
 };
 
