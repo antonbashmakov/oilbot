@@ -16,6 +16,10 @@ export type MessageFilter = components["schemas"]["MessageFilter"];
 export type Product = components["schemas"]["Product"];
 export type AvailableOil = components["schemas"]["AvailableOil"];
 export type OilAgentMessage = components["schemas"]["OilAgentMessage"];
+export type Car = components["schemas"]["Car"];
+export type QuestionAction = components["schemas"]["QuestionAction"];
+export type ActionType = components["schemas"]["ActionType"];
+export type ActionRequest = components["schemas"]["ActionRequest"];
 export type AuthRequest = components["schemas"]["AuthRequest"];
 export type CustomerSession = components["schemas"]["CustomerSession"];
 
@@ -76,9 +80,13 @@ export type Payment = Omit<BasePayment, "created_at" | "updated_at"> & {
   updated_at: Date;
   confirmed_at?: Date;
 };
-export type Customer = Omit<BaseCustomer, "created_at" | "last_seen_at"> & {
+export type CarDraft = Omit<components["schemas"]["CarDraft"], "updated_at"> & {
+  updated_at: Date;
+};
+export type Customer = Omit<BaseCustomer, "created_at" | "last_seen_at" | "car_draft"> & {
   created_at: Date;
   last_seen_at: Date;
+  car_draft?: CarDraft;
 };
 export type CustomerBalance = Omit<BaseCustomerBalance, "created_at" | "updated_at"> & {
   created_at: Date;

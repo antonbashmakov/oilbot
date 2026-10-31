@@ -5,6 +5,10 @@ type BaseChatMessage = components["schemas"]["ChatMessage"];
 
 export type Customer = components["schemas"]["Customer"];
 export type CustomerSession = components["schemas"]["CustomerSession"];
+export type Car = components["schemas"]["Car"];
+export type QuestionAction = components["schemas"]["QuestionAction"];
+export type ActionRequest = components["schemas"]["ActionRequest"];
+export type ActionResult = components["schemas"]["ActionResult"];
 export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type AddToCartItem = components["schemas"]["AddToCartItem"];

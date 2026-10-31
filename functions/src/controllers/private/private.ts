@@ -7,6 +7,7 @@ import {
   authorizeCustomer,
   ChatService,
   ChatbotService,
+  CustomerService,
   OilAgentMessage,
   ProductService,
 } from './imports';
@@ -15,7 +16,9 @@ import * as dotenv from 'dotenv';
 import * as cookieParser from 'cookie-parser';
 import initialMessage from '../../prompts/initialMessage';
 import oilBotMessage from '../../prompts/oilagent';
-import { ChatMessage } from '../../models';
+import saveCarQuestion from "../../prompts/saveCarQuestion";
+import savedCarGreeting from "../../prompts/savedCarGreeting";
+import {ActionRequest, ActionType, Car, ChatMessage} from "../../models";
 // import { logger } from 'firebase-functions/v1';
 
 admin.initializeApp(functions.config().firebase, 'private');
@@ -32,6 +35,27 @@ if (process.env.GCLOUD_PROJECT !== 'test-project' && db.databaseId !== process.e
 const chatService = new ChatService(db);
 const chatbotService = new ChatbotService();
 const productService = new ProductService(db);
+const customerService = new CustomerService(db);
+
+const isCar = (car: any): car is Car =>
+  !!car && typeof car.make === "string" && car.make.trim() !== "" &&
+  typeof car.model === "string" && car.model.trim() !== "";
+
+type ActionOutcome = "done" | "invalid_params" | "customer_not_found";
+type ActionHandler = (customerId: string, params: Car[]) => Promise<ActionOutcome>;
+
+/**
+ * Actions a customer confirms with a QuestionAction button, by type.
+ */
+const actions = new Map<ActionType, ActionHandler>([
+  ["save_car", async (customerId, params) => {
+    const car = Array.isArray(params) ? params[0] : undefined;
+    if (!isCar(car)) return "invalid_params";
+
+    const customer = await customerService.saveCar(customerId, car);
+    return customer ? "done" : "customer_not_found";
+  }],
+]);
 
 const privateApi = express();
 
@@ -51,10 +75,13 @@ privateApi.get('/customers/:customerId/chats/:chatId/messages', async (req: expr
     const messages = await chatService.fetchMessages({ id: customerId }, 10, oldestMessage as string | undefined);
 
     if (messages.length === 0) {
+      const customer = await customerService.find(customerId);
+      const greeting = customer?.car ? savedCarGreeting(customer.car) : initialMessage;
+
       const ret = await chatService.add({
         id: 'tmp',
         role: 'assistant',
-        content: initialMessage.content,
+        content: greeting.content,
         created_at: new Date(),
         owner: { id: customerId },
         chat_id: chatId,
@@ -81,6 +108,8 @@ privateApi.post('/customers/:customerId/chats/:chatId/messages', async (req: exp
     }
 
     const allProducts = await productService.findAll();
+    const customer = await customerService.find(customerId);
+    const carTokens = customer ? customerService.carDraftTokens(customer) : [];
 
 
     const m = {
@@ -91,7 +120,9 @@ privateApi.post('/customers/:customerId/chats/:chatId/messages', async (req: exp
     } as ChatMessage;
 
     const oilMessage = {
-      car: content,
+      message: content,
+      car_tokens: carTokens,
+      ...(customer?.car ? {saved_car: customer.car} : {}),
       available_oils: allProducts.map((p) => ({
         id: p.id,
         name: p.name,
@@ -132,6 +163,25 @@ privateApi.post('/customers/:customerId/chats/:chatId/messages', async (req: exp
 
     message.role = 'assistant';
 
+    // A car told over several messages: keep its messages while the AI needs more information,
+    // offer to save it once the identification ends.
+    const tokens = [...(aiAnswer.new_car ? [] : carTokens), ...(aiAnswer.car_in_message ? [content] : [])];
+    const identified = aiAnswer.status !== "need_more_info";
+
+    if (customer && !identified && aiAnswer.car_in_message) {
+      await customerService.setCarDraft(customer, tokens);
+    } else if (customer && identified && customer.car_draft) {
+      await customerService.clearCarDraft(customer);
+    }
+
+    if (identified && aiAnswer.car_in_message && isCar(aiAnswer.car) && !customer?.car) {
+      message.question = {
+        text: saveCarQuestion.content,
+        type: "save_car",
+        params: [{...aiAnswer.car, description: tokens.join(", ")}],
+      };
+    }
+
     const answer = await chatService.add(message);
 
     return api.send(res, [...ret, answer]);
@@ -141,5 +191,26 @@ privateApi.post('/customers/:customerId/chats/:chatId/messages', async (req: exp
   }
 });
 
+
+privateApi.post("/customers/:customerId/actions", async (req: express.Request, res: express.Response) => {
+  try {
+    const {customerId} = req.params;
+    const {type, params, message_id: messageId} = req.body as ActionRequest;
+
+    const action = actions.get(type);
+    if (!action) return api.badRequest(res, `Unknown action type: ${type}`, "UNKNOWN_ACTION");
+
+    const outcome = await action(customerId, params);
+    if (outcome === "invalid_params") return api.badRequest(res, "Invalid action params", "INVALID_PARAMS");
+    if (outcome === "customer_not_found") return api.notFound(res, "Customer not found");
+
+    if (messageId) await chatService.markQuestionAnswered({id: customerId}, messageId);
+
+    return api.send(res, {type, status: "done"});
+  } catch (err: any) {
+    functions.logger.error(err);
+    return api.error(res, err.message || "Internal server error");
+  }
+});
 
 export default privateApi;

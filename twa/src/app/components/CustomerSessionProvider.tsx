@@ -34,6 +34,9 @@ const signIn = async (): Promise<CustomerSessionContext> => {
   }
 };
 
+// One sign-in per page load, also when React runs the effect twice (Strict Mode in dev).
+let signInOnce: Promise<CustomerSessionContext> | undefined;
+
 /**
  * Signs the customer in with the Telegram Mini App init data and passes the customer token to the
  * API client. The token lives in memory only.
@@ -45,7 +48,8 @@ export const CustomerSessionProvider: React.FC<React.PropsWithChildren> = ({ chi
   useEffect(() => {
     let active = true;
 
-    signIn().then((result) => {
+    signInOnce ??= signIn();
+    signInOnce.then((result) => {
       if (active) setSession(result);
     });
 

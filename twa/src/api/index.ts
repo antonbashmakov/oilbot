@@ -1,9 +1,11 @@
-import { IdempotentSupport, useApiQuery, useDeleteApi, usePatchApi, usePostApi, usePutApi } from "@/api/rq";
+import { handleResult, IdempotentSupport, useApiQuery, useDeleteApi, usePatchApi, usePostApi, usePutApi } from "@/api/rq";
 
 import { UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
 import useClient from "@/api/useClient";
 
 import {
+    ActionRequest,
+    ActionResult,
     ChatMessage,
     ChatMessageView,
 } from "@/api/models";
@@ -52,6 +54,24 @@ export const useSendMessage = (customerId?: string, chatId?: string) => {
     );
 };
 
+
+/**
+ * Runs an action the customer confirmed in a QuestionAction and refreshes the chat.
+ */
+export const usePerformAction = (customerId?: string) => {
+    const { POST } = useClient();
+    const queryClient = useQueryClient();
+
+    return useMutation<ActionResult | null | undefined, unknown, ActionRequest>({
+        mutationFn: (body) => handleResult(POST("/api/private/customers/{customerId}/actions", {
+            params: { path: { customerId: customerId || "" } },
+            body,
+        })),
+        onSuccess: () => queryClient.invalidateQueries({
+            queryKey: ["/api/private/customers/{customerId}/chats/{chatId}/messages"],
+        }),
+    });
+};
 
 export const validateUser = async (initData: string) => {
     return fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL || ""}/api/public/auth`, {

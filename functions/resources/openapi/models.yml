@@ -361,6 +361,16 @@ components:
             * not_found — подходящего масла нет;
             * unknown — невозможно надёжно определить требования.
           example: "success"
+        car_in_message:
+          type: boolean
+          description: |
+            Сообщение пользователя содержит данные об определяемом автомобиле (марка, модель,
+            двигатель, год, модификация), в том числе короткий ответ на уточняющий вопрос.
+          example: true
+        new_car:
+          type: boolean
+          description: Сообщение начинает описывать другой автомобиль, чем car_tokens
+          example: false
         question:
           type: string
           nullable: true
@@ -369,7 +379,7 @@ components:
         car:
           type: object
           nullable: true
-          description: Описание автомобиля, определённое агентом (для статусов success и not_found)
+          description: Автомобиль, собранный агентом из car_tokens и сообщения (всегда, когда car_in_message, и для статусов success и not_found)
           properties:
             make:
               type: string
@@ -381,17 +391,17 @@ components:
               example: "Passat"
             year:
               type: integer
+              nullable: true
               description: Год выпуска автомобиля
               example: 2019
             engine:
               type: string
+              nullable: true
               description: Описание двигателя (объём, мощность, тип топлива и т.п.)
               example: "2.0 TDI 150 hp"
           required:
             - make
             - model
-            - year
-            - engine
         requirements:
           type: object
           nullable: true

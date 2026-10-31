@@ -66,6 +66,18 @@ describe("Customer sign-in and chat authorization", () => {
       expect(customer?.id).toBe(response.body.id);
     });
 
+    it("creates one customer for parallel sign-ins of the same user", async () => {
+      const initData = signTelegramInitData({id: 270053858, first_name: "Parallel"});
+
+      const responses = await Promise.all([1, 2, 3].map(() => request(PUBLIC_URL).post("/auth").send({initData}).expect(200)));
+
+      const ids = new Set(responses.map((response) => response.body.id));
+      expect(ids).toEqual(new Set(["TELEGRAM_270053858"]));
+
+      const snapshot = await db.collection("CUSTOMERS").where("external_id", "==", "270053858").get();
+      expect(snapshot.size).toBe(1);
+    });
+
     it("rejects init data signed with another bot token", async () => {
       const initData = signTelegramInitData({id: 270053857, first_name: "Test"});
       const forged = initData.replace(/hash=[0-9a-f]+/, `hash=${"0".repeat(64)}`);

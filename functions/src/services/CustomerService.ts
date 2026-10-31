@@ -1,7 +1,12 @@
 import AbstractService from "./AbstractService";
 import {COLLECTIONS} from "../constants";
-import {Customer, CustomerAccounting, CustomerStats} from "../models";
+import {Car, Customer, CustomerAccounting, CustomerStats} from "../models";
 import {FieldValue} from "firebase-admin/firestore";
+
+// gRPC status code of a create() on an existing document.
+const ALREADY_EXISTS = 6;
+// How long the messages of a car still being identified are kept.
+const CAR_DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 
 
 class CustomerService extends AbstractService<Customer> {
@@ -92,6 +97,63 @@ class CustomerService extends AbstractService<Customer> {
     });
   }
 
+  /**
+   * Saves the car as the customer's car; undefined when there is no such customer.
+   */
+  async saveCar(customerId: string, car: Car): Promise<Customer | undefined> {
+    const customer = await this.find(customerId);
+    if (!customer) return undefined;
+
+    const saved: Car = {
+      make: car.make.trim(),
+      model: car.model.trim(),
+      year: car.year ?? null,
+      engine: car.engine ?? null,
+      ...(car.description ? {description: car.description} : {}),
+    };
+
+    await this.update(customer, {car: saved});
+    return {...customer, car: saved};
+  }
+
+  /**
+   * The customer's messages with car information of an identification still in progress; empty
+   * when there is none or it is older than CAR_DRAFT_TTL_MS.
+   */
+  carDraftTokens(customer: Customer, now = new Date()): string[] {
+    const draft = customer.car_draft;
+    if (!draft || now.getTime() - draft.updated_at.getTime() > CAR_DRAFT_TTL_MS) return [];
+    return draft.tokens;
+  }
+
+  setCarDraft(customer: Customer, tokens: string[]): Promise<any> {
+    return this.update(customer, {car_draft: {tokens, updated_at: new Date()}});
+  }
+
+  clearCarDraft(customer: Customer): Promise<any> {
+    return this.update(customer, {car_draft: FieldValue.delete()} as unknown as Partial<Customer>);
+  }
+
+  /**
+   * The customer with the customer's external_id, created when there is none. A new customer's id
+   * is <origin>_<external_id> and is written with create(), so parallel sign-ins of one person
+   * cannot create two customers.
+   */
+  async findOrCreateByExternalId(customer: Customer): Promise<Customer> {
+    const existing = await this.findByExternalId(customer.external_id);
+    if (existing) return existing;
+
+    const ref = this.getCollection().doc(`${customer.origin}_${customer.external_id}`);
+
+    try {
+      await ref.create({...customer, id: ref.id});
+      return {...customer, id: ref.id};
+    } catch (err: any) {
+      if (err?.code !== ALREADY_EXISTS) throw err;
+      return this.toPOJO(ref.id, (await ref.get()).data()) as Customer;
+    }
+  }
+
   findByExternalId(externalId: string): Promise<Customer | undefined> {
     return this.db.collection(this.getCollectionName()).where("external_id", "==", externalId).get().then((snapshot) => {
       if (snapshot.empty) {
@@ -112,6 +174,9 @@ class CustomerService extends AbstractService<Customer> {
     }
     if (o.last_seen_at) {
       ret.last_seen_at = o.last_seen_at.toDate();
+    }
+    if (o.car_draft?.updated_at?.toDate) {
+      ret.car_draft = {...o.car_draft, updated_at: o.car_draft.updated_at.toDate()};
     }
 
 

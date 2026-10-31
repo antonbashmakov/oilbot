@@ -29,6 +29,20 @@ class ChatService extends AbstractService<ChatMessage> {
     }).reverse();
   }
 
+  /**
+   * Marks the question of the owner's message answered; false when there is no such question.
+   */
+  async markQuestionAnswered(owner: { id: string }, messageId: string): Promise<boolean> {
+    const ref = this.getCollection().doc(messageId);
+    const doc = await ref.get();
+    const data = doc.data();
+
+    if (!doc.exists || data?.owner?.id !== owner.id || !data?.question) return false;
+
+    await ref.update({"question.answered": true});
+    return true;
+  }
+
   async addMessageForUser(owner: { id: string }, chatId: string, content: string): Promise<ChatMessage> {
     const newMessage: ChatMessage = {
       id: '',

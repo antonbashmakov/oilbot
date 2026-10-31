@@ -23,6 +23,7 @@ project:
 epics:
   - { id: "SETUP-01", title: "Agent workflow adoption", spec: "features/SETUP-01-agent-workflow.md" }
   - { id: "TWA-01", title: "Mini App launch in Telegram", spec: "features/TWA-01-mini-app-launch.md" }
+  - { id: "CAR-01", title: "Saved car in the AI chat", spec: "features/CAR-01-saved-car.md" }
 
 features:
   - id: "SETUP-01-DOC"
@@ -71,3 +72,30 @@ features:
       - "[Team] Opened outside Telegram or when sign-in fails, the app shows a message instead of the chat"
       - "[Team] A production build calls the API on its own origin (no emulator URL baked in)"
       - "[Team] Under next dev the app signs in outside Telegram with init data signed by the test bot token (?tgUser=<id> picks the customer); production builds contain neither the token nor the signing code"
+
+  - id: "CAR-01-BE"
+    epic: "CAR-01"
+    title: "Save-car question from the AI and the customer actions endpoint"
+    surface: "backend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 90
+    depends_on: ["TWA-01-BE"]
+    acceptance_criteria:
+      - "[Team] The AI answer carries car_in_message (the user's message names a valid car) and the car it understood"
+      - "[Team] Car messages of an unfinished identification are kept in a 24-hour draft on the customer and sent to the AI; the draft grows while the AI needs more info and is cleared when it does not"
+      - "[Team] The question {text: 'Хотите сохранить автомобиль в системе?', type: 'save_car', params: [car]} is added only when status is not need_more_info, car_in_message is true and the customer has no saved car; car is combined from all draft messages"
+      - "[Team] POST /private/customers/{customerId}/actions with type save_car saves params[0] as the customer's car and marks the question of message_id answered; unknown type or invalid params → 400"
+      - "[Team] With a saved car the AI gets it as saved_car and does not ask for the car again; the first greeting names the saved car"
+
+  - id: "CAR-01-FE"
+    epic: "CAR-01"
+    title: "QuestionActionWidget in the chat"
+    surface: "frontend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 90
+    depends_on: ["CAR-01-BE"]
+    acceptance_criteria:
+      - "[Team] An assistant message with a question shows QuestionActionWidget: the question text and an action button, or the done state once answered"
+      - "[Team] The button sends POST /actions with type, params and message_id; while sending it is disabled, on success the widget shows that the car is saved, on error it shows a retry message"

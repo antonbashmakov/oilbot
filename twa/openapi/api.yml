@@ -62,6 +62,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /private/customers/{customerId}/actions:
+    post:
+      operationId: performCustomerAction
+      summary: Run an action the customer confirmed in the chat
+      description: |
+        Runs the action named by `type` with `params` for the customer, for example `save_car`
+        (saves `params[0]` as the customer's car). With `message_id` the question of that chat
+        message is marked answered.
+      tags:
+        - Chats
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Unique identifier of the customer.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionRequest'
+      responses:
+        '200':
+          description: The action was done.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResult'
+        '400':
+          description: Unknown action type or invalid params.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Missing or invalid customer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: The customer token belongs to another customer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Customer not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /private/customers/{customerId}/chats/{chatId}/messages:
     get:
       operationId: getLatestCustomerChatMessages
@@ -175,6 +235,100 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    Car:
+      type: object
+      description: A customer's car as the AI understood it from the customer's message.
+      required:
+        - make
+        - model
+      properties:
+        make:
+          type: string
+          example: "Volkswagen"
+        model:
+          type: string
+          example: "Golf"
+        year:
+          type: integer
+          nullable: true
+          example: 2015
+        engine:
+          type: string
+          nullable: true
+          example: "1.4 TSI"
+        description:
+          type: string
+          description: The customer's own words that named the car.
+          example: "Volkswagen Golf 2015 1.4 TSI"
+    CarDraft:
+      type: object
+      description: |
+        Temporary state of a car being identified over several messages: the customer's messages
+        with car information so far. Valid 24 hours; cleared when the identification ends.
+      required:
+        - tokens
+        - updated_at
+      properties:
+        tokens:
+          type: array
+          items:
+            type: string
+          example: ["Skoda Octavia", "1.5L"]
+        updated_at:
+          type: string
+          format: date-time
+    QuestionAction:
+      type: object
+      description: A question in an assistant message that the customer answers with an action button.
+      required:
+        - text
+        - type
+        - params
+      properties:
+        text:
+          type: string
+          example: "Хотите сохранить автомобиль в системе?"
+        type:
+          $ref: '#/components/schemas/ActionType'
+        params:
+          type: array
+          description: Parameters of the action; for save_car one Car.
+          items:
+            $ref: '#/components/schemas/Car'
+        answered:
+          type: boolean
+          description: True once the customer ran the action.
+    ActionType:
+      type: string
+      enum:
+        - save_car
+    ActionRequest:
+      type: object
+      required:
+        - type
+        - params
+      properties:
+        type:
+          $ref: '#/components/schemas/ActionType'
+        params:
+          type: array
+          items:
+            $ref: '#/components/schemas/Car'
+        message_id:
+          type: string
+          description: The chat message whose question this answers; marked answered.
+    ActionResult:
+      type: object
+      required:
+        - type
+        - status
+      properties:
+        type:
+          $ref: '#/components/schemas/ActionType'
+        status:
+          type: string
+          enum:
+            - done
     AuthRequest:
       type: object
       required:
@@ -260,7 +414,12 @@ components:
             - TELEGRAM
             - VK
           description: Customer origin
-          example: "TELEGRAM"        
+          example: "TELEGRAM"
+        car:
+          $ref: '#/components/schemas/Car'
+        car_draft:
+          $ref: '#/components/schemas/CarDraft'
+
     Subscription:
       type: object
       required:
@@ -1393,6 +1552,8 @@ components:
           description: List of products associated with the message.
           items:
             $ref: '#/components/schemas/Product'
+        question:
+          $ref: '#/components/schemas/QuestionAction'
         created_at:
           type: string
           format: date-time
@@ -1541,17 +1702,27 @@ components:
         Сообщение (AI message), передаваемое агенту подбора моторного масла.
         Содержит описание автомобиля пользователя и список доступных масел.
       properties:
-        car:
+        message:
           type: string
-          description: Описание автомобиля пользователя
+          description: Последнее сообщение пользователя
           example: "Volkswagen Passat 2019 2.0 TDI 150 hp"
+        car_tokens:
+          type: array
+          description: Предыдущие сообщения пользователя с данными об автомобиле, который ещё определяется
+          items:
+            type: string
+          example: ["Skoda Octavia", "1.5L"]
+        saved_car:
+          allOf:
+            - $ref: '#/components/schemas/Car'
+          description: Автомобиль, сохранённый пользователем, если есть
         available_oils:
           type: array
           description: Список доступных масел, из которых агент выбирает подходящие
           items:
             $ref: '#/components/schemas/AvailableOil'
       required:
-        - car
+        - message
         - available_oils
 
 

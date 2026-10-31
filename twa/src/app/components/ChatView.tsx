@@ -6,6 +6,7 @@ import { useGetMessages, useSendMessage } from '@/api';
 import { Fragment, useCallback, useEffect, useState } from "react";
 import Carousel from "./Carousel";
 import { useCustomerSession } from "./CustomerSessionProvider";
+import QuestionActionWidget from "./QuestionActionWidget";
 // import { products } from "@/app/data/mock";
 
 const ChatView = () => {
@@ -72,6 +73,9 @@ const ChatView = () => {
           )}
           {!m.products && (
             <ChatMessageComponent message={m} />
+          )}
+          {m.question && (
+            <QuestionActionWidget question={m.question} messageId={m.id} />
           )}
         </Fragment>
       ))}

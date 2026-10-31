@@ -7,3 +7,4 @@ Find a spec here, not by guessing the file name. Statuses come from `FEATURE_REG
 |---|---|---|---|
 | `SETUP-01` | Agent workflow adoption | [SETUP-01-agent-workflow.md](SETUP-01-agent-workflow.md) | `SETUP-01-DOC` in_progress |
 | `TWA-01` | Mini App launch in Telegram | [TWA-01-mini-app-launch.md](TWA-01-mini-app-launch.md) | `TWA-01-BE` code_review, `TWA-01-FE` code_review |
+| `CAR-01` | Saved car in the AI chat | [CAR-01-saved-car.md](CAR-01-saved-car.md) | `CAR-01-BE` code_review, `CAR-01-FE` code_review |

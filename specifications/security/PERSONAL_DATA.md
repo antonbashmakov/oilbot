@@ -11,6 +11,8 @@ Federal Law 152-FZ applies (not verified with the developer, Q-06). Rules:
 | Customer first and last name, username, language, Telegram/VK id (`external_id`) | `CUSTOMERS` | Telegram (messages), CRM | Telegram/VK init data (`/public/auth`) |
 | Telegram/VK init data (signed profile) | not stored, not logged | — | `twa/` |
 | Chat texts (car description, questions) | `CHAT_MESSAGES` | DeepSeek | customer in `twa/` |
+| Saved car (make, model, year, engine, the customer's description) | `CUSTOMERS.car` | DeepSeek (`saved_car` in every chat request) | `save_car` action |
+| Car draft (the customer's car messages of an unfinished identification, 24 hours) | `CUSTOMERS.car_draft` | DeepSeek (`car_tokens`) | chat messages |
 | Staff–customer messages, comments | `CONVERSATION_MESSAGES`, `COMMENTS` | Telegram | CRM, customers |
 | Orders, delivery and items per customer | `ORDERS`, `PICKINGS`, `CART_ITEMS` | CRM, bot | customers |
 | Payments, balances, subscriptions | `PAYMENTS`, `CUSTOMER_BALANCES*`, `SUBSCRIPTIONS` | T-Bank (amount, receipt with support e-mail/phone) | T-Bank, backend |

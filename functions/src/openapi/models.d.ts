@@ -218,11 +218,22 @@ export interface components {
              */
             status: "need_more_info" | "success" | "not_found" | "unknown";
             /**
+             * @description Сообщение пользователя содержит данные об определяемом автомобиле (марка, модель,
+             *     двигатель, год, модификация), в том числе короткий ответ на уточняющий вопрос.
+             * @example true
+             */
+            car_in_message?: boolean;
+            /**
+             * @description Сообщение начинает описывать другой автомобиль, чем car_tokens
+             * @example false
+             */
+            new_car?: boolean;
+            /**
              * @description Уточняющий вопрос пользователю (для статуса need_more_info)
              * @example Какой двигатель установлен на вашем автомобиле?
              */
             question?: string | null;
-            /** @description Описание автомобиля, определённое агентом (для статусов success и not_found) */
+            /** @description Автомобиль, собранный агентом из car_tokens и сообщения (всегда, когда car_in_message, и для статусов success и not_found) */
             car?: {
                 /**
                  * @description Марка автомобиля
@@ -238,12 +249,12 @@ export interface components {
                  * @description Год выпуска автомобиля
                  * @example 2019
                  */
-                year: number;
+                year?: number | null;
                 /**
                  * @description Описание двигателя (объём, мощность, тип топлива и т.п.)
                  * @example 2.0 TDI 150 hp
                  */
-                engine: string;
+                engine?: string | null;
             } | null;
             /** @description Требования производителя к моторному маслу (для статусов success и not_found) */
             requirements?: {

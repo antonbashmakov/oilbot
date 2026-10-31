@@ -12,6 +12,12 @@ Numbers are never reused.
 
 ## Fixed
 
+- **[BUG-005]** Parallel `POST /public/auth` calls for a new Telegram user created two customers
+  (React Strict Mode signs in twice in dev; also possible with overlapping requests in production);
+  later sign-ins picked either one, so a saved car or chat could disappear — fixed, backend and
+  `twa/`, CAR-01-BE: race-safe `findOrCreateByExternalId`, one sign-in per page load. Found in the
+  CAR-01 browser check.
+
 - **[BUG-001]** The private API had no authentication: anyone could read and add chat messages of
   any `customerId` and make the project pay for DeepSeek calls — fixed (not deployed), backend,
   TWA-01-BE: customer token required, 401/403. Found while adopting the agent setup.

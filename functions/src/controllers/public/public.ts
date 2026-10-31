@@ -200,20 +200,15 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
       return api.forbidden(res, "Invalid Telegram init data");
     }
 
-    let customer = await customerService.findByExternalId(`${verification.user?.id}`);
-
-    if (!customer) {
-      customer = {
-        id: "",
-        external_id: `${verification.user?.id}`,
-        first_name: verification.user?.first_name || "",
-        last_name: verification.user?.last_name || "",
-        created_at: new Date(),
-        last_seen_at: new Date(),
-        origin: isTelegram ? "TELEGRAM" : "VK",
-      };
-      customer = await customerService.add(customer);
-    }
+    const customer = await customerService.findOrCreateByExternalId({
+      id: "",
+      external_id: `${verification.user?.id}`,
+      first_name: verification.user?.first_name || "",
+      last_name: verification.user?.last_name || "",
+      created_at: new Date(),
+      last_seen_at: new Date(),
+      origin: isTelegram ? "TELEGRAM" : "VK",
+    });
 
     await customerService.update(customer, {last_seen_at: new Date()});
 

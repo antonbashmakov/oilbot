@@ -26,6 +26,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/private/customers/{customerId}/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run an action the customer confirmed in the chat
+         * @description Runs the action named by `type` with `params` for the customer, for example `save_car`
+         *     (saves `params[0]` as the customer's car). With `message_id` the question of that chat
+         *     message is marked answered.
+         */
+        post: operations["performCustomerAction"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/private/customers/{customerId}/chats/{chatId}/messages": {
         parameters: {
             query?: never;
@@ -51,6 +73,60 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description A customer's car as the AI understood it from the customer's message. */
+        Car: {
+            /** @example Volkswagen */
+            make: string;
+            /** @example Golf */
+            model: string;
+            /** @example 2015 */
+            year?: number | null;
+            /** @example 1.4 TSI */
+            engine?: string | null;
+            /**
+             * @description The customer's own words that named the car.
+             * @example Volkswagen Golf 2015 1.4 TSI
+             */
+            description?: string;
+        };
+        /**
+         * @description Temporary state of a car being identified over several messages: the customer's messages
+         *     with car information so far. Valid 24 hours; cleared when the identification ends.
+         */
+        CarDraft: {
+            /**
+             * @example [
+             *       "Skoda Octavia",
+             *       "1.5L"
+             *     ]
+             */
+            tokens: string[];
+            /** Format: date-time */
+            updated_at: string;
+        };
+        /** @description A question in an assistant message that the customer answers with an action button. */
+        QuestionAction: {
+            /** @example Хотите сохранить автомобиль в системе? */
+            text: string;
+            type: components["schemas"]["ActionType"];
+            /** @description Parameters of the action; for save_car one Car. */
+            params: components["schemas"]["Car"][];
+            /** @description True once the customer ran the action. */
+            answered?: boolean;
+        };
+        /** @enum {string} */
+        ActionType: "save_car";
+        ActionRequest: {
+            type: components["schemas"]["ActionType"];
+            params: components["schemas"]["Car"][];
+            /** @description The chat message whose question this answers; marked answered. */
+            message_id?: string;
+        };
+        ActionResult: {
+            type: components["schemas"]["ActionType"];
+            /** @enum {string} */
+            status: "done";
+        };
         AuthRequest: {
             /** @description Raw init data of the Mini App (Telegram.WebApp.initData or the VK launch query). */
             initData: string;
@@ -118,6 +194,8 @@ export interface components {
              * @enum {enum}
              */
             origin: "TELEGRAM" | "VK";
+            car?: components["schemas"]["Car"];
+            car_draft?: components["schemas"]["CarDraft"];
         };
         Subscription: {
             /**
@@ -1039,6 +1117,7 @@ export interface components {
             owner: components["schemas"]["OwnerRef"];
             /** @description List of products associated with the message. */
             products?: components["schemas"]["Product"][];
+            question?: components["schemas"]["QuestionAction"];
             /**
              * Format: date-time
              * @description Time the message was created.
@@ -1172,10 +1251,20 @@ export interface components {
          */
         OilAgentMessage: {
             /**
-             * @description Описание автомобиля пользователя
+             * @description Последнее сообщение пользователя
              * @example Volkswagen Passat 2019 2.0 TDI 150 hp
              */
-            car: string;
+            message: string;
+            /**
+             * @description Предыдущие сообщения пользователя с данными об автомобиле, который ещё определяется
+             * @example [
+             *       "Skoda Octavia",
+             *       "1.5L"
+             *     ]
+             */
+            car_tokens?: string[];
+            /** @description Автомобиль, сохранённый пользователем, если есть */
+            saved_car?: components["schemas"]["Car"];
             /** @description Список доступных масел, из которых агент выбирает подходящие */
             available_oils: components["schemas"]["AvailableOil"][];
         };
@@ -1221,6 +1310,78 @@ export interface operations {
             };
             /** @description Init data signature invalid or expired. */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unexpected error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    performCustomerAction: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique identifier of the customer. */
+                customerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActionRequest"];
+            };
+        };
+        responses: {
+            /** @description The action was done. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionResult"];
+                };
+            };
+            /** @description Unknown action type or invalid params. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid customer token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The customer token belongs to another customer. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Customer not found. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

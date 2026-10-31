@@ -50,6 +50,7 @@ image remote patterns; no `middleware.ts`).
 | `/public/login`, `/public/signup`, `/public/users/me` | `crm/openapi/api.yml` copy | `crm/src/api` |
 | `authenticateCustomer` `/public/auth` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` `validateUser` (plain `fetch`) |
 | `/private/customers/{customerId}/chats/{chatId}/messages` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` |
+| `performCustomerAction` `/private/customers/{customerId}/actions` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` `usePerformAction` (`QuestionActionWidget`) |
 
 ## Backend
 
@@ -70,9 +71,9 @@ in code); SSR functions in `europe-west1`.
 
 | Collection | Holds | Personal data |
 |---|---|---|
-| `CUSTOMERS`, `CUSTOMER_STATS`, `CUSTOMER_ACCOUNTING` | Customers and their stats | yes, see PERSONAL_DATA.md |
+| `CUSTOMERS`, `CUSTOMER_STATS`, `CUSTOMER_ACCOUNTING` | Customers (with the saved `car` and the 24-hour `car_draft` of a car still being identified; new ids `<ORIGIN>_<external_id>`) and their stats | yes, see PERSONAL_DATA.md |
 | `USERS` | Staff accounts | yes |
-| `CHAT_MESSAGES`, `CONVERSATION_MESSAGES`, `COMMENTS` | AI chat, staff–customer messages, comments | yes (free text) |
+| `CHAT_MESSAGES`, `CONVERSATION_MESSAGES`, `COMMENTS` | AI chat (assistant messages may carry a `question` with an action), staff–customer messages, comments | yes (free text) |
 | `DELIVERIES`, `ORDERS`, `PICKINGS`, `ITEMS`, `ITEM_STATS`, `CART_ITEMS`, `PRODUCTS` | Catalogue and orders | orders link to customers |
 | `PAYMENTS`, `CUSTOMER_BALANCES`, `CUSTOMER_BALANCES_CHANGE_EVENTS`, `SUBSCRIPTIONS` | Money | yes |
 | `BROADCAST_TASKS`, `BROADCAST_RESULTS` | Broadcasts | recipients |
