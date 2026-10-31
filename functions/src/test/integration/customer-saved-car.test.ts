@@ -14,6 +14,7 @@ const PRIVATE_URL = `${FUNCTIONS_ORIGIN}/test-project/us-central1/private`;
 
 const SAVE_CAR_QUESTION = "Хотите сохранить автомобиль в системе?";
 const SUGGESTIONS_INTRO = "Возможно вам подходит какая-то из этих моделей?";
+const CAR_SAVED_CONFIRMATION = "Автомобиль сохранён, сейчас подыщем масло";
 
 const customerToken = (customerId: string) => jwt.sign({customerId}, JWT_SECRET, {expiresIn: "1h"});
 
@@ -95,8 +96,8 @@ describe("Saved car: question and save_car action", () => {
     expect(suggestions.role).toBe("assistant");
     expect(suggestions.content).toBe(SUGGESTIONS_INTRO);
     expect(suggestions.questions).toEqual([
-      {text: "Skoda Octavia 2017 1.4 TSI", type: "save_car", params: [{make: "Skoda", model: "Octavia", year: 2017, engine: "1.4 TSI", description: "Skoda Octavia 2017 1.4 TSI"}]},
-      {text: "Skoda Octavia 2020 1.5 TSI", type: "save_car", params: [{make: "Skoda", model: "Octavia", year: 2020, engine: "1.5 TSI", description: "Skoda Octavia 2020 1.5 TSI"}]},
+      {text: "Skoda Octavia 2017 1.4 TSI", type: "save_car", follow_up: "oil_search", params: [{make: "Skoda", model: "Octavia", year: 2017, engine: "1.4 TSI", description: "Skoda Octavia 2017 1.4 TSI"}]},
+      {text: "Skoda Octavia 2020 1.5 TSI", type: "save_car", follow_up: "oil_search", params: [{make: "Skoda", model: "Octavia", year: 2020, engine: "1.5 TSI", description: "Skoda Octavia 2020 1.5 TSI"}]},
     ]);
   });
 
@@ -114,6 +115,38 @@ describe("Saved car: question and save_car action", () => {
 
     const stored = (await startChat()).body.find((m: { id: string }) => m.id === suggestions.id);
     expect(stored.questions.map((q: { answered?: boolean }) => !!q.answered)).toEqual([false, true]);
+  });
+
+  it("confirms a saved suggestion and searches oil for it", async () => {
+    await startChat();
+    const suggestions = (await send("Skoda Octavia")).body[2];
+    const chosen = suggestions.questions[0];
+
+    const result = await request(PRIVATE_URL).post(actionsPath()).set("Authorization", auth)
+      .send({type: "save_car", params: chosen.params, message_id: suggestions.id}).expect(200);
+
+    expect(result.body).toMatchObject({type: "save_car", status: "done", follow_up: "oil_search"});
+    expect(result.body.messages).toHaveLength(1);
+    expect(result.body.messages[0]).toMatchObject({role: "assistant", content: CAR_SAVED_CONFIRMATION, chat_id: "latest"});
+
+    const found = await request(PRIVATE_URL).post(`/customers/${customer.id}/chats/latest/oil-search`)
+      .set("Authorization", auth).expect(200);
+
+    expect(found.body).toHaveLength(1);
+    expect(found.body[0].role).toBe("assistant");
+    expect(found.body[0].products).toHaveLength(1);
+    expect(found.body[0].questions).toBeUndefined();
+
+    const chat = (await startChat()).body;
+    expect(chat.filter((m: { role: string }) => m.role === "user").map((m: { content: string }) => m.content)).toEqual(["Skoda Octavia"]);
+    expect(chat.map((m: { content: string }) => m.content)).toContain(CAR_SAVED_CONFIRMATION);
+  });
+
+  it("answers 400 to an oil search without a saved car", async () => {
+    await startChat();
+
+    await request(PRIVATE_URL).post(`/customers/${customer.id}/chats/latest/oil-search`).set("Authorization", auth).expect(400);
+    await request(PRIVATE_URL).post(`/customers/${customer.id}/chats/latest/oil-search`).expect(401);
   });
 
   it("does not suggest cars when the message names no car or the customer has a saved car", async () => {

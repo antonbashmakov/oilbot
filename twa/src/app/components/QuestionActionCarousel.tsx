@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePerformAction } from "@/api";
-import { QuestionAction } from "@/api/models";
+import { ActionResult, QuestionAction } from "@/api/models";
 import { useCustomerSession } from "./CustomerSessionProvider";
 
 type QuestionActionCardProps = {
@@ -10,7 +10,7 @@ type QuestionActionCardProps = {
   messageId: string;
   done: boolean;
   disabled: boolean;
-  onDone: () => void;
+  onDone: (result: ActionResult | null | undefined) => void;
 };
 
 const QuestionActionCard = ({ question, messageId, done, disabled, onDone }: QuestionActionCardProps) => {
@@ -51,13 +51,14 @@ const QuestionActionCard = ({ question, messageId, done, disabled, onDone }: Que
 type QuestionActionCarouselProps = {
   questions: QuestionAction[];
   messageId: string;
+  onActionResult?: (result: ActionResult) => void;
 };
 
 /**
  * Several questions of one message as a carousel of cards (for example car suggestions); once one
  * is answered the others are disabled.
  */
-const QuestionActionCarousel = ({ questions, messageId }: QuestionActionCarouselProps) => {
+const QuestionActionCarousel = ({ questions, messageId, onActionResult }: QuestionActionCarouselProps) => {
   const [chosen, setChosen] = useState<number | null>(null);
   const answered = questions.findIndex((question) => question.answered);
   const done = answered >= 0 ? answered : chosen;
@@ -72,7 +73,10 @@ const QuestionActionCarousel = ({ questions, messageId }: QuestionActionCarousel
             messageId={messageId}
             done={done === index}
             disabled={done !== null && done !== index}
-            onDone={() => setChosen(index)}
+            onDone={(result) => {
+              setChosen(index);
+              if (result) onActionResult?.(result);
+            }}
           />
         ))}
       </div>

@@ -26,6 +26,7 @@ epics:
   - { id: "CAR-01", title: "Saved car in the AI chat", spec: "features/CAR-01-saved-car.md" }
   - { id: "CAR-02", title: "Car model suggestions", spec: "features/CAR-02-car-suggestions.md" }
   - { id: "TWA-02", title: "Telegram login in a web browser", spec: "features/TWA-02-browser-telegram-login.md" }
+  - { id: "CAR-03", title: "Oil search after choosing a suggested car", spec: "features/CAR-03-oil-search-after-save.md" }
 
 features:
   - id: "SETUP-01-DOC"
@@ -153,3 +154,27 @@ features:
       - "[Team] The login survives a page reload in the same tab (sessionStorage, while Telegram's data is under 24 hours old)"
       - "[Team] The dev sign-in runs only with ?tgUser=<id>"
       - "[Team] In next dev, DEV_API_PROXY sends /api to the emulator so one tunnel URL serves the app and the API"
+
+  - id: "CAR-03-BE"
+    epic: "CAR-03"
+    title: "Confirmation message and the oil search endpoint"
+    surface: "backend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 90
+    depends_on: ["CAR-02-BE"]
+    acceptance_criteria:
+      - "[Team] Suggestion questions carry follow_up 'oil_search'; save_car of such a question adds the assistant message 'Автомобиль сохранён, сейчас подыщем масло' and returns it with follow_up in the action result"
+      - "[Team] POST /private/customers/{customerId}/chats/{chatId}/oil-search runs the AI for the saved car without a user message and returns the assistant answer"
+
+  - id: "CAR-03-FE"
+    epic: "CAR-03"
+    title: "Show the confirmation and run the oil search; chat input on phones"
+    surface: "frontend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 90
+    depends_on: ["CAR-03-BE"]
+    acceptance_criteria:
+      - "[Team] After saving a suggested car the chat shows the confirmation at once, then the typing indicator, then the AI answer"
+      - "[Team] On iPhone the chat input does not zoom the page and stays inside the screen; return sends the message"

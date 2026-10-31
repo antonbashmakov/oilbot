@@ -75,6 +75,22 @@ export const usePerformAction = (customerId?: string) => {
     });
 };
 
+/**
+ * Asks the AI for oil for the saved car, without a customer message (after saving a suggested car).
+ */
+export const useOilSearch = (customerId?: string) => {
+    const { POST } = useClient();
+
+    return useMutation<ChatMessage[], unknown, void>({
+        mutationFn: async () => {
+            const data = await handleResult(POST("/api/private/customers/{customerId}/chats/{chatId}/oil-search", {
+                params: { path: { customerId: customerId || "", chatId: "latest" } },
+            }));
+            return chatMessageInterceptor((data || []) as unknown as ChatMessage[]);
+        },
+    });
+};
+
 export const authenticateTelegramLogin = async (data: TelegramLoginData): Promise<CustomerSession> => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL || ""}/api/public/auth/telegram-login`, {
         method: 'POST',

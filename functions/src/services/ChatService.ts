@@ -39,24 +39,24 @@ class ChatService extends AbstractService<ChatMessage> {
   }
 
   /**
-   * Marks the question of the owner's message with the same params answered; false when there is
-   * no such question.
+   * Marks the question of the owner's message with the same params answered; returns it with the
+   * message's chat, or undefined when there is no such question.
    */
-  async markQuestionAnswered(owner: {id: string}, messageId: string, params: unknown): Promise<boolean> {
+  async markQuestionAnswered(owner: {id: string}, messageId: string, params: unknown): Promise<{question: QuestionAction; chatId: string} | undefined> {
     const ref = this.getCollection().doc(messageId);
     const doc = await ref.get();
     const data = doc.data();
 
-    if (!doc.exists || data?.owner?.id !== owner.id || !Array.isArray(data?.questions)) return false;
+    if (!doc.exists || data?.owner?.id !== owner.id || !Array.isArray(data?.questions)) return undefined;
 
     const key = JSON.stringify(canonical(params));
     const index = data.questions.findIndex((question: QuestionAction) => JSON.stringify(canonical(question.params)) === key);
-    if (index < 0) return false;
+    if (index < 0) return undefined;
 
     const questions = data.questions.map((question: QuestionAction, i: number) =>
       i === index ? {...question, answered: true} : question);
     await ref.update({questions});
-    return true;
+    return {question: questions[index], chatId: data.chat_id};
   }
 
   async addMessageForUser(owner: { id: string }, chatId: string, content: string): Promise<ChatMessage> {

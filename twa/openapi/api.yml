@@ -163,6 +163,59 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /private/customers/{customerId}/chats/{chatId}/oil-search:
+    post:
+      operationId: searchOilForSavedCar
+      summary: Ask the AI for oil for the customer's saved car
+      description: |
+        Runs the oil selection for the saved car without a user message (for example right after
+        the customer saved a suggested car) and returns the new assistant messages.
+      tags:
+        - Chats
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: chatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The assistant's answer.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatMessage'
+        '400':
+          description: The customer has no saved car.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Missing or invalid customer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: The customer token belongs to another customer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Customer not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /private/customers/{customerId}/chats/{chatId}/messages:
     get:
       operationId: getLatestCustomerChatMessages
@@ -339,6 +392,13 @@ components:
         answered:
           type: boolean
           description: True once the customer ran the action.
+        follow_up:
+          $ref: '#/components/schemas/FollowUp'
+    FollowUp:
+      type: string
+      description: What the client does after the action, for example oil_search (searchOilForSavedCar).
+      enum:
+        - oil_search
     ActionType:
       type: string
       enum:
@@ -370,6 +430,13 @@ components:
           type: string
           enum:
             - done
+        messages:
+          type: array
+          description: Chat messages the action added, for example the confirmation.
+          items:
+            $ref: '#/components/schemas/ChatMessage'
+        follow_up:
+          $ref: '#/components/schemas/FollowUp'
     TelegramLoginData:
       type: object
       description: The user object the Telegram Login Widget passes to its callback, unchanged.

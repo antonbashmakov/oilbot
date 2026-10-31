@@ -1,8 +1,11 @@
-const PendingMessage = ({ content }: { content: string }) => {
+/**
+ * The echo of the message being sent (when there is one) and the assistant's typing indicator.
+ */
+const PendingMessage = ({ content }: { content?: string }) => {
   return (
     <>
       {/* Temporary echo of the message we just sent */}
-      <div className="flex flex-col items-end self-end max-w-[82%] space-y-1">
+      {content && <div className="flex flex-col items-end self-end max-w-[82%] space-y-1">
         <div className="bg-surface-variant border border-white/10 text-on-background rounded-[1rem_1rem_0.25rem_1rem] px-4 py-2.5 shadow-sm font-body-md text-body-md opacity-70">
           <p className="font-medium tracking-wide">{content}</p>
         </div>
@@ -12,7 +15,7 @@ const PendingMessage = ({ content }: { content: string }) => {
           </span>
           <span>Sending...</span>
         </div>
-      </div>
+      </div>}
 
       {/* Assistant typing indicator */}
       <div className="flex flex-col items-start max-w-[94%] space-y-1">

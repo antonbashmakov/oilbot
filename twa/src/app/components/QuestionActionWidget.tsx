@@ -1,7 +1,7 @@
 "use client";
 
 import { usePerformAction } from "@/api";
-import { QuestionAction } from "@/api/models";
+import { ActionResult, QuestionAction } from "@/api/models";
 import { useCustomerSession } from "./CustomerSessionProvider";
 
 const ACTION_LABELS: Record<QuestionAction["type"], { button: string; done: string }> = {
@@ -11,19 +11,22 @@ const ACTION_LABELS: Record<QuestionAction["type"], { button: string; done: stri
 type QuestionActionWidgetProps = {
   question: QuestionAction;
   messageId: string;
+  onActionResult?: (result: ActionResult) => void;
 };
 
 /**
  * A question from the assistant with one action button; the button runs the question's action.
  * An answered question shows the done state instead of the button.
  */
-const QuestionActionWidget = ({ question, messageId }: QuestionActionWidgetProps) => {
+const QuestionActionWidget = ({ question, messageId, onActionResult }: QuestionActionWidgetProps) => {
   const { customer } = useCustomerSession();
   const { mutate, isPending, isSuccess, isError } = usePerformAction(customer?.id);
   const labels = ACTION_LABELS[question.type];
 
   const handleClick = () => {
-    mutate({ type: question.type, params: question.params, message_id: messageId });
+    mutate({ type: question.type, params: question.params, message_id: messageId }, {
+      onSuccess: (result) => result && onActionResult?.(result),
+    });
   };
 
   return (

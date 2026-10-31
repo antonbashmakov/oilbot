@@ -10,3 +10,4 @@ Find a spec here, not by guessing the file name. Statuses come from `FEATURE_REG
 | `CAR-01` | Saved car in the AI chat | [CAR-01-saved-car.md](CAR-01-saved-car.md) | `CAR-01-BE` code_review, `CAR-01-FE` code_review |
 | `CAR-02` | Car model suggestions | [CAR-02-car-suggestions.md](CAR-02-car-suggestions.md) | `CAR-02-BE` code_review, `CAR-02-FE` code_review |
 | `TWA-02` | Telegram login in a web browser | [TWA-02-browser-telegram-login.md](TWA-02-browser-telegram-login.md) | `TWA-02-BE` code_review, `TWA-02-FE` code_review |
+| `CAR-03` | Oil search after choosing a suggested car | [CAR-03-oil-search-after-save.md](CAR-03-oil-search-after-save.md) | `CAR-03-BE` code_review, `CAR-03-FE` code_review |

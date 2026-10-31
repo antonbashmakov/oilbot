@@ -69,6 +69,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/private/customers/{customerId}/chats/{chatId}/oil-search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask the AI for oil for the customer's saved car
+         * @description Runs the oil selection for the saved car without a user message (for example right after
+         *     the customer saved a suggested car) and returns the new assistant messages.
+         */
+        post: operations["searchOilForSavedCar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/private/customers/{customerId}/chats/{chatId}/messages": {
         parameters: {
             query?: never;
@@ -134,7 +155,13 @@ export interface components {
             params: components["schemas"]["Car"][];
             /** @description True once the customer ran the action. */
             answered?: boolean;
+            follow_up?: components["schemas"]["FollowUp"];
         };
+        /**
+         * @description What the client does after the action, for example oil_search (searchOilForSavedCar).
+         * @enum {string}
+         */
+        FollowUp: "oil_search";
         /** @enum {string} */
         ActionType: "save_car";
         ActionRequest: {
@@ -147,6 +174,9 @@ export interface components {
             type: components["schemas"]["ActionType"];
             /** @enum {string} */
             status: "done";
+            /** @description Chat messages the action added, for example the confirmation. */
+            messages?: components["schemas"]["ChatMessage"][];
+            follow_up?: components["schemas"]["FollowUp"];
         };
         /** @description The user object the Telegram Login Widget passes to its callback, unchanged. */
         TelegramLoginData: {
@@ -1476,6 +1506,65 @@ export interface operations {
             };
             /** @description Unexpected error. */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    searchOilForSavedCar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customerId: string;
+                chatId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The assistant's answer. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatMessage"][];
+                };
+            };
+            /** @description The customer has no saved car. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid customer token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The customer token belongs to another customer. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Customer not found. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

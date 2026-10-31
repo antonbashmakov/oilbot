@@ -51,6 +51,7 @@ image remote patterns; no `middleware.ts`).
 | `authenticateTelegramLogin` `/public/auth/telegram-login` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` `authenticateTelegramLogin` |
 | `authenticateCustomer` `/public/auth` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` `validateUser` (plain `fetch`) |
 | `/private/customers/{customerId}/chats/{chatId}/messages` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` |
+| `searchOilForSavedCar` `/private/customers/{customerId}/chats/{chatId}/oil-search` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` `useOilSearch` |
 | `performCustomerAction` `/private/customers/{customerId}/actions` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` `usePerformAction` (`QuestionActionWidget`) |
 
 ## Backend

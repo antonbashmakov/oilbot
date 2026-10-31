@@ -7,7 +7,7 @@ type MockCar = {make?: string; model?: string; year?: number; engine?: string};
 
 /**
  * Words of a message read as car data: a four-digit year, an engine like "1.5L", or make and model
- * (the first two other words). A message with a question mark carries no car data.
+ * (the first two other words in Latin letters). A message with a question mark carries no car data.
  */
 const readCar = (text: string): MockCar => {
   if (text.includes("?")) return {};
@@ -18,7 +18,7 @@ const readCar = (text: string): MockCar => {
   text.trim().split(/\s+/).filter(Boolean).forEach((word) => {
     if (YEAR.test(word)) car.year = Number(word);
     else if (ENGINE.test(word)) car.engine = word;
-    else names.push(word);
+    else if (/^[A-Za-z]/.test(word)) names.push(word);
   });
 
   if (names.length >= 2) {

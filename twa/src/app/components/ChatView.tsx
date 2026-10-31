@@ -1,8 +1,8 @@
-import { ChatMessage } from "@/api/models";
+import { ActionResult, ChatMessage } from "@/api/models";
 import ChatMessageComponent from "./ChatMessage";
 import Footer from "./Footer";
 import PendingMessage from "./PendingMessage";
-import { useGetMessages, useSendMessage } from '@/api';
+import { useGetMessages, useOilSearch, useSendMessage } from '@/api';
 import { Fragment, useCallback, useEffect, useState } from "react";
 import Carousel from "./Carousel";
 import { useCustomerSession } from "./CustomerSessionProvider";
@@ -15,7 +15,25 @@ const ChatView = () => {
   const { data: messages } = useGetMessages(customer?.id);
   const { mutateAsync: sendMessage, data: answers, isPending, variables } = useSendMessage(customer?.id, "latest");
 
+  const { mutate: searchOil, isPending: searchingOil } = useOilSearch(customer?.id);
+
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
+
+  // Adds messages that are not in the conversation yet (a refetch may have brought them already).
+  const appendMessages = useCallback((items: ChatMessage[]) => {
+    setConversation((prev) => [
+      ...prev,
+      ...items.filter((item) => !prev.some((m) => m.id === item.id)).map((item) => ({ ...item, created_at: new Date(item.created_at) })),
+    ]);
+  }, []);
+
+  // A saved suggested car: show the confirmation, then ask the AI for oil for it.
+  const handleActionResult = useCallback((result: ActionResult) => {
+    appendMessages((result.messages || []) as unknown as ChatMessage[]);
+    if (result.follow_up === "oil_search") {
+      searchOil(undefined, { onSuccess: (found) => appendMessages(found) });
+    }
+  }, [appendMessages, searchOil]);
 
   // Temporary message shown while we await the answer from sendMessage.
   const pendingMessage = isPending ? variables?.content ?? null : null;
@@ -40,7 +58,7 @@ const ChatView = () => {
       top: document.documentElement.scrollHeight,
       behavior: "smooth",
     });
-  }, [conversation.length, pendingMessage]);
+  }, [conversation.length, pendingMessage, searchingOil]);
 
   const handleSendMessage = useCallback(async (content: string) => {
     try {
@@ -76,14 +94,15 @@ const ChatView = () => {
             <ChatMessageComponent message={m} />
           )}
           {m.questions?.length === 1 && (
-            <QuestionActionWidget question={m.questions[0]} messageId={m.id} />
+            <QuestionActionWidget question={m.questions[0]} messageId={m.id} onActionResult={handleActionResult} />
           )}
           {m.questions && m.questions.length > 1 && (
-            <QuestionActionCarousel questions={m.questions} messageId={m.id} />
+            <QuestionActionCarousel questions={m.questions} messageId={m.id} onActionResult={handleActionResult} />
           )}
         </Fragment>
       ))}
       {pendingMessage && <PendingMessage content={pendingMessage} />}
+      {searchingOil && <PendingMessage />}
       <Footer onSubmit={handleSendMessage} />
     </main>
   );

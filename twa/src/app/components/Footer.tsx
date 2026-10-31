@@ -19,7 +19,7 @@ const Footer = ({ onSubmit }: { onSubmit: (message: string) => Promise<boolean> 
     if (success) {
       setMessage("");
     }
-  }, []);
+  }, [onSubmit]);
 
   return (
     <footer className="fixed bottom-0 left-0 w-full z-40 bg-surface/95 backdrop-blur-md px-layout-margin-mobile pt-2 pb-5 shadow-lg border-t border-white/5">
@@ -43,7 +43,13 @@ const Footer = ({ onSubmit }: { onSubmit: (message: string) => Promise<boolean> 
             disabled={sending}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            className="flex-1 bg-transparent border-0 text-on-surface placeholder:text-on-surface-variant/60 text-body-md focus:ring-0 focus:outline-none px-1"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSubmit(message);
+            }}
+            enterKeyHint="send"
+            // 16px: iOS Safari zooms the page into inputs with smaller text. min-w-0: lets the
+            // input shrink in the row on narrow screens.
+            className="flex-1 min-w-0 bg-transparent border-0 text-on-surface placeholder:text-on-surface-variant/60 text-[16px] leading-5 focus:ring-0 focus:outline-none px-1"
             placeholder="Ask follow-up or specify year/mileage..."
             type="text"
           />
