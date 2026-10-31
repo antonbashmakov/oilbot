@@ -1,0 +1,40 @@
+import {setGlobalOptions} from "firebase-functions/v2";
+import {onRequest} from "firebase-functions/v2/https";
+import type {Express} from "express";
+import {REGION} from "./constants";
+import {isEmulated} from "./env";
+import {publicApi} from "./controllers/public";
+import {privateApi} from "./controllers/private";
+
+// Wiring only (rule 106.11): one HTTPS function per module, named after it.
+setGlobalOptions({region: REGION});
+
+const modules: Record<string, Express> = {
+  public: publicApi,
+  private: privateApi,
+};
+
+// Hosting rewrites /api/<module>/** to the function; the module's app sees the path without the prefix.
+const mount = (name: string, app: Express) => onRequest((req, res) => {
+  req.url = req.url.replace(new RegExp(`^/api/${name}(?=/|$)`), "") || "/";
+  app(req, res);
+});
+
+const pub = mount("public", publicApi);
+const priv = mount("private", privateApi);
+
+export {pub as public, priv as private};
+
+// Emulator only (rule 107.6): one entry point for the local UI, /<module>/... to each module.
+if (isEmulated()) {
+  exports.api = onRequest((req, res) => {
+    const match = req.url.match(/^\/(?:api\/)?([^/?]+)(.*)$/);
+    const app = match ? modules[match[1]] : undefined;
+    if (!match || !app) {
+      res.status(404).send({error: {code: "NOT_FOUND", message: "No such module"}});
+      return;
+    }
+    req.url = match[2] || "/";
+    app(req, res);
+  });
+}

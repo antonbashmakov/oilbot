@@ -1,0 +1,72 @@
+import request from "supertest";
+import {firestore} from "../../db";
+import {projectId} from "../../env";
+import {REGION} from "../../constants";
+import ItemService from "../../services/ItemService";
+
+// The functions emulator serves each module at /<project>/<region>/<module> (rule 111.7).
+const FUNCTIONS = `http://127.0.0.1:5001/${projectId()}/${REGION}`;
+
+const signUp = async (email: string): Promise<{token: string; uid: string}> => {
+  const response = await fetch(
+    `http://${process.env.FIREBASE_AUTH_EMULATOR_HOST}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key`,
+    {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({email, password: "test-password", returnSecureToken: true}),
+    });
+  const body = await response.json() as {idToken: string; localId: string};
+  return {token: body.idToken, uid: body.localId};
+};
+
+describe("items", () => {
+  const itemService = new ItemService(firestore());
+
+  it("lists and reads items publicly", async () => {
+    const saved = await itemService.add({name: "Lamp", price_minor: 1999});
+
+    const list = await request(FUNCTIONS).get("/public/items");
+    expect(list.status).toBe(200);
+    expect(list.body).toEqual([expect.objectContaining({id: saved.id, name: "Lamp", price_minor: 1999})]);
+
+    const one = await request(FUNCTIONS).get(`/public/items/${saved.id}`);
+    expect(one.status).toBe(200);
+    expect(one.body.created_at).toBe(saved.created_at);
+  });
+
+  it("answers 404 for an unknown item", async () => {
+    const response = await request(FUNCTIONS).get("/public/items/missing");
+    expect(response.status).toBe(404);
+    expect(response.body.error.code).toBe("NOT_FOUND");
+  });
+
+  it("refuses to create an item without a token", async () => {
+    const response = await request(FUNCTIONS).post("/private/items").send({name: "Cup", price_minor: 500});
+    expect(response.status).toBe(401);
+  });
+
+  it("validates a new item", async () => {
+    const {token} = await signUp("validate@example.test");
+    const response = await request(FUNCTIONS).post("/private/items")
+      .set("Authorization", `Bearer ${token}`).send({name: "", price_minor: -1});
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe("BAD_REQUEST");
+  });
+
+  it("creates an item owned by the caller and lists it as theirs", async () => {
+    const {token, uid} = await signUp("owner@example.test");
+    const created = await request(FUNCTIONS).post("/private/items")
+      .set("Authorization", `Bearer ${token}`).send({name: "Cup", price_minor: 500});
+    expect(created.status).toBe(200);
+    expect(created.body.owner).toEqual({id: uid});
+
+    const mine = await request(FUNCTIONS).get("/private/items/mine").set("Authorization", `Bearer ${token}`);
+    expect(mine.status).toBe(200);
+    expect(mine.body.map((item: {id: string}) => item.id)).toEqual([created.body.id]);
+  });
+
+  it("routes the emulator-only api function to the modules", async () => {
+    const response = await request(FUNCTIONS).get("/api/public/items");
+    expect(response.status).toBe(200);
+  });
+});

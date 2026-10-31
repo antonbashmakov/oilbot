@@ -5,7 +5,6 @@ import {User} from "../models";
 import UserService from "./UserService";
 import {express} from "../controllers/private/imports";
 import {intersection} from "lodash";
-import {logger} from "firebase-functions/v1";
 import {validate, parse} from "@tma.js/init-data-node";
 import * as crypto from "crypto";
 
@@ -109,6 +108,39 @@ export const generateToken = (user: User): string => {
 
 export type ROLE = "ADMIN" | "AGENT";
 
+export type CustomerToken = {
+  customerId: string;
+};
+
+export const generateCustomerToken = (customerId: string): string => {
+  return jwt.sign({customerId} as CustomerToken, process.env.JWT_SECRET as string, {
+    expiresIn: "1d",
+  });
+};
+
+/**
+ * Lets a request through only with a customer token (Authorization header or the __session
+ * cookie) issued for the customer in the path parameter customerId.
+ */
+export const authorizeCustomer = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const token = parseToken(req.headers.authorization?.trim()) || req.cookies?.__session;
+
+  if (!token) return api.unauthorized(res);
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as Partial<CustomerToken>;
+
+    if (!decoded.customerId) return api.unauthorized(res, "Invalid token");
+    if (decoded.customerId !== req.params.customerId) return api.forbidden(res);
+
+    (req as any).customerId = decoded.customerId;
+  } catch (err) {
+    return api.unauthorized(res, "Invalid token");
+  }
+
+  return next();
+};
+
 
 export const authorize = async (req: express.Request, res: express.Response, next: express.NextFunction, userService: UserService, roles?: ROLE[]) => {
   if (!req.headers.authorization) {
@@ -162,8 +194,6 @@ export type VerificationResult = {
 
 
 export const verifyTelegramInitData: (initData: string, botToken: string) => VerificationResult | undefined = (initData: string, botToken: string) => {
-  // logger.info("Verifying Telegram init data:", initData);
-  logger.info("Bot token:", botToken.substring(0, 5) + "..." + botToken.substring(botToken.length - 5));
   try {
     // Validate init data.
     validate(initData, botToken, {
@@ -172,8 +202,6 @@ export const verifyTelegramInitData: (initData: string, botToken: string) => Ver
     });
 
     const data = parse(initData);
-
-    logger.info("User data:", data.user);
 
     const jwt = generateToken({id: data.user?.id + ""} as User);
 

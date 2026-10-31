@@ -1,0 +1,37 @@
+import type {NextFunction, Request, Response} from "express";
+import {auth} from "../auth";
+import {api} from "../services/utils";
+
+export type Role = "ADMIN";
+
+export interface Caller {
+  id: string;
+  roles: string[];
+}
+
+export type AuthorizedRequest = Request & {caller?: Caller};
+
+// Verifies the Firebase Auth ID token (the Auth emulator's under the emulators) and the roles.
+export const authorize = (roles: Role[] = []) =>
+  async (req: AuthorizedRequest, res: Response, next: NextFunction): Promise<void> => {
+    const header = req.headers.authorization ?? "";
+    const token = header.startsWith("Bearer ") ? header.slice("Bearer ".length) : "";
+    if (!token) {
+      api.unauthorized(res, "Missing bearer token");
+      return;
+    }
+    let caller: Caller;
+    try {
+      const decoded = await auth().verifyIdToken(token);
+      caller = {id: decoded.uid, roles: Array.isArray(decoded.roles) ? decoded.roles : []};
+    } catch {
+      api.unauthorized(res, "Invalid or expired token");
+      return;
+    }
+    if (roles.some((role) => !caller.roles.includes(role))) {
+      api.forbidden(res, "Missing role");
+      return;
+    }
+    req.caller = caller;
+    next();
+  };

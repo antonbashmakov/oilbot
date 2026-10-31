@@ -1,0 +1,16 @@
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+
+export default tseslint.config(
+  {ignores: ["lib/**", "src/openapi/**"]},
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    files: ["src/**/*.ts"],
+    rules: {
+      "quotes": ["error", "double"],
+      "semi": ["error", "always"],
+      "no-console": ["error", {allow: ["warn", "error"]}],
+    },
+  },
+);

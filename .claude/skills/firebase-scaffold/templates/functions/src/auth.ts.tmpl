@@ -1,0 +1,6 @@
+import {getAuth, type Auth} from "firebase-admin/auth";
+import {adminApp} from "./db";
+
+// Kept apart from db.ts: the Admin Auth SDK loads ES modules that Jest on Node 22 cannot require, so
+// tests of services and HTTP modules never load it (only the functions emulator does).
+export const auth = (): Auth => getAuth(adminApp());

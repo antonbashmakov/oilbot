@@ -1,7 +1,9 @@
 import * as admin from "firebase-admin";
 import {CONSTANTS} from "../controllers/admin/imports";
 
-process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
+// emulators:exec sets the host when the emulators run on other ports (rule 107.12).
+const FIRESTORE_EMULATOR_HOST = process.env.FIRESTORE_EMULATOR_HOST || "127.0.0.1:8080";
+process.env.FIRESTORE_EMULATOR_HOST = FIRESTORE_EMULATOR_HOST;
 
 admin.initializeApp({
   projectId: "test-project",
@@ -10,7 +12,7 @@ admin.initializeApp({
 // Export the Admin db for tests
 const db = admin.firestore();
 db.settings({
-  host: "localhost:8080", // Firestore emulator host
+  host: FIRESTORE_EMULATOR_HOST, // Firestore emulator host
   ssl: false, // Must be false for emulator
 });
 

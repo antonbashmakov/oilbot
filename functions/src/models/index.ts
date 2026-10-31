@@ -16,6 +16,8 @@ export type MessageFilter = components["schemas"]["MessageFilter"];
 export type Product = components["schemas"]["Product"];
 export type AvailableOil = components["schemas"]["AvailableOil"];
 export type OilAgentMessage = components["schemas"]["OilAgentMessage"];
+export type AuthRequest = components["schemas"]["AuthRequest"];
+export type CustomerSession = components["schemas"]["CustomerSession"];
 
 
 export type BaseSubscription = components["schemas"]["Subscription"];

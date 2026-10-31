@@ -1,0 +1,21 @@
+# Dependencies and build output
+node_modules/
+functions/lib/
+ui/.next/
+ui/out/
+*.tsbuildinfo
+
+# Firebase
+.firebase/
+firebase-debug*.log
+firestore-debug.log
+ui-debug.log
+emulator-data/
+
+# Environment and secrets (rule 107.9): only the synthetic emulator values are committed
+.env.local
+.env.*.local
+*.local
+functions/.env
+functions/.env.*
+!functions/.env.demo-__SLUG__

@@ -1,0 +1,14 @@
+import type {components} from "../openapi/api";
+
+// Contract types are generated (npm run openapi) and re-exported here (rule 106.13).
+type Schemas = components["schemas"];
+
+export type NewItem = Schemas["NewItem"];
+export type Item = Schemas["Item"];
+export type ApiError = Schemas["Error"];
+
+export interface Entity {
+  id: string;
+  created_at?: string;
+  owner?: {id: string};
+}

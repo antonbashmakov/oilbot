@@ -1,0 +1,6 @@
+# Lint configuration for the contracts listed in CONTRACTS of agent-rules/project.sh
+# (used by agent-rules/scripts/gate.sh).
+extends:
+  - recommended
+rules:
+  info-license: off

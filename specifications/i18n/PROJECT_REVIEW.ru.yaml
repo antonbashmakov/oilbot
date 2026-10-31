@@ -1,0 +1,6 @@
+# Russian texts of the data on specifications/PROJECT_REVIEW.html.
+# Key: the exact English text from the registry, the source tasks or the questions journal; value: Russian.
+# Used when project.review_translation is "required" (then the gate fails on a missing or unused entry)
+# and optionally otherwise. Missing entries:
+#   python3 agent-rules/scripts/gen_project_review.py --missing
+translations: {}

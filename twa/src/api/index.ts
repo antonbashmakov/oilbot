@@ -30,7 +30,7 @@ export const useGetMessages = (customerId?: string): UseQueryResult<ChatMessage[
         {
             params: {
                 path: {
-                    customerId: customerId || "Cz0KB5zXRqMsEho8BOLC",
+                    customerId: customerId || "",
                     chatId: "latest"
                 },
             }

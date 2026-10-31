@@ -1,0 +1,16 @@
+import AbstractService from "./AbstractService";
+import {COLLECTIONS} from "../constants";
+import type {Item} from "../models";
+
+class ItemService extends AbstractService<Item> {
+  async findByName(name: string): Promise<Item[]> {
+    const result = await this.getCollection().where("name", "==", name).get();
+    return result.docs.map((doc) => this.toPOJO(doc.id, doc.data()) as Item);
+  }
+
+  getCollectionName(): string {
+    return COLLECTIONS.ITEMS;
+  }
+}
+
+export default ItemService;

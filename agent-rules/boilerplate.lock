@@ -1,0 +1,4 @@
+# Written by ai-ready-boilerplate install.py. Do not edit by hand.
+source=git@github.com:antonbashmakov/aimakler.git
+version=c4050fe
+stack=nextjs

@@ -1,0 +1,28 @@
+// Writes synthetic data to the emulators (rule 107.8): npm run seed at the repository root.
+import {auth} from "../auth";
+import {firestore} from "../db";
+import {isEmulated} from "../env";
+import ItemService from "../services/ItemService";
+
+const DEMO_USER = {email: "demo@example.test", password: "demo-password", displayName: "Demo User"};
+
+const seed = async (): Promise<void> => {
+  if (!process.env.FIRESTORE_EMULATOR_HOST || !process.env.FIREBASE_AUTH_EMULATOR_HOST || !isEmulated()) {
+    throw new Error("Refusing to seed: run it against the emulators of the demo project only");
+  }
+  const user = await auth().getUserByEmail(DEMO_USER.email)
+    .catch(() => auth().createUser(DEMO_USER));
+
+  const itemService = new ItemService(firestore());
+  const existing = await itemService.fetchForOwner({id: user.uid});
+  if (existing.length === 0) {
+    await itemService.add({name: "Notebook", price_minor: 1490, owner: {id: user.uid}});
+    await itemService.add({name: "Pencil", price_minor: 250, owner: {id: user.uid}});
+  }
+  console.warn(`Seeded: user ${DEMO_USER.email}, ${existing.length || 2} items`);
+};
+
+seed().then(() => process.exit(0), (err) => {
+  console.error(err);
+  process.exit(1);
+});

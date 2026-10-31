@@ -1,0 +1,10 @@
+module.exports = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  roots: ["<rootDir>/src"],
+  testMatch: ["**/?(*.)+(test).ts"],
+  // Tests against real third-party sandboxes are not part of the gate (rule 111.7).
+  testPathIgnorePatterns: ["/lib/", "\\.real\\.test\\.ts$"],
+  setupFiles: ["<rootDir>/jest.setup.js"],
+  setupFilesAfterEnv: ["<rootDir>/src/test/setup.ts"],
+};

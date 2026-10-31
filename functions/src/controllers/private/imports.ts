@@ -21,10 +21,11 @@ import * as CONSTANTS from "../../constants";
 import OrderPickingService from "../../services/OrderPickingService";
 import ProductService from "../../services/ProductService";
 
-import {api} from "../../services/utils";
+import {api, authorizeCustomer} from "../../services/utils";
 import MockTBankService from "../../services/payments/MockTBankService";
 
 import MockEventPublisher from "../../services/MockEventPublisher";
+import MockChatbotService from "../../services/MockChatbotService";
 import EventPublisher from "../../services/EventPublisher";
 import {OilAgentMessage}  from "../../models";
 
@@ -35,6 +36,7 @@ export {
   admin,
   cors,
   api,
+  authorizeCustomer,
   readFile,
   DeliveryService,
   ItemService,
@@ -59,6 +61,7 @@ export {
 if (process.env.GCLOUD_PROJECT === "test-project") {
   exports.TBankService = MockTBankService;
   exports.EventPublisher = MockEventPublisher;
+  exports.ChatbotService = MockChatbotService;
 }
 
 

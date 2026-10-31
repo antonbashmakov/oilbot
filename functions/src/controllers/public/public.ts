@@ -11,13 +11,12 @@ import {
   CustomerService,
 } from "./imports";
 import * as bcrypt from "bcrypt";
-import {generateToken, verifyVKInitData, who} from "../../services/utils";
+import {generateCustomerToken, generateToken, verifyVKInitData, who} from "../../services/utils";
 import {User} from "../../models";
 import {localeMiddleware} from "../../middleware/localeMiddleware";
 
 import CustomerBalanceService from "../../services/CustomerBalanceService";
 import {SubscriptionService} from "../private/imports";
-import {logger} from "firebase-functions/v1";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -182,8 +181,6 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
   try {
     const {initData} = req.body;
 
-    functions.logger.info("Aut init data:", initData);
-
     if (!initData) {
       return api.badRequest(res, "Missing initData query parameter");
     }
@@ -203,12 +200,6 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
       return api.forbidden(res, "Invalid Telegram init data");
     }
 
-    res.cookie("__session", verification.jwt, {
-      httpOnly: true,
-      secure: true, // HTTPS only
-      sameSite: "strict",
-    });
-
     let customer = await customerService.findByExternalId(`${verification.user?.id}`);
 
     if (!customer) {
@@ -226,14 +217,20 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
 
     await customerService.update(customer, {last_seen_at: new Date()});
 
-    logger.debug("Current customer : ", customer);
+    const token = generateCustomerToken(customer.id);
+
+    res.cookie("__session", token, {
+      httpOnly: true,
+      secure: true, // HTTPS only
+      sameSite: "strict",
+    });
 
     const balance = await customerBalanceService.obtainForCustomer(customer.id);
     const stats = await customerService.obtainStatistics(customer.id);
     const subscription = await subscriptionService.find(customer.id);
 
     const is_member = subscription && subscription.status === "ACTIVE" || stats.number_of_free_orders > 0;
-    return api.send(res, {...customer, balance, stats, subscription, is_member});
+    return api.send(res, {...customer, balance, stats, subscription, is_member, token});
   } catch (err: any) {
     functions.logger.error(err);
     // The authorize function already sends error responses, so we just need to return

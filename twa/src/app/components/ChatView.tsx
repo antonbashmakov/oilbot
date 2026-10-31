@@ -5,11 +5,13 @@ import PendingMessage from "./PendingMessage";
 import { useGetMessages, useSendMessage } from '@/api';
 import { Fragment, useCallback, useEffect, useState } from "react";
 import Carousel from "./Carousel";
+import { useCustomerSession } from "./CustomerSessionProvider";
 // import { products } from "@/app/data/mock";
 
 const ChatView = () => {
-  const { data: messages } = useGetMessages("Cz0KB5zXRqMsEho8BOLC");
-  const { mutateAsync: sendMessage, data: answers, isPending, variables } = useSendMessage("Cz0KB5zXRqMsEho8BOLC", "latest");
+  const { customer } = useCustomerSession();
+  const { data: messages } = useGetMessages(customer?.id);
+  const { mutateAsync: sendMessage, data: answers, isPending, variables } = useSendMessage(customer?.id, "latest");
 
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
 

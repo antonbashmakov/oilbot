@@ -4,8 +4,11 @@ import { ChatMessage } from "../models";
 
 class ChatService extends AbstractService<ChatMessage> {
 
+  /**
+   * The latest `limit` messages of the owner, oldest first; with `startAfterId` the ones before that message.
+   */
   async fetchMessages(owner: { id: string }, limit: number, startAfterId?: string | undefined): Promise<ChatMessage[]> {
-    let query = this.getCollection().where("owner.id", "==", owner.id).orderBy("created_at", "asc").limit(limit);
+    let query = this.getCollection().where("owner.id", "==", owner.id).orderBy("created_at", "desc").limit(limit);
 
     if (startAfterId) {
       // Fetch the document to use as startAfter
@@ -23,7 +26,7 @@ class ChatService extends AbstractService<ChatMessage> {
         id: doc.id,
         created_at: data.created_at?.toDate()
       } as ChatMessage;
-    });
+    }).reverse();
   }
 
   async addMessageForUser(owner: { id: string }, chatId: string, content: string): Promise<ChatMessage> {

@@ -1,0 +1,15 @@
+import {firestore} from "../db";
+import {COLLECTIONS} from "../constants";
+import {projectId} from "../env";
+
+// Every test starts with empty emulators (rule 111.7).
+afterEach(async () => {
+  const db = firestore();
+  await Promise.all(Object.values(COLLECTIONS).map((name) => db.recursiveDelete(db.collection(name))));
+  await fetch(`http://${process.env.FIREBASE_AUTH_EMULATOR_HOST}/emulator/v1/projects/${projectId()}/accounts`,
+    {method: "DELETE"});
+});
+
+afterAll(async () => {
+  await firestore().terminate();
+});

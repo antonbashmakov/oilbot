@@ -4,6 +4,7 @@ import { components as models } from "./openapi/models";
 type BaseChatMessage = components["schemas"]["ChatMessage"];
 
 export type Customer = components["schemas"]["Customer"];
+export type CustomerSession = components["schemas"]["CustomerSession"];
 export type Item = components["schemas"]["Item"];
 export type PickingItem = components["schemas"]["PickingItem"];
 export type AddToCartItem = components["schemas"]["AddToCartItem"];

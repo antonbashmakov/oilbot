@@ -18,7 +18,7 @@ class ProductService extends AbstractService<Product> {
     return COLLECTIONS.PRODUCTS;
   }
   getExcludedFields(): string[] {
-    return [];
+    return ["created_at"];
   }
 }
 

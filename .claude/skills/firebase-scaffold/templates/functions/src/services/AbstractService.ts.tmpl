@@ -1,0 +1,72 @@
+import {Timestamp, type DocumentData, type Firestore, type Transaction} from "firebase-admin/firestore";
+import type {Entity} from "../models";
+import {NotFoundError} from "./utils";
+
+// Firestore rejects undefined values; leave them out instead.
+const withoutUndefined = (object: object): DocumentData =>
+  Object.fromEntries(Object.entries(object).filter(([, value]) => value !== undefined));
+
+// Base of every collection service (rule 106.7): the only code that reads and writes Firestore.
+abstract class AbstractService<T extends Entity> {
+  constructor(protected readonly db: Firestore) {}
+
+  abstract getCollectionName(): string;
+
+  getCollection() {
+    return this.db.collection(this.getCollectionName());
+  }
+
+  async find(id: string): Promise<T | undefined> {
+    const doc = await this.getCollection().doc(id).get();
+    return this.toPOJO(doc.id, doc.data());
+  }
+
+  async require(id: string): Promise<T> {
+    const found = await this.find(id);
+    if (!found) throw new NotFoundError(`${this.getCollectionName()}/${id} is not found`);
+    return found;
+  }
+
+  async findAll(): Promise<T[]> {
+    const result = await this.getCollection().get();
+    return result.docs.map((doc) => this.toPOJO(doc.id, doc.data()) as T);
+  }
+
+  async fetchForOwner(owner: {id: string}): Promise<T[]> {
+    const result = await this.getCollection().where("owner.id", "==", owner.id).get();
+    return result.docs.map((doc) => this.toPOJO(doc.id, doc.data()) as T);
+  }
+
+  async add(object: Omit<T, "id" | "created_at">): Promise<T> {
+    const ref = this.getCollection().doc();
+    const now = new Date();
+    await ref.set(withoutUndefined({...object, id: ref.id, created_at: now}));
+    return {...object, id: ref.id, created_at: now.toISOString()} as T;
+  }
+
+  async set(object: T): Promise<void> {
+    await this.getCollection().doc(object.id).set(withoutUndefined(object));
+  }
+
+  async update(id: string, changes: Partial<Omit<T, "id">>): Promise<void> {
+    await this.getCollection().doc(id).update(withoutUndefined(changes));
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.getCollection().doc(id).delete();
+  }
+
+  runTransactionally<R>(work: (transaction: Transaction) => Promise<R>): Promise<R> {
+    return this.db.runTransaction(work);
+  }
+
+  // Stored documents to plain objects: string ids, timestamps as ISO strings (the contract's date-time).
+  protected toPOJO(id: string, data: DocumentData | undefined): T | undefined {
+    if (!data) return undefined;
+    const converted = Object.fromEntries(Object.entries(data).map(([key, value]) =>
+      [key, value instanceof Timestamp ? value.toDate().toISOString() : value]));
+    return {...converted, id: `${id}`} as T;
+  }
+}
+
+export default AbstractService;

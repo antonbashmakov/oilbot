@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Hanken_Grotesk, Space_Grotesk } from "next/font/google";
 import { Providers } from "./providers";
@@ -42,7 +43,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           rel="stylesheet"
         />
       </head>
-       <body
+      <body
         className={`${hankenGrotesk.variable} ${spaceGrotesk.variable} bg-surface-container-lowest text-on-surface font-body-md antialiased min-h-screen flex flex-col justify-between selection:bg-primary-container selection:text-on-primary-container`}
       >
         <Providers>
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             {children}
           </div>
         </Providers>
+        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
       </body>
     </html>
   );

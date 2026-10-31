@@ -1,0 +1,52 @@
+import type {Response} from "express";
+import {
+  express,
+  cors,
+  firestore,
+  api,
+  authorize,
+  AuthorizedRequest,
+  ItemService,
+} from "./imports";
+import type {NewItem} from "../../models";
+
+const db = firestore();
+const itemService = new ItemService(db);
+
+const privateApi = express();
+
+privateApi.use(cors({origin: true}));
+privateApi.use(express.json());
+privateApi.use(authorize());
+
+const validateNewItem = (body: Partial<NewItem> | undefined): string | undefined => {
+  if (!body || typeof body.name !== "string" || !body.name.trim() || body.name.length > 200) {
+    return "name must be a non-empty string of at most 200 characters";
+  }
+  if (!Number.isInteger(body.price_minor) || (body.price_minor as number) < 0) {
+    return "price_minor must be a non-negative integer";
+  }
+  return undefined;
+};
+
+privateApi.post("/items", async (req: AuthorizedRequest, res: Response) => {
+  try {
+    const problem = validateNewItem(req.body);
+    if (problem) return api.badRequest(res, problem);
+    const {name, price_minor} = req.body as NewItem;
+    const caller = req.caller!;
+    return api.send(res, await itemService.add({name: name.trim(), price_minor, owner: {id: caller.id}}));
+  } catch (err) {
+    return api.failure(res, err);
+  }
+});
+
+privateApi.get("/items/mine", async (req: AuthorizedRequest, res: Response) => {
+  try {
+    return api.send(res, await itemService.fetchForOwner({id: req.caller!.id}));
+  } catch (err) {
+    return api.failure(res, err);
+  }
+});
+
+export default privateApi;

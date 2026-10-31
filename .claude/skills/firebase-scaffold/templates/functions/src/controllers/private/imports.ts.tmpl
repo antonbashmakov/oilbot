@@ -1,0 +1,18 @@
+// Every dependency of the module (rule 106.3); test doubles are selected here (106.8), for example:
+//   const PaymentService = isEmulated() ? MockPaymentService : RealPaymentService;
+import express from "express";
+import cors from "cors";
+import {firestore} from "../../db";
+import {api} from "../../services/utils";
+import {authorize, type AuthorizedRequest} from "../../middleware/authorize";
+import ItemService from "../../services/ItemService";
+
+export {
+  express,
+  cors,
+  firestore,
+  api,
+  authorize,
+  AuthorizedRequest,
+  ItemService,
+};

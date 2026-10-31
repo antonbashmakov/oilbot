@@ -4,6 +4,28 @@
  */
 
 export interface paths {
+    "/public/auth": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign a customer in with Telegram or VK Mini App init data
+         * @description Checks the init data signature (Telegram: bot token, valid for one hour; VK: secret key),
+         *     creates the customer on first sign-in and returns the customer with a customer token. The
+         *     token is also set as the `__session` cookie.
+         */
+        post: operations["authenticateCustomer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/private/customers/{customerId}/chats/{chatId}/messages": {
         parameters: {
             query?: never;
@@ -29,6 +51,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AuthRequest: {
+            /** @description Raw init data of the Mini App (Telegram.WebApp.initData or the VK launch query). */
+            initData: string;
+        };
+        CustomerSession: components["schemas"]["Customer"] & {
+            /** @description Customer token (JWT with the claim customerId, valid one day). */
+            token: string;
+            /** @description Whether the customer has an active subscription or free orders left. */
+            is_member: boolean;
+            balance?: components["schemas"]["CustomerBalance"];
+            stats?: components["schemas"]["CustomerStats"];
+            subscription?: components["schemas"]["Subscription"];
+        };
         Customer: {
             /**
              * @description Customer's first name
@@ -1153,6 +1188,57 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    authenticateCustomer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuthRequest"];
+            };
+        };
+        responses: {
+            /** @description The signed-in customer and the customer token. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSession"];
+                };
+            };
+            /** @description Init data missing or in an unknown format. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Init data signature invalid or expired. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unexpected error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getLatestCustomerChatMessages: {
         parameters: {
             query?: {
@@ -1177,6 +1263,24 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChatMessage"][];
+                };
+            };
+            /** @description Missing or invalid customer token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The customer token belongs to another customer. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             /** @description Customer or chat not found. */
@@ -1215,6 +1319,24 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChatMessage"][];
+                };
+            };
+            /** @description Missing or invalid customer token. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The customer token belongs to another customer. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
             /** @description Customer or chat not found. */

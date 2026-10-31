@@ -4,6 +4,7 @@ import React, {useContext, createContext} from "react";
 export interface ApiConfigContext {
     baseUrl: string
     siteUrl: string
+    token?: string
 }
 
 const context = createContext<ApiConfigContext|undefined>(undefined);

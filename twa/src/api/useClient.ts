@@ -30,6 +30,7 @@ const useClient = () => {
 
     let client = createClient<ApiPaths>({
         baseUrl: apiConfig.baseUrl,
+        headers: apiConfig.token ? { Authorization: `Bearer ${apiConfig.token}` } : undefined,
     });
     
 

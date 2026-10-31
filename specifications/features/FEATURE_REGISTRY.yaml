@@ -1,0 +1,72 @@
+# Task registry — the only place for statuses and progress.
+# Rules: agent-rules/rules/003-workflow.md, 016-specifications-upkeep.md. Validated by agent-rules/scripts/check_specs.py.
+
+project:
+  name: "oilbot"
+  client: "Anton Bashmakov"
+  tracker:
+    name: "GitHub"
+    label: "GH"
+    url: "https://github.com/antonbashmakov/oilbot/issues/"
+  extra_labels: []                   # extra criterion labels, for example ["PARTNER"] for a partner contract
+  review_translation: "optional"     # "required": every data text needs a Russian translation (i18n/)
+  status_model:
+    - { code: "planned", label: "Not started", set_by: "-" }
+    - { code: "in_progress", label: "In progress", set_by: "agent or developer" }
+    - { code: "blocked", label: "Blocked", set_by: "agent or developer" }
+    - { code: "code_review", label: "Code review", set_by: "agent or developer" }
+    - { code: "review_fixes", label: "Review fixes", set_by: "agent or developer" }
+    - { code: "ready_for_review", label: "Ready for review", set_by: "agent or developer" }
+    - { code: "ready_for_test", label: "Ready for test (RFT)", set_by: "developer only" }
+    - { code: "done", label: "Done", set_by: "developer only" }
+
+epics:
+  - { id: "SETUP-01", title: "Agent workflow adoption", spec: "features/SETUP-01-agent-workflow.md" }
+  - { id: "TWA-01", title: "Mini App launch in Telegram", spec: "features/TWA-01-mini-app-launch.md" }
+
+features:
+  - id: "SETUP-01-DOC"
+    epic: "SETUP-01"
+    title: "Adapt the agent workflow to this project"
+    surface: "docs"
+    tracker_ids: []
+    status: "in_progress"
+    progress_percent: 80
+    depends_on: []
+    acceptance_criteria:
+      - "[Team] The stack is installed: agent-rules/boilerplate.lock names it and the gate step agent / stack passes"
+      - "[Team] AGENTS.md project sections and rules 001, 104 and 115 describe this project; no <placeholder> is left"
+      - "[Team] agent-rules/project.sh names the code paths, contracts and build steps of this project"
+      - "[Team] The project section of the registry names the project, the client and the task tracker"
+      - "[Team] PRD, system overview and personal data inventory describe the current state"
+      - "[Team] agent-rules/scripts/gate.sh passes with no skipped step"
+
+  - id: "TWA-01-BE"
+    epic: "TWA-01"
+    title: "Customer token, protected chat API, latest chat history, Firestore index"
+    surface: "backend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 90
+    depends_on: []
+    acceptance_criteria:
+      - "[Team] POST /public/auth returns a customer token in the body and in the __session cookie; the token names the customer id"
+      - "[Team] The private chat endpoints answer 401 without a valid customer token and 403 when the token belongs to another customer (BUG-001)"
+      - "[Team] The chat history sent to the UI and to the AI is the latest 10 messages in ascending order"
+      - "[Team] firestore.indexes.json holds the CHAT_MESSAGES index (owner.id, created_at) and firebase.json deploys it"
+      - "[Team] POST /public/auth no longer logs the init data or the user profile (BUG-002)"
+      - "[Team] In the test emulator the AI is a mock (MockChatbotService)"
+
+  - id: "TWA-01-FE"
+    epic: "TWA-01"
+    title: "Telegram sign-in in the Mini App and the real customer in the chat"
+    surface: "frontend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 90
+    depends_on: ["TWA-01-BE"]
+    acceptance_criteria:
+      - "[Team] The Mini App loads the Telegram WebApp script, calls ready() and expand(), and signs in with its init data through POST /public/auth"
+      - "[Team] The chat uses the signed-in customer's id and sends the customer token with every API call; no customer id is hard-coded"
+      - "[Team] Opened outside Telegram or when sign-in fails, the app shows a message instead of the chat"
+      - "[Team] A production build calls the API on its own origin (no emulator URL baked in)"

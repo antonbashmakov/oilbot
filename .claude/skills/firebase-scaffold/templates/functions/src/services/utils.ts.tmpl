@@ -1,0 +1,31 @@
+import type {Response} from "express";
+import * as logger from "firebase-functions/logger";
+import {HTTP_ERRORS} from "../constants";
+
+export class NotFoundError extends Error {}
+
+const fail = (response: Response, status: number, code: string, message: string): Response =>
+  response.status(status).json({error: {code, message}});
+
+// The only way controllers answer (rule 106.5); error bodies are {error: {code, message}}.
+export const api = {
+  send: (response: Response, data: unknown = {}): Response => response.status(200).json(data),
+  ok: (response: Response): Response => response.status(204).end(),
+  badRequest: (response: Response, message = "", code = HTTP_ERRORS.BAD_REQUEST): Response =>
+    fail(response, 400, code, message),
+  unauthorized: (response: Response, message = "", code = HTTP_ERRORS.UNAUTHORIZED): Response =>
+    fail(response, 401, code, message),
+  forbidden: (response: Response, message = "", code = HTTP_ERRORS.FORBIDDEN): Response =>
+    fail(response, 403, code, message),
+  notFound: (response: Response, message = "Not found"): Response =>
+    fail(response, 404, HTTP_ERRORS.NOT_FOUND, message),
+  error: (response: Response, message = "Internal error", code = HTTP_ERRORS.INTERNAL): Response =>
+    fail(response, 500, code, message),
+
+  // For the catch block of every handler: known errors keep their status, the rest is logged and hidden.
+  failure: (response: Response, err: unknown): Response => {
+    if (err instanceof NotFoundError) return api.notFound(response, err.message);
+    logger.error("Request failed", err);
+    return api.error(response);
+  },
+};

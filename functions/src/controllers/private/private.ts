@@ -4,6 +4,7 @@ import {
   admin,
   express,
   api,
+  authorizeCustomer,
   ChatService,
   ChatbotService,
   OilAgentMessage,
@@ -39,6 +40,8 @@ privateApi.use(cors(
 ));
 
 privateApi.use(cookieParser());
+
+privateApi.use("/customers/:customerId", authorizeCustomer);
 
 privateApi.get('/customers/:customerId/chats/:chatId/messages', async (req: express.Request, res: express.Response) => {
   try {

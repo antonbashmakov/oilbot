@@ -1,0 +1,34 @@
+import type {Request, Response} from "express";
+import {
+  express,
+  cors,
+  firestore,
+  api,
+  ItemService,
+} from "./imports";
+
+const db = firestore();
+const itemService = new ItemService(db);
+
+const publicApi = express();
+
+publicApi.use(cors({origin: true}));
+publicApi.use(express.json());
+
+publicApi.get("/items", async (req: Request, res: Response) => {
+  try {
+    return api.send(res, await itemService.findAll());
+  } catch (err) {
+    return api.failure(res, err);
+  }
+});
+
+publicApi.get("/items/:id", async (req: Request<{id: string}>, res: Response) => {
+  try {
+    return api.send(res, await itemService.require(req.params.id));
+  } catch (err) {
+    return api.failure(res, err);
+  }
+});
+
+export default publicApi;

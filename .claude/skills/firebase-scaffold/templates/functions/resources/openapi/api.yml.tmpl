@@ -1,0 +1,154 @@
+openapi: 3.0.3
+info:
+  title: __SLUG__ API
+  version: 0.1.0
+  description: HTTP API of the Cloud Functions. Owned by this repository (rule 106.13).
+servers:
+  - url: /api
+tags:
+  - name: items
+    description: Items and their owners
+paths:
+  /public/items:
+    get:
+      operationId: listItems
+      summary: List all items
+      tags: [items]
+      security: []
+      responses:
+        "200":
+          description: The items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
+        "500":
+          $ref: "#/components/responses/Error"
+  /public/items/{id}:
+    get:
+      operationId: getItem
+      summary: Get one item
+      tags: [items]
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+  /private/items:
+    post:
+      operationId: createItem
+      summary: Create an item owned by the signed-in user
+      tags: [items]
+      security:
+        - bearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewItem"
+      responses:
+        "200":
+          description: The created item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+  /private/items/mine:
+    get:
+      operationId: listMyItems
+      summary: List the items of the signed-in user
+      tags: [items]
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: The items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Item"
+        "401":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: Firebase Auth ID token
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    NewItem:
+      type: object
+      required: [name, price_minor]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        price_minor:
+          type: integer
+          minimum: 0
+          description: Price in minor units (cents)
+    Item:
+      allOf:
+        - $ref: "#/components/schemas/NewItem"
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+            owner:
+              $ref: "#/components/schemas/OwnerRef"
+            created_at:
+              type: string
+              format: date-time
+    OwnerRef:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
