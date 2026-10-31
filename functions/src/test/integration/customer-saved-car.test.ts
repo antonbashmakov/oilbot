@@ -12,6 +12,7 @@ const FUNCTIONS_ORIGIN = process.env.FUNCTIONS_EMULATOR_ORIGIN || "http://127.0.
 const PRIVATE_URL = `${FUNCTIONS_ORIGIN}/test-project/us-central1/private`;
 
 const SAVE_CAR_QUESTION = "Хотите сохранить автомобиль в системе?";
+const SUGGESTIONS_INTRO = "Возможно вам подходит какая-то из этих моделей?";
 
 const customerToken = (customerId: string) => jwt.sign({customerId}, JWT_SECRET, {expiresIn: "1h"});
 
@@ -49,11 +50,11 @@ describe("Saved car: question and save_car action", () => {
     const answer = response.body[1];
 
     expect(answer.role).toBe("assistant");
-    expect(answer.question).toEqual({
+    expect(answer.questions).toEqual([{
       text: SAVE_CAR_QUESTION,
       type: "save_car",
       params: [{make: "Volkswagen", model: "Golf", year: 2015, engine: "1.4", description: "Volkswagen Golf 2015 1.4 TSI"}],
-    });
+    }]);
   });
 
   it("builds the car over several messages and asks only once it is identified", async () => {
@@ -61,26 +62,65 @@ describe("Saved car: question and save_car action", () => {
 
     const first = (await send("Skoda Octavia")).body[1];
     expect(first.content).toBe("Укажите двигатель");
-    expect(first.question).toBeUndefined();
+    expect(first.questions).toBeUndefined();
     expect((await customerService.find(customer.id))?.car_draft?.tokens).toEqual(["Skoda Octavia"]);
 
     const unrelated = (await send("Какое масло подходит?")).body[1];
-    expect(unrelated.question).toBeUndefined();
+    expect(unrelated.questions).toBeUndefined();
     expect((await customerService.find(customer.id))?.car_draft?.tokens).toEqual(["Skoda Octavia"]);
 
     const second = (await send("1.5L")).body[1];
     expect(second.content).toBe("Укажите год выпуска");
-    expect(second.question).toBeUndefined();
+    expect(second.questions).toBeUndefined();
     expect((await customerService.find(customer.id))?.car_draft?.tokens).toEqual(["Skoda Octavia", "1.5L"]);
 
     const third = (await send("2016")).body[1];
     const car = {make: "Skoda", model: "Octavia", year: 2016, engine: "1.5L", description: "Skoda Octavia, 1.5L, 2016"};
-    expect(third.question).toEqual({text: SAVE_CAR_QUESTION, type: "save_car", params: [car]});
+    expect(third.questions).toEqual([{text: SAVE_CAR_QUESTION, type: "save_car", params: [car]}]);
     expect((await customerService.find(customer.id))?.car_draft).toBeUndefined();
 
     await request(PRIVATE_URL).post(actionsPath()).set("Authorization", auth)
-      .send({type: "save_car", params: third.question.params, message_id: third.id}).expect(200);
+      .send({type: "save_car", params: third.questions[0].params, message_id: third.id}).expect(200);
     expect((await customerService.find(customer.id))?.car).toEqual(car);
+  });
+
+  it("suggests probable cars in a second message while details are missing", async () => {
+    await startChat();
+
+    const response = await send("Skoda Octavia");
+    expect(response.body).toHaveLength(3);
+
+    const suggestions = response.body[2];
+    expect(suggestions.role).toBe("assistant");
+    expect(suggestions.content).toBe(SUGGESTIONS_INTRO);
+    expect(suggestions.questions).toEqual([
+      {text: "Skoda Octavia 2017 1.4 TSI", type: "save_car", params: [{make: "Skoda", model: "Octavia", year: 2017, engine: "1.4 TSI", description: "Skoda Octavia 2017 1.4 TSI"}]},
+      {text: "Skoda Octavia 2020 1.5 TSI", type: "save_car", params: [{make: "Skoda", model: "Octavia", year: 2020, engine: "1.5 TSI", description: "Skoda Octavia 2020 1.5 TSI"}]},
+    ]);
+  });
+
+  it("saves the chosen suggestion, ends the identification and marks only that option answered", async () => {
+    await startChat();
+    const suggestions = (await send("Skoda Octavia")).body[2];
+    const chosen = suggestions.questions[1];
+
+    await request(PRIVATE_URL).post(actionsPath()).set("Authorization", auth)
+      .send({type: "save_car", params: chosen.params, message_id: suggestions.id}).expect(200);
+
+    const saved = await customerService.find(customer.id);
+    expect(saved?.car).toEqual(chosen.params[0]);
+    expect(saved?.car_draft).toBeUndefined();
+
+    const stored = (await startChat()).body.find((m: { id: string }) => m.id === suggestions.id);
+    expect(stored.questions.map((q: { answered?: boolean }) => !!q.answered)).toEqual([false, true]);
+  });
+
+  it("does not suggest cars when the message names no car or the customer has a saved car", async () => {
+    await startChat();
+    expect((await send("Какое масло подходит?")).body).toHaveLength(2);
+
+    await customerService.saveCar(customer.id, {make: "Skoda", model: "Octavia", year: 2018, engine: null});
+    expect((await send("Skoda Octavia")).body).toHaveLength(2);
   });
 
   it("starts over when the customer names another car mid-way", async () => {
@@ -89,7 +129,7 @@ describe("Saved car: question and save_car action", () => {
 
     const answer = (await send("BMW X5 3.0 2020")).body[1];
 
-    expect(answer.question.params).toEqual([{make: "BMW", model: "X5", year: 2020, engine: "3.0", description: "BMW X5 3.0 2020"}]);
+    expect(answer.questions[0].params).toEqual([{make: "BMW", model: "X5", year: 2020, engine: "3.0", description: "BMW X5 3.0 2020"}]);
   });
 
   it("does not ask when the message names no car", async () => {
@@ -97,7 +137,7 @@ describe("Saved car: question and save_car action", () => {
 
     const response = await send("Какое масло подходит?");
 
-    expect(response.body[1].question).toBeUndefined();
+    expect(response.body[1].questions).toBeUndefined();
   });
 
   it("saves the car, marks the question answered and stops asking", async () => {
@@ -105,7 +145,7 @@ describe("Saved car: question and save_car action", () => {
     const answer = (await send("Volkswagen Golf 2015 1.4 TSI")).body[1];
 
     const result = await request(PRIVATE_URL).post(actionsPath()).set("Authorization", auth)
-      .send({type: "save_car", params: answer.question.params, message_id: answer.id})
+      .send({type: "save_car", params: answer.questions[0].params, message_id: answer.id})
       .expect(200);
     expect(result.body).toEqual({type: "save_car", status: "done"});
 
@@ -113,10 +153,10 @@ describe("Saved car: question and save_car action", () => {
     expect(saved?.car).toEqual({make: "Volkswagen", model: "Golf", year: 2015, engine: "1.4", description: "Volkswagen Golf 2015 1.4 TSI"});
 
     const messages = (await startChat()).body;
-    expect(messages.find((m: { id: string }) => m.id === answer.id).question.answered).toBe(true);
+    expect(messages.find((m: { id: string }) => m.id === answer.id).questions[0].answered).toBe(true);
 
     const next = await send("Skoda Octavia 2018");
-    expect(next.body[1].question).toBeUndefined();
+    expect(next.body[1].questions).toBeUndefined();
   });
 
   it("greets a new chat with the saved car", async () => {

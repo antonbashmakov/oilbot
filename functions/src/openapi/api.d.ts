@@ -1117,7 +1117,8 @@ export interface components {
             owner: components["schemas"]["OwnerRef"];
             /** @description List of products associated with the message. */
             products?: components["schemas"]["Product"][];
-            question?: components["schemas"]["QuestionAction"];
+            /** @description Questions the customer answers with action buttons; several are car suggestions. */
+            questions?: components["schemas"]["QuestionAction"][];
             /**
              * Format: date-time
              * @description Time the message was created.

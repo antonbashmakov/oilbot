@@ -229,6 +229,20 @@ export interface components {
              */
             new_car?: boolean;
             /**
+             * @description До 3 наиболее вероятных полных вариантов автомобиля (для статуса need_more_info),
+             *     согласованных со всем, что сообщил пользователь; самый вероятный первым.
+             */
+            suggested_cars?: {
+                /** @example Skoda */
+                make: string;
+                /** @example Octavia */
+                model: string;
+                /** @example 2017 */
+                year?: number | null;
+                /** @example 1.4 TSI 150 л.с. */
+                engine?: string | null;
+            }[];
+            /**
              * @description Уточняющий вопрос пользователю (для статуса need_more_info)
              * @example Какой двигатель установлен на вашем автомобиле?
              */

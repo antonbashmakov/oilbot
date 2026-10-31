@@ -24,6 +24,7 @@ epics:
   - { id: "SETUP-01", title: "Agent workflow adoption", spec: "features/SETUP-01-agent-workflow.md" }
   - { id: "TWA-01", title: "Mini App launch in Telegram", spec: "features/TWA-01-mini-app-launch.md" }
   - { id: "CAR-01", title: "Saved car in the AI chat", spec: "features/CAR-01-saved-car.md" }
+  - { id: "CAR-02", title: "Car model suggestions", spec: "features/CAR-02-car-suggestions.md" }
 
 features:
   - id: "SETUP-01-DOC"
@@ -99,3 +100,29 @@ features:
     acceptance_criteria:
       - "[Team] An assistant message with a question shows QuestionActionWidget: the question text and an action button, or the done state once answered"
       - "[Team] The button sends POST /actions with type, params and message_id; while sending it is disabled, on success the widget shows that the car is saved, on error it shows a retry message"
+
+  - id: "CAR-02-BE"
+    epic: "CAR-02"
+    title: "AI car suggestions and the questions array"
+    surface: "backend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 90
+    depends_on: ["CAR-01-BE"]
+    acceptance_criteria:
+      - "[Team] ChatMessage carries questions: QuestionAction[] instead of question"
+      - "[Team] With status need_more_info the AI returns up to 3 most probable complete cars (suggested_cars) consistent with what the customer said"
+      - "[Team] When there are suggestions and the customer has no saved car, a second assistant message 'Возможно вам подходит какая-то из этих моделей?' follows the AI answer, with one save_car question per suggestion"
+      - "[Team] Choosing a suggestion saves that car, clears the car draft and marks only that question answered"
+
+  - id: "CAR-02-FE"
+    epic: "CAR-02"
+    title: "Carousel of car suggestions"
+    surface: "frontend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 90
+    depends_on: ["CAR-02-BE"]
+    acceptance_criteria:
+      - "[Team] A message with several questions shows its text and then a carousel with one card per question (car and a save button); one question shows the single widget"
+      - "[Team] After a choice the chosen card shows the saved state and the other cards are disabled, also after a reload"

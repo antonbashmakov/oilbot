@@ -98,7 +98,8 @@ class CustomerService extends AbstractService<Customer> {
   }
 
   /**
-   * Saves the car as the customer's car; undefined when there is no such customer.
+   * Saves the car as the customer's car and ends any identification in progress; undefined when
+   * there is no such customer.
    */
   async saveCar(customerId: string, car: Car): Promise<Customer | undefined> {
     const customer = await this.find(customerId);
@@ -112,8 +113,8 @@ class CustomerService extends AbstractService<Customer> {
       ...(car.description ? {description: car.description} : {}),
     };
 
-    await this.update(customer, {car: saved});
-    return {...customer, car: saved};
+    await this.update(customer, {car: saved, car_draft: FieldValue.delete()} as unknown as Partial<Customer>);
+    return {...customer, car: saved, car_draft: undefined};
   }
 
   /**

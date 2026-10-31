@@ -1552,8 +1552,11 @@ components:
           description: List of products associated with the message.
           items:
             $ref: '#/components/schemas/Product'
-        question:
-          $ref: '#/components/schemas/QuestionAction'
+        questions:
+          type: array
+          description: Questions the customer answers with action buttons; several are car suggestions.
+          items:
+            $ref: '#/components/schemas/QuestionAction'
         created_at:
           type: string
           format: date-time

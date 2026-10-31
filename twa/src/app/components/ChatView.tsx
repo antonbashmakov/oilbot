@@ -7,6 +7,7 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import Carousel from "./Carousel";
 import { useCustomerSession } from "./CustomerSessionProvider";
 import QuestionActionWidget from "./QuestionActionWidget";
+import QuestionActionCarousel from "./QuestionActionCarousel";
 // import { products } from "@/app/data/mock";
 
 const ChatView = () => {
@@ -74,8 +75,11 @@ const ChatView = () => {
           {!m.products && (
             <ChatMessageComponent message={m} />
           )}
-          {m.question && (
-            <QuestionActionWidget question={m.question} messageId={m.id} />
+          {m.questions?.length === 1 && (
+            <QuestionActionWidget question={m.questions[0]} messageId={m.id} />
+          )}
+          {m.questions && m.questions.length > 1 && (
+            <QuestionActionCarousel questions={m.questions} messageId={m.id} />
           )}
         </Fragment>
       ))}

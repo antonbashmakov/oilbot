@@ -17,7 +17,8 @@ import * as cookieParser from 'cookie-parser';
 import initialMessage from '../../prompts/initialMessage';
 import oilBotMessage from '../../prompts/oilagent';
 import saveCarQuestion from "../../prompts/saveCarQuestion";
-import savedCarGreeting from "../../prompts/savedCarGreeting";
+import savedCarGreeting, {describeCar} from "../../prompts/savedCarGreeting";
+import carSuggestionsIntro from "../../prompts/carSuggestionsIntro";
 import {ActionRequest, ActionType, Car, ChatMessage} from "../../models";
 // import { logger } from 'firebase-functions/v1';
 
@@ -175,16 +176,34 @@ privateApi.post('/customers/:customerId/chats/:chatId/messages', async (req: exp
     }
 
     if (identified && aiAnswer.car_in_message && isCar(aiAnswer.car) && !customer?.car) {
-      message.question = {
+      message.questions = [{
         text: saveCarQuestion.content,
         type: "save_car",
         params: [{...aiAnswer.car, description: tokens.join(", ")}],
-      };
+      }];
     }
 
     const answer = await chatService.add(message);
 
-    return api.send(res, [...ret, answer]);
+    // Probable complete cars while the AI still needs details: offered as a second message.
+    const suggestions = identified || customer?.car ? [] : (aiAnswer.suggested_cars || []).filter(isCar).slice(0, 3);
+
+    if (suggestions.length === 0) return api.send(res, [...ret, answer]);
+
+    const suggestionsMessage = await chatService.add({
+      id: "",
+      role: "assistant",
+      content: carSuggestionsIntro.content,
+      owner: {id: customerId},
+      chat_id: chatId,
+      created_at: new Date(),
+      questions: suggestions.map((car) => {
+        const description = describeCar({...car, year: car.year ?? null, engine: car.engine ?? null});
+        return {text: description, type: "save_car", params: [{...car, description}]};
+      }),
+    });
+
+    return api.send(res, [...ret, answer, suggestionsMessage]);
   } catch (err: any) {
     functions.logger.error(err);
     return api.error(res, err.message || 'Internal server error');
@@ -204,7 +223,7 @@ privateApi.post("/customers/:customerId/actions", async (req: express.Request, r
     if (outcome === "invalid_params") return api.badRequest(res, "Invalid action params", "INVALID_PARAMS");
     if (outcome === "customer_not_found") return api.notFound(res, "Customer not found");
 
-    if (messageId) await chatService.markQuestionAnswered({id: customerId}, messageId);
+    if (messageId) await chatService.markQuestionAnswered({id: customerId}, messageId, params);
 
     return api.send(res, {type, status: "done"});
   } catch (err: any) {

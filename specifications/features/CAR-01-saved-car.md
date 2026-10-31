@@ -34,8 +34,9 @@ button).
    `car_in_message` is true, the message is added to the draft (with `new_car` the draft restarts
    with this message). Any other status ends the identification and clears the draft.
 2a. `[Team]` The save question is added only when the status is not `need_more_info`,
-   `car_in_message` is true, `car` has make and model, and the customer has no saved car:
-   `{text: "Хотите сохранить автомобиль в системе?", type: "save_car", params: [car]}`;
+   `car_in_message` is true, `car` has make and model, and the customer has no saved car, as
+   `questions: [{text: "Хотите сохранить автомобиль в системе?", type: "save_car", params: [car]}]`
+   (a single `question` before CAR-02);
    `car.description` is the draft tokens and this message joined with ", " (for example
    "Skoda Octavia, 1.5L, 2016").
 3. `[Team]` `POST /private/customers/{customerId}/actions` (customer token, rule TWA-01 3) runs the

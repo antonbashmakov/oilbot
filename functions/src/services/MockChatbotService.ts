@@ -32,6 +32,7 @@ const readCar = (text: string): MockCar => {
  * Deterministic stand-in for ChatbotService in the test emulator. It combines car_tokens and the
  * message (a message with another make and model starts a new car), asks for make and model,
  * engine and year in that order, then recommends the first available oil or answers not_found.
+ * While it asks for engine or year it suggests two cars with the missing parts filled in.
  */
 class MockChatbotService {
   async createConversationMessage(messages: ChatMessage[]): Promise<OilAgentResponse> {
@@ -60,8 +61,12 @@ class MockChatbotService {
       return this.recommend(request, {...flags, car: undefined});
     }
     if (!car) return {status: "need_more_info", ...flags, question: "Укажите марку и модель"} as OilAgentResponse;
-    if (!car.engine) return {status: "need_more_info", ...flags, question: "Укажите двигатель"} as OilAgentResponse;
-    if (!car.year) return {status: "need_more_info", ...flags, question: "Укажите год выпуска"} as OilAgentResponse;
+    const suggested_cars = [
+      {...car, year: car.year ?? 2017, engine: car.engine ?? "1.4 TSI"},
+      {...car, year: car.year ?? 2020, engine: car.engine ?? "1.5 TSI"},
+    ];
+    if (!car.engine) return {status: "need_more_info", ...flags, suggested_cars, question: "Укажите двигатель"} as OilAgentResponse;
+    if (!car.year) return {status: "need_more_info", ...flags, suggested_cars, question: "Укажите год выпуска"} as OilAgentResponse;
 
     return this.recommend(request, flags);
   }

@@ -371,6 +371,32 @@ components:
           type: boolean
           description: Сообщение начинает описывать другой автомобиль, чем car_tokens
           example: false
+        suggested_cars:
+          type: array
+          description: |
+            До 3 наиболее вероятных полных вариантов автомобиля (для статуса need_more_info),
+            согласованных со всем, что сообщил пользователь; самый вероятный первым.
+          maxItems: 3
+          items:
+            type: object
+            properties:
+              make:
+                type: string
+                example: "Skoda"
+              model:
+                type: string
+                example: "Octavia"
+              year:
+                type: integer
+                nullable: true
+                example: 2017
+              engine:
+                type: string
+                nullable: true
+                example: "1.4 TSI 150 л.с."
+            required:
+              - make
+              - model
         question:
           type: string
           nullable: true
