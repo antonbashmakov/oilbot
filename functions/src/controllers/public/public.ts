@@ -11,7 +11,7 @@ import {
   CustomerService,
 } from "./imports";
 import * as bcrypt from "bcrypt";
-import {generateCustomerToken, generateToken, verifyVKInitData, who} from "../../services/utils";
+import {ExternalUser, generateCustomerToken, generateToken, verifyTelegramLogin, verifyVKInitData, who} from "../../services/utils";
 import {User} from "../../models";
 import {localeMiddleware} from "../../middleware/localeMiddleware";
 
@@ -177,6 +177,39 @@ publicApi.get("/stats/:userId", async (req: express.Request, res: express.Respon
   }
 });
 
+/**
+ * Answers a successful sign-in: the customer with this external user's id (created when new), a
+ * customer token (also as the __session cookie) and the customer's balance, stats and membership.
+ */
+const sendCustomerSession = async (res: express.Response, user: ExternalUser, origin: "TELEGRAM" | "VK") => {
+  const customer = await customerService.findOrCreateByExternalId({
+    id: "",
+    external_id: `${user.id}`,
+    first_name: user.first_name || "",
+    last_name: user.last_name || "",
+    created_at: new Date(),
+    last_seen_at: new Date(),
+    origin,
+  });
+
+  await customerService.update(customer, {last_seen_at: new Date()});
+
+  const token = generateCustomerToken(customer.id);
+
+  res.cookie("__session", token, {
+    httpOnly: true,
+    secure: true, // HTTPS only
+    sameSite: "strict",
+  });
+
+  const balance = await customerBalanceService.obtainForCustomer(customer.id);
+  const stats = await customerService.obtainStatistics(customer.id);
+  const subscription = await subscriptionService.find(customer.id);
+
+  const is_member = subscription && subscription.status === "ACTIVE" || stats.number_of_free_orders > 0;
+  return api.send(res, {...customer, balance, stats, subscription, is_member, token});
+};
+
 publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
   try {
     const {initData} = req.body;
@@ -200,32 +233,7 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
       return api.forbidden(res, "Invalid Telegram init data");
     }
 
-    const customer = await customerService.findOrCreateByExternalId({
-      id: "",
-      external_id: `${verification.user?.id}`,
-      first_name: verification.user?.first_name || "",
-      last_name: verification.user?.last_name || "",
-      created_at: new Date(),
-      last_seen_at: new Date(),
-      origin: isTelegram ? "TELEGRAM" : "VK",
-    });
-
-    await customerService.update(customer, {last_seen_at: new Date()});
-
-    const token = generateCustomerToken(customer.id);
-
-    res.cookie("__session", token, {
-      httpOnly: true,
-      secure: true, // HTTPS only
-      sameSite: "strict",
-    });
-
-    const balance = await customerBalanceService.obtainForCustomer(customer.id);
-    const stats = await customerService.obtainStatistics(customer.id);
-    const subscription = await subscriptionService.find(customer.id);
-
-    const is_member = subscription && subscription.status === "ACTIVE" || stats.number_of_free_orders > 0;
-    return api.send(res, {...customer, balance, stats, subscription, is_member, token});
+    return await sendCustomerSession(res, verification.user, isTelegram ? "TELEGRAM" : "VK");
   } catch (err: any) {
     functions.logger.error(err);
     // The authorize function already sends error responses, so we just need to return
@@ -236,6 +244,30 @@ publicApi.post("/auth", async (req: express.Request, res: express.Response) => {
     return;
   }
 });
+publicApi.post("/auth/telegram-login", async (req: express.Request, res: express.Response) => {
+  try {
+    const data = req.body || {};
+
+    if (!data.id || !data.first_name || !data.auth_date || !data.hash) {
+      return api.badRequest(res, "Missing Telegram login fields");
+    }
+
+    const user = verifyTelegramLogin(data, process.env.TELEGRAM_BOT_TOKEN as string);
+
+    if (!user) {
+      return api.forbidden(res, "Invalid or expired Telegram login");
+    }
+
+    return await sendCustomerSession(res, user, "TELEGRAM");
+  } catch (err: any) {
+    functions.logger.error(err);
+    if (!res.headersSent) {
+      return api.error(res, err.message || "Internal server error");
+    }
+    return;
+  }
+});
+
 /*
 publicApi.post("/update-customers", async (req: express.Request, res: express.Response) => {
   try {

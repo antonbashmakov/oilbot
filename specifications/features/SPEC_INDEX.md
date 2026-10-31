@@ -9,3 +9,4 @@ Find a spec here, not by guessing the file name. Statuses come from `FEATURE_REG
 | `TWA-01` | Mini App launch in Telegram | [TWA-01-mini-app-launch.md](TWA-01-mini-app-launch.md) | `TWA-01-BE` code_review, `TWA-01-FE` code_review |
 | `CAR-01` | Saved car in the AI chat | [CAR-01-saved-car.md](CAR-01-saved-car.md) | `CAR-01-BE` code_review, `CAR-01-FE` code_review |
 | `CAR-02` | Car model suggestions | [CAR-02-car-suggestions.md](CAR-02-car-suggestions.md) | `CAR-02-BE` code_review, `CAR-02-FE` code_review |
+| `TWA-02` | Telegram login in a web browser | [TWA-02-browser-telegram-login.md](TWA-02-browser-telegram-login.md) | `TWA-02-BE` code_review, `TWA-02-FE` code_review |

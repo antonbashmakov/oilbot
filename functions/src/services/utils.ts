@@ -211,6 +211,38 @@ export const verifyTelegramInitData: (initData: string, botToken: string) => Ver
   }
 };
 
+// Telegram Login Widget data older than this is refused.
+const TELEGRAM_LOGIN_MAX_AGE_SECONDS = 24 * 60 * 60;
+
+/**
+ * Checks Telegram Login Widget data (core.telegram.org/widgets/login-legacy): hash = hex
+ * HMAC-SHA-256 of the sorted "key=value" lines of all other fields, with key SHA-256(bot token);
+ * auth_date at most 24 hours old.
+ */
+export const verifyTelegramLogin = (data: Record<string, unknown>, botToken: string, now = Date.now()): ExternalUser | undefined => {
+  const {hash, ...fields} = data;
+  if (typeof hash !== "string" || !botToken) return undefined;
+
+  const dataCheckString = Object.keys(fields)
+    .filter((key) => fields[key] !== undefined && fields[key] !== null)
+    .sort()
+    .map((key) => `${key}=${fields[key]}`)
+    .join("\n");
+  const secret = crypto.createHash("sha256").update(botToken).digest();
+  const expected = crypto.createHmac("sha256", secret).update(dataCheckString).digest("hex");
+
+  if (expected.length !== hash.length || !crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(hash))) return undefined;
+
+  const authDate = Number(fields.auth_date);
+  if (!Number.isFinite(authDate) || now / 1000 - authDate > TELEGRAM_LOGIN_MAX_AGE_SECONDS) return undefined;
+
+  return {
+    id: `${fields.id}`,
+    first_name: typeof fields.first_name === "string" ? fields.first_name : undefined,
+    last_name: typeof fields.last_name === "string" ? fields.last_name : undefined,
+  };
+};
+
 export const verifyVKInitData: (initData: string, botToken: string) => VerificationResult | undefined = (initData: string, secretKey: string) => {
   let sign;
 

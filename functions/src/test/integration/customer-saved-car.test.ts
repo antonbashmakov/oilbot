@@ -1,12 +1,13 @@
 import db from "../setup";
+import {emulatorEnv} from "../emulatorEnv";
 import * as request from "supertest";
 import * as jwt from "jsonwebtoken";
 import CustomerService from "../../services/CustomerService";
 import ProductService from "../../services/ProductService";
 import {Customer, Product} from "../../models";
 
-// Same value as functions/.env.test-project, which the functions emulator loads.
-const JWT_SECRET = "secter";
+// Same values as the functions emulator loads (see emulatorEnv).
+const JWT_SECRET = emulatorEnv.JWT_SECRET;
 
 const FUNCTIONS_ORIGIN = process.env.FUNCTIONS_EMULATOR_ORIGIN || "http://127.0.0.1:5001";
 const PRIVATE_URL = `${FUNCTIONS_ORIGIN}/test-project/us-central1/private`;

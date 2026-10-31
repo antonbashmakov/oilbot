@@ -24,7 +24,7 @@ backend API. Layout differences from the stack rules: rule 201.
 
 | Route | Purpose | Notes |
 |---|---|---|
-| `/` | AI chat with the oil-selection agent | client component; signs in with Telegram init data first (`CustomerSessionProvider`, `SessionGate`), shows a notice outside Telegram |
+| `/` | AI chat with the oil-selection agent | client component; signs in with Telegram init data in the Mini App, or in a web browser with the Telegram Login Widget (`CustomerSessionProvider`, `SessionGate`, `TelegramLoginButton`) |
 
 Redirects and middleware: none (`next.config.ts` of `crm/` only adds next-intl; of `twa/` only
 image remote patterns; no `middleware.ts`).
@@ -48,6 +48,7 @@ image remote patterns; no `middleware.ts`).
 | `/admin/*` (deliveries, orders, pickings, payments, messages, comments, broadcast) | `crm/openapi/api.yml` copy (this repository; backend contract does not describe them, Q-03) | `crm/src/api`, `bot/` |
 | `/agent/deliveries/{id}`, `/agent/orders/{id}/deliver` | `crm/openapi/api.yml` copy | `crm/src/api` |
 | `/public/login`, `/public/signup`, `/public/users/me` | `crm/openapi/api.yml` copy | `crm/src/api` |
+| `authenticateTelegramLogin` `/public/auth/telegram-login` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` `authenticateTelegramLogin` |
 | `authenticateCustomer` `/public/auth` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` `validateUser` (plain `fetch`) |
 | `/private/customers/{customerId}/chats/{chatId}/messages` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` |
 | `performCustomerAction` `/private/customers/{customerId}/actions` | `functions/resources/openapi/api.yml` (copy in `twa/openapi/`) | `twa/src/api/index.ts` `usePerformAction` (`QuestionActionWidget`) |

@@ -17,6 +17,7 @@ Federal Law 152-FZ applies (not verified with the developer, Q-06). Rules:
 | Orders, delivery and items per customer | `ORDERS`, `PICKINGS`, `CART_ITEMS` | CRM, bot | customers |
 | Payments, balances, subscriptions | `PAYMENTS`, `CUSTOMER_BALANCES*`, `SUBSCRIPTIONS` | T-Bank (amount, receipt with support e-mail/phone) | T-Bank, backend |
 | Staff e-mail, password hash (bcrypt), roles, JWT | `USERS` | — | `/public/signup` |
+| Telegram Login Widget data (Telegram id, names, username, photo URL, signed) | `sessionStorage` of the browser tab | backend `/public/auth/telegram-login` | Telegram Login Widget |
 | Customer token (JWT with the customer id) | React state in `twa/`; `HttpOnly` cookie `__session` | backend | `POST /public/auth` |
 
 ## Handling rules

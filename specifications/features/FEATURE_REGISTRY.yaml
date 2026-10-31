@@ -25,6 +25,7 @@ epics:
   - { id: "TWA-01", title: "Mini App launch in Telegram", spec: "features/TWA-01-mini-app-launch.md" }
   - { id: "CAR-01", title: "Saved car in the AI chat", spec: "features/CAR-01-saved-car.md" }
   - { id: "CAR-02", title: "Car model suggestions", spec: "features/CAR-02-car-suggestions.md" }
+  - { id: "TWA-02", title: "Telegram login in a web browser", spec: "features/TWA-02-browser-telegram-login.md" }
 
 features:
   - id: "SETUP-01-DOC"
@@ -126,3 +127,29 @@ features:
     acceptance_criteria:
       - "[Team] A message with several questions shows its text and then a carousel with one card per question (car and a save button); one question shows the single widget"
       - "[Team] After a choice the chosen card shows the saved state and the other cards are disabled, also after a reload"
+
+  - id: "TWA-02-BE"
+    epic: "TWA-02"
+    title: "Sign-in with Telegram Login Widget data"
+    surface: "backend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 80
+    depends_on: ["TWA-01-BE"]
+    acceptance_criteria:
+      - "[Team] POST /public/auth/telegram-login checks the Login Widget hash (key SHA-256 of the bot token) and auth_date (24 hours) and answers like /public/auth: the customer with that Telegram id (created when new) and a customer token"
+      - "[Team] Missing fields → 400; wrong hash or old auth_date → 403"
+
+  - id: "TWA-02-FE"
+    epic: "TWA-02"
+    title: "Telegram login button when the chat runs in a web browser"
+    surface: "frontend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 80
+    depends_on: ["TWA-02-BE"]
+    acceptance_criteria:
+      - "[Team] Outside Telegram the app shows the Telegram login button; after login the chat opens for the customer with that Telegram id"
+      - "[Team] The login survives a page reload in the same tab (sessionStorage, while Telegram's data is under 24 hours old)"
+      - "[Team] The dev sign-in runs only with ?tgUser=<id>"
+      - "[Team] In next dev, DEV_API_PROXY sends /api to the emulator so one tunnel URL serves the app and the API"

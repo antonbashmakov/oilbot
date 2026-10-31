@@ -62,6 +62,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /public/auth/telegram-login:
+    post:
+      operationId: authenticateTelegramLogin
+      summary: Sign a customer in with Telegram Login Widget data (web browser)
+      description: |
+        Checks the hash of the Telegram Login Widget data (key SHA-256 of the bot token) and
+        accepts auth_date up to 24 hours old; then answers like /public/auth.
+      security: []
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramLoginData'
+      responses:
+        '200':
+          description: The signed-in customer and the customer token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerSession'
+        '400':
+          description: Required fields missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Hash invalid or auth_date older than 24 hours.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /private/customers/{customerId}/actions:
     post:
       operationId: performCustomerAction
@@ -329,6 +370,31 @@ components:
           type: string
           enum:
             - done
+    TelegramLoginData:
+      type: object
+      description: The user object the Telegram Login Widget passes to its callback, unchanged.
+      required:
+        - id
+        - first_name
+        - auth_date
+        - hash
+      properties:
+        id:
+          type: integer
+          example: 270053857
+        first_name:
+          type: string
+        last_name:
+          type: string
+        username:
+          type: string
+        photo_url:
+          type: string
+        auth_date:
+          type: integer
+          description: Unix time of the login.
+        hash:
+          type: string
     AuthRequest:
       type: object
       required:

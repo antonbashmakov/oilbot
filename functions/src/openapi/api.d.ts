@@ -26,6 +26,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/auth/telegram-login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sign a customer in with Telegram Login Widget data (web browser)
+         * @description Checks the hash of the Telegram Login Widget data (key SHA-256 of the bot token) and
+         *     accepts auth_date up to 24 hours old; then answers like /public/auth.
+         */
+        post: operations["authenticateTelegramLogin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/private/customers/{customerId}/actions": {
         parameters: {
             query?: never;
@@ -126,6 +147,18 @@ export interface components {
             type: components["schemas"]["ActionType"];
             /** @enum {string} */
             status: "done";
+        };
+        /** @description The user object the Telegram Login Widget passes to its callback, unchanged. */
+        TelegramLoginData: {
+            /** @example 270053857 */
+            id: number;
+            first_name: string;
+            last_name?: string;
+            username?: string;
+            photo_url?: string;
+            /** @description Unix time of the login. */
+            auth_date: number;
+            hash: string;
         };
         AuthRequest: {
             /** @description Raw init data of the Mini App (Telegram.WebApp.initData or the VK launch query). */
@@ -1310,6 +1343,57 @@ export interface operations {
                 };
             };
             /** @description Init data signature invalid or expired. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unexpected error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    authenticateTelegramLogin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramLoginData"];
+            };
+        };
+        responses: {
+            /** @description The signed-in customer and the customer token. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSession"];
+                };
+            };
+            /** @description Required fields missing. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Hash invalid or auth_date older than 24 hours. */
             403: {
                 headers: {
                     [name: string]: unknown;

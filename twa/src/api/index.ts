@@ -6,6 +6,8 @@ import useClient from "@/api/useClient";
 import {
     ActionRequest,
     ActionResult,
+    CustomerSession,
+    TelegramLoginData,
     ChatMessage,
     ChatMessageView,
 } from "@/api/models";
@@ -71,6 +73,21 @@ export const usePerformAction = (customerId?: string) => {
             queryKey: ["/api/private/customers/{customerId}/chats/{chatId}/messages"],
         }),
     });
+};
+
+export const authenticateTelegramLogin = async (data: TelegramLoginData): Promise<CustomerSession> => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_API_URL || ""}/api/public/auth/telegram-login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (!res.ok || json.error) {
+        return Promise.reject(json.error);
+    }
+    return json as CustomerSession;
 };
 
 export const validateUser = async (initData: string) => {
