@@ -60,6 +60,15 @@
   `features-test/TWA-01-FE-TEST.md`. Emulators, dev server and temporary configs were stopped and
   removed afterwards.
 
+## Real DeepSeek locally (follow-up, same day)
+
+- The developer asked how to use DeepSeek in local runs. `private/imports.ts` keeps
+  `MockChatbotService` for `test-project` unless `USE_REAL_AI=true`; new script `serve:ai` in
+  `functions/package.json` (the functions emulator passes the shell environment to the functions).
+- Check: emulators on ports 5101/8180 with `USE_REAL_AI=true`, one synthetic product, one chat
+  message "Volkswagen Golf 2015 1.4 TSI" → DeepSeek (`deepseek-flash`) answered after 12.5 s with a
+  follow-up question (`need_more_info`). Emulators and temporary config removed afterwards.
+
 ## Code review
 
 Not done yet: needs a separate session (rule 012).

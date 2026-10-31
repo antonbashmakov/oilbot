@@ -61,7 +61,10 @@ export {
 if (process.env.GCLOUD_PROJECT === "test-project") {
   exports.TBankService = MockTBankService;
   exports.EventPublisher = MockEventPublisher;
-  exports.ChatbotService = MockChatbotService;
+  // USE_REAL_AI=true (yarn serve:ai) calls DeepSeek in local runs; tests keep the mock.
+  if (process.env.USE_REAL_AI !== "true") {
+    exports.ChatbotService = MockChatbotService;
+  }
 }
 
 

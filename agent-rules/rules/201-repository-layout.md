@@ -21,7 +21,8 @@ and what an agent does until each difference is resolved by a task of its own.
   (rule 115.5).
 - **201.5** Overrides 107.6 and 107.8: there is no root `dev` or `seed` script. Start the functions
   emulator with `cd functions && yarn serve` (or `yarn serve:test` with the committed export in
-  `functions/seed-data/`) and each app with `yarn dev` in its folder. `firebase.json` deploys only the
+  `functions/seed-data/` and the mock AI, or `yarn serve:ai` for the same with real DeepSeek through
+  `USE_REAL_AI=true`; tests always use the mock) and each app with `yarn dev` in its folder. `firebase.json` deploys only the
   Firestore indexes; there is no `firestore.rules` or `storage` block, and the Firestore emulator
   uses default rules. Adding rules is a task of its own (rule 115.6). Synthetic emulator secrets are
   in the committed `functions/.env.test-project`.

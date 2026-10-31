@@ -80,7 +80,8 @@ in code); SSR functions in `europe-west1`.
 
 External systems and their mocks: `TelegramService` / `MockTelegramService`, `TBankService` /
 `MockTBankService`, `EventPublisher` / `MockEventPublisher`, `ChatbotService` (DeepSeek) /
-`MockChatbotService`; mocks are used when the project id is `test-project`.
+`MockChatbotService`; mocks are used when the project id is `test-project`, except the AI when the
+emulator runs with `USE_REAL_AI=true` (`yarn serve:ai`, key `DEEPSEEK_API_KEY` from `functions/.env`).
 
 Firestore indexes: `firestore.indexes.json` (`CHAT_MESSAGES`: `owner.id` ASC, `created_at` DESC),
 deployed to the default database through `firebase.json` (Q-07).
