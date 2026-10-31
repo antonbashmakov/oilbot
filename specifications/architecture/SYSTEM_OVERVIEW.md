@@ -92,8 +92,10 @@ emulator; `yarn serve:test` starts Firestore and functions with project `test-pr
 export in `functions/seed-data/`. Ports: auth 9099, functions 5001, firestore 8080, emulator UI
 default. Apps: `yarn dev` in `crm/` or `twa/` on 3000; `twa/.env.development.local` (not committed)
 points `NEXT_PUBLIC_BASE_API_URL` at the emulator, `twa/.env.production` (committed) leaves it empty
-so production calls `/api/...` on its own origin. Outside Telegram `twa/` shows a notice; signing in
-needs init data signed with the bot token in `functions/.env`.
+so production calls `/api/...` on its own origin. Under `next dev` the app signs in outside Telegram
+with init data it signs itself with the fake bot token of `twa/.env.development` (matching
+`functions/.env.test-project`); `?tgUser=<id>` picks another customer. In a production build
+outside Telegram it shows a notice.
 
 ## Client state, cookies and storage
 

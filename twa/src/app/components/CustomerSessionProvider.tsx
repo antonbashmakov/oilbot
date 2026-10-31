@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { ApiConfigProvider, useApiConfig } from "@/api/apiConfigContext";
 import { validateUser } from "@/api";
 import { CustomerSession } from "@/api/models";
+import { createDevInitData } from "@/utils/devTelegram";
 
 export type SessionStatus = "loading" | "outside-telegram" | "failed" | "ready";
 
@@ -16,16 +17,17 @@ const context = createContext<CustomerSessionContext>({ status: "loading" });
 
 const signIn = async (): Promise<CustomerSessionContext> => {
   const webApp = window.Telegram?.WebApp;
+  const initData = webApp?.initData || await createDevInitData();
 
-  if (!webApp?.initData) {
+  if (!initData) {
     return { status: "outside-telegram" };
   }
 
-  webApp.ready();
-  webApp.expand();
+  webApp?.ready();
+  webApp?.expand();
 
   try {
-    const customer: CustomerSession = await validateUser(webApp.initData);
+    const customer: CustomerSession = await validateUser(initData);
     return { status: "ready", customer };
   } catch {
     return { status: "failed" };

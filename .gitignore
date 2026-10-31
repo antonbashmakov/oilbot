@@ -72,6 +72,7 @@ web_modules/
 .env.*
 !functions/.env.test-project
 !twa/.env.production
+!twa/.env.development
 !.env.example
 
 # parcel-bundler cache (https://parceljs.org/)

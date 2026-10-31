@@ -30,7 +30,8 @@
 - **104.3** New dependencies are pinned to a version range the lock file resolves (never `latest` or
   `*`). Dependencies already declared as `latest`: none.
 - **104.4** Environment files: committed, without secrets: `functions/.env.test-project` (synthetic
-  values for the test emulator) and `twa/.env.production` (public values of the production build).
+  values for the test emulator), `twa/.env.development` (fake bot token for the dev sign-in, read by
+  `next dev` only) and `twa/.env.production` (public values of the production build).
   Not committed: `functions/.env` (T-Bank terminal credentials, DeepSeek API key) and
   `twa/.env.development.local` (emulator URL for `next dev`; a `.env.local` would also be read by
   production builds) (rule 110.2).

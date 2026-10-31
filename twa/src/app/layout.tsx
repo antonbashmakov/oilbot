@@ -34,6 +34,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      // telegram-web-app.js sets --tg-viewport-* styles on <html> before hydration
+      suppressHydrationWarning
       
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >

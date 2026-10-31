@@ -799,7 +799,8 @@ goes into `specifications/` in the same task as the code.
 - **104.3** New dependencies are pinned to a version range the lock file resolves (never `latest` or
   `*`). Dependencies already declared as `latest`: none.
 - **104.4** Environment files: committed, without secrets: `functions/.env.test-project` (synthetic
-  values for the test emulator) and `twa/.env.production` (public values of the production build).
+  values for the test emulator), `twa/.env.development` (fake bot token for the dev sign-in, read by
+  `next dev` only) and `twa/.env.production` (public values of the production build).
   Not committed: `functions/.env` (T-Bank terminal credentials, DeepSeek API key) and
   `twa/.env.development.local` (emulator URL for `next dev`; a `.env.local` would also be read by
   production builds) (rule 110.2).
@@ -1181,7 +1182,7 @@ Changing any of these needs the developer's explicit confirmation (rule 015).
   remote patterns), the CORS settings and auth middleware of every controller in
   `functions/src/controllers/`.
 - **115.4** Environment files and secrets: `functions/.env` (T-Bank terminal credentials, DeepSeek
-  API key), `functions/.env.test-project`, `twa/.env.development.local`, `twa/.env.production`, and
+  API key), `functions/.env.test-project`, `twa/.env.development`, `twa/.env.development.local`, `twa/.env.production`, and
   the environment variables of the deployed functions. Never read
   their values into logs, work logs or replies.
 - **115.5** Package manager configuration (`.npmrc`, `.yarnrc*`), `engines`, `resolutions` or

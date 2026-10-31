@@ -70,3 +70,4 @@ features:
       - "[Team] The chat uses the signed-in customer's id and sends the customer token with every API call; no customer id is hard-coded"
       - "[Team] Opened outside Telegram or when sign-in fails, the app shows a message instead of the chat"
       - "[Team] A production build calls the API on its own origin (no emulator URL baked in)"
+      - "[Team] Under next dev the app signs in outside Telegram with init data signed by the test bot token (?tgUser=<id> picks the customer); production builds contain neither the token nor the signing code"

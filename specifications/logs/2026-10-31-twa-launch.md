@@ -47,6 +47,19 @@
   `api.yml`, 5 in `models.yml`); build steps SKIP (precheck: `crm/node_modules` missing).
 - Not checked: the Mini App inside Telegram (needs a deploy and the production bot token).
 
+## Dev sign-in (follow-up, same day)
+
+- The developer asked for a way to use the chat locally outside Telegram. Added
+  `twa/src/utils/devTelegram.ts` (signs init data with Web Crypto like Telegram does) used by
+  `CustomerSessionProvider` when there is no Telegram init data, only under `next dev`; committed
+  `twa/.env.development` with the fake bot token of `functions/.env.test-project`.
+- `layout.tsx`: `suppressHydrationWarning` on `<html>`, because `telegram-web-app.js` sets
+  `--tg-viewport-*` styles before hydration.
+- Checks: `tsc` OK, changed files lint clean, `yarn build` OK (fake token in no build file, signing
+  code only in a server source map); browser walk-through recorded in
+  `features-test/TWA-01-FE-TEST.md`. Emulators, dev server and temporary configs were stopped and
+  removed afterwards.
+
 ## Code review
 
 Not done yet: needs a separate session (rule 012).

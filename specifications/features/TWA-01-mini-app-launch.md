@@ -32,6 +32,10 @@ payment endpoint on `master`), VK sign-in in `twa/`, BotFather and channel setup
 4. `[Team]` The chat shows and sends to the AI the latest 10 messages, oldest first.
 5. `[Team]` Outside Telegram (no init data) or after a failed sign-in the app shows a message and no
    chat.
+6. `[Team]` Under `next dev` only, without Telegram init data the app signs its own init data with
+   the test bot token from `twa/.env.development` (the same fake token as
+   `functions/.env.test-project`) for user `NEXT_PUBLIC_DEV_TELEGRAM_USER_ID` or `?tgUser=<id>`
+   (`twa/src/utils/devTelegram.ts`). Production has the real bot token, so such data is refused there.
 
 ## Pages and routes
 

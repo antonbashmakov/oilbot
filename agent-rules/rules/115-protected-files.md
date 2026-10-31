@@ -10,7 +10,7 @@ Changing any of these needs the developer's explicit confirmation (rule 015).
   remote patterns), the CORS settings and auth middleware of every controller in
   `functions/src/controllers/`.
 - **115.4** Environment files and secrets: `functions/.env` (T-Bank terminal credentials, DeepSeek
-  API key), `functions/.env.test-project`, `twa/.env.development.local`, `twa/.env.production`, and
+  API key), `functions/.env.test-project`, `twa/.env.development`, `twa/.env.development.local`, `twa/.env.production`, and
   the environment variables of the deployed functions. Never read
   their values into logs, work logs or replies.
 - **115.5** Package manager configuration (`.npmrc`, `.yarnrc*`), `engines`, `resolutions` or
