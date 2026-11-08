@@ -31,6 +31,12 @@
 - `yarn build` OK; the old English texts are in no client file; `lang="ru"`, Russian title.
 - Browser check recorded in `features-test/TWA-03-FE-TEST.md`.
 
+## Deploy
+
+2026-11-08, on the developer's word: committed as `ef258ab`, deployed `hosting:twa` to
+`oilmatch-prod`. Live: `<html lang="ru">`, title "OilMatch — подбор моторного масла", the client code
+has the Russian placeholder and none of the old English texts.
+
 ## Code review
 
 Not done yet: needs a separate session (rule 012).
