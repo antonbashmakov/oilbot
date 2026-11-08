@@ -14,20 +14,23 @@ const Carousel = ({ products }: { products: Product[] }) => {
         <span className="w-1.5 h-1 rounded-full bg-surface-variant"></span>
         <span className="w-1.5 h-1 rounded-full bg-surface-variant"></span>
       </div>
+      {/* Filter buttons, hidden for now (TWA-03). To show them again, uncomment and add
+          `const t = useTranslations("Product");` (texts are in messages/ru.json).
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-2">
         <button className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-low border border-secondary/30 text-secondary text-label-md hover:bg-secondary/10 active:scale-95 transition-all">
           <span className="material-symbols-outlined text-[15px]">compare_arrows</span>
-          <span>Compare Viscosity</span>
+          <span>{t("compareViscosity")}</span>
         </button>
         <button className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-low border border-secondary/30 text-secondary text-label-md hover:bg-secondary/10 active:scale-95 transition-all">
           <span className="material-symbols-outlined text-[15px]">tune</span>
-          <span>Filter by Viscosity 0W-20</span>
+          <span>{t("filterByViscosity", { viscosity: "0W-20" })}</span>
         </button>
         <button className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-low border border-secondary/30 text-secondary text-label-md hover:bg-secondary/10 active:scale-95 transition-all">
           <span className="material-symbols-outlined text-[15px]">build</span>
-          <span>Show Local Mechanics</span>
+          <span>{t("localMechanics")}</span>
         </button>
       </div>
+      */}
     </div>
   );
 };

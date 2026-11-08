@@ -1,43 +1,21 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
-// import { useCustomer } from '@/api/user/provider';
+import messages from '../../../messages/ru.json';
+
+// The interface is Russian only (TWA-03); the messages are bundled, so nothing waits for them.
+const locale = "ru";
+// Times are shown in the device's time zone (customers are in many regions).
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 interface LocaleProviderProps {
   children: ReactNode;
 }
 
 export function LocaleProvider({ children }: LocaleProviderProps) {
-  // const { customer } = useCustomer();
-  const [messages, setMessages] = useState<Record<string, any> | null>(null);
-  
-  // Determine locale from user's language_code
-  const locale =  "ru";//customer?.language_code || "ru";
-  
-  useEffect(() => {
-    // Dynamically load messages based on locale
-    const loadMessages = async () => {
-      try {
-        const module = await import(`../../../messages/${locale}.json`);
-        setMessages(module.default);
-      } catch (error) {
-        console.error('Failed to load messages:', error);
-        // Fallback to empty messages
-        setMessages({});
-      }
-    };
-    
-    loadMessages();
-  }, [locale]);
-  
-  // Don't render until messages are loaded
-  if (!messages) {
-    return null;
-  }
-  
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
       {children}
     </NextIntlClientProvider>
   );

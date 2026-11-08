@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePerformAction } from "@/api";
 import { ActionResult, QuestionAction } from "@/api/models";
+import { useTranslations } from "next-intl";
 import { useCustomerSession } from "./CustomerSessionProvider";
 
 type QuestionActionCardProps = {
@@ -14,6 +15,7 @@ type QuestionActionCardProps = {
 };
 
 const QuestionActionCard = ({ question, messageId, done, disabled, onDone }: QuestionActionCardProps) => {
+  const t = useTranslations("Question");
   const { customer } = useCustomerSession();
   const { mutate, isPending, isError } = usePerformAction(customer?.id);
 
@@ -30,7 +32,7 @@ const QuestionActionCard = ({ question, messageId, done, disabled, onDone }: Que
       {done ? (
         <div className="inline-flex items-center gap-1.5 text-tertiary font-label-md">
           <span className="material-symbols-outlined text-[16px]">check_circle</span>
-          <span>Автомобиль сохранён</span>
+          <span>{t(`${question.type}.done`)}</span>
         </div>
       ) : (
         <button
@@ -40,10 +42,10 @@ const QuestionActionCard = ({ question, messageId, done, disabled, onDone }: Que
           className="flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-container hover:bg-primary text-on-primary-container font-label-md font-bold rounded-lg active:scale-95 transition-all shadow-md disabled:opacity-60 disabled:active:scale-100"
         >
           {isPending && <span className="material-symbols-outlined text-[16px]">progress_activity</span>}
-          <span>Сохранить</span>
+          <span>{t(`${question.type}.button`)}</span>
         </button>
       )}
-      {isError && <p className="text-error font-label-sm text-[12px]">Не удалось сохранить. Попробуйте ещё раз.</p>}
+      {isError && <p className="text-error font-label-sm text-[12px]">{t("saveFailed")}</p>}
     </div>
   );
 };

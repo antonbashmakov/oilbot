@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { useCustomerSession } from "./CustomerSessionProvider";
 import TelegramLoginButton from "./TelegramLoginButton";
 
@@ -20,27 +21,26 @@ const BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
  */
 const SessionGate: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { status, loginWithTelegram } = useCustomerSession();
+  const t = useTranslations("Session");
 
   if (status === "loading") {
-    return <Notice icon="hourglass_empty" text="Загрузка…" />;
+    return <Notice icon="hourglass_empty" text={t("loading")} />;
   }
 
   if (status === "login-required" || status === "login-failed") {
-    const text = status === "login-failed" ?
-      "Не удалось войти через Telegram. Попробуйте ещё раз." :
-      "Войдите через Telegram, чтобы продолжить.";
+    const text = status === "login-failed" ? t("loginFailed") : t("login");
 
     return (
       <Notice icon="send" text={text}>
         {BOT_USERNAME ?
           <TelegramLoginButton botUsername={BOT_USERNAME} onAuth={loginWithTelegram} /> :
-          <p className="font-label-sm text-on-surface-variant">Вход не настроен: задайте NEXT_PUBLIC_TELEGRAM_BOT_USERNAME.</p>}
+          <p className="font-label-sm text-on-surface-variant">{t("loginNotConfigured")}</p>}
       </Notice>
     );
   }
 
   if (status === "failed") {
-    return <Notice icon="error" text="Не удалось войти. Закройте и откройте приложение снова." />;
+    return <Notice icon="error" text={t("failed")} />;
   }
 
   return <>{children}</>;

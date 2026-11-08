@@ -2,11 +2,8 @@
 
 import { usePerformAction } from "@/api";
 import { ActionResult, QuestionAction } from "@/api/models";
+import { useTranslations } from "next-intl";
 import { useCustomerSession } from "./CustomerSessionProvider";
-
-const ACTION_LABELS: Record<QuestionAction["type"], { button: string; done: string }> = {
-  save_car: { button: "Сохранить", done: "Автомобиль сохранён" },
-};
 
 type QuestionActionWidgetProps = {
   question: QuestionAction;
@@ -21,7 +18,7 @@ type QuestionActionWidgetProps = {
 const QuestionActionWidget = ({ question, messageId, onActionResult }: QuestionActionWidgetProps) => {
   const { customer } = useCustomerSession();
   const { mutate, isPending, isSuccess, isError } = usePerformAction(customer?.id);
-  const labels = ACTION_LABELS[question.type];
+  const t = useTranslations("Question");
 
   const handleClick = () => {
     mutate({ type: question.type, params: question.params, message_id: messageId }, {
@@ -36,7 +33,7 @@ const QuestionActionWidget = ({ question, messageId, onActionResult }: QuestionA
         {isSuccess || question.answered ? (
           <div className="inline-flex items-center gap-1.5 text-tertiary font-label-md">
             <span className="material-symbols-outlined text-[16px]">check_circle</span>
-            <span>{labels.done}</span>
+            <span>{t(`${question.type}.done`)}</span>
           </div>
         ) : (
           <button
@@ -48,11 +45,11 @@ const QuestionActionWidget = ({ question, messageId, onActionResult }: QuestionA
             <span className="material-symbols-outlined text-[16px]">
               {isPending ? "progress_activity" : "directions_car"}
             </span>
-            <span>{labels.button}</span>
+            <span>{t(`${question.type}.button`)}</span>
           </button>
         )}
         {isError && (
-          <p className="text-error font-label-sm text-[12px]">Не удалось выполнить. Попробуйте ещё раз.</p>
+          <p className="text-error font-label-sm text-[12px]">{t("actionFailed")}</p>
         )}
       </div>
     </div>

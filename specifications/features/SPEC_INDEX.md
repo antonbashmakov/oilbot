@@ -11,3 +11,4 @@ Find a spec here, not by guessing the file name. Statuses come from `FEATURE_REG
 | `CAR-02` | Car model suggestions | [CAR-02-car-suggestions.md](CAR-02-car-suggestions.md) | `CAR-02-BE` code_review, `CAR-02-FE` code_review |
 | `TWA-02` | Telegram login in a web browser | [TWA-02-browser-telegram-login.md](TWA-02-browser-telegram-login.md) | `TWA-02-BE` code_review, `TWA-02-FE` code_review |
 | `CAR-03` | Oil search after choosing a suggested car | [CAR-03-oil-search-after-save.md](CAR-03-oil-search-after-save.md) | `CAR-03-BE` code_review, `CAR-03-FE` code_review |
+| `TWA-03` | Russian interface texts | [TWA-03-russian-texts.md](TWA-03-russian-texts.md) | `TWA-03-FE` code_review |

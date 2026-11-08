@@ -27,6 +27,7 @@ epics:
   - { id: "CAR-02", title: "Car model suggestions", spec: "features/CAR-02-car-suggestions.md" }
   - { id: "TWA-02", title: "Telegram login in a web browser", spec: "features/TWA-02-browser-telegram-login.md" }
   - { id: "CAR-03", title: "Oil search after choosing a suggested car", spec: "features/CAR-03-oil-search-after-save.md" }
+  - { id: "TWA-03", title: "Russian interface texts", spec: "features/TWA-03-russian-texts.md" }
 
 features:
   - id: "SETUP-01-DOC"
@@ -178,3 +179,16 @@ features:
     acceptance_criteria:
       - "[Team] After saving a suggested car the chat shows the confirmation at once, then the typing indicator, then the AI answer"
       - "[Team] On iPhone the chat input does not zoom the page and stays inside the screen; return sends the message"
+
+  - id: "TWA-03-FE"
+    epic: "TWA-03"
+    title: "Interface texts in Russian through next-intl; filter buttons hidden"
+    surface: "frontend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 90
+    depends_on: []
+    acceptance_criteria:
+      - "[Team] Every interface text of twa/ is in messages/ru.json and read with next-intl; no English text is shown"
+      - "[Team] Dates and times in the chat are formatted for the ru locale; the page language is ru"
+      - "[Team] The filter buttons under the product carousel (Compare Viscosity, Filter by Viscosity 0W-20, Show Local Mechanics) are commented out"

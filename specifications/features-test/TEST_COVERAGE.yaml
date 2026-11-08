@@ -23,3 +23,5 @@ coverage:
     backend: { types: "done", lint: "done", integration: "done", build: "done" }
   - feature: "CAR-03-FE"
     frontend: { types: "done", lint: "done", build: "planned", browser: "done" }
+  - feature: "TWA-03-FE"
+    frontend: { types: "done", lint: "done", build: "done", browser: "done" }

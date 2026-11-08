@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type HeaderProps = {
   title?: string;
@@ -11,13 +12,14 @@ type HeaderProps = {
 };
 
 const Header = ({
-  title = "LubeBot AI",
-  badge = "DIAG",
-  statusText = "Online - Engine Diagnostician",
+  title,
+  badge,
+  statusText,
   vehicle = "Škoda",
   onBack,
 }: HeaderProps) => {
   const router = useRouter();
+  const t = useTranslations("Header");
 
   const handleBack = () => {
     if (onBack) {
@@ -38,7 +40,7 @@ const Header = ({
       <div className="flex items-center gap-space-xs">
         <button
           type="button"
-          aria-label="Go back"
+          aria-label={t("back")}
           onClick={handleBack}
           className="w-10 h-10 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95 transition-transform duration-150"
         >
@@ -59,16 +61,16 @@ const Header = ({
         <div className="flex flex-col ml-0.5">
           <div className="flex items-center gap-1.5">
             <span className="font-headline-sm text-headline-sm font-bold text-primary tracking-tight">
-              {title}
+              {title ?? t("title")}
             </span>
             <span className="inline-flex items-center px-1.5 py-0.2 bg-tertiary/10 text-tertiary text-[9px] font-label-sm font-semibold rounded tracking-wider border border-tertiary/20">
-              {badge}
+              {badge ?? t("badge")}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
             <span className="font-label-sm text-label-sm text-on-surface-variant tracking-normal">
-              {statusText}
+              {statusText ?? t("status")}
             </span>
           </div>
         </div>

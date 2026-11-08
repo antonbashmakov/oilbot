@@ -1,3 +1,72 @@
 {
-
+  "App": {
+    "title": "OilMatch — подбор моторного масла",
+    "description": "Подбор моторного масла для вашего автомобиля в Telegram"
+  },
+  "Header": {
+    "title": "LubeBot AI",
+    "badge": "ДИАГ",
+    "status": "В сети · подбор масла",
+    "back": "Назад"
+  },
+  "Chat": {
+    "telemetry": "ТЕЛЕМЕТРИЯ: СПЕЦИФИКАЦИЯ МАСЛА V2.4",
+    "activeSession": "Сеанс активен"
+  },
+  "Footer": {
+    "placeholder": "Задайте вопрос или укажите год/пробег…",
+    "upload": "Загрузить руководство или фото крышки горловины",
+    "voice": "Голосовой ввод",
+    "send": "Отправить сообщение",
+    "oemApplied": "Учтён допуск OEM {spec}",
+    "oilCapacity": "Объём масла {liters} л"
+  },
+  "Pending": {
+    "sending": "Отправка…",
+    "awaiting": "Ожидаем ответ…"
+  },
+  "Product": {
+    "reviews": "({count, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзыва}})",
+    "buy": "Купить",
+    "compareViscosity": "Сравнить вязкость",
+    "filterByViscosity": "Вязкость {viscosity}",
+    "localMechanics": "Автосервисы рядом"
+  },
+  "Checkout": {
+    "title": "Оформление заказа",
+    "close": "Закрыть",
+    "oem": "{oem} OEM",
+    "sku": "Артикул: {article}",
+    "inStock": "В наличии • Склад МСК",
+    "quantity": "Количество",
+    "quantityHint": "Канистра 4 л (хватает на ТО)",
+    "decrease": "Меньше",
+    "increase": "Больше",
+    "address": "Адрес доставки",
+    "courier": "Курьер СДЭК / Boxberry",
+    "addressPlaceholder": "Город, улица, дом, квартира/офис",
+    "addressRequired": "Пожалуйста, укажите адрес доставки",
+    "deliveryToday": "Доставка возможна сегодня при заказе до 16:00.",
+    "total": "Итого к оплате",
+    "freeDelivery": "Бесплатная доставка",
+    "sbp": "СБП",
+    "paySbp": "Оплатить через СБП",
+    "payCard": "Оплатить картой",
+    "security": "Безопасная оплата 256-bit SSL • Официальная гарантия OEM"
+  },
+  "Session": {
+    "loading": "Загрузка…",
+    "login": "Войдите через Telegram, чтобы продолжить.",
+    "loginFailed": "Не удалось войти через Telegram. Попробуйте ещё раз.",
+    "loginNotConfigured": "Вход не настроен: задайте NEXT_PUBLIC_TELEGRAM_BOT_USERNAME.",
+    "failed": "Не удалось войти. Закройте и откройте приложение снова."
+  },
+  "Question": {
+    "save_car": {
+      "button": "Сохранить",
+      "done": "Автомобиль сохранён"
+    },
+    "actionFailed": "Не удалось выполнить. Попробуйте ещё раз.",
+    "saveFailed": "Не удалось сохранить. Попробуйте ещё раз."
+  }
 }

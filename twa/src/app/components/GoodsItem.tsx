@@ -3,9 +3,12 @@
 import { Product } from "@/api/models";
 import Image from "next/image";
 import { useState } from "react";
+import { useFormatter, useTranslations } from "next-intl";
 import CheckoutSheet, { PRODUCT_IMAGE } from "./CheckoutSheet";
 
 const GoodsItem = ({ item, priority }: { item: Product; priority?: boolean }) => {
+  const t = useTranslations("Product");
+  const format = useFormatter();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   return (
@@ -32,7 +35,7 @@ const GoodsItem = ({ item, priority }: { item: Product; priority?: boolean }) =>
             star
           </span>
           <span className="text-on-surface font-bold">5</span>
-          <span>(10 reviews)</span>
+          <span>{t("reviews", { count: 10 })}</span>
           <span className="mx-1 text-outline-variant">•</span>
           <span className="text-secondary-fixed-dim"></span>
         </div>
@@ -52,9 +55,9 @@ const GoodsItem = ({ item, priority }: { item: Product; priority?: boolean }) =>
       </div>
       <div className="pt-1 border-t border-white/5 flex items-center justify-between gap-2">
         <div>
-          <div className="font-mono-metric text-lg font-bold text-on-surface">{item.price} ₽</div>
+          <div className="font-mono-metric text-lg font-bold text-on-surface">{format.number(item.price)} ₽</div>
           <div className="font-label-sm text-[10px] text-on-surface-variant tracking-tight">
-            {(item.price).toFixed(2)} / {item.unit}
+            {format.number(item.price, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / {item.unit}
           </div>
         </div>
         <button
@@ -65,7 +68,7 @@ const GoodsItem = ({ item, priority }: { item: Product; priority?: boolean }) =>
           <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>
             bolt
           </span>
-          <span>Buy</span>
+          <span>{t("buy")}</span>
         </button>
       </div>
       <CheckoutSheet

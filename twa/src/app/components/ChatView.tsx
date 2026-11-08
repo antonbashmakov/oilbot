@@ -3,6 +3,7 @@ import ChatMessageComponent from "./ChatMessage";
 import Footer from "./Footer";
 import PendingMessage from "./PendingMessage";
 import { useGetMessages, useOilSearch, useSendMessage } from '@/api';
+import { useTranslations } from "next-intl";
 import { Fragment, useCallback, useEffect, useState } from "react";
 import Carousel from "./Carousel";
 import { useCustomerSession } from "./CustomerSessionProvider";
@@ -11,6 +12,7 @@ import QuestionActionCarousel from "./QuestionActionCarousel";
 // import { products } from "@/app/data/mock";
 
 const ChatView = () => {
+  const t = useTranslations("Chat");
   const { customer } = useCustomerSession();
   const { data: messages } = useGetMessages(customer?.id);
   const { mutateAsync: sendMessage, data: answers, isPending, variables } = useSendMessage(customer?.id, "latest");
@@ -78,11 +80,11 @@ const ChatView = () => {
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-secondary text-[18px]">query_stats</span>
           <span className="font-mono-metric text-label-sm text-on-surface">
-            TELEMETRY LOCK: ENGINE OIL SPEC V2.4
+            {t("telemetry")}
           </span>
         </div>
         <span className="text-tertiary font-label-sm text-[10px] tracking-wider font-semibold uppercase">
-          Active Session
+          {t("activeSession")}
         </span>
       </div>
       {conversation && conversation.map((m) => (

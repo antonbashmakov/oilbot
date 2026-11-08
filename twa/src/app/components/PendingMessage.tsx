@@ -1,7 +1,11 @@
+import { useTranslations } from "next-intl";
+
 /**
  * The echo of the message being sent (when there is one) and the assistant's typing indicator.
  */
 const PendingMessage = ({ content }: { content?: string }) => {
+  const t = useTranslations("Pending");
+
   return (
     <>
       {/* Temporary echo of the message we just sent */}
@@ -13,7 +17,7 @@ const PendingMessage = ({ content }: { content?: string }) => {
           <span className="material-symbols-outlined text-[13px] text-secondary animate-spin">
             progress_activity
           </span>
-          <span>Sending...</span>
+          <span>{t("sending")}</span>
         </div>
       </div>}
 
@@ -28,7 +32,7 @@ const PendingMessage = ({ content }: { content?: string }) => {
         </div>
         <div className="flex items-center gap-1 pl-1 text-on-surface-variant font-label-sm text-[11px]">
           <span className="material-symbols-outlined text-[13px] text-secondary">memory</span>
-          <span>Awaiting response...</span>
+          <span>{t("awaiting")}</span>
         </div>
       </div>
     </>

@@ -3,6 +3,7 @@
 import { Product } from "@/api/models";
 import Image from "next/image";
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export type PaymentMethod = "sbp" | "card";
 
@@ -30,6 +31,7 @@ const CheckoutSheet = ({
   image = PRODUCT_IMAGE,
   onPay,
 }: CheckoutSheetProps) => {
+  const t = useTranslations("Checkout");
   const [quantity, setQuantity] = useState(1);
   const [address, setAddress] = useState("");
 
@@ -74,14 +76,14 @@ const CheckoutSheet = ({
                 shopping_cart_checkout
               </span>
               <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-                Оформление заказа
+                {t("title")}
               </h2>
             </div>
             <button
               type="button"
               onClick={onClose}
               className="w-8 h-8 rounded-full bg-surface-container-high hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors active:scale-95"
-              aria-label="Закрыть"
+              aria-label={t("close")}
             >
               <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
@@ -103,11 +105,11 @@ const CheckoutSheet = ({
             <div className="flex items-center gap-1.5 mb-0.5">
               {oem && (
                 <span className="px-1.5 py-0.2 rounded bg-tertiary/10 text-tertiary font-label-sm text-[9px] font-semibold border border-tertiary/20">
-                  {oem} OEM
+                  {t("oem", { oem })}
                 </span>
               )}
               <span className="text-[10px] font-mono-metric text-on-surface-variant">
-                SKU: {item.article}
+                {t("sku", { article: item.article ?? "" })}
               </span>
             </div>
             <h4 className="font-headline-sm text-[15px] font-bold text-on-surface truncate">
@@ -121,7 +123,7 @@ const CheckoutSheet = ({
                 </span>
               </span>
               <span className="font-label-sm text-[10px] text-tertiary">
-                В наличии • Склад МСК
+                {t("inStock")}
               </span>
             </div>
           </div>
@@ -132,16 +134,17 @@ const CheckoutSheet = ({
         <div className="bg-surface-container-low rounded-xl p-3 border border-white/5 flex items-center justify-between">
           <div>
             <div className="text-body-md font-semibold text-on-surface text-[13px]">
-              Количество
+              {t("quantity")}
             </div>
             <div className="text-[11px] text-on-surface-variant">
-              Канистра 4 л (хватает на ТО)
+              {t("quantityHint")}
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button
               type="button"
               id="qty-minus"
+              aria-label={t("decrease")}
               onClick={handleDecrement}
               className="w-8 h-8 rounded-lg bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center justify-center font-bold text-lg active:scale-95 transition-all border border-white/5"
             >
@@ -156,6 +159,7 @@ const CheckoutSheet = ({
             <button
               type="button"
               id="qty-plus"
+              aria-label={t("increase")}
               onClick={handleIncrement}
               className="w-8 h-8 rounded-lg bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center justify-center font-bold text-lg active:scale-95 transition-all border border-white/5"
             >
@@ -168,10 +172,10 @@ const CheckoutSheet = ({
         <div className="space-y-1.5">
           <label className="flex items-center justify-between text-body-md text-[13px] font-semibold text-on-surface">
             <span className="">
-              Адрес доставки <span className="text-error">*</span>
+              {t("address")} <span className="text-error">*</span>
             </span>
             <span className="text-on-surface-variant text-[11px] font-normal">
-              Курьер СДЭК / Boxberry
+              {t("courier")}
             </span>
           </label>
           {/* Input field with active error styling */}
@@ -195,7 +199,7 @@ const CheckoutSheet = ({
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="Город, улица, дом, квартира/офис"
+                placeholder={t("addressPlaceholder")}
                 className="flex-1 bg-transparent border-0 text-on-surface placeholder:text-on-surface-variant/60 text-body-md text-[13px] focus:ring-0 focus:outline-none p-0"
               />
               {addressError && (
@@ -209,11 +213,11 @@ const CheckoutSheet = ({
           {addressError && (
             <div className="flex items-center gap-1.5 text-error text-[12px] font-label-md pt-0.5">
               <span className="material-symbols-outlined text-[15px]">warning</span>
-              <span className="">Пожалуйста, укажите адрес доставки</span>
+              <span className="">{t("addressRequired")}</span>
             </div>
           )}
           <p className="text-on-surface-variant text-[11px] pl-1">
-            Доставка возможна сегодня при заказе до 16:00.
+            {t("deliveryToday")}
           </p>
         </div>
 
@@ -221,7 +225,7 @@ const CheckoutSheet = ({
         {/* Price Summary Row */}
         <div className="pt-2 border-t border-white/5 flex items-center justify-between">
           <div>
-            <div className="text-on-surface-variant text-[11px]">Итого к оплате</div>
+            <div className="text-on-surface-variant text-[11px]">{t("total")}</div>
             <div
               id="total-price"
               className="font-mono-metric text-[22px] font-bold text-primary"
@@ -233,7 +237,7 @@ const CheckoutSheet = ({
             <span className="material-symbols-outlined text-[14px]">
               local_shipping
             </span>
-            <span className="">Бесплатная доставка</span>
+            <span className="">{t("freeDelivery")}</span>
           </div>
         </div>
 
@@ -247,9 +251,9 @@ const CheckoutSheet = ({
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#142850] hover:bg-[#1a3468] border border-[#2b59a8]/50 text-white font-label-md font-bold shadow-md active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-[#e84e1b] text-white text-[10px] font-mono-metric font-extrabold">
-              СБП
+              {t("sbp")}
             </span>
-            <span className="">Оплатить через СБП</span>
+            <span className="">{t("paySbp")}</span>
           </button>
           {/* Bank Card Payment Action */}
           <button
@@ -259,7 +263,7 @@ const CheckoutSheet = ({
             className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary-container hover:bg-primary text-on-primary-container font-label-md font-bold shadow-md active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="material-symbols-outlined text-[20px]">credit_card</span>
-            <span className="">Оплатить картой</span>
+            <span className="">{t("payCard")}</span>
           </button>
         </div>
 
@@ -269,7 +273,7 @@ const CheckoutSheet = ({
             shield
           </span>
           <span className="">
-            Безопасная оплата 256-bit SSL • Официальная гарантия OEM
+            {t("security")}
           </span>
         </div>
       </div>

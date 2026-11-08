@@ -1,7 +1,11 @@
 import { ChatMessage } from "@/api/models";
 import { useMemo } from "react";
+import { useFormatter } from "next-intl";
+
+const TIME_FORMAT = { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" } as const;
 
 const ChatMessageComponent = ({ message }: { message: ChatMessage }) => {
+  const format = useFormatter();
 
   const createdAt = useMemo(() => {
     if (message.created_at) {
@@ -25,7 +29,7 @@ const ChatMessageComponent = ({ message }: { message: ChatMessage }) => {
         </div>
         <div className="flex items-center gap-1 pl-1 text-on-surface-variant font-label-sm text-[11px]">
           <span className="material-symbols-outlined text-[13px] text-secondary">memory</span>
-          <span>{createdAt?.toLocaleTimeString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+          <span>{createdAt && format.dateTime(createdAt, TIME_FORMAT)}</span>
         </div>
       </div>
     );
@@ -37,7 +41,7 @@ const ChatMessageComponent = ({ message }: { message: ChatMessage }) => {
         <p className="font-medium tracking-wide">{message.content}</p>
       </div>
       <div className="flex items-center gap-1 pr-1 text-on-surface-variant font-label-sm text-[11px]">
-        <span>{message.created_at.toISOString()}</span>
+        <span>{createdAt && format.dateTime(createdAt, TIME_FORMAT)}</span>
         <span
           className="material-symbols-outlined text-[13px] text-tertiary"
           style={{ fontVariationSettings: "'FILL' 1" }}
