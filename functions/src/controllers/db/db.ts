@@ -26,7 +26,7 @@ const databaseId = process.env.DATABASE_ID ?? "(default)";
 
 const db = admin.firestore();
 
-if (process.env.GCLOUD_PROJECT !== "test-project" && db.databaseId !== process.env.DATABASE_ID) {
+if (process.env.GCLOUD_PROJECT !== "test-project" && process.env.DATABASE_ID && db.databaseId !== process.env.DATABASE_ID) {
   db.settings({
     databaseId,
   });

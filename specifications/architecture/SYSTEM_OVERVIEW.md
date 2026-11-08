@@ -120,7 +120,17 @@ settings found. `NEXT_PUBLIC_*` variables are inlined at build time.
 
 ## Deployment
 
-Manual: `firebase deploy` with the project from `.firebaserc` (`posebestoimosti-473916` by default,
-`posebesto-business` as a second project). `crm` script `deploy` bumps the version, builds and
-deploys hosting; `twa` script `deploy` deploys `hosting:twa`. Functions read `functions/.env` and
-the deployed environment. No CI.
+Manual, with the Firebase CLI.
+
+- **OilMatch (this `master`, the AI chat):** project `oilmatch-prod`, config `firebase.oilmatch.json`
+  (`firebase deploy --config firebase.oilmatch.json --project oilmatch-prod --only
+  firestore:indexes,functions,hosting:twa`); functions in `us-central1`, Firestore `(default)` in
+  `europe-north2`, hosting site `oilmatch-prod` (https://oilmatch-prod.web.app, custom domain
+  app.oilmatch.ru pending). Settings in `functions/.env` and `functions/.env.oilmatch-prod`
+  (not committed); app settings in `twa/.env.production`.
+- **The shop (other branches):** `firebase.json` with `.firebaserc` default
+  `posebestoimosti-473916` (named database `posebestoimosti`) and `posebesto-business`; `crm`
+  script `deploy` bumps the version, builds and deploys hosting; `twa` script `deploy` deploys
+  `hosting:twa`. Deploying `master` there would replace the shop's `private` API.
+
+No CI.

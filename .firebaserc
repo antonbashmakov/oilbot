@@ -1,6 +1,7 @@
 {
   "projects": {
-    "default": "posebestoimosti-473916"
+    "default": "posebestoimosti-473916",
+    "oilmatch": "oilmatch-prod"
   },
   "targets": {
     "posebesto-business": {
@@ -20,6 +21,13 @@
         ],
         "crm": [
           "posebestoimosti-473916"
+        ]
+      }
+    },
+    "oilmatch-prod": {
+      "hosting": {
+        "twa": [
+          "oilmatch-prod"
         ]
       }
     }

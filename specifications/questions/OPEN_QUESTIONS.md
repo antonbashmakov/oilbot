@@ -31,7 +31,10 @@ contract", "Environment and security").
   is in no contract. Should the backend contract be completed from the CRM copy? Until answered —
   the backend contract is ours (rule 201.7); a task that touches an endpoint adds it there.
   Blocks: none.
-- **Q-07. Which Firestore database does production use?** (TWA-01-BE, 2026-10-31). The functions
+- **Q-07. Which Firestore database does production use?** (remainder) Found 2026-11-08: the shop
+  project `posebestoimosti-473916` has `(default)`, `posebestoimosti` and `posebestoimosti-clone`
+  in `europe-north2`; OilMatch (`oilmatch-prod`) uses `(default)`. Still open for the shop: which
+  one `DATABASE_ID` names in its deployed functions. (TWA-01-BE, 2026-10-31). The functions
   read `DATABASE_ID` (default `(default)`); the new `CHAT_MESSAGES` index in
   `firestore.indexes.json` is deployed to the default database. If production sets `DATABASE_ID`,
   `firebase.json` must name that database. Until answered — default database. Blocks: deploying

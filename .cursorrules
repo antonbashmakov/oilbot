@@ -1189,7 +1189,7 @@ Changing any of these needs the developer's explicit confirmation (rule 015).
 - **115.5** Package manager configuration (`.npmrc`, `.yarnrc*`), `engines`, `resolutions` or
   `overrides` in any `package.json`.
 - **115.6** Firebase: `firebase.json` (hosting targets `crm` and `twa`, rewrites, SSR functions),
-  `.firebaserc` (projects `posebestoimosti-473916` and `posebesto-business`), `firestore.indexes.json`,
+  `.firebaserc` (projects `posebestoimosti-473916` and `posebesto-business`; alias `oilmatch` → `oilmatch-prod`), `firebase.oilmatch.json`, `firestore.indexes.json`,
   the `engines` of `functions/package.json`, the `functions/.env*` files and the secrets set with
   `firebase functions:secrets:set` (rule 107). Never deploy (`firebase deploy`) without the
   developer's explicit word.

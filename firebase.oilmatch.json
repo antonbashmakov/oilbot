@@ -1,0 +1,55 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ],
+  "hosting": [
+    {
+      "target": "twa",
+      "source": "twa",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "/api/public/**",
+          "function": "public",
+          "region": "us-central1"
+        },
+        {
+          "source": "/api/private/**",
+          "function": "private"
+        },
+        {
+          "source": "/api/admin/**",
+          "function": "admin"
+        },
+        {
+          "source": "/api/agent/**",
+          "function": "agent"
+        }
+      ],
+      "frameworksBackend": {
+        "region": "europe-west1"
+      }
+    }
+  ]
+}
