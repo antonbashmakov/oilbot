@@ -3,16 +3,20 @@ import ChatMessageComponent from "./ChatMessage";
 import Footer from "./Footer";
 import PendingMessage from "./PendingMessage";
 import { useGetMessages, useOilSearch, useSendMessage } from '@/api';
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { Fragment, useCallback, useEffect, useState } from "react";
 import Carousel from "./Carousel";
 import { useCustomerSession } from "./CustomerSessionProvider";
 import QuestionActionWidget from "./QuestionActionWidget";
 import QuestionActionCarousel from "./QuestionActionCarousel";
+import QuickActions from "./QuickActions";
+import MileageWidget from "./MileageWidget";
 // import { products } from "@/app/data/mock";
 
 const ChatView = () => {
   const t = useTranslations("Chat");
+  const tMileage = useTranslations("Mileage");
+  const format = useFormatter();
   const { customer } = useCustomerSession();
   const { data: messages } = useGetMessages(customer?.id);
   const { mutateAsync: sendMessage, data: answers, isPending, variables } = useSendMessage(customer?.id, "latest");
@@ -20,6 +24,8 @@ const ChatView = () => {
   const { mutate: searchOil, isPending: searchingOil } = useOilSearch(customer?.id);
 
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
+  // When the mileage widget was opened from the quick actions; null while it is closed.
+  const [mileageShownAt, setMileageShownAt] = useState<Date | null>(null);
 
   // Adds messages that are not in the conversation yet (a refetch may have brought them already).
   const appendMessages = useCallback((items: ChatMessage[]) => {
@@ -60,7 +66,7 @@ const ChatView = () => {
       top: document.documentElement.scrollHeight,
       behavior: "smooth",
     });
-  }, [conversation.length, pendingMessage, searchingOil]);
+  }, [conversation.length, pendingMessage, searchingOil, mileageShownAt]);
 
   const handleSendMessage = useCallback(async (content: string) => {
     try {
@@ -73,6 +79,14 @@ const ChatView = () => {
       return false;
     }
   }, [sendMessage]);
+
+  // The chosen mileage goes to the AI as a chat message (TWA-04).
+  const handleMileage = useCallback((km: number) => {
+    setMileageShownAt(null);
+    handleSendMessage(tMileage("message", { km: format.number(km) }));
+  }, [handleSendMessage, tMileage, format]);
+
+  const busy = !!pendingMessage || searchingOil;
 
   return (
     <main className="flex-1 w-full max-w-chat-max-width mx-auto pt-20 pb-40 px-layout-margin-mobile flex flex-col space-y-space-lg">
@@ -105,6 +119,10 @@ const ChatView = () => {
       ))}
       {pendingMessage && <PendingMessage content={pendingMessage} />}
       {searchingOil && <PendingMessage />}
+      {mileageShownAt && <MileageWidget shownAt={mileageShownAt} onSubmit={handleMileage} />}
+      {conversation.length > 0 && !busy && !mileageShownAt && (
+        <QuickActions onMileage={() => setMileageShownAt(new Date())} />
+      )}
       <Footer onSubmit={handleSendMessage} />
     </main>
   );

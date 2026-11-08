@@ -28,6 +28,7 @@ epics:
   - { id: "TWA-02", title: "Telegram login in a web browser", spec: "features/TWA-02-browser-telegram-login.md" }
   - { id: "CAR-03", title: "Oil search after choosing a suggested car", spec: "features/CAR-03-oil-search-after-save.md" }
   - { id: "TWA-03", title: "Russian interface texts", spec: "features/TWA-03-russian-texts.md" }
+  - { id: "TWA-04", title: "Quick actions and mileage widget", spec: "features/TWA-04-mileage-widget.md" }
 
 features:
   - id: "SETUP-01-DOC"
@@ -192,3 +193,16 @@ features:
       - "[Team] Every interface text of twa/ is in messages/ru.json and read with next-intl; no English text is shown"
       - "[Team] Dates and times in the chat are formatted for the ru locale; the page language is ru"
       - "[Team] The filter buttons under the product carousel (Compare Viscosity, Filter by Viscosity 0W-20, Show Local Mechanics) are commented out"
+
+  - id: "TWA-04-FE"
+    epic: "TWA-04"
+    title: "Quick actions under the last message; mileage widget and picker"
+    surface: "frontend"
+    tracker_ids: []
+    status: "code_review"
+    progress_percent: 90
+    depends_on: ["TWA-03-FE"]
+    acceptance_criteria:
+      - "[Team] Under the last message the chat shows three quick actions: enter mileage, change the car and fuel type; the last two are shown disabled (not implemented)"
+      - "[Team] Enter mileage shows the mileage widget (the developer's layout) at the end of the chat; its Выбрать button opens a picker sheet"
+      - "[Team] Confirming a mileage sends the chat message 'Пробег: <km> км' to the AI and closes the widget"

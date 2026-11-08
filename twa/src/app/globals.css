@@ -149,3 +149,10 @@
   --text-body-md--letter-spacing: 0.01em;
   --text-body-md--font-weight: 400;
 }
+/* Horizontal carousels and sheets scroll without a visible scrollbar. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
