@@ -7,6 +7,9 @@ const devTunnelHost = process.env.NODE_ENV === "development" ? process.env.DEV_T
 
 const nextConfig: NextConfig = {
     images: {
+    // The app is deployed as static files (no server function), so /_next/image does not exist:
+    // images load directly from their source.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",

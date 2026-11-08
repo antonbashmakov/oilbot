@@ -67,6 +67,14 @@
   (Firestore REST, the Firebase CLI's signed-in account; dry run first: 0 before, 15 after).
   `CUSTOMERS` and `CHAT_MESSAGES` of the seed data were not copied.
 
+## Product images (2026-11-08)
+
+- The developer reported 404 for `/_next/image?url=…` in production. The app builds as static pages,
+  so Firebase deploys no server function and Next.js image optimization has no endpoint; the source
+  image itself answers 200. `twa/next.config.ts`: `images.unoptimized: true` (images load from
+  their source). `tsc` OK, `yarn build` OK, the client chunks carry the setting. Deployed
+  `hosting:twa` on the developer's word; the live client code carries `unoptimized: true`.
+
 ## Findings and decisions
 
 - Deploy attempts that failed and why: Spark plan (Cloud Build needs Blaze); the code-analysis
