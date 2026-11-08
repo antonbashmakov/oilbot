@@ -26,6 +26,12 @@
 - `tsc` OK; new files lint clean (ChatView keeps its two existing errors); `yarn build` OK.
 - Browser check recorded in `features-test/TWA-04-FE-TEST.md`.
 
+## Deploy
+
+2026-11-08, on the developer's word: committed as `e4b1550`, deployed `hosting:twa` to
+`oilmatch-prod`. Live: page 200; the client code has the quick action, widget and picker texts; the
+CSS has the `no-scrollbar` rule.
+
 ## Code review
 
 Not done yet: needs a separate session (rule 012).
